@@ -3,10 +3,10 @@
     <v-row class="text-center">
       <v-col cols="12">
         <v-img
-          :src="logo"
+          src="https://media.discordapp.net/attachments/1198109212379729981/1224376040420544662/image2.gif?ex=661d440b&is=660acf0b&hm=40d0e89cb549a0c2455c203cd714163c3101fde0e96251e0e53b855f89ea8ff2&="
           class="my-3"
           contain
-          height="200"
+          height="500"
         />
       </v-col>
 

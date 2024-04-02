@@ -6,6 +6,8 @@
     "serve": "vite preview",
     "build": "vite build",
     "lint": "vue-cli-service lint",
+    "start": "concurrently \"npm run dev\" \"npm run start-backend\"",
+    "start-backend": "nodemon ../backend/src/main.js",
     "dev": "vite"
   },
   "dependencies": {

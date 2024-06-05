@@ -120,7 +120,7 @@ export default {
     async SaludoBackend() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://192.168.100.2:3000/usuarios', {
+        const response = await fetch('http://localhost:3000/usuarios', {
           method: 'GET',
           // Puedes agregar más configuraciones a la solicitud aquí si es necesario
         });
@@ -140,6 +140,29 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+    async ObtenAgrupaciones(){
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch('http://localhost:3000/agrupaciones', {
+          method: 'GET',
+          // Puedes agregar más configuraciones a la solicitud aquí si es necesario
+        });
+        
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          
+          // Haz algo con los datos recibidos
+          console.log(data);
+          // Puedes guardar los datos en el estado de tu componente o realizar otras acciones
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    }
   },
 }
 

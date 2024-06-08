@@ -19,6 +19,8 @@ const port = config.PORT;
 const host = config.HOST;
 const secret = '64hjf73u8dfjfjrj3846hrk@klsd';
 const refreshSecret = config.REFRESH_JWT_SECRET;
+const mailUser = config.MAIL_USER;
+const mailPass = config.MAIL_PASS;
 
 // Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
@@ -26,8 +28,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true para 465, false para otros puertos
   auth: {
-    user: 'conectaubb@gmail.com', // tu correo
-    pass: 'elwm wwja bzzm hlgs' // tu contraseña
+    user: mailUser, // tu correo
+    pass: mailPass // tu contraseña
   }
 });
 

@@ -6,93 +6,59 @@ const {pool} = require('./db.js');
 const jwt = require('@fastify/jwt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+
+fastify.register(fastifyCors, {
+  // Configura los orígenes permitidos
+  origin: "http://localhost:5173"
+});
+
+
+
 // Usar las configuraciones importadas
 const port = config.PORT;
 const host = config.HOST;
 const secret = '64hjf73u8dfjfjrj3846hrk@klsd';
 const refreshSecret = config.REFRESH_JWT_SECRET;
 
-fastify.register(require('@fastify/jwt'), {
-  secret: '64hjf73u8dfjfjrj3846hrk@klsd'
-});
-
-// Habilita CORS en Fastify
-fastify.register(fastifyCors, {
-    origin: '*',
-});
-fastify.register(require('fastify-oauth2'), {
-  name: 'googleOAuth2',
-  scope: 'https://www.googleapis.com/auth/plus.login',
-  credentials: {
-    client: {
-      id: '<CLIENT_ID>',
-      secret: '<CLIENT_SECRET>'
-    },
-    auth: require('fastify-oauth2').GOOGLE_CONFIGURATION
-  },
-  startRedirectPath: '/login/google',
-  callbackUri: 'http://localhost:3000/login/google/callback'
-})
-
-fastify.get('/login/google/callback', async function (request, reply) {
-  const token = await this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
-  // token.access_token is the Google access token
-
-  // Aquí puedes obtener información del usuario desde Google y usarla para crear una sesión,
-  // generar un JWT, etc.
-
-  reply.send({ access_token: token.access_token })
-})
-fastify.post('/login', async (request, reply) => {
-  try {
-    const { email } = request.body;
-
-    // Generar un token aleatorio
-    const token = crypto.randomBytes(20).toString('hex');
-
-    // Crear un JWT con el correo electrónico y el token
-    const jwtToken = fastify.jwt.sign({ email, token });
-
-    // Configurar el transporte de correo
-    let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'conectaubb@gmail.com',
-        pass: 'GestionDeAnteproyacticaProfesional2'
-      }
-    });
-
-    // Enviar un correo electrónico al usuario con el enlace de confirmación
-    let info = await transporter.sendMail({
-      from: 'conectaubb@gmail.com',
-      to: email,
-      subject: 'Confirm your email',
-      text: `Please confirm your email by clicking on the following link: http://localhost:3000/confirm?token=${jwtToken}`
-    });
-
-    reply.send({ message: 'Please check your email to confirm your account.' });
-  } catch (error) {
-    console.error('Error:', error);
-    reply.status(500).send('Internal server error');
+// Configura el transporte de Nodemailer
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP
+  port: 465,
+  secure: true, // true para 465, false para otros puertos
+  auth: {
+    user: 'conectaubb@gmail.com', // tu correo
+    pass: 'elwm wwja bzzm hlgs' // tu contraseña
   }
 });
 
-fastify.get('/confirm', async (request, reply) => {
-  try {
-    const { token } = request.query;
-
-    // Verificar el JWT
-    const decoded = jwt.verify(token, secret);
-
-    // Aquí puedes autenticar al usuario en tu aplicación, por ejemplo, creando una sesión
-
-    reply.send({ message: 'Your account has been confirmed.' });
-  } catch (error) {
-    console.error('Error:', error);
-    reply.status(500).send('Internal server error');
+transporter.verify((error) => {
+  if (error) {
+    console.error('Error al verificar el transporte:', error);
+  } else {
+    console.log('Transporte listo para enviar correos');
   }
 });
 
+fastify.post('/EmailLogin', async (request, reply) => {
+  const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
+
+  // Define el correo electrónico
+  const mailOptions = {
+    from: '"Prueba correo" <conectaubb@gmail.com>', // dirección del remitente
+    to: email, // dirección del destinatario, pasada en la solicitud
+    subject: 'Enlace Importante', // Asunto del correo
+    text: 'Aquí está tu enlace.', // cuerpo del correo en texto plano
+    html: '<b>Aquí está tu enlace.</b>' // cuerpo del correo en HTML
+  };
+
+  // Envía el correo electrónico
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    reply.send({ success: true, message: `Correo enviado a ${email}`, info: info });
+  } catch (error) {
+    reply.send({ success: false, message: `Error al enviar correo a ${email}`, error: error });
+  }
+});
 
 fastify.get('/usuarios', async (request, reply) => {
   try {

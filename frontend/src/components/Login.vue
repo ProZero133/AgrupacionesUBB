@@ -1,22 +1,19 @@
 <template>
-  <v-container>
-    <v-col cols="12">
-        <v-img src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/5eeea355389655.59822ff824b72.gif"
-          class="my-3" contain height="500" />
-      </v-col>
-      <v-col cols="12">
-        <form @submit.prevent="login">
-          <input type="email" v-model="email" placeholder="Enter your email" required>
-          <button type="submit">Login</button>
-        </form>
-      </v-col>
+  <v-container class="login-container">
+    <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
+      <h2> </h2>
+    <v-form>
+      <v-text-field v-model="username" label="Nombre de usuario" required></v-text-field>
+      <v-text-field v-model="password" label="Contraseña" type="password" required></v-text-field>
+      <v-btn type="submit" color="primary">Iniciar sesión</v-btn>
+    </v-form>
   </v-container>
 </template>
 
 <script>
 
 export default {
-  name: 'HelloWorld',
+  name: 'Login',
 
   data: () => ({
   }),

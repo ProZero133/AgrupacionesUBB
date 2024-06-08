@@ -8,6 +8,56 @@
       <v-btn variant="tonal" @click="SaludoBackend">
         Button
       </v-btn>
+      <v-col cols="12">
+        <form @submit.prevent="login">
+          <input type="email" v-model="email" placeholder="Enter your email" required>
+          <button type="submit">Login</button>
+        </form>
+      </v-col>
+      <v-col cols="12">
+        <form
+          @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion)">
+          <input type="text" v-model="nombre_agr" placeholder="Nombre de la agrupación" required>
+          <input type="text" v-model="descripcion" placeholder="Descripción" required>
+          <input type="text" v-model="rut" placeholder="Rut" required>
+          <input type="date" v-model="fecha_creacion" placeholder="Fecha de creación" required>
+          <input type="checkbox" v-model="verificado" placeholder="Verificado" required>
+          <input type="date" v-model="fecha_verificacion" placeholder="Fecha de verificación" required>
+          <button type="submit">Crear agrupación</button>
+        </form>
+      </v-col>
+      <v-container>
+        <v-col cols="8">
+          <v-card title="Crear actividad" subtitle="Ingrese los datos de su actividad" text="..." variant="tonal">
+            <v-card-actions>
+              <form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo, id_agr)">
+                <div>
+                  <input type="text" v-model="nom_act" placeholder="Nombre de la actividad" requires>
+                </div>
+                <div>
+                  <input type="text" v-model="descripcion" placeholder="Descripción" requires>
+                </div>
+                <div>
+                  <input type="text" v-model="imagen" placeholder="Imagen">
+                </div>
+                <div>
+                  <label for="tipo">Seleccione el tipo de actividad</label>
+                  <select v-model="tipo">
+                    <option value="false">Privado</option>
+                    <option value="true">Público</option>
+                  </select>
+                </div>
+                <div>
+                  <input type="text" v-model="id_agr" placeholder="Id de la agrupación" requires>
+                </div>
+                <div>
+                  <button type="submit">Crear actividad</button>
+                </div>
+              </form>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-container>
       <v-col class="mb-4">
         <h1 class="display-2 font-weight-bold mb-3">
           Welcome to the Vuetify 3 Beta
@@ -68,6 +118,12 @@ export default {
   name: 'HelloWorld',
 
   data: () => ({
+    nombre_agr: '',
+    descripcion: '',
+    rut: '',
+    fecha_creacion: '',
+    verificado: false,
+    fecha_verificacion: '',
     ecosystem: [
       {
         text: 'vuetify-loader',
@@ -124,12 +180,12 @@ export default {
           method: 'GET',
           // Puedes agregar más configuraciones a la solicitud aquí si es necesario
         });
-        
+
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          
+
           // Haz algo con los datos recibidos
           console.log(data);
           // Puedes guardar los datos en el estado de tu componente o realizar otras acciones
@@ -140,22 +196,97 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-    async ObtenAgrupaciones(){
+    async ObtenAgrupaciones() {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch('http://localhost:3000/agrupaciones', {
+          method: 'GET',
+        });
+
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log(data);
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async login() {
+      const response = await fetch('http://localhost:3000/EmailLogin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: this.email }),
+      });
+    },
+    async ObtenAgrupaciones() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch('http://localhost:3000/agrupaciones', {
           method: 'GET',
           // Puedes agregar más configuraciones a la solicitud aquí si es necesario
         });
-        
+
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          
+
           // Haz algo con los datos recibidos
           console.log(data);
           // Puedes guardar los datos en el estado de tu componente o realizar otras acciones
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        console.log(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion);
+
+        const response = await fetch('http://localhost:3000/agrupacion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion }),
+        });
+
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log(data);
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch('http://localhost:3000/actividad', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+        });
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log(data);
         } else {
           console.error('Error en la respuesta:', response.status);
         }

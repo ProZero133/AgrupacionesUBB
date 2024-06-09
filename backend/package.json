@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^8.0.0",
     "@fastify/jwt": "^8.0.1",
     "dotenv": "^16.4.5",

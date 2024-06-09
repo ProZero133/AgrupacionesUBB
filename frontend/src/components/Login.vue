@@ -12,6 +12,9 @@
       <v-label>o</v-label>
       <v-text-field v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
+      <div v-if="isLoading" class="loading-overlay">
+        Cargando...
+      </div>
     </v-form>
   </v-container>
 </template>
@@ -22,6 +25,8 @@ export default {
   name: 'Login',
 
   data: () => ({
+    isLoading: false,
+    email: '',
   }),
   methods: {
     async login() {
@@ -32,8 +37,45 @@ export default {
         },
         body: JSON.stringify({ email: this.email }),
       });
+
+      if (response.ok) {
+        // El correo se ha enviado correctamente, ahora espera a que el usuario haga clic en el enlace
+        this.checkAuthenticationStatus();
+      } else {
+        // Manejo de error, por ejemplo, mostrar un mensaje al usuario
+        this.isLoading = false; // Desactiva la pantalla de carga si hay un error
+      }
+    },
+    async checkAuthenticationStatus() {
+      const checkStatus = async () => {
+        // Reemplaza '/api/auth/status' con tu endpoint real para verificar el estado de autenticación
+        const response = await fetch('http://localhost:3000/api/auth/status');
+        const data = await response.json();
+        if (data.isAuthenticated) {
+          this.isLoading = false; // Desactiva la pantalla de carga
+          // Aquí puedes redirigir al usuario a otra página o realizar alguna acción adicional
+        } else {
+          setTimeout(checkStatus, 5000); // Reintenta después de 5 segundos
+        }
+      };
+
+      checkStatus();
     },
   },
 }
 
 </script>
+<style>
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+</style>

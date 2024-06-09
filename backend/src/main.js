@@ -6,22 +6,28 @@ const {pool} = require('./db.js');
 const jwt = require('@fastify/jwt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-
-fastify.register(fastifyCors, {
-  // Configura los orígenes permitidos
-  origin: "http://localhost:5173"
-});
+const fastifyCookie = require('@fastify/cookie');
 
 
-
-// Usar las configuraciones importadas
 const port = config.PORT;
 const host = config.HOST;
-const secret = '64hjf73u8dfjfjrj3846hrk@klsd';
+const secret = config.JWT_SECRET;
 const refreshSecret = config.REFRESH_JWT_SECRET;
 const mailUser = config.MAIL_USER;
 const mailPass = config.MAIL_PASS;
+const cookieSecret = config.COOKIE_SECRET;
+const url = config.URL;
 
+fastify.register(fastifyCors, {
+  // Configura los orígenes permitidos
+  origin: url
+});
+fastify.register(fastifyCookie, {
+  secret: cookieSecret,
+});
+fastify.register(require('@fastify/jwt'), {
+  secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
+});
 // Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP
@@ -43,17 +49,16 @@ transporter.verify((error) => {
 
 fastify.post('/EmailLogin', async (request, reply) => {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
-
+  const token = fastify.jwt.sign({ email: email }, { expiresIn: '1h' });
+  console.log('Enviando token al correo: ', email);
   // Define el correo electrónico
   const mailOptions = {
-    from: '"Prueba correo" <conectaubb@gmail.com>', // dirección del remitente
+    from: '"ConectaUBB" <conectaubb@gmail.com>', // dirección del remitente
     to: email, // dirección del destinatario, pasada en la solicitud
-    subject: 'Enlace Importante', // Asunto del correo
-    text: 'Aquí está tu enlace.', // cuerpo del correo en texto plano
-    html: '<b>Aquí está tu enlace.</b>' // cuerpo del correo en HTML
+    subject: 'Enlace de verificación de inicio de sesión',
+    text: 'Haz clic en el enlace para iniciar sesión.',
+    html: `<b>Haz clic en el enlace para iniciar sesión:</b> <a href="http://localhost:3000/validarToken?token=${token}">Iniciar Sesión</a>`
   };
-
-  // Envía el correo electrónico
   try {
     let info = await transporter.sendMail(mailOptions);
     reply.send({ success: true, message: `Correo enviado a ${email}`, info: info });
@@ -61,6 +66,50 @@ fastify.post('/EmailLogin', async (request, reply) => {
     reply.send({ success: false, message: `Error al enviar correo a ${email}`, error: error });
   }
 });
+
+
+  fastify.get('/api/auth/status', async (request, reply) => {
+    // Aquí puedes implementar la lógica para verificar el estado de la autenticación
+    // Por ejemplo, verificar si hay un token y si es válido
+    const token = request.headers['authorization']?.split(' ')[1]; // Asume que el token viene en el encabezado de autorización
+  
+    if (!token) {
+      return reply.status(401).send({ success: false, message: 'No se proporcionó token de autenticación' });
+    }
+  
+    try {
+      const decoded = await fastify.jwt.verify(token);
+      // Si el token es válido, puedes devolver información relevante del usuario o simplemente un mensaje de éxito
+      return reply.send({ success: true, message: 'Autenticación verificada', user: decoded });
+    } catch (error) {
+      return reply.status(401).send({ success: false, message: 'Token inválido o expirado', error: error.message });
+    }
+  });
+
+
+  fastify.get('/validarToken', async (request, reply) => {
+    const { token } = request.query;
+    try {
+      const decoded = fastify.jwt.verify(token);
+      // Token es válido, establecer una cookie de primera parte
+      reply.setCookie('authToken', token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'strict', // Considera 'lax' si necesitas que la cookie sea enviada en solicitudes de terceros (dependiendo del contexto)
+        secure: true, // Establece en false si estás desarrollando en localhost sin HTTPS
+        maxAge: 3600 // Expire después de 1 hora, ajusta según sea necesario
+      })
+      // Redirige al usuario a la ruta correcta
+      .redirect(`${url}/api/home`);
+    } catch (error) {
+      reply.send({ success: false, message: 'Token inválido o expirado', error: error.message });
+    }
+  });
+
+
+
+
+
 
 fastify.get('/usuarios', async (request, reply) => {
   try {

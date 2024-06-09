@@ -15,11 +15,13 @@ const HOST = process.env.HOST;
 /** URL de la base de datos */
 const DB_URL = process.env.DB_URL;
 /** Secreto para el token de acceso */
-const ACCESS_JWT_SECRET = process.env.ACCESS_JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 /** Secreto para el token de refresco */
 const REFRESH_JWT_SECRET = process.env.REFRESH_JWT_SECRET;
 
 const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
+const COOKIE_SECRET = process.env.COOKIE_SECRET;
+const URL= process.env.BASE_URL;
 
-module.exports = { PORT, HOST, DB_URL, ACCESS_JWT_SECRET, REFRESH_JWT_SECRET, MAIL_USER, MAIL_PASS};
+module.exports = { PORT, HOST, DB_URL, JWT_SECRET, REFRESH_JWT_SECRET, MAIL_USER, MAIL_PASS, COOKIE_SECRET, URL};

@@ -4,7 +4,7 @@ const publicacionService = require("../services/publicacion.service.js");
 const { publicacionBodySchema, publicacionIdSchema } = require("../schema/publicacion.schema.js");
 
 /**
- * Obtiene todas las apelaciones
+ * Obtiene todas las publicaciones
  * @param {Object} req - Objeto de petición
  * @param {Object} res - Objeto de respuesta
  */

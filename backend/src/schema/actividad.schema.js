@@ -30,4 +30,5 @@ const actividadBodySchema = Joi.object({
   
   module.exports = { 
       actividadBodySchema,
+      actividadIdSchema,
   };

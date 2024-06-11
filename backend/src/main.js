@@ -7,6 +7,12 @@ const {pool} = require('./db.js');
 const port = config.PORT;
 const host = config.HOST;
 
+// Enrutador de la aplicación
+const publicacionRoutes = require('./routes/publicacion.routes.js');
+const usuarioRoutes = require('./routes/usuario.routes.js');
+const agrupacionRoutes = require('./routes/agrupacion.routes.js');
+const actividadRoutes = require('./routes/actividad.routes.js');
+
 // Habilita CORS en Fastify
 fastify.register(fastifyCors, {
     origin: '*',
@@ -116,6 +122,7 @@ fastify.get('/actividades', async (request, reply) => {
       reply.status(500).send('Error interno del servidor');
   }
 });
+fastify.
 fastify.listen({
     port: 3000,
     host: '0.0.0.0',

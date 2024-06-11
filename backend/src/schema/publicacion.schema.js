@@ -34,4 +34,5 @@ const publicacionBodySchema = Joi.object({
 
 module.exports = {
     publicacionBodySchema,
+    publicacionIdSchema,
 };

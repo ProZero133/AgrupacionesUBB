@@ -36,4 +36,5 @@ const agrupacionBodySchema = Joi.object({
 
     module.exports = {
         agrupacionBodySchema,
+        agrupacionIdSchema,
     };

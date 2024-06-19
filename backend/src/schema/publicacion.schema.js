@@ -13,12 +13,12 @@ const publicacionBodySchema = Joi.object({
         "string.base": "El contenido de la publicación debe ser de tipo string.",
         }),
     imaPub: Joi.bytea().messages({
-        "string.base": "La imagen debe ser de tipo bytea.",
+        "bytea.base": "La imagen debe ser de tipo bytea.",
         }),
     id_agr: Joi.integer().required().messages({
-        "string.empty": "El id de la agrupación no puede estar vacío.",
+        "integer.empty": "El id de la agrupación no puede estar vacío.",
         "any.required": "El id de la agrupación es obligatorio.",
-        "string.base": "El id de la agrupación debe ser de tipo integer.",
+        "integer.base": "El id de la agrupación debe ser de tipo integer.",
         }),
     RUT: Joi.string().required().messages({
         "string.empty": "El RUT no puede estar vacío.",
@@ -26,9 +26,9 @@ const publicacionBodySchema = Joi.object({
         "string.base": "El RUT debe ser de tipo string.",
         }),
     fecha_publicacion: Joi.date().required().messages({
-        "string.empty": "La fecha de publicacion no puede estar vacía.",
+        "date.empty": "La fecha de publicacion no puede estar vacía.",
         "any.required": "La fecha de publicacion es obligatoria.",
-        "string.base": "La fecha de publicacion debe ser de tipo date.",
+        "date.base": "La fecha de publicacion debe ser de tipo date.",
         }),
     });
 

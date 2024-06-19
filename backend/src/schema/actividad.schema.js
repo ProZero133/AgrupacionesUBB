@@ -21,9 +21,9 @@ const actividadBodySchema = Joi.object({
         "string.base": "El tipo de actividad debe ser de tipo bool.",
     }),  
     id_agr: Joi.integer().required().messages({
-        "string.empty": "El id de la agrupación no puede estar vacío.",
+        "integer.empty": "El id de la agrupación no puede estar vacío.",
         "any.required": "El id de la agrupación es obligatorio.",
-        "string.base": "El id de la agrupación debe ser de tipo integer.",
+        "integer.base": "El id de la agrupación debe ser de tipo integer.",
     }),
   });
   

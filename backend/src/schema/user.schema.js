@@ -21,5 +21,5 @@ function validateEmail(email) {
 
 module.exports = {
     userSchema,
-    userIdSchema
+    //userIdSchema
 }

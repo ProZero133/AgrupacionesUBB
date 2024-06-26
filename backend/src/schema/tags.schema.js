@@ -16,5 +16,5 @@ const tagsBodySchema = Joi.object({
 
 module.exports = {
     tagsBodySchema,
-    tagsIdSchema,
+    //tagsIdSchema,
 };

@@ -7,7 +7,6 @@ const jwt = require('@fastify/jwt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const fastifyCookie = require('@fastify/cookie');
-const userRoutes = require('./routes/user.routes.js');
 
 const port = config.PORT;
 const host = config.HOST;
@@ -19,10 +18,10 @@ const cookieSecret = config.COOKIE_SECRET;
 const url = config.URL;
 
 // Enrutador de la aplicación
-const publicacionRoutes = require('./routes/publicacion.routes.js');
-//const usuarioRoutes = require('./routes/usuario.routes.js');
-const agrupacionRoutes = require('./routes/agrupacion.routes.js');
-const actividadRoutes = require('./routes/actividad.routes.js');
+// const publicacionRoutes = require('./routes/publicacion.routes.js');
+// const agrupacionRoutes = require('./routes/agrupacion.routes.js');
+// const actividadRoutes = require('./routes/actividad.routes.js');
+// const userRoutes = require('./routes/user.routes.js');
 
 // Habilita CORS en Fastify
 fastify.register(fastifyCors, {
@@ -36,6 +35,10 @@ fastify.register(require('@fastify/jwt'), {
   secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
 });
 fastify.register(userRoutes);
+// fastify.register(publicacionRoutes);
+// fastify.register(agrupacionRoutes);
+// fastify.register(actividadRoutes);
+
 // Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP

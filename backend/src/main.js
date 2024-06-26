@@ -49,8 +49,27 @@ transporter.verify((error) => {
 
 fastify.post('/EmailLogin', async (request, reply) => {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
-  const token = fastify.jwt.sign({ email: email }, { expiresIn: '1h' });
+  //LLamar a la base de datos para verificar si el usuario existe
+  const result = await validarUsuario(email);
+  const usuario = result.user[0];
+  if (result.success) {
+    console.log('Usuario encontrado, enviando correo de verificación...');
+    console.log(`Rol: ${usuario.rol_u}`);
+  } else {
+    console.log('Usuario no encontrado, no se enviará correo de verificación');
+  }
+
+
+  const token = fastify.jwt.sign({ 
+    rol: usuario.rol_u,
+    email: email,
+    nombre_completo: usuario.nombre_completo,
+    rut: usuario.rut,
+    carrera: usuario.carrera
+   }, { expiresIn: '1h' });
   console.log('Enviando token al correo: ', email);
+  const decoded = fastify.jwt.verify(token);
+  console.log('Decodificado:', decoded);
   // Define el correo electrónico
   const mailOptions = {
     from: '"ConectaUBB" <conectaubb@gmail.com>', // dirección del remitente
@@ -66,6 +85,20 @@ fastify.post('/EmailLogin', async (request, reply) => {
     reply.send({ success: false, message: `Error al enviar correo a ${email}`, error: error });
   }
 });
+
+async function validarUsuario(email) {
+  try {
+    const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
+    console.log('Resultado de la consulta:', result.rows);
+    if (result.rows.length === 0) {
+      return { success: false, message: 'Usuario no encontrado' };
+    } else {
+      return { success: true, message: 'Usuario encontrado', user: result.rows };
+    }
+  } catch (error) {
+    return { success: false, message: 'Token inválido o expirado', error: error.message };
+  }
+}
 
 
   fastify.get('/api/auth/status', async (request, reply) => {
@@ -91,16 +124,28 @@ fastify.post('/EmailLogin', async (request, reply) => {
     const { token } = request.query;
     try {
       const decoded = fastify.jwt.verify(token);
-      // Token es válido, establecer una cookie de primera parte
+      console.log('Token decodificado:', decoded);
+      // Extrae el rol del usuario del objeto
+      const rol = decoded.rol; // Asegúrate de usar 'rol_u' para coincidir con tu estructura de datos
+  
+      // Establece una cookie de primera parte
       reply.setCookie('authToken', token, {
         path: '/',
         httpOnly: true,
         sameSite: 'strict', // Considera 'lax' si necesitas que la cookie sea enviada en solicitudes de terceros (dependiendo del contexto)
         secure: true, // Establece en false si estás desarrollando en localhost sin HTTPS
         maxAge: 3600 // Expire después de 1 hora, ajusta según sea necesario
-      })
-      // Redirige al usuario a la ruta correcta
-      .redirect(`${url}/api/home`);
+      });
+  
+      // Redirige al usuario basado en su rol
+      if (rol === 'Estudiante') {
+        reply.redirect(`${url}/api/home`);
+      } else if (rol === 'Admin') {
+        reply.redirect(`${url}/api/adminhome`);
+      } else {
+        // Maneja el caso de roles no reconocidos
+        reply.send({ success: false, message: 'Rol no reconocido' });
+      }
     } catch (error) {
       reply.send({ success: false, message: 'Token inválido o expirado', error: error.message });
     }

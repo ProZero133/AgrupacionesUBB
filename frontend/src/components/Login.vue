@@ -27,9 +27,15 @@ export default {
   data: () => ({
     isLoading: false,
     email: '',
+    emailError: '',
   }),
   methods: {
     async login() {
+       // Validación del correo electrónico
+       if (!this.email.endsWith('@alumnos.ubiobio.cl') && !this.email.endsWith('@ubiobio.cl')) {
+        this.emailError = 'El correo ingresado no corresponde a un correo institucional';
+        return; // Detiene la ejecución si el correo no es válido
+      }
       const response = await fetch('http://localhost:3000/EmailLogin', {
         method: 'POST',
         headers: {

@@ -14,7 +14,7 @@ const routes = [
         {
           path: 'adminhome',
           name: 'AdminHome',
-          component: () => import('@/views/HelloWorldView.vue'),
+          component: () => import('@/views/AdminHome.vue'),
         },
         {
           path: 'crear_agrupacion',

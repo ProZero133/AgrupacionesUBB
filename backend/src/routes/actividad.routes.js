@@ -10,4 +10,4 @@ app.post('/actividades', actividadController.createActividad);
 app.put('/actividades/:id', actividadController.updateActividad);
 app.delete('/actividades/:id', actividadController.deleteActividad);
 
-module.exports = app;
+module.exports = actividadRoutes;

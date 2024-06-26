@@ -9,4 +9,4 @@ app.get('/agrupaciones/:id', agrupacionController.getAgrupacionById);
 app.post('/agrupaciones', agrupacionController.createAgrupacion);
 app.put('/agrupaciones/:id', agrupacionController.updateAgrupacion);
 
-module.exports = app;
+module.exports = agrupacionRoutes;

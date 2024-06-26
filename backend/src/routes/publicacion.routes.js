@@ -10,4 +10,4 @@ app.post('/publicaciones', publicacionController.createpublicacion);
 app.put('/publicaciones/:id', publicacionController.updatepublicacion);
 app.delete('/publicaciones/:id', publicacionController.deletepublicacion);
 
-module.exports = app;
+module.exports = publicacionRoutes;

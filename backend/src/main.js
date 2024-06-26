@@ -217,7 +217,7 @@ fastify.get('/actividades', async (request, reply) => {
       reply.status(500).send('Error interno del servidor');
   }
 });
-fastify.
+
 fastify.listen({
     port: 3000,
     host: '0.0.0.0',

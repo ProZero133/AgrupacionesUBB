@@ -1,6 +1,7 @@
 <template>
-  <v-container class="Busqueda">
-  <v-card class="pa-4" height="100px" img="https://cdn.vuetifyjs.com/images/toolbar/map.jpg" flat>
+
+<v-container class="Busqueda">
+  
     <v-toolbar dense floating class="search-bar">
       <v-text-field prepend-icon="mdi-magnify" hide-details single-line></v-text-field>
       <v-btn icon>
@@ -10,8 +11,9 @@
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
     </v-toolbar>
-  </v-card>
+  
 </v-container>
+
 <v-container>
     <v-row>
       <v-col cols="12" md="6" lg="3" v-for="(item, index) in items" :key="index">
@@ -44,7 +46,9 @@
   margin-top: 3000;
 }
 .Busqueda {
-  margin-top: 30px;
+  margin-top: 90px;
+  padding-left: 500px;
+  padding-right: 500px;
 }
 </style>
 

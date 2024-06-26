@@ -7,7 +7,7 @@ const jwt = require('@fastify/jwt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const fastifyCookie = require('@fastify/cookie');
-
+const userRoutes = require('./routes/user.routes.js');
 
 const port = config.PORT;
 const host = config.HOST;
@@ -35,6 +35,7 @@ fastify.register(fastifyCookie, {
 fastify.register(require('@fastify/jwt'), {
   secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
 });
+fastify.register(userRoutes);
 // Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP
@@ -54,6 +55,7 @@ transporter.verify((error) => {
   }
 });
 
+/*
 fastify.post('/EmailLogin', async (request, reply) => {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   //LLamar a la base de datos para verificar si el usuario existe
@@ -92,7 +94,7 @@ fastify.post('/EmailLogin', async (request, reply) => {
     reply.send({ success: false, message: `Error al enviar correo a ${email}`, error: error });
   }
 });
-
+*/
 async function validarUsuario(email) {
   try {
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
@@ -273,3 +275,5 @@ fastify.listen({
     }
     console.log(`Servidor escuchando en el puerto ${port}`);
 });
+
+module.exports = fastify;

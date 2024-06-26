@@ -20,7 +20,7 @@ const url = config.URL;
 
 // Enrutador de la aplicación
 const publicacionRoutes = require('./routes/publicacion.routes.js');
-const usuarioRoutes = require('./routes/usuario.routes.js');
+//const usuarioRoutes = require('./routes/usuario.routes.js');
 const agrupacionRoutes = require('./routes/agrupacion.routes.js');
 const actividadRoutes = require('./routes/actividad.routes.js');
 

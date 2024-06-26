@@ -1,6 +1,6 @@
 "use strict";
 
-const fastify = require('fastify')();
+const fastify = require('../config/configFastify.js');
 
 const actividadRoutes = require('./actividad.routes');
 const agrupacionRoutes = require('./agrupacion.routes');

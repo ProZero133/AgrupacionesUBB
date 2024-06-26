@@ -1,8 +1,8 @@
-const fastify = require('fastify');
+const fastify = require('../config/configFastify.js');
 
 const agrupacionController = require('../controllers/agrupacion.controller.js');
 
-const app = fastify();
+const app = fastify;
 
 app.get('/agrupaciones', agrupacionController.getAgrupaciones);
 app.get('/agrupaciones/:id', agrupacionController.getAgrupacionById);

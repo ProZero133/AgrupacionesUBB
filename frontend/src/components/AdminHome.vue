@@ -3,7 +3,7 @@
 <v-container class="Busqueda">
   
     <v-toolbar dense floating class="search-bar">
-      <v-text-field prepend-icon="mdi-magnify" hide-details single-line></v-text-field>
+      <v-text-field prepend-icon="mdi-magnify" hide-details single-line placeholder="Buscar por agrupacion"></v-text-field>
       <v-btn icon>
         <v-icon>mdi-crosshairs-gps</v-icon>
       </v-btn>
@@ -58,37 +58,37 @@ export default {
     return {
       items: [
         {
-          title: "Top 10 Australian beaches",
-          subtitle: "Number 10",
-          description1: "Whitehaven Beach",
+          title: "Nombre agrupacion",
+          subtitle: "Lider de la agrupacion",
+          description1: "Descripcion de la agrupacion",
           description2: "Whitsunday Island, Whitsunday Islands",
           img: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
         },
         {
-          title: "Top 10 Australian beaches",
-          subtitle: "Number 10",
-          description1: "Whitehaven Beach",
+          title: "Nombre agrupacion",
+          subtitle: "Lider de la agrupacion",
+          description1: "Descripcion de la agrupacion",
           description2: "Whitsunday Island, Whitsunday Islands",
           img: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
         },
         {
-          title: "Top 10 Australian beaches",
-          subtitle: "Number 10",
-          description1: "Whitehaven Beach",
+          title: "Nombre agrupacion",
+          subtitle: "Lider de la agrupacion",
+          description1: "Descripcion de la agrupacion",
           description2: "Whitsunday Island, Whitsunday Islands",
           img: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
         },
         {
-          title: "Top 10 Australian beaches",
-          subtitle: "Number 10",
-          description1: "Whitehaven Beach",
+          title: "Nombre agrupacion",
+          subtitle: "Lider de la agrupacion",
+          description1: "Descripcion de la agrupacion",
           description2: "Whitsunday Island, Whitsunday Islands",
           img: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
         },
         {
-          title: "Top 10 Australian beaches",
-          subtitle: "Number 10",
-          description1: "Whitehaven Beach",
+          title: "Nombre agrupacion",
+          subtitle: "Lider de la agrupacion",
+          description1: "Descripcion de la agrupacion",
           description2: "Whitsunday Island, Whitsunday Islands",
           img: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
         },

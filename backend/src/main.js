@@ -1,5 +1,5 @@
-const fastify = require('fastify')();
-const fastifyCors = require('@fastify/cors');
+const fastify = require('./config/configFastify.js');
+//const fastifyCors = require('@fastify/cors');
 const config = require('./config/configEnv.js');
 const { Client } = require('pg');
 const {pool} = require('./db.js');
@@ -25,6 +25,7 @@ const agrupacionRoutes = require('./routes/agrupacion.routes.js');
 const actividadRoutes = require('./routes/actividad.routes.js');
 
 // Habilita CORS en Fastify
+/*
 fastify.register(fastifyCors, {
   // Configura los orígenes permitidos
   origin: url
@@ -36,6 +37,7 @@ fastify.register(require('@fastify/jwt'), {
   secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
 });
 fastify.register(userRoutes);
+*/
 // Configura el transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP
@@ -46,7 +48,7 @@ const transporter = nodemailer.createTransport({
     pass: mailPass // tu contraseña
   }
 });
-
+/*
 transporter.verify((error) => {
   if (error) {
     console.error('Error al verificar el transporte:', error);
@@ -54,7 +56,7 @@ transporter.verify((error) => {
     console.log('Transporte listo para enviar correos');
   }
 });
-
+*/
 /*
 fastify.post('/EmailLogin', async (request, reply) => {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
@@ -95,6 +97,8 @@ fastify.post('/EmailLogin', async (request, reply) => {
   }
 });
 */
+
+/*
 async function validarUsuario(email) {
   try {
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
@@ -108,7 +112,7 @@ async function validarUsuario(email) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
 }
-
+*/
 
   fastify.get('/api/auth/status', async (request, reply) => {
     // Aquí puedes implementar la lógica para verificar el estado de la autenticación
@@ -182,6 +186,8 @@ fastify.get('/usuarios', async (request, reply) => {
       reply.status(500).send('Error interno del servidor');
   }
 });
+
+/*
 fastify.get('/agrupaciones', async (request, reply) => {
   try {
       console.log('Consultando nombres de tablas en la base de datos...');
@@ -199,6 +205,10 @@ fastify.get('/agrupaciones', async (request, reply) => {
       reply.status(500).send('Error interno del servidor');
   }
 });
+
+*/
+
+
 fastify.post('/agrupacion', async (request, reply) => {
   try {
     console.log('Insertando nueva agrupacion en la base de datos...');
@@ -247,6 +257,8 @@ fastify.post('/actividad', async (request, reply) => {
     reply.status(500).send('Error interno del servidor');
   }
 });
+
+/*
 fastify.get('/actividades', async (request, reply) => {
   try {
       console.log('Consultando nombres de tablas en la base de datos...');
@@ -264,7 +276,7 @@ fastify.get('/actividades', async (request, reply) => {
       reply.status(500).send('Error interno del servidor');
   }
 });
-
+*/
 fastify.listen({
     port: 3000,
     host: '0.0.0.0',

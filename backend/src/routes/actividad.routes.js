@@ -1,8 +1,8 @@
-const fastify = require('fastify');
+const fastify = require('../config/configFastify.js');
 
 const actividadController = require('../controllers/actividad.controller.js');
 
-const app = fastify();
+const app = fastify;
 
 app.get('/actividades', actividadController.getActividades);
 app.get('/actividades/:id', actividadController.getActividadById);

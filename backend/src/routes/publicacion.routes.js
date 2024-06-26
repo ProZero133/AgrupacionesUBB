@@ -1,8 +1,8 @@
-const fastify = require('fastify');
+const fastify = require('../config/configFastify.js');
 
 const publicacionController = require('../controllers/publicacion.controller.js');
 
-const app = fastify();
+const app = fastify;
 
 app.get('/publicaciones', publicacionController.getpublicaciones);
 app.get('/publicaciones/:id', publicacionController.getpublicacionById);

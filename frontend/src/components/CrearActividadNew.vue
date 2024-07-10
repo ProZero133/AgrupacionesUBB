@@ -18,13 +18,11 @@
                         <v-text-field class="descripcionAct" v-model="descripcion" label="Descripción de la actividad"
                             clearable counter required></v-text-field>
                     </v-col>
-    
-    
                     <v-col cols="4">
                         <v-text-field v-model="imagen" label="Imagen de la actividad"
                         clearable counter required></v-text-field>
                     </v-col>
-    
+
                     <v-col cols="4">
                           <v-combobox v-model="tipo"
                           label="Tipo"

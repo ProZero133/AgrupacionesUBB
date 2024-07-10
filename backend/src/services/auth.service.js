@@ -6,12 +6,12 @@ const mailUser = config.MAIL_USER;
 const mailPass = config.MAIL_PASS;
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', // Cambia esto por tu servidor SMTP
+  host: 'smtp.gmail.com', 
   port: 465,
   secure: true, // true para 465, false para otros puertos
   auth: {
-    user: mailUser, // tu correo
-    pass: mailPass // tu contraseña
+    user: mailUser, 
+    pass: mailPass 
   }
 });
 
@@ -64,6 +64,8 @@ async function asignarToken(fastify, usuario, reply) {
   } catch (error) {
     reply.send({ success: false, message: `Error al enviar correo a ${usuario.email}`, error: error });
   }
-}
+};
 
-module.exports = { validarUsuario, asignarToken };
+
+
+module.exports = { validarUsuario, asignarToken};

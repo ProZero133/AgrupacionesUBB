@@ -3,12 +3,6 @@
 const agrupacionService = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 
-/**
- * Obtiene todas las agrupaciones
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
 async function getAgrupaciones(req, res) {
     try {
         // Obtiene todas las agrupaciones
@@ -74,12 +68,6 @@ async function createAgrupacion(req, res) {
         res.status(500).send('Error al crear la agrupacion');
     }
 }
-
-/**
- * Actualiza una agrupacion
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
 
 async function updateAgrupacion(req, res) {
     try {

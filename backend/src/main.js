@@ -97,7 +97,7 @@ fastify.post('/EmailLogin', async (request, reply) => {
 });
 */
 
-/*
+
 async function validarUsuario(email) {
   try {
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
@@ -111,7 +111,7 @@ async function validarUsuario(email) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
 }
-*/
+
 
   fastify.get('/api/auth/status', async (request, reply) => {
     // Aquí puedes implementar la lógica para verificar el estado de la autenticación
@@ -186,7 +186,7 @@ fastify.get('/usuarios', async (request, reply) => {
   }
 });
 
-/*
+
 fastify.get('/agrupaciones', async (request, reply) => {
   try {
       console.log('Consultando nombres de tablas en la base de datos...');
@@ -205,7 +205,7 @@ fastify.get('/agrupaciones', async (request, reply) => {
   }
 });
 
-*/
+
 
 
 fastify.post('/agrupacion', async (request, reply) => {

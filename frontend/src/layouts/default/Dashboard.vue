@@ -1,6 +1,7 @@
 <template>
   <v-app>
       <!-- Toolbar -->
+    <v-container>
       <v-app-bar color="#EEEEEE" prominent>
           <v-app-bar-nav-icon
             variant="text"
@@ -55,7 +56,8 @@
           </v-list-item>
         </v-list>
       </v-navigation-drawer>
-      
+    </v-container>
+    
       <router-view></router-view>
     
   </v-app>

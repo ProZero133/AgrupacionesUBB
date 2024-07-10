@@ -1,30 +1,51 @@
 <template>
-  <v-container>
-    <v-col cols="12">
-        <v-img src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/5eeea355389655.59822ff824b72.gif"
-          class="my-3" contain height="500" />
-      </v-col>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <form @submit.prevent="login">
-          <input type="email" v-model="email" placeholder="Enter your email" required>
-          <button type="submit">Login</button>
-        </form>
-      </v-col>
-      <v-col cols="12">
-        <form
-          @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion)">
-          <input type="text" v-model="nombre_agr" placeholder="Nombre de la agrupación" required>
-          <input type="text" v-model="descripcion" placeholder="Descripción" required>
-          <input type="text" v-model="rut" placeholder="Rut" required>
-          <input type="date" v-model="fecha_creacion" placeholder="Fecha de creación" required>
-          <input type="checkbox" v-model="verificado" placeholder="Verificado" required>
-          <input type="date" v-model="fecha_verificacion" placeholder="Fecha de verificación" required>
-          <button type="submit">Crear agrupación</button>
-        </form>
-      </v-col>
-    </v-row>
-  </v-container>
+<v-container cols="12"></v-container>
+<v-container cols="12">
+  <v-card class="mx-auto px-6 py-8" max-width="800">
+    <v-form @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion)" fast-fail class="form" ref="formulario">
+      <v-row>
+                <v-spacer></v-spacer>
+                <v-col cols="12" justify="center">
+                    <h1 class="texto">Crear agrupación</h1>
+                    <p class="text-left">Por favor, introducir abajo los datos correspondientes a crear una branch.</p>
+                </v-col>
+                <v-col cols="4">
+                    <v-text-field class="nombreAgrupa" v-model="nombre_agr" label="Nombre de la agrupación"
+                        clearable counter required></v-text-field>
+                </v-col>
+                <v-col cols="8">
+                    <v-text-field class="descripcion" v-model="descripcion" label="Descripción de la agrupación"
+                        clearable counter required></v-text-field>
+                </v-col>
+
+                <v-col cols="6" md="6">
+                    <v-text-field v-model="fecha_creacion" label="Fecha de creación" type="date" required :min="hoy"
+                        :rules="dateRules" :error-messages="dateErrors.creacion" @change="validateFechaCreacion"></v-text-field>
+                </v-col>
+                <v-col cols="6" md="6">
+                    <v-text-field v-model="fecha_verificacion" label="Fecha de verificación" type="date" required :min="hoy"
+                        :rules="dateRules" :error-messages="dateErrors.verificacion" @change="validateFechaVerificacion"></v-text-field>
+                </v-col>
+
+                <v-col cols="9">
+                    <v-text-field v-model="rut" label="RUT"
+                    clearable counter required></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-checkbox label="Verificado" v-model="verificado"></v-checkbox>
+                </v-col>
+
+                <v-col cols="3">
+                  <v-btn class="form-submit" type="submit"
+                  color="#2CA2DC">Crear Agrupación</v-btn>
+                </v-col>
+
+            </v-row>
+            
+    </v-form>
+  </v-card>
+</v-container>
+
 </template>
 
 <script>
@@ -39,6 +60,18 @@ export default {
     fecha_creacion: '',
     verificado: false,
     fecha_verificacion: '',
+
+    dateErrors: {
+      creacion: [],
+      verificacion: [],
+    },
+    
+    dateRules: [
+            value => {
+                if (value) return true
+                return 'La fecha es requerida.'
+            },
+    ],
   }),
   methods: {
     async login() {
@@ -73,6 +106,21 @@ export default {
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      }
+    },
+    validateFechaCreacion() {
+      this.validateDate(this.fecha_creacion, this.dateErrors.creacion);
+    },
+    validateFechaVerificacion() {
+      this.validateDate(this.fecha_verificacion, this.dateErrors.verificacion);
+    },
+    validateDate(fecha, errors) {
+      errors = [];
+      for (let rule of this.dateRules) {
+        let result = rule(fecha);
+        if (typeof result === 'string') {
+          this.dateErrors.push(result);
+        }
       }
     },
   },

@@ -1,12 +1,17 @@
 {
   "dependencies": {
+    "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^8.0.0",
     "@fastify/jwt": "^8.0.1",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
     "fastify-oauth2": "^4.6.0",
+    "joi": "^17.13.3",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.1",
     "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

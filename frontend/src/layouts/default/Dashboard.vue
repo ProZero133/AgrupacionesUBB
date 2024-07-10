@@ -1,0 +1,84 @@
+<template>
+  <v-app>
+      <!-- Toolbar -->
+    <v-container>
+      <v-app-bar color="#EEEEEE" prominent>
+          <v-app-bar-nav-icon
+            variant="text"
+            @click.stop="drawer = !drawer"
+          ></v-app-bar-nav-icon>
+  
+          <v-text-field
+              :loading="loading"
+              append-inner-icon="mdi-magnify"
+              density="compact"
+              label="Buscar..."
+              flat="true"
+              variant="solo"
+              hide-details
+              single-line
+              bg-color="gray"
+              @click:append-inner="onClick"
+              :style="{ 'margin-left': '20px' }"
+            ></v-text-field>
+  
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+  
+          <template v-if="$vuetify.display.mdAndUp">
+            <v-text>Marco Araneda</v-text>
+  
+            <v-btn icon>
+              <v-icon>mdi-account</v-icon>
+            </v-btn>
+          </template>
+      </v-app-bar>
+  
+      <v-navigation-drawer
+      v-model="drawer"
+      temporary>
+        <v-list density="compact">
+          <v-list-subheader>AGRUPACIONES UBB</v-list-subheader>
+
+          <v-list-item
+            v-for="(item, i) in items"
+            :key="i"
+            :value="item"
+            :to="item.path"
+            color="primary"
+          >
+            <template v-slot:prepend>
+              <v-icon :icon="item.icon"></v-icon>
+            </template>
+
+            <v-list-item-title v-text="item.name"></v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+    </v-container>
+    
+      <router-view></router-view>
+    
+  </v-app>
+  </template>
+    <script>
+    
+    export default {
+      data: () => ({
+        drawer: true,
+        rail: true,
+    
+        items: [
+            { name: 'Home', icon: 'mdi-home', path: '/api/home'},
+            { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion'},
+            { name: 'Crear Actividad', icon: 'mdi-calendar-plus', path: '/api/crear_actividad'},
+            { name: 'Login', icon: 'mdi-login', path: '/api/login'},
+        ],
+    
+        user_RUT: '20.999.554-9',
+        user_name: 'Marco Araneda',
+      }),
+  }
+    </script>
+    

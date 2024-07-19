@@ -19,7 +19,12 @@ const routes = [
         {
           path: 'crear_agrupacion',
           name: 'Crear Agrupacion',
-          component: () => import('@/views/CrearAgrupacionView.vue'),
+          component: () => import('@/views/AcreditarAgrupacionView.vue'),
+        },
+        {
+          path: 'acreditar_agrupacion',
+          name: 'Acreditar Agrupacion',
+          component: () => import('@/views/AcreditarAgrupacionView.vue'),
         },
         {
           path: 'crear_actividad',

@@ -22,7 +22,7 @@
 <script>
 export default {
 
-  name: 'CrearAgrupacion',
+  name: 'AcreditarAgrupacion',
   data() {
     return {
       groupName: '',

@@ -7,22 +7,22 @@
         <v-row>
           <v-spacer></v-spacer>
             <v-col cols="12" justify="center" class="title-card">
-              <h1 class="texto">Crear actividad</h1>
-              <p class="text-left">Por favor, introducir abajo los datos correspondientes a la actividad a crear.</p>
+              <h1 class="texto">Crear publicación</h1>
+              <p class="text-left">Publica algo al grupo. Introduce abajo los datos sobre tu publicación.</p>
             </v-col>
             
             <v-col cols="12" md="7">
 
               <v-col cols="12">
-                  <v-text-field class="nombreAct" v-model="nom_act" label="Nombre de la actividad"
+                  <v-text-field v-model="nom_act" label="Nombre de la publicación"
                   clearable required variant="solo-filled"></v-text-field>
               </v-col>
 
               <v-col cols="12">
                 <v-text-field
-                  class="descripcionAct"
+                  class="descripcion"
                   v-model="descripcion"
-                  label="Descripción de la actividad"
+                  label="Descripción de la publicación"
                   clearable required variant="solo-filled"
                   height="200px"
                   >
@@ -37,7 +37,7 @@
                 <v-file-input
                   v-model="imagen"
                   accept="image/png, image/jpeg, image/bmp"
-                  label="Imagen para la actividad"
+                  label="Imagen para la publicación"
                   clearable
                   required
                   variant="solo-filled"
@@ -59,22 +59,8 @@
             </v-col>
             
 
+
             <v-col cols="12" md="12">
-
-              <v-col cols="12" class="bottomElement">
-
-                <v-checkbox v-model="tipo">
-                  <template v-slot:label>
-                    <div>
-                      <h2 v-if=tipo>Actividad Pública: Activado</h2>
-                      <h2 v-else>Actividad Pública: Desactivado</h2>
-                      <h4 v-if=tipo>Todos podrán ver y participar en la actividad, sean miembros del grupo o no.</h4>
-                      <h4 v-else>Sólo los miembros del grupo podrán ver y participar de la actividad.</h4>
-                    </div>
-                  </template>
-                </v-checkbox>
-
-              </v-col>
 
               <v-col cols="12">
                 <v-text-field
@@ -87,7 +73,7 @@
 
               <v-col cols="4">
                 <v-btn class="form-submit" type="submit"
-                color="#2CA2DC">Crear actividad</v-btn>
+                color="#2CA2DC">Crear publicación</v-btn>
               </v-col>
 
             </v-col>
@@ -172,7 +158,7 @@ import addImage from '../assets/imagePlaceholder.png';
   
 </script>
 <style>
-  .descripcionAct {
+  .descripcion {
     height: 520px !important;
     margin-top: -20px;
     margin-bottom: -260px;

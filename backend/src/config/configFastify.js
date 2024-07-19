@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')();
 const config = require('../config/configEnv.js');
 const fastifyCookie = require('@fastify/cookie');
 

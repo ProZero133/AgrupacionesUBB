@@ -3,6 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
     {
+      path: '/',
+      redirect: '/api/home',
+    },
+    {
       path: '/api',
       component: () => import('@/layouts/default/Dashboard.vue'),
       children: [
@@ -25,11 +29,27 @@ const routes = [
           path: 'acreditar_agrupacion',
           name: 'Acreditar Agrupacion',
           component: () => import('@/views/AcreditarAgrupacionView.vue'),
+
+        },
+        {
+          path: 'verificaciones',
+          name: 'Verificaciones',
+          component: () => import('@/views/VerificacionesView.vue'),
         },
         {
           path: 'crear_actividad',
           name: 'Crear Actividad',
           component: () => import('@/views/CrearActividadView.vue'),
+        },
+        {
+          path: 'crear_agrupacion',
+          name: 'Crear Agrupacion',
+          component: () => import('@/views/CrearAgrupacionView.vue'),
+        },
+        {
+          path: 'crear_publicacion',
+          name: 'Crear Publicacion',
+          component: () => import('@/views/CrearPublicacionView.vue'),
         },
         {
           path: 'login',

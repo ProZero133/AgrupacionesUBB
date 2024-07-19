@@ -2,7 +2,8 @@ const fastify = require('fastify')();
 const config = require('../config/configEnv.js');
 const fastifyCookie = require('@fastify/cookie');
 
-const userRoutes = require('../routes/user.routes');
+const login = require('../routes/auth.routes');
+const user = require('../routes/user.routes');
 const fastifyCors = require('@fastify/cors');
 const secret = config.JWT_SECRET;
 const cookieSecret = config.COOKIE_SECRET;
@@ -18,5 +19,6 @@ fastify.register(fastifyCors, {
   fastify.register(require('@fastify/jwt'), {
     secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
   });
-  fastify.register(userRoutes);
+  fastify.register(login);
+  fastify.register(user);
 module.exports = fastify;

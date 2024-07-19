@@ -1,5 +1,5 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
-
+const { getAgrupaciones } = require('../services/agrupacion.service');
 async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   // Llamar a la base de datos para verificar si el usuario existe
@@ -16,4 +16,15 @@ async function EmailLogin(request, reply) {
   }
 }
 
-module.exports = { EmailLogin };
+async function VerGrupos(request, reply) {
+  const agrupaciones = await getAgrupaciones();
+  if (agrupaciones.length === 0) {
+    return reply.send({ success: false, message: 'No se encontraron agrupaciones' });
+  }
+  else{
+
+    return reply.send(agrupaciones);
+
+}
+}
+module.exports = { EmailLogin, VerGrupos };

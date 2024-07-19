@@ -1,23 +1,20 @@
-
+const { pool } = require('../db.js');
 
 async function getAgrupaciones() {
-    try {
-      // Obtiene todas las agrupaciones
-      const agrupaciones = await Agrupacion.findAll();
-  
-      // Retorna las agrupaciones
-      return agrupaciones;
-    } catch (error) {
-      // Maneja cualquier error que pueda ocurrir
-      console.error('Error al obtener las agrupaciones:', error);
-      throw error;
-    }
+   try{
+    // Obtiene todas las agrupaciones
+    const agrupaciones = await pool.query('SELECT * FROM "Agrupacion"');
+    // Retorna las agrupaciones
+    return agrupaciones.rows;
+   }
+    catch (error) {
+      console.log('Error al obtener las agrupaciones:', error);
   }
-
+}
   async function getAgrupacionById(id) {
     try {
       // Obtiene la agrupacion con el id especificado
-      const agrupacion = await Agrupacion.findByPk(id);
+      const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [id]);
   
       // Retorna la agrupacion
       return agrupacion;

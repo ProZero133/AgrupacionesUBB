@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor">
   <div class="ActividadGrupos">
-    <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-3 card">
+    <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades">
       <v-card-title>{{ actividad.nom_act }}</v-card-title>
       <v-card-text>
         <p>{{ actividad.descripcion }}</p>
@@ -10,7 +10,7 @@
     </v-card>
   </div>
   <div class="misgrupos">
-    <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card">
+    <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
       <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
       <v-card-text>
         <p>{{ grupo.descripcion }}</p>
@@ -31,6 +31,7 @@
   align-items: flex-start;
 }
 .ActividadGrupos {
+  width: 90vh;
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* Asegura que el contenedor tenga al menos el alto de la ventana */
@@ -46,8 +47,13 @@
   min-height: 100vh; /* Asegura que el contenedor tenga al menos el alto de la ventana */
   margin-top: 100px;
 }
+.card-actividades {
+  height: 400px; /* O la altura que prefieras para tus v-card */
+  width: 800px; /* O el ancho que prefieras para tus v-card */
+  max-width: 900px; /* O el ancho máximo que prefieras para tus v-card */
+}
 
-.card {
+.card-misgrupos {
   max-width: 600px; /* O el ancho máximo que prefieras para tus v-card */
 }
 </style>

@@ -1,18 +1,14 @@
 <template>
-  <v-container class="container-loginrut">
-    <h2> </h2>
-    <v-form class="form-loginrut">
-      <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
-      
+  <v-container class="login-container">
+    <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
+      <h2> </h2>
+    <v-form>
       <v-label>Iniciar sesión con credenciales institucionales</v-label>
       <v-text-field v-model="username" label="Rut" required></v-text-field>
       <v-text-field v-model="password" label="Contraseña" type="password" required></v-text-field>
       <v-btn type="submit" color="primary">Iniciar sesión</v-btn>
     </v-form>
-  </v-container>
-
-  <v-container class="container-logincorreo">
-    <v-form class="form-logincorreo">
+    <v-form>
       <v-label>o</v-label>
       <v-text-field v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
@@ -22,9 +18,6 @@
     </v-form>
   </v-container>
 </template>
-
-
-
 
 <script>
 
@@ -78,27 +71,7 @@ export default {
 }
 
 </script>
-
 <style>
-template{
-  background: url('..\assets\pattern.jpg');
-  background-position:center;
-  background-repeat: repeat;
-  background-size: auto;
-  height: 100vh;
-  width: 100vw;
-}
-
-.container-loginrut {
-  background: rgba(255, 255, 255, 0.8);     /* Fondo blanco semi-transparente */
-  border: 1px solid rgba(0, 0, 0, 0.2);     /* Borde negro semi-transparente */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);  /* Sombra negra semi-transparente */
-  padding: 30px;                              /* Espacio interior */
-  margin-top: 100px;
-  border-radius: 15px;                        /* Bordes redondeados */
-  width: 32%;
-}
-
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -110,19 +83,5 @@ template{
   justify-content: center;
   align-items: center;
   font-size: 20px;
-}
-
-.form-loginrut {
-  position: center;
-  display: table;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.form-logincorreo {
-  margin-top: 50px;
-  position: center;
-  margin-left: 400px;
-  margin-right: 400px;
 }
 </style>

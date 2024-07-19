@@ -1,17 +1,18 @@
 const { pool } = require('../db.js');
 const nodemailer = require('nodemailer');
 const config = require('../config/configEnv.js');
+const { registrarUsuario } = require('../services/user.service.js');
 
 const mailUser = config.MAIL_USER;
 const mailPass = config.MAIL_PASS;
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', 
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true, // true para 465, false para otros puertos
   auth: {
-    user: mailUser, 
-    pass: mailPass 
+    user: mailUser,
+    pass: mailPass
   }
 });
 
@@ -25,7 +26,38 @@ transporter.verify((error) => {
 
 async function validarUsuario(email) {
   try {
+    // busca el usuario en la base de datos servidor universidad (Simulado por el momento)
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
+    console.log('Resultado de la consulta:', result.rows);
+    // Si no se encuentra el usuario
+    if (result.rows.length === 0) {
+      return { success: false, message: 'Usuario no encontrado' };
+    }
+    // Si se encuentra el usuario, se valida que exista en la base de datos de la plaforma
+    else {
+      const validarUsuario = await validarUsuarioEnPlataforma(result.rows[0].rut);
+      // Si el usuario existe en el servidor de la universidad pero no en la plataforma, se registra el usuario en la plataforma
+      if (!validarUsuario.success) {
+        const ingresarUsuario = await registrarUsuario(result.rows[0].rut, result.rows[0].rol);
+        if (ingresarUsuario.success) {
+          return { success: true, message: 'Usuario registrado en la plataforma', user: result.rows };
+        } else {
+          return { success: false, message: 'Error al registrar usuario en la plataforma' };
+        }
+      }
+      // Si el usuario existe en la plataforma y en el servidor de la universida, simplemente se retorna el usuario
+      else {
+        return { success: true, message: 'Usuario encontrado', user: result.rows };
+      }
+    }
+  } catch (error) {
+    return { success: false, message: 'Token inválido o expirado', error: error.message };
+  }
+}
+
+async function validarUsuarioEnPlataforma(rut) {
+  try {
+    const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
     console.log('Resultado de la consulta:', result.rows);
     if (result.rows.length === 0) {
       return { success: false, message: 'Usuario no encontrado' };
@@ -35,6 +67,7 @@ async function validarUsuario(email) {
   } catch (error) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
+
 }
 
 async function asignarToken(fastify, usuario, reply) {
@@ -68,4 +101,4 @@ async function asignarToken(fastify, usuario, reply) {
 
 
 
-module.exports = { validarUsuario, asignarToken};
+module.exports = { validarUsuario, asignarToken };

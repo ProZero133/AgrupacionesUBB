@@ -1,56 +1,35 @@
-"use strict";
 
-const actividadService = require("../services/actividad.service.js");
-const { actividadBodySchema, actividadId } = require("../schema/actividad.schema.js");
+const { getActividades, getActividadesByAgrupacion, getActividadById } = require('../services/actividad.service');
 
-/**
- * Obtiene todas las actividades
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getActividades(req, res) {
-    try {
-        // Obtiene todas las actividades
-        const actividades = await actividadService.getActividades();
-
-        // Retorna las actividades
-        res.status(200).json(actividades);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las actividades:', error);
-        res.status(500).send('Error al obtener las actividades');
+async function ObtenerActividades(req, res) {
+    const respuesta = await getActividades();
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
     }
 }
 
-/**
- * Obtiene una actividad por su id
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getActividadById(req, res) {
-    try {
-        // Obtiene el id de la actividad
-        const id = req.params.id;
-
-        // Obtiene la actividad por su id
-        const actividad = await actividadService.getActividadById(id);
-
-        // Retorna la actividad
-        res.status(200).json(actividad);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener la actividad:', error);
-        res.status(500).send('Error al obtener la actividad');
+async function ObtenerActividadPorID(req, res) {
+    const respuesta = await getActividadById(req.params.id);
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
     }
 }
 
-/**
- * Crea una nueva actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+async function ObtenerActividadesPorAgrupacion(req, res) {
+    const respuesta = await getActividadesByAgrupacion(req.params.id_agr);
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
+    }
+}
 
 async function createActividad(req, res) {
     try {
@@ -75,11 +54,7 @@ async function createActividad(req, res) {
     }
 }
 
-/**
- * Actualiza una actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+
 
 async function updateActividad(req, res) {
     try {
@@ -107,11 +82,7 @@ async function updateActividad(req, res) {
     }
 }
 
-/**
- * Elimina una actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+
 
 async function deleteActividad(req, res) {
     try {
@@ -131,9 +102,10 @@ async function deleteActividad(req, res) {
 }
 
 module.exports = {
-    getActividades,
-    getActividadById,
+    ObtenerActividades,
+    ObtenerActividadPorID,
     createActividad,
     updateActividad,
-    deleteActividad
+    deleteActividad,
+    ObtenerActividadesPorAgrupacion
 };

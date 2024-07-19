@@ -1,23 +1,22 @@
-
+const { pool } = require('../db.js');
 
 async function getActividades() {
-    try {
-        // Obtiene todas las actividades de la base de datos
-        const actividades = await Actividad.findAll();
-
-        // Retorna todas las actividades
-        return actividades;
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las actividades:', error);
-        throw error;
+    try{
+        // Obtiene todas las actividades
+        const actividades = await pool.query('SELECT * FROM "Actividad"');
+        console.log(actividades.rows);
+        // Retorna las actividades
+        return actividades.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las actividades:', error);
     }
 }
 
 async function getActividadById(id) {
     try {
         // Obtiene la actividad con el id especificado de la base de datos
-        const actividad = await Actividad.findByPk(id);
+        const actividad = await pool.query('SELECT * FROM "Actividad" WHERE id_act = $1', [id]);
 
         // Retorna la actividad
         return actividad;
@@ -25,6 +24,18 @@ async function getActividadById(id) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la actividad:', error);
         throw error;
+    }
+}
+
+async function getActividadesByAgrupacion(id_agr) {
+    try{
+        // Obtiene todas las actividades de una agrupacion
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+        // Retorna las actividades
+        return actividades.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las actividades:', error);
     }
 }
 
@@ -93,5 +104,6 @@ module.exports = {
     getActividadById,
     createActividad,
     updateActividad,
-    deleteActividad
+    deleteActividad,
+    getActividadesByAgrupacion
 };

@@ -1,12 +1,12 @@
 "use strict";
 
-const agrupacionService = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 
-async function getAgrupaciones(req, res) {
+async function ObtenerAgrupaciones(req, res) {
     try {
         // Obtiene todas las agrupaciones
-        const agrupaciones = await agrupacionService.getAgrupaciones();
+        const agrupaciones = await getAgrupaciones();
 
         // Retorna las agrupaciones
         res.status(200).json(agrupaciones);
@@ -17,19 +17,13 @@ async function getAgrupaciones(req, res) {
     }
 }
 
-/**
- * Obtiene una agrupacion por su id
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getAgrupacionById(req, res) {
+async function ObtenerAgrupacionesPorID(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id = req.params.id;
 
         // Obtiene la agrupacion por su id
-        const agrupacion = await agrupacionService.getAgrupacionById(id);
+        const agrupacion = await getAgrupacionById(id);
 
         // Retorna la agrupacion
         res.status(200).json(agrupacion);
@@ -39,12 +33,6 @@ async function getAgrupacionById(req, res) {
         res.status(500).send('Error al obtener la agrupacion');
     }
 }
-
-/**
- * Crea una nueva agrupacion
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
 
 async function createAgrupacion(req, res) {
     try {
@@ -96,8 +84,8 @@ async function updateAgrupacion(req, res) {
 }
 
 module.exports = {
-    getAgrupaciones,
-    getAgrupacionById,
+    ObtenerAgrupaciones,
+    ObtenerAgrupacionesPorID,
     createAgrupacion,
     updateAgrupacion
 };

@@ -1,11 +1,11 @@
 const fastify = require('../config/configFastify.js');
 
-const { getAgrupacionById, getAgrupaciones, createAgrupacion, updateAgrupacion } = require('../controllers/agrupacion.controller.js');
+const { ObtenerAgrupaciones, ObtenerAgrupacionesPorID, createAgrupacion, updateAgrupacion } = require('../controllers/agrupacion.controller.js');
 
 module.exports = function(fastify, options, done) {
     
-  fastify.get('/agrupaciones', getAgrupaciones);
-  fastify.get('/agrupaciones/:id', getAgrupacionById);
+  fastify.get('/agrupaciones', ObtenerAgrupaciones);
+  fastify.get('/agrupaciones/:id', ObtenerAgrupacionesPorID);
   fastify.post('/agrupaciones', createAgrupacion);
   fastify.put('/agrupaciones/:id', updateAgrupacion);
   done();

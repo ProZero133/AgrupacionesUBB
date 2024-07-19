@@ -1,30 +1,26 @@
-
+const { pool } = require('../db.js');
 
 async function getpublicaciones() {
-    try {
-        // Obtiene todas las publicaciones de la base de datos
-        const publicaciones = await Publicacion.findAll();
-
-        // Retorna todas las publicaciones
-        return publicaciones;
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las publicaciones:', error);
-        throw error;
+   try{
+    // Obtiene todas las publicaciones
+    const publicaciones = await pool.query('SELECT * FROM "Publicacion"');
+    // Retorna las publicaciones
+    return publicaciones.rows;
+   }
+    catch (error) {
+      console.log('Error al obtener las publicaciones:', error);
     }
 }
 
 async function getpublicacionById(id) {
-    try {
-        // Obtiene la publicacion con el id especificado de la base de datos
-        const publicacion = await Publicacion.findByPk(id);
-
+    try{
+        // Obtiene la publicacion con el id especificado
+        const publicacion = await pool.query('SELECT * FROM "Publicacion" WHERE id_pub = $1', [id]);
         // Retorna la publicacion
         return publicacion;
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener la publicacion:', error);
-        throw error;
+    }
+    catch (error) {
+        console.log('Error al obtener la publicacion:', error);
     }
 }
 

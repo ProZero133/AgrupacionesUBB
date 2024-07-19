@@ -1,20 +1,6 @@
 const fastify = require('./config/configFastify.js');
-//const fastifyCors = require('@fastify/cors');
 const config = require('./config/configEnv.js');
-const { Client } = require('pg');
-const {pool} = require('./db.js');
-const jwt = require('@fastify/jwt');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-const fastifyCookie = require('@fastify/cookie');
-
 const port = config.PORT;
-const host = config.HOST;
-const secret = config.JWT_SECRET;
-const refreshSecret = config.REFRESH_JWT_SECRET;
-const mailUser = config.MAIL_USER;
-const mailPass = config.MAIL_PASS;
-const cookieSecret = config.COOKIE_SECRET;
 const url = config.URL;
 
 // Enrutador de la aplicación

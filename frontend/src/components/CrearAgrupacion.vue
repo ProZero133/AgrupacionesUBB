@@ -21,6 +21,7 @@
 
 <script>
 export default {
+
   name: 'CrearAgrupacion',
   data() {
     return {
@@ -45,6 +46,21 @@ export default {
     submitForm() {
       // Lógica para enviar la solicitud de oficialización
       console.log('Solicitud enviada:', this.groupName, this.groupDescription, this.groupType);
+    },
+    validateFechaCreacion() {
+      this.validateDate(this.fecha_creacion, this.dateErrors.creacion);
+    },
+    validateFechaVerificacion() {
+      this.validateDate(this.fecha_verificacion, this.dateErrors.verificacion);
+    },
+    validateDate(fecha, errors) {
+      errors = [];
+      for (let rule of this.dateRules) {
+        let result = rule(fecha);
+        if (typeof result === 'string') {
+          this.dateErrors.push(result);
+        }
+      }
     },
   },
 };

@@ -1,5 +1,4 @@
 <template>
-
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-card class="mx-auto px-6 py-8" max-width="800">

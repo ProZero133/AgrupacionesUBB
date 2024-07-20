@@ -4,6 +4,9 @@ const fastifyCookie = require('@fastify/cookie');
 
 const login = require('../routes/auth.routes');
 const user = require('../routes/user.routes');
+const formulario = require('../routes/formulario.routes');
+const votacion = require('../routes/votacion.routes');
+const post = require('../routes/post.routes');
 const agrupacion = require('../routes/agrupacion.routes');
 const actividad = require('../routes/actividad.routes');
 const fastifyCors = require('@fastify/cors');
@@ -23,6 +26,9 @@ fastify.register(fastifyCors, {
   });
   fastify.register(login);
   fastify.register(user);
+  fastify.register(formulario);
+  fastify.register(votacion);
+  fastify.register(post);
   fastify.register(agrupacion);
   fastify.register(actividad);
 module.exports = fastify;

@@ -1,7 +1,7 @@
 "use strict";
 
 const publicacionService = require("../services/publicacion.service.js");
-const { publicacionBodySchema, publicacionIdSchema } = require("../schema/publicacion.schema.js");
+const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
 
 /**
  * Obtiene todas las publicaciones

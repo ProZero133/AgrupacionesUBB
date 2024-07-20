@@ -38,7 +38,7 @@ async function validarUsuario(email) {
       const validarUsuario = await validarUsuarioEnPlataforma(result.rows[0].rut);
       // Si el usuario existe en el servidor de la universidad pero no en la plataforma, se registra el usuario en la plataforma
       if (!validarUsuario.success) {
-        const ingresarUsuario = await registrarUsuario(result.rows[0].rut, result.rows[0].rol);
+        const ingresarUsuario = await registrarUsuario(result.rows[0].rut, result.rows[0].rol_u);
         if (ingresarUsuario.success) {
           return { success: true, message: 'Usuario registrado en la plataforma', user: result.rows };
         } else {

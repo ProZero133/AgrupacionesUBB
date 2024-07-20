@@ -1,15 +1,19 @@
 <template>
-  <div class="contenedor">
-  <div class="ActividadGrupos">
-    <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades">
+  <v-container cols="12"></v-container>
+  <v-col cols="12" class="pagina" align-self:>
+  <v-row >
+  <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
+  <v-col cols="7" class="flex-grow-0 flex-shrink-0">
+    <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
       <v-card-title>{{ actividad.nom_act }}</v-card-title>
       <v-card-text>
         <p>{{ actividad.descripcion }}</p>
         <p>Tipo: {{ actividad.tipo }}</p>
       </v-card-text>
     </v-card>
-  </div>
-  <div class="misgrupos">
+  </v-col>
+  
+  <v-col cols="3" class="flex-grow-0 flex-shrink-0">
     <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
       <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
       <v-card-text>
@@ -20,41 +24,29 @@
         <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
       </v-card-text>
     </v-card>
-  </div>
-</div>
+  </v-col>
+  </v-row>
+  </v-col>
 </template>
 
 <style scoped>
-.contenedor {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+.pagina {
+  margin-top: 30px;
+  width: 90%;
 }
-.ActividadGrupos {
-  width: 90vh;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Asegura que el contenedor tenga al menos el alto de la ventana */
-  margin-top: 100px;
-  margin-left: 400px;
-  margin-right: 100px;
-}
-.misgrupos {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh; /* Asegura que el contenedor tenga al menos el alto de la ventana */
-  margin-top: 100px;
+.card-misgrupos {
+  width: 80%;
+  margin: 0 auto; /* This centers the card within its container */
 }
 .card-actividades {
   height: 400px; /* O la altura que prefieras para tus v-card */
-  width: 800px; /* O el ancho que prefieras para tus v-card */
-  max-width: 900px; /* O el ancho máximo que prefieras para tus v-card */
+  width: 80%;
+  margin: 0 auto; /* This centers the card within its container */
+  border: 2px solid rgb(207, 207, 207) !important
 }
-
 .card-misgrupos {
   max-width: 600px; /* O el ancho máximo que prefieras para tus v-card */
+  border: 1px solid rgb(235, 235, 235) !important
 }
 </style>
 

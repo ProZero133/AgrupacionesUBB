@@ -76,6 +76,7 @@
             { name: 'Login', icon: 'mdi-login', path: '/api/login'},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
+            { name: 'Grupo', icon: 'mdi-account-group', path: '/api/grupo'},
         ],
     
         user_RUT: '20.999.554-9',

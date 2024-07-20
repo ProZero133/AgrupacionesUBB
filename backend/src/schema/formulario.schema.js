@@ -1,6 +1,6 @@
-const joi = require('joi');
+const Joi = require('joi');
 
-const formularioSchema = joi.object({
+const formularioBodySchema = Joi.object({
     id_pub: Joi.number().integer().required().messages({
         "number.base": "El id de la publicación debe ser de tipo número.",
         "number.integer": "El id de la publicación debe ser un entero.",
@@ -17,4 +17,4 @@ const formularioSchema = joi.object({
         }),
     });
 
-module.exports = formularioSchema;
+module.exports = formularioBodySchema;

@@ -1,7 +1,7 @@
 "use strict";
 
 const votacionService = require("../services/votacion.service");
-const {votacionBodySchema} = require("../validators/votacion.validator");
+const {votacionBodySchema} = require("../schema/votacion.schema.js");
 
 /**
  * Obtiene todas las votaciones

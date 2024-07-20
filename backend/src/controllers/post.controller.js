@@ -1,7 +1,7 @@
 "use strict";
 
 const postService = require("../services/post.service");
-const { postBodySchema } = require("../schemas/post.schema");
+const { postBodySchema } = require("../schema/post.schema.js");
 
 /**
  * Obtiene todas los posts

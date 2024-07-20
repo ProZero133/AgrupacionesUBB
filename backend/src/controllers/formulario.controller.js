@@ -1,7 +1,7 @@
 "use strict";
 
 const formularioService = require("../services/formulario.service");
-const { formularioBodySchema } = require("../validations/formulario.validation");
+const { formularioBodySchema } = require("../schema/formulario.schema.js");
 
 /**
  * Obtiene todas los formularios

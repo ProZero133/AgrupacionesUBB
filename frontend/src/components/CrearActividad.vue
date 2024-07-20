@@ -144,8 +144,9 @@ import addImage from '../assets/imagePlaceholder.png';
 
       async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
         console.log(imagen);
+        const patata = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSG7Hfjekh-OCFx5U1rmOYk76Bq-Kt9C3_4Pw&s";
         
-        console.log(nom_act, descripcion, imagen, tipo, id_agr);
+        console.log(nom_act, descripcion, patata, tipo, id_agr);
         try {
           // Realiza una solicitud fetch a tu backend Fastify
           const response = await fetch('http://localhost:3000/actividades', {
@@ -153,7 +154,7 @@ import addImage from '../assets/imagePlaceholder.png';
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+            body: JSON.stringify({ nom_act, descripcion, patata, tipo, id_agr }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {

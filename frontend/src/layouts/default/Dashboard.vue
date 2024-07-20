@@ -62,26 +62,24 @@
     
   </v-app>
   </template>
-    <script>
+  <script>
     
     export default {
       data: () => ({
         drawer: true,
         rail: true,
-    
+
         items: [
             { name: 'Home', icon: 'mdi-home', path: '/api/home'},
+            { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
+            { name: 'Crear Actividad', icon: 'mdi-calendar-plus', path: '/api/crear_actividad'},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion'},
             { name: 'Acreditar Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/acreditar_agrupacion'},
-            { name: 'Crear Actividad', icon: 'mdi-calendar-plus', path: '/api/crear_actividad'},
             { name: 'Login', icon: 'mdi-login', path: '/api/login'},
-            { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
-            { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
         ],
-    
+
         user_RUT: '20.999.554-9',
         user_name: 'Marco Araneda',
       }),
-  }
-    </script>
-    
+    }
+  </script>

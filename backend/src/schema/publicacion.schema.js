@@ -7,11 +7,6 @@ const publicacionBodySchema = Joi.object({
         "any.required": "El título de la publicación es obligatorio.",
         "string.base": "El título de la publicación debe ser de tipo string.",
         }),
-    cuerpo: Joi.string().required().messages({
-        "string.empty": "El contenido de la publicación no puede estar vacío.",
-        "any.required": "El contenido de la publicación es obligatorio.",
-        "string.base": "El contenido de la publicación debe ser de tipo string.",
-        }),
     imaPub: Joi.binary().messages({
         "binary.base": "La imagen debe ser de tipo binary.",
         }),

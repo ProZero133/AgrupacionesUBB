@@ -21,20 +21,9 @@ const routes = [
           component: () => import('@/views/AdminHome.vue'),
         },
         {
-          path: 'crear_agrupacion',
-          name: 'Crear Agrupacion',
-          component: () => import('@/views/AcreditarAgrupacionView.vue'),
-        },
-        {
           path: 'acreditar_agrupacion',
           name: 'Acreditar Agrupacion',
           component: () => import('@/views/AcreditarAgrupacionView.vue'),
-
-        },
-        {
-          path: 'verificaciones',
-          name: 'Verificaciones',
-          component: () => import('@/views/VerificacionesView.vue'),
         },
         {
           path: 'crear_actividad',

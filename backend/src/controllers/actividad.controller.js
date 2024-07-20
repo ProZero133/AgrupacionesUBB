@@ -1,5 +1,6 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById } = require('../services/actividad.service');
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad } = require('../services/actividad.service');
+const { actividadBodySchema } = require('../schema/actividad.schema.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -31,26 +32,27 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
     }
 }
 
-async function createActividad(req, res) {
+async function crearActividad(req, reply) {
     try {
         // Valida el cuerpo de la solicitud
-        const { error, value } = actividadBodySchema.validate(req.body);
+        const { body } = req;
+        const { error, value } = actividadBodySchema.validate(body);
 
         if (error) {
             // Si hay un error, retorna un error de validación
-            res.status(400).send(error.message);
+            reply.code(400).send(error.message);
             return;
         }
 
         // Crea una nueva actividad
-        const actividad = await actividadService.createActividad(value);
+        const actividad = await createActividad(body);
 
         // Retorna la nueva actividad
-        res.status(201).json(actividad);
+        reply.code(201).send(actividad);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la actividad:', error);
-        res.status(500).send('Error al insertar la actividad');
+        reply.code(500).send('Error al insertar la actividad');
     }
 }
 
@@ -104,7 +106,7 @@ async function deleteActividad(req, res) {
 module.exports = {
     ObtenerActividades,
     ObtenerActividadPorID,
-    createActividad,
+    crearActividad,
     updateActividad,
     deleteActividad,
     ObtenerActividadesPorAgrupacion

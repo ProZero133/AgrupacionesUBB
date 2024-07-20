@@ -4,14 +4,6 @@ const port = config.PORT;
 const url = config.URL;
 
 // Enrutador de la aplicación
-// const publicacionRoutes = require('./routes/publicacion.routes.js');
-// const agrupacionRoutes = require('./routes/agrupacion.routes.js');
-// const actividadRoutes = require('./routes/actividad.routes.js');
-// const userRoutes = require('./routes/user.routes.js');
-
-
-
-
 
   fastify.get('/api/auth/status', async (request, reply) => {
     // Aquí puedes implementar la lógica para verificar el estado de la autenticación

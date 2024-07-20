@@ -29,7 +29,6 @@ async function createpublicacion(publicacionData) {
         // Inserta una nueva publicacion en la base de datos
         const newpublicacion = await Publicacion.create({
             encabezado: publicacion.encabezado,
-            cuerpo: publicacion.cuerpo,
             imaPub: publicacion.imaPub,
             id_agr: publicacion.id_agr,
             RUT: publicacion.RUT,
@@ -50,7 +49,6 @@ async function updatepublicacion(id, publicacionData) {
         // Actualiza la publicacion con el id especificado en la base de datos
         const [rowsUpdated, [updatedpublicacion]] = await Publicacion.update({
             encabezado: publicacion.encabezado,
-            cuerpo: publicacion.cuerpo,
             imaPub: publicacion.imaPub,
             id_agr: publicacion.id_agr,
             RUT: publicacion.RUT,

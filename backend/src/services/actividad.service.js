@@ -41,17 +41,14 @@ async function getActividadesByAgrupacion(id_agr) {
 
 async function createActividad(actividadData) {
     try {
-        // Inserta una nueva actividad en la base de datos
-        const newActividad = await Actividad.create({
-            nom_act: actividadData.nom_act,
-            descripcion: actividadData.descripcion,
-            imagen: actividadData.imagen,
-            tipo: actividadData.tipo,
-            id_agr: actividadData.id_agr
-        });
+        // Inserta una nueva actividad en la base de datos usando PostgreSQL en una sola línea
+        const newActividad = await pool.query(
+            'INSERT INTO "Actividad"(nom_act, descripcion, imagen, tipo, id_agr) VALUES($1, $2, $3, $4, $5) RETURNING *',
+            [actividadData.nom_act, actividadData.descripcion, actividadData.imagen, actividadData.tipo, actividadData.id_agr]
+        );
 
-        // Retorna la nueva actividad
-        return newActividad;
+        // Retorna la nueva actividad insertada
+        return newActividad.rows[0];
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la actividad:', error);

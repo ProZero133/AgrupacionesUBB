@@ -4,6 +4,8 @@ const fastifyCookie = require('@fastify/cookie');
 
 const login = require('../routes/auth.routes');
 const user = require('../routes/user.routes');
+const agrupacion = require('../routes/agrupacion.routes');
+const actividad = require('../routes/actividad.routes');
 const fastifyCors = require('@fastify/cors');
 const secret = config.JWT_SECRET;
 const cookieSecret = config.COOKIE_SECRET;
@@ -21,4 +23,6 @@ fastify.register(fastifyCors, {
   });
   fastify.register(login);
   fastify.register(user);
+  fastify.register(agrupacion);
+  fastify.register(actividad);
 module.exports = fastify;

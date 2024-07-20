@@ -72,7 +72,6 @@
         items: [
             { name: 'Home', icon: 'mdi-home', path: '/api/home'},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion'},
-            { name: 'Acreditar Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/acreditar_agrupacion'},
             { name: 'Crear Actividad', icon: 'mdi-calendar-plus', path: '/api/crear_actividad'},
             { name: 'Login', icon: 'mdi-login', path: '/api/login'},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},

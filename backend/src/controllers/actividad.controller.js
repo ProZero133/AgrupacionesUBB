@@ -35,14 +35,24 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
 async function crearActividad(req, reply) {
     try {
         // Valida el cuerpo de la solicitud
+        
         const { body } = req;
         const { error, value } = actividadBodySchema.validate(body);
-
+        
+        // No es necesario convertir la imagen de base64 a hexadecimal
+        // Si la imagen está en base64 y es una cadena, se puede dejar tal cual
+        if (body.imagen && typeof body.imagen === 'string') {
+            console.log("Imagen recibida en base64");
+        }
+        
         if (error) {
+            console.log("Error en la validación");
+            console.log(error.details.map(detail => detail.message));
             // Si hay un error, retorna un error de validación
-            reply.code(400).send(error.message);
+            reply.code(400).send(error.details.map(detail => detail.message));
             return;
         }
+        console.log("Validacion exitosa, Creando actividad");
 
         // Crea una nueva actividad
         const actividad = await createActividad(body);

@@ -12,8 +12,8 @@ const actividadBodySchema = Joi.object({
         "any.required": "La descripción es obligatoria.",
         "string.base": "La descripción debe ser de tipo string.",
     }),
-    imagen: Joi.binary().messages({
-        "binary.base": "La imagen debe ser de tipo bytea.",
+    imagen: Joi.string().optional().messages({
+        "string.base": "La imagen debe ser de tipo string.",
     }),
     tipo: Joi.bool().required().messages({
         "bool.empty": "El tipo de actividad no puede estar vacío.",

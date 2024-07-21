@@ -6,6 +6,7 @@ const login = require('../routes/auth.routes');
 const user = require('../routes/user.routes');
 const formulario = require('../routes/formulario.routes');
 const votacion = require('../routes/votacion.routes');
+const opcion = require('../routes/opcion.routes');
 const post = require('../routes/post.routes');
 const agrupacion = require('../routes/agrupacion.routes');
 const actividad = require('../routes/actividad.routes');
@@ -29,6 +30,7 @@ fastify.register(fastifyCors, {
   fastify.register(user);
   fastify.register(formulario);
   fastify.register(votacion);
+  fastify.register(opcion);
   fastify.register(post);
   fastify.register(agrupacion);
   fastify.register(actividad);

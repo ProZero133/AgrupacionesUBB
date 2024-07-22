@@ -1,19 +1,17 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 
-async function ObtenerAgrupaciones(req, res) {
-    try {
-        // Obtiene todas las agrupaciones
-        const agrupaciones = await getAgrupaciones();
+async function VerGrupos(request, reply) {
+    const agrupaciones = await getAgrupaciones();
+    if (agrupaciones.length === 0) {
+        return reply.send({ success: false, message: 'No se encontraron agrupaciones' });
+    }
+    else {
 
-        // Retorna las agrupaciones
-        res.status(200).json(agrupaciones);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las agrupaciones:', error);
-        res.status(500).send('Error al obtener las agrupaciones');
+        return reply.send(agrupaciones);
+
     }
 }
 
@@ -34,22 +32,22 @@ async function ObtenerAgrupacionesPorID(req, res) {
     }
 }
 
-async function createAgrupacion(req, res) {
+async function crearAgrupacion(req, res) {
     try {
         // Valida el cuerpo de la solicitud
         const { error, value } = agrupacionBodySchema.validate(req.body);
 
         if (error) {
             // Retorna un error si el cuerpo de la solicitud es inválido
-            res.status(400).send(error.message);
+            res.code(400).send(error.details.map(detail => detail.message));
             return;
         }
 
         // Crea una nueva agrupacion
-        const agrupacion = await agrupacionService.createAgrupacion(req.body);
+        const agrupacion = await createAgrupacion(req.body);
 
         // Retorna la nueva agrupacion
-        res.status(201).json(agrupacion);
+        res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al crear la agrupacion:', error);
@@ -57,7 +55,7 @@ async function createAgrupacion(req, res) {
     }
 }
 
-async function updateAgrupacion(req, res) {
+async function editarAgrupacion(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id = req.params.id;
@@ -72,7 +70,7 @@ async function updateAgrupacion(req, res) {
         }
 
         // Actualiza la agrupacion
-        const agrupacion = await agrupacionService.updateAgrupacion(id, req.body);
+        const agrupacion = await updateAgrupacion(id, req.body);
 
         // Retorna la agrupacion actualizada
         res.status(200).json(agrupacion);
@@ -84,8 +82,8 @@ async function updateAgrupacion(req, res) {
 }
 
 module.exports = {
-    ObtenerAgrupaciones,
+    VerGrupos,
     ObtenerAgrupacionesPorID,
-    createAgrupacion,
-    updateAgrupacion
+    crearAgrupacion,
+    editarAgrupacion
 };

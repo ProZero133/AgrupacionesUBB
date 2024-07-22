@@ -2,7 +2,7 @@
     <v-container cols="12"></v-container>
     <v-container cols="12">
       <v-card class="mx-auto px-6 py-8" max-width="800">
-        <v-form @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion)" fast-fail class="form" ref="formulario">
+        <v-form @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado)" fast-fail class="form" ref="formulario">
           <v-row>
                 <v-spacer></v-spacer>
                 <v-col cols="12" justify="center">
@@ -22,17 +22,10 @@
                     <v-text-field v-model="fecha_creacion" label="Fecha de creación" type="date" required :min="hoy"
                         :rules="dateRules" :error-messages="dateErrors.creacion" @change="validateFechaCreacion"></v-text-field>
                 </v-col>
-                <v-col cols="6" md="6">
-                    <v-text-field v-model="fecha_verificacion" label="Fecha de verificación" type="date" required :min="hoy"
-                        :rules="dateRules" :error-messages="dateErrors.verificacion" @change="validateFechaVerificacion"></v-text-field>
-                </v-col>
 
                 <v-col cols="9">
                     <v-text-field v-model="rut" label="RUT"
                     clearable counter required></v-text-field>
-                </v-col>
-                <v-col cols="3">
-                    <v-checkbox label="Verificado" v-model="verificado"></v-checkbox>
                 </v-col>
 
                 <v-col cols="3">
@@ -59,7 +52,7 @@ export default {
     rut: '',
     fecha_creacion: '',
     verificado: false,
-    fecha_verificacion: '',
+    fecha_verificacion: null,
 
     dateErrors: {
         creacion: [],
@@ -83,17 +76,17 @@ export default {
         body: JSON.stringify({ email: this.email }),
         });
     },
-    async CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion) {
+    async CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado) {
         try {
         // Realiza una solicitud fetch a tu backend Fastify
-        console.log(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion);
+        console.log(nombre_agr, descripcion, rut, fecha_creacion, verificado);
 
-        const response = await fetch('http://localhost:3000/agrupacion', {
+        const response = await fetch('http://localhost:3000/agrupaciones', {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion }),
+            body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado}),
         });
 
         // Verifica si la respuesta es exitosa
@@ -102,7 +95,7 @@ export default {
             const data = await response.json();
             console.log(data);
         } else {
-            console.error('Error en la respuesta:', response.status);
+            console.error('Error en la respuesta:', response);
         }
         } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -110,9 +103,6 @@ export default {
     },
     validateFechaCreacion() {
         this.validateDate(this.fecha_creacion, this.dateErrors.creacion);
-    },
-    validateFechaVerificacion() {
-        this.validateDate(this.fecha_verificacion, this.dateErrors.verificacion);
     },
     validateDate(fecha, errors) {
         errors = [];

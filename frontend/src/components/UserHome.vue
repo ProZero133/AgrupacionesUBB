@@ -3,27 +3,47 @@
   <v-col cols="12" class="pagina" align-self:>
     <v-row>
       <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
+
       <v-col cols="7" class="flex-grow-0 flex-shrink-0">
+        <v-card-title class="pasando">
+            <span class="text-h4 textopasando">Qué está pasando?</span>
+          </v-card-title>
         <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
+          <p class="subtitle-1 publicadoen">Publicado por John Doe en Comunidad genérica</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
-            <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura">
-            <p>{{ actividad.descripcion }}</p>
-            <p>Tipo: {{ actividad.tipo }}</p>
+            <v-row>
+              <v-col cols="5">
+                <v-img class="image" aspect-ratio="1" :src='urlImagen' />
+              </v-col>
+              <v-col cols="7">
+                <p>{{ actividad.descripcion }}</p>
+              </v-col>
+            </v-row>
+            <!-- <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura"> -->
+            <!--<p>Tipo: {{ actividad.tipo }}</p>-->
           </v-card-text>
         </v-card>
       </v-col>
 
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
-          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-          <v-card-text>
-            <p>{{ grupo.descripcion }}</p>
-            <p>RUT: {{ grupo.rut }}</p>
-            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-            <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
-            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-          </v-card-text>
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">Mis Grupos</span>
+          </v-card-title>
+
+          <v-divider class="gruparador"></v-divider>
+
+          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
+            <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+            <v-card-text>
+              <p>{{ grupo.descripcion }}</p>
+              <p>RUT: {{ grupo.rut }}</p>
+              <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+              <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
+              <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+            </v-card-text>
+          </v-card>
         </v-card>
       </v-col>
     </v-row>
@@ -31,6 +51,29 @@
 </template>
 
 <style scoped>
+.publicadoen {
+  font-size: 12px;
+  color: #8d8d8d;
+  margin-left: 2.5%;
+  margin-top: 2%;
+  margin-bottom: -1%;
+}
+
+.pasando {
+  margin-left: 3%;
+  margin-bottom: 6%;
+}
+
+.textopasando {
+  font-weight: bold;
+  color: #8d8d8d;
+}
+
+.gruparador {
+  width: 95%;
+  margin-bottom: 10px;
+}
+
 .pagina {
   margin-top: 30px;
   width: 90%;
@@ -43,10 +86,10 @@
 }
 
 .card-actividades {
-  height: 400px;
   /* O la altura que prefieras para tus v-card */
-  width: 80%;
+  width: 90%;
   margin: 0 auto;
+  margin-top: -40px;
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
 }
@@ -59,28 +102,34 @@
 </style>
 
 <script>
+import addImage from '../assets/imagePlaceholder.png';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
 export default {
   name: 'UserHome',
   data: () => ({
     grupos: [],
-    actividades: []
+    actividades: [],
+    urlImagen: addImage
   }),
   methods: {
     convertirImagen(data) {
-  console.log('Data passed to convertirImagen:', data);
-  // Convertir el Proxy a un Array real si es necesario
-  const dataArray = Array.isArray(data) ? data : Array.from(data);
+      console.log('Data passed to convertirImagen:', data);
+    // Convertir el Proxy a un Array real si es necesario
+      const dataArray = Array.isArray(data) ? data : Array.from(data);
   
-  if (!dataArray || dataArray.length === 0) {
-    return '';
-  }
-  let binary = '';
-  const bytes = new Uint8Array(dataArray);
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return `data:image/jpeg;base64,${window.btoa(binary)}`;
-},
+      if (!dataArray || dataArray.length === 0) {
+        return '';
+      }
+      let binary = '';
+      const bytes = new Uint8Array(dataArray);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return `data:image/jpeg;base64,${window.btoa(binary)}`;
+    },
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -120,7 +169,10 @@ export default {
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
-    }
+    },
+    iragGrupo(id) {
+      this.$router.push(`/api/grupo/${id}`);
+    },
   },
   mounted() {
     this.VerGrupos();

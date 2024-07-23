@@ -23,12 +23,16 @@ async function ObtenerActividadPorID(req, res) {
 }
 
 async function ObtenerActividadesPorAgrupacion(req, res) {
-    const respuesta = await getActividadesByAgrupacion(req.params.id_agr);
-    if (respuesta.length === 0) {
-        return res.send({ success: false, message: 'No se encontraron actividades' });
-    }
-    else{
-        return res.send(respuesta);
+    try {
+        const respuesta = await getActividadesByAgrupacion(req.params.id);
+        if (respuesta.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron actividades en la' + req.params.id });
+        } else {
+            return res.send(respuesta);
+        }
+    } catch (error) {
+        console.error("Error al obtener actividades: ", error);
+        return res.status(500).send({ success: false, message: 'Error al obtener actividades' });
     }
 }
 

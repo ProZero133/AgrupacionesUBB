@@ -13,7 +13,7 @@ const routes = [
         {
           path: 'home',
           name: 'Home',
-          component: () => import('@/views/UserHome.vue'),
+          component: () => import('@/views/UserHomeView.vue'),
         },
         {
           path: 'adminhome',
@@ -46,7 +46,7 @@ const routes = [
           component: () => import('@/views/LoginView.vue'),
         },
         {
-          path: 'grupo',
+          path: 'grupo/:id', // Add the dynamic segment :id
           name: 'Grupo',
           component: () => import('@/views/GrupoView.vue'),
         },

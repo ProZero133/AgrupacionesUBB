@@ -1,6 +1,6 @@
 "use strict";
 
-const formularioService = require("../services/formulario.service");
+const { getFormularios, getFormularioById, createFormulario, updateFormulario, deleteFormulario} = require("../services/formulario.service");
 const { formularioBodySchema } = require("../schema/formulario.schema.js");
 
 /**
@@ -9,7 +9,7 @@ const { formularioBodySchema } = require("../schema/formulario.schema.js");
  * @param {Object} res - Objeto de respuesta
  */
 
-const getFormularios = async (req, res) => {
+const obtenerFormularios = async (req, res) => {
     try {
         const formularios = await formularioService.getFormularios();
         return res.status(200).json(formularios);
@@ -24,7 +24,7 @@ const getFormularios = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const getFormularioById = async (req, res) => {
+const obtenerFormularioPorId = async (req, res) => {
     try {
         const {id} = req.params;
         const formulario = await formularioService.getFormularioById(id);
@@ -41,7 +41,7 @@ const getFormularioById = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const createFormulario = async (req, res) => {
+const crearFormulario = async (req, res) => {
     try {
         const {body} = req;
         await formularioBodySchema.validateAsync(body);
@@ -58,7 +58,7 @@ const createFormulario = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const updateFormulario = async (req, res) => {
+const actualizarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
         const {error} = await formularioBodySchema.validateAsync(req.body);
@@ -78,7 +78,7 @@ const updateFormulario = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const deleteFormulario = async (req, res) => {
+const eliminarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
         await formularioService.deleteFormulario(id);
@@ -89,9 +89,9 @@ const deleteFormulario = async (req, res) => {
 }
 
 module.exports = {
-    getFormularios,
-    getFormularioById,
-    createFormulario,
-    updateFormulario,
-    deleteFormulario
+    obtenerFormularios,
+    obtenerFormularioPorId,
+    crearFormulario,
+    actualizarFormulario,
+    eliminarFormulario
 };

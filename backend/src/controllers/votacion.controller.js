@@ -1,6 +1,6 @@
 "use strict";
 
-const votacionService = require("../services/votacion.service");
+const {getVotaciones, getVotacionById, createVotacion, updateVotacion, deleteVotacion} = require("../services/votacion.service");
 const {votacionBodySchema} = require("../schema/votacion.schema.js");
 
 /**
@@ -9,7 +9,7 @@ const {votacionBodySchema} = require("../schema/votacion.schema.js");
  * @param {Object} res - Objeto de respuesta
  */
 
-const getVotaciones = async (req, res) => {
+const obtenerVotaciones = async (req, res) => {
     try {
         const votaciones = await votacionService.getVotaciones();
         res.status(200).json(votaciones);
@@ -24,7 +24,7 @@ const getVotaciones = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const getVotacionById = async (req, res) => {
+const obtenerVotacionPorId = async (req, res) => {
     try {
         const {id} = req.params;
         const votacion = await votacionService.getVotacionById(id);
@@ -40,7 +40,7 @@ const getVotacionById = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const createVotacion = async (req, res) => {
+const crearVotacion = async (req, res) => {
     try {
         const {body} = req;
         await votacionBodySchema.validateAsync(body);
@@ -57,7 +57,7 @@ const createVotacion = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const updateVotacion = async (req, res) => {
+const actualizarVotacion = async (req, res) => {
     try {
         // Obtiene el id de la votacion
         const { id } = req.params;
@@ -87,7 +87,7 @@ const updateVotacion = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const deleteVotacion = async (req, res) => {
+const eliminarVotacion = async (req, res) => {
     try {
         // Obtiene el id de la votacion
         const { id } = req.params;
@@ -105,9 +105,9 @@ const deleteVotacion = async (req, res) => {
 }
 
 module.exports = {
-    getVotaciones,
-    getVotacionById,
-    createVotacion,
-    updateVotacion,
-    deleteVotacion
+    obtenerVotaciones,
+    obtenerVotacionPorId,
+    crearVotacion,
+    actualizarVotacion,
+    eliminarVotacion
 };

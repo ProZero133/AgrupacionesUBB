@@ -1,6 +1,6 @@
 const { pool } = require('../db.js');
 
-async function getpublicaciones() {
+async function getPublicacion() {
    try{
     // Obtiene todas las publicaciones
     const publicaciones = await pool.query('SELECT * FROM "Publicacion"');
@@ -12,7 +12,7 @@ async function getpublicaciones() {
     }
 }
 
-async function getpublicacionById(id) {
+async function getPublicacionById(id) {
     try{
         // Obtiene la publicacion con el id especificado
         const publicacion = await pool.query('SELECT * FROM "Publicacion" WHERE id_pub = $1', [id]);
@@ -24,7 +24,7 @@ async function getpublicacionById(id) {
     }
 }
 
-async function createpublicacion(publicacionData) {
+async function createPublicacion(publicacionData) {
     try {
         // Inserta una nueva publicacion en la base de datos
         const newpublicacion = await Publicacion.create({
@@ -44,7 +44,7 @@ async function createpublicacion(publicacionData) {
     }
 }
 
-async function updatepublicacion(id, publicacionData) {
+async function updatePublicacion(id, publicacionData) {
     try {
         // Actualiza la publicacion con el id especificado en la base de datos
         const [rowsUpdated, [updatedpublicacion]] = await Publicacion.update({
@@ -67,7 +67,7 @@ async function updatepublicacion(id, publicacionData) {
     }
 }
 
-async function deletepublicacion(id) {
+async function deletePublicacion(id) {
     try {
         // Elimina la publicacion con el id especificado de la base de datos
         const rowsDeleted = await Publicacion.destroy({
@@ -84,9 +84,9 @@ async function deletepublicacion(id) {
 }
 
 module.exports = {
-    getpublicaciones,
-    getpublicacionById,
-    createpublicacion,
-    updatepublicacion,
-    deletepublicacion
+    getPublicacion,
+    getPublicacionById,
+    createPublicacion,
+    updatePublicacion,
+    deletePublicacion
 };

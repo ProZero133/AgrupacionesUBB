@@ -1,11 +1,12 @@
 const fastify = require('../config/configFastify.js');
 
-const { getFormularioById, getFormularios, createFormulario, updateFormulario, deleteFormulario } = require('../controllers/formulario.controller.js');
+const { obtenerFormularios, obtenerFormularioPorId, crearFormulario, actualizarFormulario, eliminarFormulario } = require('../controllers/formulario.controller.js');
 
-module.exports = async function (fastify, opts) {
-    fastify.get('/formularios', getFormularios);
-    fastify.get('/formulario/:id', getFormularioById);
-    fastify.post('/formulario', createFormulario);
-    fastify.put('/formulario/:id', updateFormulario);
-    fastify.delete('/formulario/:id', deleteFormulario);
+module.exports = async function (fastify, opts, done) {
+    fastify.get('/formularios', obtenerFormularios);
+    fastify.get('/formularios/:id', obtenerFormularioPorId);
+    fastify.post('/formularios', crearFormulario);
+    fastify.put('/formularios/:id', actualizarFormulario);
+    fastify.delete('/formularios/:id', eliminarFormulario);
+    done();
 };

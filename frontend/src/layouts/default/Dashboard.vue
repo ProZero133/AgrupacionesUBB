@@ -77,11 +77,7 @@
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
             { name: 'Grupo', icon: 'mdi-account-group', path: '/api/grupo'},
-<<<<<<< HEAD
             {name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
-=======
-            
->>>>>>> 904663c8b3872948470bc8247adfca2d01a93d5b
         ],
     
         user_RUT: '20.999.554-9',

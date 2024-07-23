@@ -1,5 +1,6 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 const { getAgrupaciones } = require('../services/agrupacion.service');
+const { getUsuarioByRut } = require('../services/user.service');
 async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   // Llamar a la base de datos para verificar si el usuario existe
@@ -27,4 +28,22 @@ async function VerGrupos(request, reply) {
 
 }
 }
-module.exports = { EmailLogin, VerGrupos };
+async function obtenerUsuarioPorRut(req, res) {
+  try {
+    const { rut } = req.params;
+
+    // Obtiene el usuario por su rut
+    const usuario = await getUsuarioByRut(rut);
+    if (usuario.length === 0) {
+      return res.send({ success: false, message: 'No se encontró el usuario' });
+    }
+
+    // Retorna el usuario
+    res.code(201).send(usuario);
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al obtener el usuario:', error);
+    res.code(500).send('Error al obtener el usuario');
+  }
+}
+module.exports = { EmailLogin, VerGrupos, obtenerUsuarioPorRut };

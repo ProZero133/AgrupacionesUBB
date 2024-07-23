@@ -1,7 +1,8 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
+const { getUsuarioByRut } = require("../services/user.service.js");
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -95,10 +96,34 @@ async function obtenerImagenAgrupacion(req, res) {
     }
 }
 
+async function unirseAgrupacion(req, res) {
+    try {
+        const rut = req.params.rut;
+        const id_agr = req.params.id_agr;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const result = await createSolicitud(rut, id_agr);
+        if (!result) {
+            return res.code(500).send('Error al enviar solicitud');
+        }
+        res.code(201).send(result);
+    } catch (error) {
+        console.error('Error al enviar solicitud:', error);
+        res.code(500).send('Error al enviar solicitud');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
     crearAgrupacion,
     editarAgrupacion,
     obtenerImagenAgrupacion,
+    unirseAgrupacion
 };

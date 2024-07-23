@@ -26,14 +26,15 @@ async function obtenerUsuariosPlataforma(){
 }
 
 // Busca un usuario en especifico en la plataforma segun su rut
-async function obtenerUsuarioPlataforma(rut){
+async function getUsuarioByRut(req){
     try{
+        const rut = req;
         const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
         return result.rows;
     }
     catch(error){
         console.error('Error en la consulta:', error);
-        return error;
+        return { error: "Ocurrió un error al obtener el usuario por RUT." };
     }
 }
 
@@ -59,4 +60,4 @@ async function registrarUsuario(rut, rol){
     }
 }
 
-module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, registrarUsuario };
+module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario };

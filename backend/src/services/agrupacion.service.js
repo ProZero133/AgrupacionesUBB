@@ -80,11 +80,23 @@ async function getAgrupaciones() {
     }
 
   }
+  async function createSolicitud(rut, id_agr) {
+    try {
+      // Crea una nueva solicitud
+    const rol_agr = 'Pendiente';
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, rol_agr) VALUES ($1, $2, $3) RETURNING *', [rut, id_agr, rol_agr]);
+    return response.rows[0];
+    }
+    catch (error) {
+      console.log('Error al crear la solicitud:', error);
+    }
+  }
 
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
     createAgrupacion,
     updateAgrupacion,
-    getImage
+    getImage,
+    createSolicitud
   };

@@ -20,9 +20,18 @@
             </v-col>
 
             <v-col cols="12">
-              <v-text-field class="descripcionAct" v-model="descripcion" label="Descripción de la actividad" clearable
-                required variant="solo-filled" height="200px">
-              </v-text-field>
+              <v-textarea
+              class="descripcionAct"
+              v-model="descripcion"
+              label="Descripción de la actividad"
+              clearable
+              required
+              variant="solo-filled"
+              rows="10"
+              no-resize
+              :rules="descrules"
+              counter>
+              </v-textarea>
             </v-col>
 
           </v-col>
@@ -85,6 +94,7 @@ export default {
   name: 'HelloWorld',
 
   data: () => ({
+    descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
     nom_act: '',
     descripcion: '',
     imagen: [],
@@ -142,25 +152,27 @@ export default {
 async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
   try {
     // Selecciona el primer archivo de imagen proporcionado
-    const file = imagen[0];
+    //const file = imagen[0];
     // Crea una promesa para convertir la imagen a base64 utilizando FileReader
-    const imagenBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    //const imagenBase64 = await new Promise((resolve, reject) => {
+    //  const reader = new FileReader();
+    //  reader.onloadend = () => {
         // Resuelve la promesa con el resultado de la conversión
-        resolve(reader.result);
-      };
-      reader.onerror = reject;
+    //    resolve(reader.result);
+    //  };
+    //  reader.onerror = reject;
       // Inicia la lectura del archivo como Data URL
-      reader.readAsDataURL(file);
-    });
+    //  reader.readAsDataURL(file);
+    //});
+
+    imagen = "hola"; 
     // Realiza una solicitud fetch a tu backend Fastify
     const response = await fetch('http://localhost:3000/actividades', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ nom_act, descripcion, imagen: imagenBase64, tipo, id_agr }),
+      body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
     });
     // Verifica si la respuesta es exitosa
     if (response.ok) {
@@ -180,7 +192,7 @@ async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
 </script>
 <style>
 .descripcionAct {
-  height: 520px !important;
+  height: 20px !important;
   margin-top: -20px;
   margin-bottom: -260px;
 }

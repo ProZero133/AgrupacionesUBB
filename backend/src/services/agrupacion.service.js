@@ -67,9 +67,24 @@ async function getAgrupaciones() {
     }
   }
 
+  async function getImage(id) {
+    try {
+      // Obtiene la imagen con el id especificado
+      const imagen = await pool.query('SELECT * FROM "Imagenes" WHERE id_imagen = $1', [id]);
+      const imageData = imagen.rows[0].imagen;
+      return imageData;
+    } catch (error) {
+      // Maneja cualquier error que pueda ocurrir
+      console.error('Error al obtener la imagen:', error);
+      throw error;
+    }
+
+  }
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
     createAgrupacion,
-    updateAgrupacion
+    updateAgrupacion,
+    getImage
   };

@@ -21,7 +21,7 @@
             <p>{{ grupo.descripcion }}</p>
             <p>RUT: {{ grupo.rut }}</p>
             <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-            <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
+            <p>Verificado: {{ grupo.verificado}}</p>
             <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
           </v-card-text>
         </v-card>

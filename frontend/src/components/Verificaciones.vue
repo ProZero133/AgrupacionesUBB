@@ -5,7 +5,7 @@
         Agrupaciones Pendientes
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="headers" :items="groups">
+        <v-data-table :headers="headers" :items="AgrupacionesPendientesObtenidas">
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
               <v-btn color="primary" name="Botones">
@@ -21,47 +21,39 @@
 
 <script>
 export default {
-
   name: 'CrearAgrupacion',
   data() {
     return {
-      groupName: '',
-      groupDescription: '',
-      groupType: null,
-      groupTypes: ['Académico', 'Cultural', 'Deportivo'],
+      AgrupacionesPendientesObtenidas: [],
       headers: [
-        { text: 'Nombre del Grupo', value: 'name' },
-        { text: 'Acción', value: 'action', sortable: false },
-      ],
-      groups: [
-        { name: 'UBB' },
-        { name: 'SIM UBB' },
-        { name: 'Futbol UBB' },
-        { name: 'E-sports UBB' },
-        { name: 'Debate' },
+        { text: 'Nombre', value: 'nombre_agr' },
+        { text: 'Descripción', value: 'descripcion' },
+        { text: 'RUT', value: 'rut' },
+        { text: 'Verificado', value: 'verificado' },
+        { text: 'Fecha de verificación', value: 'fecha_verificacion' },
+        { text: 'Acciones', value: 'action', sortable: false },
       ],
     };
   },
   methods: {
-    submitForm() {
-      // Lógica para enviar la solicitud de oficialización
-      console.log('Solicitud enviada:', this.groupName, this.groupDescription, this.groupType);
-    },
-    validateFechaCreacion() {
-      this.validateDate(this.fecha_creacion, this.dateErrors.creacion);
-    },
-    validateFechaVerificacion() {
-      this.validateDate(this.fecha_verificacion, this.dateErrors.verificacion);
-    },
-    validateDate(fecha, errors) {
-      errors = [];
-      for (let rule of this.dateRules) {
-        let result = rule(fecha);
-        if (typeof result === 'string') {
-          this.dateErrors.push(result);
+    async ObtenerAgrupacionesPendientes() {
+      try {
+        const response = await fetch('http://localhost:3000/acreditaciones', {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.AgrupacionesPendientesObtenidas = data;
+        } else {
+          console.error('Error en la respuesta:', response.status);
         }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
       }
     },
+  },
+  mounted() {
+    this.ObtenerAgrupacionesPendientes();
   },
 };
 </script>

@@ -12,9 +12,9 @@ const opcionBodySchema = require("../schema/opcion.schema");
 async function obtenerOpciones(req, res) {
   try {
     const opciones = await opcionService.getOpciones();
-    res.json(opciones);
+    res.send(opciones);
   } catch (error) {
-    res.status(500).send(error.message);
+    res.code(500).send(error.message);
   }
 }
 
@@ -28,9 +28,9 @@ async function obtenerOpcionPorId(req, res) {
     try {
         const id = req.params.id;
         const opcion = await opcionService.getOpcionById(id);
-        res.json(opcion);
+        res.send(opcion);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.code(500).send(error.message);
     }
 }
 
@@ -44,12 +44,12 @@ async function crearOpcion(req, res) {
     try {
         const { error, value } = opcionBodySchema.validate(req.body);
         if (error) {
-        return res.status(400).send(error.message);
+        return res.code(400).send(error.message);
         }
         const opcion = await opcionService.createOpcion(value);
-        res.json(opcion);
+        res.send(opcion);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.code(500).send(error.message);
     }
 }
 
@@ -64,12 +64,12 @@ async function actualizarOpcion(req, res) {
         const id = req.params.id;
         const { error, value } = opcionBodySchema.validate(req.body);
         if (error) {
-        return res.status(400).send(error.message);
+        return res.code(400).send(error.message);
         }
         const opcion = await opcionService.updateOpcion(id, value);
-        res.json(opcion);
+        res.send(opcion);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.code(500).send(error.message);
     }
 }
 
@@ -83,9 +83,9 @@ async function eliminarOpcion(req, res) {
     try {
         const id = req.params.id;
         await opcionService.deleteOpcion(id);
-        res.json({ success: true });
+        res.send({ success: true });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.code(500).send(error.message);
     }
 }
 

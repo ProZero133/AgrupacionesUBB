@@ -51,7 +51,7 @@ export default {
     descripcion: '',
     rut: '',
     fecha_creacion: '',
-    verificado: false,
+    verificado: 'Noverificado',
     fecha_verificacion: null,
 
     dateErrors: {

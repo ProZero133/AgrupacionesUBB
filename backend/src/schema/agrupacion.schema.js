@@ -12,10 +12,10 @@ const agrupacionBodySchema = Joi.object({
         "any.required": "La descripción es obligatoria.",
         "string.base": "La descripción debe ser de tipo string.",
         }),
-    verificado: Joi.bool().required().messages({
-        "bool.empty": "El estado de verificación no puede estar vacío.",
+    verificado: Joi.string().required().valid("Verificado", "Noverificado", "Pendiente").messages({
+        "string.empty": "El estado de verificación no puede estar vacío.",
         "any.required": "El estado de verificación es obligatorio.",
-        "bool.base": "El estado de verificación debe ser de tipo bool.",
+        "string.base": "El estado de verificación debe ser de tipo string.",
         }),
     fecha_verificacion: Joi.date().messages({
         "date.base": "La fecha de verificación debe ser de tipo date.",

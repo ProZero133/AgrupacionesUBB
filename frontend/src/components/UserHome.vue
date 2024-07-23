@@ -84,7 +84,7 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/VerGrupos', {
+        const response = await fetch('http://localhost:3000/agrupaciones', {
           method: 'GET',
         });
 

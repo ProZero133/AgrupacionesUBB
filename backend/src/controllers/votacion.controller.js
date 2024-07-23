@@ -12,9 +12,9 @@ const {votacionBodySchema} = require("../schema/votacion.schema.js");
 const obtenerVotaciones = async (req, res) => {
     try {
         const votaciones = await votacionService.getVotaciones();
-        res.status(200).json(votaciones);
+        res.code(200).send(votaciones);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.code(500).send({message: error.message});
     }
 }
 
@@ -28,9 +28,9 @@ const obtenerVotacionPorId = async (req, res) => {
     try {
         const {id} = req.params;
         const votacion = await votacionService.getVotacionById(id);
-        res.status(200).json(votacion);
+        res.code(200).send(votacion);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.code(500).send({message: error.message});
     }
 }
 
@@ -45,9 +45,9 @@ const crearVotacion = async (req, res) => {
         const {body} = req;
         await votacionBodySchema.validateAsync(body);
         const votacion = await votacionService.createVotacion(body);
-        res.status(201).json(votacion);
+        res.code(201).send(votacion);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.code(500).send({message: error.message});
     }
 }
 
@@ -66,18 +66,18 @@ const actualizarVotacion = async (req, res) => {
         const { error } = votacionBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.details[0].message);
+            return res.code(400).send(error.details[0].message);
         }
 
         // Actualiza la votacion por su id
         const post = await votacionService.updateVotacion(id, req.body);
 
         // Retorna la votacion actualizada
-        res.status(200).json(post);
+        res.code(200).send(post);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la votacion:', error);
-        res.status(500).send('Error al actualizar la votacion');
+        res.code(500).send('Error al actualizar la votacion');
     }
 }
 
@@ -96,11 +96,11 @@ const eliminarVotacion = async (req, res) => {
         await votacionService.deleteVotacion(id);
 
         // Retorna un mensaje de éxito
-        res.status(200).send('Votacion eliminada');
+        res.code(200).send('Votacion eliminada');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la votacion:', error);
-        res.status(500).send('Error al eliminar la votacion');
+        res.code(500).send('Error al eliminar la votacion');
     }
 }
 

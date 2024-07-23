@@ -12,9 +12,9 @@ const { formularioBodySchema } = require("../schema/formulario.schema.js");
 const obtenerFormularios = async (req, res) => {
     try {
         const formularios = await formularioService.getFormularios();
-        return res.status(200).json(formularios);
+        return res.code(200).send(formularios);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.code(500).send({ message: error.message });
     }
 }
 
@@ -28,9 +28,9 @@ const obtenerFormularioPorId = async (req, res) => {
     try {
         const {id} = req.params;
         const formulario = await formularioService.getFormularioById(id);
-        return res.status(200).json(formulario);
+        return res.code(200).send(formulario);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.code(500).send({ message: error.message });
     }
 }
 
@@ -46,9 +46,9 @@ const crearFormulario = async (req, res) => {
         const {body} = req;
         await formularioBodySchema.validateAsync(body);
         const formulario = await formularioService.createFormulario(body);
-        return res.status(201).json(formulario);
+        return res.code(201).send(formulario);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.code(500).send({ message: error.message });
     }
 }
 
@@ -63,12 +63,12 @@ const actualizarFormulario = async (req, res) => {
         const {id} = req.params;
         const {error} = await formularioBodySchema.validateAsync(req.body);
         if (error) {
-            return res.status(400).json({ message: error.message });
+            return res.code(400).send({ message: error.message });
         }
         const formulario = await formularioService.updateFormulario(id, req.body);
-        return res.status(200).json(formulario);
+        return res.code(200).send(formulario);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.code(500).send({ message: error.message });
     }
 }
 
@@ -82,9 +82,9 @@ const eliminarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
         await formularioService.deleteFormulario(id);
-        return res.status(204).json();
+        return res.code(204).send();
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.code(500).send({ message: error.message });
     }
 }
 

@@ -1,12 +1,12 @@
 const fastify = require('../config/configFastify.js');
 
-const { getVotaciones, getVotacionById, createVotacion, updateVotacion, deleteVotacion } = require('../controllers/votacion.controller.js');
+const { obtenerVotaciones, obtenerVotacionPorId, crearVotacion, actualizarVotacion, eliminarVotacion } = require('../controllers/votacion.controller.js');
 
 module.exports = function (fastify, opts, done) {
-    fastify.get('/votaciones', getVotaciones);
-    fastify.get('/votaciones/:id', getVotacionById);
-    fastify.post('/votaciones', createVotacion);
-    fastify.put('/votaciones/:id', updateVotacion);
-    fastify.delete('/votaciones/:id', deleteVotacion);
+    fastify.get('/votaciones', obtenerVotaciones);
+    fastify.get('/votaciones/:id', obtenerVotacionPorId);
+    fastify.post('/votaciones', crearVotacion);
+    fastify.put('/votaciones/:id', actualizarVotacion);
+    fastify.delete('/votaciones/:id', eliminarVotacion);
     done();
 };

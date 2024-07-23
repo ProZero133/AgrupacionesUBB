@@ -1,6 +1,6 @@
 "use strict";
 
-const publicacionService = require("../services/publicacion.service.js");
+const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion, deletePublicacion} = require("../services/publicacion.service.js");
 const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
 
 /**
@@ -9,10 +9,10 @@ const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getpublicaciones(req, res) {
+async function obtenerPublicaciones(req, res) {
     try {
         // Obtiene todas las publicaciones
-        const publicaciones = await publicacionService.getpublicaciones();
+        const publicaciones = await getPublicacion();
 
         // Retorna las publicaciones
         res.status(200).json(publicaciones);
@@ -29,13 +29,13 @@ async function getpublicaciones(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getpublicacionById(req, res) {
+async function obtenerPublicacionesPorId(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
 
         // Obtiene la publicacion por su id
-        const publicacion = await publicacionService.getpublicacionById(id);
+        const publicacion = await getPublicacionById(id);
 
         // Retorna la publicacion
         res.status(200).json(publicacion);
@@ -52,7 +52,7 @@ async function getpublicacionById(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function createpublicacion(req, res) {
+async function crearPublicacion(req, res) {
     try {
         // Valida el cuerpo de la solicitud
         const { error, value } = publicacionBodySchema.validate(req.body);
@@ -62,7 +62,7 @@ async function createpublicacion(req, res) {
         }
 
         // Crea una nueva publicacion
-        const newpublicacion = await publicacionService.createpublicacion(value);
+        const newpublicacion = await createPublicacion(value);
 
         // Retorna la nueva publicacion
         res.status(201).json(newpublicacion);
@@ -79,7 +79,7 @@ async function createpublicacion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function updatepublicacion(req, res) {
+async function actualizarPublicacion(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
@@ -92,7 +92,7 @@ async function updatepublicacion(req, res) {
         }
 
         // Actualiza la publicacion
-        const updatedpublicacion = await publicacionService.updatepublicacion(id, value);
+        const updatedpublicacion = await updatePublicacion(id, value);
 
         // Retorna la publicacion actualizada
         res.status(200).json(updatedpublicacion);
@@ -109,13 +109,13 @@ async function updatepublicacion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function deletepublicacion(req, res) {
+async function eliminarPublicacion(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
 
         // Elimina la publicacion
-        await publicacionService.deletepublicacion(id);
+        await deletePublicacion(id);
 
         // Retorna un mensaje de éxito
         res.status(200).send('Publicacion eliminada');
@@ -127,9 +127,9 @@ async function deletepublicacion(req, res) {
 }
 
 module.exports = {
-    getpublicaciones,
-    getpublicacionById,
-    createpublicacion,
-    updatepublicacion,
-    deletepublicacion
+    obtenerPublicaciones,
+    obtenerPublicacionesPorId,
+    crearPublicacion,
+    actualizarPublicacion,
+    eliminarPublicacion
 };

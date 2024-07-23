@@ -1,13 +1,13 @@
 const fastify = require('../config/configFastify.js');
 
-const { createPost, getPosts, getPostById, updatePost, deletePost } = require('../controllers/post.controller.js');
+const { obtenerPost, obtenerPostPorId, crearPost, actualizarPost, eliminarPost } = require('../controllers/post.controller.js');
 
 module.exports = function (fastify, opts, done) {
-    fastify.post('/posts', createPost);
-    fastify.get('/posts', getPosts);
-    fastify.get('/posts/:id', getPostById);
-    fastify.put('/posts/:id', updatePost);
-    fastify.delete('/posts/:id', deletePost);
+    fastify.get('/post', obtenerPost);
+    fastify.get('/post/:id', obtenerPostPorId);
+    fastify.post('/post', crearPost);
+    fastify.put('/post/:id', actualizarPost);
+    fastify.delete('/post/:id', eliminarPost);
     
     done();
 };

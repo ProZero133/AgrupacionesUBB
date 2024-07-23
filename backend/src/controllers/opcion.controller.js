@@ -1,6 +1,6 @@
 "use strict";
 
-const opcionService = require("../services/opcion.service");
+const {getOpciones, getOpcionById, createOpcion, updateOpcion, deleteOpcion} = require("../services/opcion.service");
 const opcionBodySchema = require("../schema/opcion.schema");
 
 /**
@@ -9,7 +9,7 @@ const opcionBodySchema = require("../schema/opcion.schema");
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getOpciones(req, res) {
+async function obtenerOpciones(req, res) {
   try {
     const opciones = await opcionService.getOpciones();
     res.json(opciones);
@@ -24,7 +24,7 @@ async function getOpciones(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getOpcionById(req, res) {
+async function obtenerOpcionPorId(req, res) {
     try {
         const id = req.params.id;
         const opcion = await opcionService.getOpcionById(id);
@@ -40,7 +40,7 @@ async function getOpcionById(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function createOpcion(req, res) {
+async function crearOpcion(req, res) {
     try {
         const { error, value } = opcionBodySchema.validate(req.body);
         if (error) {
@@ -59,7 +59,7 @@ async function createOpcion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function updateOpcion(req, res) {
+async function actualizarOpcion(req, res) {
     try {
         const id = req.params.id;
         const { error, value } = opcionBodySchema.validate(req.body);
@@ -79,7 +79,7 @@ async function updateOpcion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function deleteOpcion(req, res) {
+async function eliminarOpcion(req, res) {
     try {
         const id = req.params.id;
         await opcionService.deleteOpcion(id);
@@ -90,9 +90,9 @@ async function deleteOpcion(req, res) {
 }
 
 module.exports = {
-  getOpciones,
-  getOpcionById,
-  createOpcion,
-  updateOpcion,
-  deleteOpcion,
+    obtenerOpciones,
+    obtenerOpcionPorId,
+    crearOpcion,
+    actualizarOpcion,
+    eliminarOpcion
 };

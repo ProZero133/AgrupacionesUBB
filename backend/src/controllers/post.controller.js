@@ -1,6 +1,6 @@
 "use strict";
 
-const postService = require("../services/post.service");
+const {getPosts, getPostById, createPost, updatePost, deletePost} = require("../services/post.service");
 const { postBodySchema } = require("../schema/post.schema.js");
 
 /**
@@ -9,7 +9,7 @@ const { postBodySchema } = require("../schema/post.schema.js");
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getPosts(req, res) {
+async function obtenerPosts(req, res) {
     try {
         // Obtiene todas los posts
         const posts = await postService.getPosts();
@@ -29,7 +29,7 @@ async function getPosts(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getPostById(req, res) {
+async function obtenerPostPorId(req, res) {
     try {
         // Obtiene el id del post
         const { id } = req.params;
@@ -52,7 +52,7 @@ async function getPostById(req, res) {
  * @param {Object} res - Objeto de respuesta
 */
 
-async function createPost(req, res) {
+async function crearPost(req, res) {
     try {
         // Valida el cuerpo de la petición
         const { error } = postBodySchema.validate(req.body);
@@ -79,7 +79,7 @@ async function createPost(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function updatePost(req, res) {
+async function actualizarPost(req, res) {
     try {
         // Obtiene el id del post
         const { id } = req.params;
@@ -109,7 +109,7 @@ async function updatePost(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function deletePost(req, res) {
+async function eliminarPost(req, res) {
     try {
         // Obtiene el id del post
         const { id } = req.params;
@@ -128,9 +128,9 @@ async function deletePost(req, res) {
 
 // Exporta los métodos del controlador
 module.exports = {
-    getPosts,
-    getPostById,
-    createPost,
-    updatePost,
-    deletePost
+    obtenerPosts,
+    obtenerPostPorId,
+    crearPost,
+    actualizarPost,
+    eliminarPost
 };

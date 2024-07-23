@@ -55,6 +55,11 @@ const routes = [
           name: 'Buscador Agrupaciones',
           component: () => import('@/views/BuscadorAgrupacionesView.vue'),
         },
+        {
+          path: 'solicitudes_agrupacion/:id_agr',
+          name: 'Solicitudes Agrupacion',
+          component: () => import('@/views/SolicitudesAgrupacionView.vue'),
+        }
         
       ],
     },

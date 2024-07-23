@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -119,11 +119,51 @@ async function unirseAgrupacion(req, res) {
     }
 }
 
+async function solicitudesAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const result = await getSolicitudes(id_agr);
+        if (result.length === 0) {
+            return res.code(404).send('No hay solicitudes pendientes');
+        }
+        res.code(200).send(result);
+    } catch (error) {
+        console.error('Error al obtener solicitudes:', error);
+        res.code(500).send('Error al obtener solicitudes');
+
+    }
+}
+
+async function aceptarSolicitud(req, res) {
+    try {
+        const rut = req.params.rut;
+        const id_agr = req.params.id_agr;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const result = await updateSolicitud(rut, id_agr);
+        if (!result) {
+            return res.code(500).send('Error al aceptar la solicitud');
+        }
+    }
+    catch (error) {
+        console.error('Error al aceptar la solicitud:', error);
+        res.code(500).send('Error al aceptar la solicitud');
+    }
+}
+
 module.exports = {
-    VerGrupos,
-    ObtenerAgrupacionesPorID,
-    crearAgrupacion,
-    editarAgrupacion,
-    obtenerImagenAgrupacion,
-    unirseAgrupacion
-};
+        VerGrupos,
+        ObtenerAgrupacionesPorID,
+        crearAgrupacion,
+        editarAgrupacion,
+        obtenerImagenAgrupacion,
+        unirseAgrupacion,
+        solicitudesAgrupacion,
+        aceptarSolicitud
+    };

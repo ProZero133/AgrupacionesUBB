@@ -18,21 +18,21 @@ async function getOpcionById(id) {
     }
 }
 
-async function createOpcion(opcion) {
-    const { nombre, pregunta_id } = opcion;
+async function createOpcion(opcionData) {
     try {
-        const newOpcion = await pool.query('INSERT INTO Opcion (nombre, pregunta_id) VALUES ($1, $2) RETURNING *', [nombre, pregunta_id]);
+        //Arma la consulta SQL para insertar una opcion
+        const newOpcion = await pool.query('INSERT INTO Opcion (nombre, resultado) VALUES ($1, $2) RETURNING *', [nombre, resultado]);
         return newOpcion.rows[0];
     } catch (error) {
         console.error(error);
     }
 }    
 
-async function updateOpcion(id, opcion) {
-    const { nombre, pregunta_id } = opcion;
+async function updateOpcion(id, opcionData) {
     try {
-        const updatedOpcion = await pool.query('UPDATE Opcion SET nombre = $1, pregunta_id = $2 WHERE id = $3 RETURNING *', [nombre, pregunta_id, id]);
-        return updatedOpcion.rows[0];
+        const { nombre, resultado } = opcionData;
+        const updateOpcion = await pool.query('UPDATE Opcion SET nombre = $1, resultado = $2 WHERE id = $3 RETURNING *', [nombre, resultado, id]);
+        return updateOpcion.rows[0];
     } catch (error) {
         console.error(error);
     }

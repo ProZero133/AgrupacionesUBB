@@ -27,14 +27,8 @@ async function getPublicacionById(id) {
 async function createPublicacion(publicacionData) {
     try {
         // Inserta una nueva publicacion en la base de datos
-        const newpublicacion = await Publicacion.create({
-            encabezado: publicacion.encabezado,
-            imaPub: publicacion.imaPub,
-            id_agr: publicacion.id_agr,
-            RUT: publicacion.RUT,
-            fecha_publicacion: publicacion.fecha_publicacion
-        });
-
+        const newpublicacion = await pool.query('INSERT INTO "Publicacion" (encabezado, imaPub, id_agr, RUT, fecha_publicacion) VALUES ($1, $2, $3, $4, $5) RETURNING *', [publicacionData.encabezado, publicacionData.imaPub, publicacionData.id_agr, publicacionData.RUT, publicacionData.fecha_publicacion]);
+        
         // Retorna la nueva publicacion
         return newpublicacion;
     } catch (error) {
@@ -46,20 +40,21 @@ async function createPublicacion(publicacionData) {
 
 async function updatePublicacion(id, publicacionData) {
     try {
-        // Actualiza la publicacion con el id especificado en la base de datos
-        const [rowsUpdated, [updatedpublicacion]] = await Publicacion.update({
-            encabezado: publicacion.encabezado,
-            imaPub: publicacion.imaPub,
-            id_agr: publicacion.id_agr,
-            RUT: publicacion.RUT,
-            fecha_publicacion: publicacion.fecha_publicacion
-        }, {
-            where: { id: id },
-            returning: true
-        });
-
+        // construye la consulta SQL para actualizar la publicacion
+        const consulta = 'UPDATE "Publicacion" SET encabezado = $1, imaPub = $2, id_agr = $3, RUT = $4, fecha_publicacion = $5 WHERE id = $6 RETURNING *';
+        const valores = [publicacionData.encabezado, publicacionData.imaPub, publicacionData.id_agr, publicacionData.RUT, publicacionData.fecha_publicacion, id];
+        
+        // Ejecuta la consulta SQL y actualiza la publicacion
+        const resultado = await pool.query(consulta, valores);
+        
+        // Chequea si la publicacion se encontró y se actualizó
+        if (resultado.rows.length === 0) {
+            throw new Error('Publicacion no se encontró o no se hicieron cambios.');
+        }
+        
         // Retorna la publicacion actualizada
-        return updatedpublicacion;
+        const updatedPublicacion = resultado.rows[0];
+        return updatedPublicacion;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la publicacion:', error);
@@ -69,13 +64,16 @@ async function updatePublicacion(id, publicacionData) {
 
 async function deletePublicacion(id) {
     try {
-        // Elimina la publicacion con el id especificado de la base de datos
-        const rowsDeleted = await Publicacion.destroy({
-            where: { id: id }
-        });
-
-        // Retorna la cantidad de filas eliminadas
-        return rowsDeleted;
+        // Construye la consulta SQL para eliminar la publicacion
+        const consulta = 'DELETE FROM "Publicacion" WHERE id = $1 RETURNING *';
+        const valor = [id];
+        
+        // Ejecuta la consulta SQL y elimina la publicacion
+        const resultado = await pool.query(consulta, valor);
+        
+        // Retorna el numero de filas eliminadas
+        const publicacionEliminada = resultado.rowCount;
+        return publicacionEliminada;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la publicacion:', error);

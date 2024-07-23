@@ -26,14 +26,12 @@ async function getPostById(id) {
 
 async function createPost(postData) {
     try {
-        // Inserta una nuevo post en la base de datos
-        const newPost = await Post.create({
-            id_pub: post.id_pub,
-            encabezado: post.encabezado,
-        });
-
-        // Retorna el nuevo post
-        return newPost;
+        // Arma la consulta SQL para insertar un post
+        const query = 'INSERT INTO "Post" (id_pub, encabezado) VALUES ($1, $2) RETURNING *';
+        // Inserta un nuevo post en la base de datos
+        const newPost = await pool.query(query, [postData.id_pub, postData.encabezado]);
+        // Retorna el nuevo post creado
+        return newPost.rows[0];
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar el post:', error);
@@ -43,17 +41,12 @@ async function createPost(postData) {
 
 async function updatePost(id, postData) {
     try {
+        // Arma la consulta SQL para actualizar un post
+        const query = 'UPDATE "Post" SET encabezado = $1 WHERE id_pub = $2 RETURNING *';
         // Actualiza el post con el id especificado en la base de datos
-        const [rowsUpdated, [updatedpost]] = await Post.update({
-            id_pub: postData.id_pub,
-            encabezado: postData.encabezado,
-        }, {
-            where: { id: id },
-            returning: true
-        });
-
+        const updatedPost = await pool.query(query, [postData.encabezado, id]);
         // Retorna el post actualizado
-        return updatedpost;
+        return updatedPost.rows[0];
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar el post:', error);
@@ -63,13 +56,13 @@ async function updatePost(id, postData) {
 
 async function deletePost(id) {
     try {
+        // Arma la consulta SQL para eliminar un post
+        const query = 'DELETE FROM "Post" WHERE id_pub = $1';
         // Elimina el post con el id especificado de la base de datos
-        const rowsDeleted = await Post.destroy({
-            where: { id: id }
-        });
-
-        // Retorna la cantidad de filas eliminadas
-        return rowsDeleted;
+        const resultado = await pool.query(query, [id]);
+        // Retorna el numero de filas eliminadas
+        const postEliminado = resultado.rowCount;
+        return postEliminado;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar el post:', error);

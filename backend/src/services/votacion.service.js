@@ -27,12 +27,9 @@ async function getVotacionById(id) {
 async function createVotacion(votacionData) {
     try {
         // Inserta una nueva votacion en la base de datos
-        const newVotacion = await Votacion.create({
-            id_pub: votacion.id_pub,
-            descripcion: votacion.descripcion,
-        });
+        const newVotacion = await pool.query('INSERT INTO "Votacion" (id_pub, descripcion) VALUES ($1, $2) RETURNING *', [votacionData.id_pub, votacionData.descripcion]);
 
-        // Retorna la nueva publicacion
+        // Retorna la votacion recién creada
         return newVotacion;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
@@ -43,17 +40,12 @@ async function createVotacion(votacionData) {
 
 async function updateVotacion(id, votacionData) {
     try {
+        //Arma la consulta SQL para actualizar la votacion
+        const query = 'UPDATE "Votacion" SET id_pub = $1, descripcion = $2 WHERE id = $3 RETURNING *';
         // Actualiza la votacion con el id especificado en la base de datos
-        const [rowsUpdated, [updatedvotacion]] = await Votacion.update({
-            id_pub: votacionData.id_pub,
-            descripcion: votacionData.descripcion,
-        }, {
-            where: { id: id },
-            returning: true
-        });
-
+        const updatedVotacion = await pool.query(query, [votacionData.id_pub, votacionData.descripcion, id]);
         // Retorna la votacion actualizada
-        return updatedvotacion;
+        return updatedVotacion;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la votacion:', error);
@@ -63,13 +55,10 @@ async function updateVotacion(id, votacionData) {
 
 async function deleteVotacion(id) {
     try {
-        // Elimina la votacion con el id especificado de la base de datos
-        const rowsDeleted = await Votacion.destroy({
-            where: { id: id }
-        });
-
-        // Retorna la cantidad de filas eliminadas
-        return rowsDeleted;
+        // Elimina la votacion con el id especificado
+        const deletedVotacion = await pool.query('DELETE FROM "Votacion" WHERE id = $1 RETURNING *', [id]);
+        // Retorna la votacion eliminada
+        return deletedVotacion;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la votacion:', error);

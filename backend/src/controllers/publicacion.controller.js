@@ -15,11 +15,11 @@ async function obtenerPublicaciones(req, res) {
         const publicaciones = await getPublicacion();
 
         // Retorna las publicaciones
-        res.status(200).json(publicaciones);
+        res.code(200).send(publicaciones);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener las publicaciones:', error);
-        res.status(500).send('Error al obtener las publicaciones');
+        res.code(500).send('Error al obtener las publicaciones');
     }
 }
 
@@ -38,11 +38,11 @@ async function obtenerPublicacionesPorId(req, res) {
         const publicacion = await getPublicacionById(id);
 
         // Retorna la publicacion
-        res.status(200).json(publicacion);
+        res.code(200).send(publicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la publicacion:', error);
-        res.status(500).send('Error al obtener la publicacion');
+        res.code(500).send('Error al obtener la publicacion');
     }
 }
 
@@ -58,18 +58,18 @@ async function crearPublicacion(req, res) {
         const { error, value } = publicacionBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.message);
+            return res.code(400).send(error.message);
         }
 
         // Crea una nueva publicacion
         const newpublicacion = await createPublicacion(value);
 
         // Retorna la nueva publicacion
-        res.status(201).json(newpublicacion);
+        res.code(201).send(newpublicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la publicacion:', error);
-        res.status(500).send('Error al insertar la publicacion');
+        res.code(500).send('Error al insertar la publicacion');
     }
 }
 
@@ -88,18 +88,18 @@ async function actualizarPublicacion(req, res) {
         const { error, value } = publicacionBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.message);
+            return res.code(400).send(error.message);
         }
 
         // Actualiza la publicacion
         const updatedpublicacion = await updatePublicacion(id, value);
 
         // Retorna la publicacion actualizada
-        res.status(200).json(updatedpublicacion);
+        res.code(200).json(updatedpublicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la publicacion:', error);
-        res.status(500).send('Error al actualizar la publicacion');
+        res.code(500).send('Error al actualizar la publicacion');
     }
 }
 
@@ -118,11 +118,11 @@ async function eliminarPublicacion(req, res) {
         await deletePublicacion(id);
 
         // Retorna un mensaje de éxito
-        res.status(200).send('Publicacion eliminada');
+        res.code(200).send('Publicacion eliminada');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la publicacion:', error);
-        res.status(500).send('Error al eliminar la publicacion');
+        res.code(500).send('Error al eliminar la publicacion');
     }
 }
 

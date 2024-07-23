@@ -12,14 +12,14 @@ const { postBodySchema } = require("../schema/post.schema.js");
 async function obtenerPosts(req, res) {
     try {
         // Obtiene todas los posts
-        const posts = await postService.getPosts();
+        const posts = await getPosts();
 
         // Retorna las publicaciones
-        res.status(200).json(posts);
+        res.code(201).send(posts);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener los posts:', error);
-        res.status(500).send('Error al obtener los posts');
+        res.code(500).send('Error al obtener los posts');
     }
 }
 
@@ -35,14 +35,14 @@ async function obtenerPostPorId(req, res) {
         const { id } = req.params;
 
         // Obtiene el post por su id
-        const post = await postService.getPostById(id);
+        const post = await getPostById(id);
 
         // Retorna el post
-        res.status(200).json(post);
+        res.code(200).send(post);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener el post:', error);
-        res.status(500).send('Error al obtener el post');
+        res.code(500).send('Error al obtener el post');
     }
 }
 
@@ -58,18 +58,18 @@ async function crearPost(req, res) {
         const { error } = postBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.details[0].message);
+            return res.code(400).send(error.details[0].message);
         }
 
         // Crea un nuevo post
-        const post = await postService.createPost(req.body);
+        const post = await createPost(req.body);
 
         // Retorna el post creado
-        res.status(201).json(post);
+        res.code(201).send(post);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al crear el post:', error);
-        res.status(500).send('Error al crear el post');
+        res.code(500).send('Error al crear el post');
     }
 }
 
@@ -88,18 +88,18 @@ async function actualizarPost(req, res) {
         const { error } = postBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.details[0].message);
+            return res.code(400).send(error.details[0].message);
         }
 
         // Actualiza el post por su id
-        const post = await postService.updatePost(id, req.body);
+        const post = await updatePost(id, req.body);
 
         // Retorna el post actualizado
-        res.status(200).json(post);
+        res.code(200).send(post);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar el post:', error);
-        res.status(500).send('Error al actualizar el post');
+        res.code(500).send('Error al actualizar el post');
     }
 }
 
@@ -115,14 +115,14 @@ async function eliminarPost(req, res) {
         const { id } = req.params;
 
         // Elimina el post por su id
-        await postService.deletePost(id);
+        await deletePost(id);
 
         // Retorna un mensaje de éxito
-        res.status(204).send();
+        res.code(204).send();
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar el post:', error);
-        res.status(500).send('Error al eliminar el post');
+        res.code(500).send('Error al eliminar el post');
     }
 }
 

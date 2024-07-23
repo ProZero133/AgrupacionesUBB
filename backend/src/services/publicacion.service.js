@@ -27,7 +27,7 @@ async function getPublicacionById(id) {
 async function createPublicacion(publicacionData) {
     try {
         // Inserta una nueva publicacion en la base de datos
-        const newpublicacion = await pool.query('INSERT INTO "Publicacion" (encabezado, imaPub, id_agr, RUT, fecha_publicacion) VALUES ($1, $2, $3, $4, $5) RETURNING *', [publicacionData.encabezado, publicacionData.imaPub, publicacionData.id_agr, publicacionData.RUT, publicacionData.fecha_publicacion]);
+        const newpublicacion = await pool.query('INSERT INTO "Publicacion" (encabezado, imagen, id_agr, rut, fecha_publicacion) VALUES ($1, $2, $3, $4, $5) RETURNING *', [publicacionData.encabezado, publicacionData.imagen, publicacionData.id_agr, publicacionData.rut, publicacionData.fecha_publicacion]);
         
         // Retorna la nueva publicacion
         return newpublicacion;
@@ -41,7 +41,7 @@ async function createPublicacion(publicacionData) {
 async function updatePublicacion(id, publicacionData) {
     try {
         // construye la consulta SQL para actualizar la publicacion
-        const consulta = 'UPDATE "Publicacion" SET encabezado = $1, imaPub = $2, id_agr = $3, RUT = $4, fecha_publicacion = $5 WHERE id = $6 RETURNING *';
+        const consulta = 'UPDATE "Publicacion" SET encabezado = $1, imagen = $2, id_agr = $3, RUT = $4, fecha_publicacion = $5 WHERE id = $6 RETURNING *';
         const valores = [publicacionData.encabezado, publicacionData.imaPub, publicacionData.id_agr, publicacionData.RUT, publicacionData.fecha_publicacion, id];
         
         // Ejecuta la consulta SQL y actualiza la publicacion

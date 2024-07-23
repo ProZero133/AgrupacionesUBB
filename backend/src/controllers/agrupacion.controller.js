@@ -24,7 +24,7 @@ async function ObtenerAgrupacionesPorID(req, res) {
         const agrupacion = await getAgrupacionById(id);
 
         // Retorna la agrupacion
-        res.status(200).json(agrupacion);
+        res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la agrupacion:', error);

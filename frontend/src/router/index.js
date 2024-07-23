@@ -49,7 +49,12 @@ const routes = [
           path: 'grupo',
           name: 'Grupo',
           component: () => import('@/views/GrupoView.vue'),
-        }
+        },
+        {
+          path: 'buscador_agrupaciones',
+          name: 'Buscador Agrupaciones',
+          component: () => import('@/views/BuscadorAgrupaciones.vue'),
+        },
       ],
     },
 ]

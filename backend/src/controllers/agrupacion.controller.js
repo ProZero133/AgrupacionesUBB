@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 
 async function VerGrupos(request, reply) {
@@ -65,7 +65,7 @@ async function editarAgrupacion(req, res) {
 
         if (error) {
             // Retorna un error si el cuerpo de la solicitud es inválido
-            res.status(400).send(error.message);
+            res.code(400).send(error.message);
             return;
         }
 
@@ -73,11 +73,25 @@ async function editarAgrupacion(req, res) {
         const agrupacion = await updateAgrupacion(id, req.body);
 
         // Retorna la agrupacion actualizada
-        res.status(200).json(agrupacion);
+        res.code(200).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la agrupacion:', error);
-        res.status(500).send('Error al actualizar la agrupacion');
+        res.code(500).send('Error al actualizar la agrupacion');
+    }
+}
+async function obtenerImagenAgrupacion(req, res) {
+    try {
+        const id = req.params.id;
+        const idImagenAgrupacion = await getAgrupacionById(id);
+        const imagen = await getImage(idImagenAgrupacion.rows[0].imagen);
+        if (!idImagenAgrupacion) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        res.code(200).send(imagen);
+    } catch (error) {
+        console.error('Error al obtener la imagen de la agrupación:', error);
+        res.code(500).send('Error al obtener la imagen de la agrupación');
     }
 }
 
@@ -85,5 +99,6 @@ module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
     crearAgrupacion,
-    editarAgrupacion
+    editarAgrupacion,
+    obtenerImagenAgrupacion,
 };

@@ -8,13 +8,13 @@
         <v-card-title class="pasando">
             <span class="text-h4 textopasando">Qué está pasando?</span>
           </v-card-title>
-        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
+        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px" v-on:click="iragGrupo(actividad.id_agr)" >
           <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='urlImagen' />
+                <v-img class="image" aspect-ratio="1" :src=actividad.imagen />
               </v-col>
               <v-col cols="7">
                 <p>{{ actividad.descripcion }}</p>
@@ -168,6 +168,28 @@ export default {
           console.log("actividades:");
           console.log(data);
           this.actividades = data;
+
+          for (const imagenes of this.actividades){
+            try {
+              const responde = await fetch('http://localhost:3000/imagen/'+imagenes.imagen, {
+                method: 'GET',
+              });
+              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                console.log("dataImagen");
+                console.log(dataImagen);
+                imagenes.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+
+            }
+            catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }

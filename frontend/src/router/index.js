@@ -59,6 +59,11 @@ const routes = [
           path: 'solicitudes_agrupacion/:id_agr',
           name: 'Solicitudes Agrupacion',
           component: () => import('@/views/SolicitudesAgrupacionView.vue'),
+        },
+        {
+         path: 'perfil',
+          name: 'Perfil',
+          component: () => import('@/views/PerfilUsuarioView.vue'), 
         }
         
       ],

@@ -160,8 +160,6 @@ import { mergeProps } from 'vue';
               //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
               if (responde.ok) {
                 const dataImagen = await responde.text();
-                console.log("dataImagen");
-                console.log(dataImagen);
                 imagenes.imagen = dataImagen;
               } else {
                 console.error('Error en la respuesta:', responde.status);

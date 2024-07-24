@@ -3,7 +3,7 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-card class="mx-auto px-6 py-8" max-width="800">
-      <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo)" fast-fail class="form"
+      <v-form @submit.prevent="CreaPublicacion(nom_pub, descripcion, imagen, tipo)" fast-fail class="form"
         ref="formulario">
         <v-row>
           <v-spacer></v-spacer>
@@ -24,7 +24,7 @@
           <v-col cols="12" md="7">
 
             <v-col cols="12">
-              <v-text-field v-model="nom_act" label="Nombre de la publicación" clearable required
+              <v-text-field v-model="nom_pub" label="Nombre de la publicación" clearable required
                 variant="solo-filled"></v-text-field>
             </v-col>
 
@@ -62,34 +62,49 @@
 
         </v-row>
 
-        <v-row v-if="tipo == 'Votación'" class="ml-3" v-for="opcion in opciones" :key="opcion.id">
+    <template v-if="tipo == 'Votación'">
+
+      <v-col cols="12" justify="center" class="title-card mt-3 mb-4">
+        <h1 class="texto">Opciones</h1>
+        <p class="text-left">Ingresa valores para las opciones de la votación.</p>
+      </v-col>
+
+      <template v-for = "(opcion, index) in opciones">
+        <v-row v-if="tipo == 'Votación'" class="ml-3">
           <v-col cols="12" md="1">
             <v-checkbox-btn class="mt-2"
-              v-model="includeFiles"
+              disabled
             ></v-checkbox-btn>
           </v-col>
 
           <v-col cols="12" md="8">
             <v-text-field
-              :label="opcion.label"
+              :label="'Opción ' + (index+1)"
+              v-model="opciones[index]"
               hide-details
             ></v-text-field>
           </v-col>
 
           <v-col cols="12" md="2" class="ml-3 mt-2" color="warning">
-            <v-btn>
+            <v-btn @click="deleteOption(index)" :disabled="this.opciones.length < 2">
               ELIMINAR
             </v-btn>
           </v-col>
         </v-row>
+      </template>
+
+      <v-container>
+        <button type="button" @click="addOption" class="ml-6 mt-2"><p style="color:#2CA2DC"><b>+ Añadir opción</b></p></button>
+      </v-container>
+    
+    </template>
+
+      <v-col cols="4">
+        <v-btn :disabled="disabledForm()" class="form-submit mb-n5" type="submit">Crear publicación</v-btn>
+      </v-col>
 
       </v-form>
 
-      <v-form>
-        <v-col cols="4">
-          <v-btn class="form-submit mb-n5 mt-2" type="submit" color="#2CA2DC">Crear publicación</v-btn>
-        </v-col>
-      </v-form>
     </v-card>
   </v-container>
 </template>
@@ -111,7 +126,7 @@ export default {
 
   data: () => ({
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
-    nom_act: '',
+    nom_pub: '',
     descripcion: '',
     imagen: [],
     tipo: 'Post',
@@ -119,13 +134,30 @@ export default {
     defaultImageUrl: addImage,
     urlImagen: addImage,
     idImagen: '',
-    opciones: [
-        { id: 1, label: 'Cosito' },
-        { id: 2, label: 'Cosita' },
-      ],
-    opcionesCounter: 2,
+    opciones: ['Si','No'],
+    pubId: 0,
   }),
   methods: {
+    formSubmit() {
+      if (this.tipo === 'Votación') {
+        this.CreaPublicacion();
+      } else {
+        console.log('que');
+      }
+    },
+    disabledForm() {
+      if (this.tipo === 'Votación' && (this.opciones.length < 2 || this.opciones.includes('') || this.opciones.length > 13)) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    deleteOption(index){
+      this.opciones.splice(index, 1);
+    },
+    addOption() {
+      this.opciones.push('');
+    },
     createImage(file) {
       const reader = new FileReader();
 
@@ -219,9 +251,14 @@ async PostearImagen() {
   }
 },
 
-  async CreaActividad(nom_act, descripcion, imagen, tipo) {
+  async CreaPublicacion() {
+
+    const today = new Date().toISOString();
+
     await this.PostearImagen();
-    if (this.idImagen === '') {
+    if (//this.idImagen === ''
+    false
+    ) {
       console.error('Error al subir la imagen');
       this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
       return;
@@ -231,38 +268,38 @@ async PostearImagen() {
       console.log(this.idImagen);
       try {
 
-          // Selecciona el primer archivo de imagen proporcionado
-          //const file = imagen[0];
-          // Crea una promesa para convertir la imagen a base64 utilizando FileReader
-          //const imagenBase64 = await new Promise((resolve, reject) => {
-          //  const reader = new FileReader();
-          //  reader.onloadend = () => {
-          // Resuelve la promesa con el resultado de la conversión
-          //    resolve(reader.result);
-          //  };
-          //  reader.onerror = reject;
-            // Inicia la lectura del archivo como Data URL
-          //  reader.readAsDataURL(file);
-          //});
-
-          imagen = "hola"; 
-          //console.log(this.urlImagen);
-          // Realiza una solicitud fetch a tu backend Fastify
-          const response = await fetch('http://localhost:3000/actividades', {
+          console.log("json");
+          console.log(JSON.stringify({
+            encabezado: this.nom_pub,
+            imagen: this.idImagen,
+            id_agr: this.groupId,
+            rut: '20.999.554-9',
+            fecha_publicacion: today
+          }));
+          const response = await fetch('http://localhost:3000/publicaciones', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId }),
+            body: JSON.stringify({
+              encabezado: this.nom_pub,
+              imagen: 3,
+              id_agr: this.groupId,
+              rut: '20.999.554-9',
+              fecha_publicacion: today}),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
             // Convierte la respuesta en formato JSON
-            const data = await response.json();
+            this.pubId = await response.json();
+            console.log("Publicación creada");
+            console.log(this.pubId);
+            // Luego de eso, aca hay que poner el codigo para subir las opciones de la votación. Pendiente.
             this.$router.push(`/api/grupo/${this.groupId}`);
-            this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
+            this.$root.showSnackBar('success', data.id_pub, 'Publicada con éxito!');
             } else {
               console.error('Error en la respuesta:', response.status);
+              console.log(response)
             }
       } catch (error) {
         console.error('Error al hacer fetch:', error);

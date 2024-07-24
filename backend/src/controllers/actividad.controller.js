@@ -1,85 +1,72 @@
-"use strict";
 
-const actividadService = require("../services/actividad.service.js");
-const { actividadBodySchema, actividadId } = require("../schema/actividad.schema.js");
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad } = require('../services/actividad.service');
+const { actividadBodySchema } = require('../schema/actividad.schema.js');
 
-/**
- * Obtiene todas las actividades
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getActividades(req, res) {
-    try {
-        // Obtiene todas las actividades
-        const actividades = await actividadService.getActividades();
-
-        // Retorna las actividades
-        res.status(200).json(actividades);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las actividades:', error);
-        res.status(500).send('Error al obtener las actividades');
+async function ObtenerActividades(req, res) {
+    const respuesta = await getActividades();
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
     }
 }
 
-/**
- * Obtiene una actividad por su id
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getActividadById(req, res) {
-    try {
-        // Obtiene el id de la actividad
-        const id = req.params.id;
-
-        // Obtiene la actividad por su id
-        const actividad = await actividadService.getActividadById(id);
-
-        // Retorna la actividad
-        res.status(200).json(actividad);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener la actividad:', error);
-        res.status(500).send('Error al obtener la actividad');
+async function ObtenerActividadPorID(req, res) {
+    const respuesta = await getActividadById(req.params.id);
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
     }
 }
 
-/**
- * Crea una nueva actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+async function ObtenerActividadesPorAgrupacion(req, res) {
+    const respuesta = await getActividadesByAgrupacion(req.params.id_agr);
+    if (respuesta.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(respuesta);
+    }
+}
 
-async function createActividad(req, res) {
+async function crearActividad(req, reply) {
     try {
         // Valida el cuerpo de la solicitud
-        const { error, value } = actividadBodySchema.validate(req.body);
-
+        
+        const { body } = req;
+        const { error, value } = actividadBodySchema.validate(body);
+        
+        // No es necesario convertir la imagen de base64 a hexadecimal
+        // Si la imagen está en base64 y es una cadena, se puede dejar tal cual
+        if (body.imagen && typeof body.imagen === 'string') {
+            console.log("Imagen recibida en base64");
+        }
+        
         if (error) {
+            console.log("Error en la validación");
+            console.log(error.details.map(detail => detail.message));
             // Si hay un error, retorna un error de validación
-            res.status(400).send(error.message);
+            reply.code(400).send(error.details.map(detail => detail.message));
             return;
         }
+        console.log("Validacion exitosa, Creando actividad");
 
         // Crea una nueva actividad
-        const actividad = await actividadService.createActividad(value);
+        const actividad = await createActividad(body);
 
         // Retorna la nueva actividad
-        res.status(201).json(actividad);
+        reply.code(201).send(actividad);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la actividad:', error);
-        res.status(500).send('Error al insertar la actividad');
+        reply.code(500).send('Error al insertar la actividad');
     }
 }
 
-/**
- * Actualiza una actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+
 
 async function updateActividad(req, res) {
     try {
@@ -107,11 +94,6 @@ async function updateActividad(req, res) {
     }
 }
 
-/**
- * Elimina una actividad
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
 
 async function deleteActividad(req, res) {
     try {
@@ -131,9 +113,10 @@ async function deleteActividad(req, res) {
 }
 
 module.exports = {
-    getActividades,
-    getActividadById,
-    createActividad,
+    ObtenerActividades,
+    ObtenerActividadPorID,
+    crearActividad,
     updateActividad,
-    deleteActividad
+    deleteActividad,
+    ObtenerActividadesPorAgrupacion
 };

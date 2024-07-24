@@ -1,13 +1,15 @@
 const fastify = require('../config/configFastify.js');
 
-const actividadController = require('../controllers/actividad.controller.js');
+const {ObtenerActividadPorID, ObtenerActividades, crearActividad, updateActividad, deleteActividad} = require('../controllers/actividad.controller.js');
 
-const app = fastify;
 
-app.get('/actividades', actividadController.getActividades);
-app.get('/actividades/:id', actividadController.getActividadById);
-app.post('/actividades', actividadController.createActividad);
-app.put('/actividades/:id', actividadController.updateActividad);
-app.delete('/actividades/:id', actividadController.deleteActividad);
+module.exports = function(fastify, options, done) {
+    
+    fastify.get('/actividades', ObtenerActividades);
+    fastify.get('/actividades/:id', ObtenerActividadPorID);
+    fastify.post('/actividades', crearActividad);
+    fastify.put('/actividades/:id', updateActividad);
+    fastify.delete('/actividades/:id', deleteActividad);
 
-module.exports = actividadRoutes;
+done();
+  };

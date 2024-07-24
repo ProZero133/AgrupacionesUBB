@@ -1,44 +1,30 @@
 "use strict";
 
-const agrupacionService = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 
-/**
- * Obtiene todas las agrupaciones
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
+async function VerGrupos(request, reply) {
+    const agrupaciones = await getAgrupaciones();
+    if (agrupaciones.length === 0) {
+        return reply.send({ success: false, message: 'No se encontraron agrupaciones' });
+    }
+    else {
 
-async function getAgrupaciones(req, res) {
-    try {
-        // Obtiene todas las agrupaciones
-        const agrupaciones = await agrupacionService.getAgrupaciones();
+        return reply.send(agrupaciones);
 
-        // Retorna las agrupaciones
-        res.status(200).json(agrupaciones);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las agrupaciones:', error);
-        res.status(500).send('Error al obtener las agrupaciones');
     }
 }
 
-/**
- * Obtiene una agrupacion por su id
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function getAgrupacionById(req, res) {
+async function ObtenerAgrupacionesPorID(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id = req.params.id;
 
         // Obtiene la agrupacion por su id
-        const agrupacion = await agrupacionService.getAgrupacionById(id);
+        const agrupacion = await getAgrupacionById(id);
 
         // Retorna la agrupacion
-        res.status(200).json(agrupacion);
+        res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la agrupacion:', error);
@@ -46,28 +32,22 @@ async function getAgrupacionById(req, res) {
     }
 }
 
-/**
- * Crea una nueva agrupacion
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function createAgrupacion(req, res) {
+async function crearAgrupacion(req, res) {
     try {
         // Valida el cuerpo de la solicitud
         const { error, value } = agrupacionBodySchema.validate(req.body);
 
         if (error) {
             // Retorna un error si el cuerpo de la solicitud es inválido
-            res.status(400).send(error.message);
+            res.code(400).send(error.details.map(detail => detail.message));
             return;
         }
 
         // Crea una nueva agrupacion
-        const agrupacion = await agrupacionService.createAgrupacion(req.body);
+        const agrupacion = await createAgrupacion(req.body);
 
         // Retorna la nueva agrupacion
-        res.status(201).json(agrupacion);
+        res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al crear la agrupacion:', error);
@@ -75,13 +55,7 @@ async function createAgrupacion(req, res) {
     }
 }
 
-/**
- * Actualiza una agrupacion
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- */
-
-async function updateAgrupacion(req, res) {
+async function editarAgrupacion(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id = req.params.id;
@@ -96,7 +70,7 @@ async function updateAgrupacion(req, res) {
         }
 
         // Actualiza la agrupacion
-        const agrupacion = await agrupacionService.updateAgrupacion(id, req.body);
+        const agrupacion = await updateAgrupacion(id, req.body);
 
         // Retorna la agrupacion actualizada
         res.status(200).json(agrupacion);
@@ -108,8 +82,8 @@ async function updateAgrupacion(req, res) {
 }
 
 module.exports = {
-    getAgrupaciones,
-    getAgrupacionById,
-    createAgrupacion,
-    updateAgrupacion
+    VerGrupos,
+    ObtenerAgrupacionesPorID,
+    crearAgrupacion,
+    editarAgrupacion
 };

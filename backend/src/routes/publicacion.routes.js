@@ -1,13 +1,13 @@
 const fastify = require('../config/configFastify.js');
 
-const publicacionController = require('../controllers/publicacion.controller.js');
+const { obtenerPublicaciones, obtenerPublicacionesPorId, crearPublicacion, actualizarPublicacion, eliminarPublicacion } = require('../controllers/publicacion.controller.js');
 
-const app = fastify;
+module.exports = function(fastify, options, done) {
+    fastify.get('/publicaciones', obtenerPublicaciones);
+    fastify.get('/publicaciones/:id', obtenerPublicacionesPorId);
+    fastify.post('/publicaciones', crearPublicacion);
+    fastify.put('/publicaciones/:id', actualizarPublicacion);
+    fastify.delete('/publicaciones/:id', eliminarPublicacion);
 
-app.get('/publicaciones', publicacionController.getpublicaciones);
-app.get('/publicaciones/:id', publicacionController.getpublicacionById);
-app.post('/publicaciones', publicacionController.createpublicacion);
-app.put('/publicaciones/:id', publicacionController.updatepublicacion);
-app.delete('/publicaciones/:id', publicacionController.deletepublicacion);
-
-module.exports = publicacionRoutes;
+    done();
+}

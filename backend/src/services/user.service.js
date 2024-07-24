@@ -1,60 +1,62 @@
-const User = require('../models/user.model');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { secret } = require('../config');
+const {pool} = require('../db.js');
 
-const createUser = async (req, res) => {
-    const { nombre, rut, email, contraseña, intereses } = req.body;
-    const newUser = new User({ nombre, rut, email, contraseña, intereses });
 
+// Obtiene todos los usuarios del servidor de la universidad
+async function obtenerUsuarios() {
     try {
-        const salt = await bcrypt.genSalt(10);
-        newUser.contraseña = await bcrypt.hash(contraseña, salt);
-        await newUser.save();
-        res.json('Usuario creado exitosamente');
-    }
-    catch (error) {
-        res.status(400).json({ error });
+        const result = await pool.query(`
+            SELECT * FROM sm_usuario;
+        `);
+        return result.rows;
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
     }
 }
 
-const findUser = async (req, res) => {
-    const { nombre, rut, intereses } = req.params;
-    const query = {};
-
-    if (nombre) query.nombre = nombre;
-    if (rut) query.rut = rut;
-    if (intereses) query.intereses = intereses;
-
+// Obtiene todos los usuarios registrados en la plataforma
+async function obtenerUsuariosPlataforma(){
     try {
-        const users = await User.find(query);
-        res.json(users);
-    }
-    catch (error) {
-        res.status(400).json({ error });
+        const result = await pool.query(`SELECT * FROM usuario;`);
+        return result.rows;
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
     }
 }
 
-const login = async (req, res) => {
-    const { email, contraseña } = req.body;
+// Busca un usuario en especifico en la plataforma segun su rut
+async function obtenerUsuarioPlataforma(rut){
+    try{
+        const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
+        return result.rows;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
 
+// Registra un usuario en la plataforma
+async function registrarUsuario(rut, rol){
     try {
-        const user = await User
-        .findOne
-        ({ email });
-        if (!user) {
-            return res.status(400).json('Usuario no encontrado');
+        //Consultar si el usuario ya existe en la plataforma
+        const usuario = await obtenerUsuarioPlataforma(rut);
+        if(usuario.length > 0){
+            return {success: false, message: 'Usuario ya existe en la plataforma'};
         }
-        const validPassword = await bcrypt.compare(contraseña, user.contraseña);
-        if (!validPassword) {
-            return res.status(400).json('Contraseña incorrecta');
+        //Registrar usuario en la plataforma
+        const result = await pool.query(`
+            INSERT INTO usuario (rut, rol) VALUES ($1, $2);`, [rut, rol]);
+        if(result.rowCount > 0){
+            return {success: true, message: 'Usuario registrado correctamente'};
         }
-        const token = jwt.sign({ _id: user._id }, secret);
-        res.header('auth-token', token).json(token);
-    }
-    catch (error) {
-        res.status(400).json({ error });
+        return {success: false, message: 'No se pudo registrar el usuario'};
+        
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
     }
 }
 
-module.exports = { createUser, findUser, login };
+module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, registrarUsuario };

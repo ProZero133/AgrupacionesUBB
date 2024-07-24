@@ -1,45 +1,34 @@
+const { pool } = require('../db.js');
 
-
-async function getpublicaciones() {
-    try {
-        // Obtiene todas las publicaciones de la base de datos
-        const publicaciones = await Publicacion.findAll();
-
-        // Retorna todas las publicaciones
-        return publicaciones;
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener las publicaciones:', error);
-        throw error;
+async function getPublicacion() {
+   try{
+    // Obtiene todas las publicaciones
+    const publicaciones = await pool.query('SELECT * FROM "Publicacion"');
+    // Retorna las publicaciones
+    return publicaciones.rows;
+   }
+    catch (error) {
+      console.log('Error al obtener las publicaciones:', error);
     }
 }
 
-async function getpublicacionById(id) {
-    try {
-        // Obtiene la publicacion con el id especificado de la base de datos
-        const publicacion = await Publicacion.findByPk(id);
-
+async function getPublicacionById(id) {
+    try{
+        // Obtiene la publicacion con el id especificado
+        const publicacion = await pool.query('SELECT * FROM "Publicacion" WHERE id_pub = $1', [id]);
         // Retorna la publicacion
         return publicacion;
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener la publicacion:', error);
-        throw error;
+    }
+    catch (error) {
+        console.log('Error al obtener la publicacion:', error);
     }
 }
 
-async function createpublicacion(publicacionData) {
+async function createPublicacion(publicacionData) {
     try {
         // Inserta una nueva publicacion en la base de datos
-        const newpublicacion = await Publicacion.create({
-            encabezado: publicacion.encabezado,
-            cuerpo: publicacion.cuerpo,
-            imaPub: publicacion.imaPub,
-            id_agr: publicacion.id_agr,
-            RUT: publicacion.RUT,
-            fecha_publicacion: publicacion.fecha_publicacion
-        });
-
+        const newpublicacion = await pool.query('INSERT INTO "Publicacion" (encabezado, imagen, id_agr, rut, fecha_publicacion) VALUES ($1, $2, $3, $4, $5) RETURNING *', [publicacionData.encabezado, publicacionData.imagen, publicacionData.id_agr, publicacionData.rut, publicacionData.fecha_publicacion]);
+        
         // Retorna la nueva publicacion
         return newpublicacion;
     } catch (error) {
@@ -49,23 +38,23 @@ async function createpublicacion(publicacionData) {
     }
 }
 
-async function updatepublicacion(id, publicacionData) {
+async function updatePublicacion(id, publicacionData) {
     try {
-        // Actualiza la publicacion con el id especificado en la base de datos
-        const [rowsUpdated, [updatedpublicacion]] = await Publicacion.update({
-            encabezado: publicacion.encabezado,
-            cuerpo: publicacion.cuerpo,
-            imaPub: publicacion.imaPub,
-            id_agr: publicacion.id_agr,
-            RUT: publicacion.RUT,
-            fecha_publicacion: publicacion.fecha_publicacion
-        }, {
-            where: { id: id },
-            returning: true
-        });
-
+        // construye la consulta SQL para actualizar la publicacion
+        const consulta = 'UPDATE "Publicacion" SET encabezado = $1, imagen = $2, id_agr = $3, RUT = $4, fecha_publicacion = $5 WHERE id = $6 RETURNING *';
+        const valores = [publicacionData.encabezado, publicacionData.imaPub, publicacionData.id_agr, publicacionData.RUT, publicacionData.fecha_publicacion, id];
+        
+        // Ejecuta la consulta SQL y actualiza la publicacion
+        const resultado = await pool.query(consulta, valores);
+        
+        // Chequea si la publicacion se encontró y se actualizó
+        if (resultado.rows.length === 0) {
+            throw new Error('Publicacion no se encontró o no se hicieron cambios.');
+        }
+        
         // Retorna la publicacion actualizada
-        return updatedpublicacion;
+        const updatedPublicacion = resultado.rows[0];
+        return updatedPublicacion;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la publicacion:', error);
@@ -73,15 +62,18 @@ async function updatepublicacion(id, publicacionData) {
     }
 }
 
-async function deletepublicacion(id) {
+async function deletePublicacion(id) {
     try {
-        // Elimina la publicacion con el id especificado de la base de datos
-        const rowsDeleted = await Publicacion.destroy({
-            where: { id: id }
-        });
-
-        // Retorna la cantidad de filas eliminadas
-        return rowsDeleted;
+        // Construye la consulta SQL para eliminar la publicacion
+        const consulta = 'DELETE FROM "Publicacion" WHERE id = $1 RETURNING *';
+        const valor = [id];
+        
+        // Ejecuta la consulta SQL y elimina la publicacion
+        const resultado = await pool.query(consulta, valor);
+        
+        // Retorna el numero de filas eliminadas
+        const publicacionEliminada = resultado.rowCount;
+        return publicacionEliminada;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la publicacion:', error);
@@ -90,9 +82,9 @@ async function deletepublicacion(id) {
 }
 
 module.exports = {
-    getpublicaciones,
-    getpublicacionById,
-    createpublicacion,
-    updatepublicacion,
-    deletepublicacion
+    getPublicacion,
+    getPublicacionById,
+    createPublicacion,
+    updatePublicacion,
+    deletePublicacion
 };

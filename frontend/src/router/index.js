@@ -3,13 +3,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
     {
+      path: '/',
+      redirect: '/api/home',
+    },
+    {
       path: '/api',
       component: () => import('@/layouts/default/Dashboard.vue'),
       children: [
         {
           path: 'home',
           name: 'Home',
-          component: () => import('@/views/HelloWorldView.vue'),
+          component: () => import('@/views/UserHome.vue'),
         },
         {
           path: 'adminhome',
@@ -17,9 +21,9 @@ const routes = [
           component: () => import('@/views/AdminHome.vue'),
         },
         {
-          path: 'crear_agrupacion',
-          name: 'Crear Agrupacion',
-          component: () => import('@/views/CrearAgrupacionView.vue'),
+          path: 'verificaciones',
+          name: 'Verificaciones',
+          component: () => import('@/views/VerificacionesView.vue'),
         },
         {
           path: 'crear_actividad',
@@ -27,9 +31,29 @@ const routes = [
           component: () => import('@/views/CrearActividadView.vue'),
         },
         {
+          path: 'crear_agrupacion',
+          name: 'Crear Agrupacion',
+          component: () => import('@/views/CrearAgrupacionView.vue'),
+        },
+        {
+          path: 'crear_publicacion',
+          name: 'Crear Publicacion',
+          component: () => import('@/views/CrearPublicacionView.vue'),
+        },
+        {
           path: 'login',
           name: 'Login',
           component: () => import('@/views/LoginView.vue'),
+        },
+        {
+          path: 'grupo',
+          name: 'Grupo',
+          component: () => import('@/views/GrupoView.vue'),
+        },
+        {
+          path: 'buscador_agrupaciones',
+          name: 'Buscador Agrupaciones',
+          component: () => import('@/views/BuscadorAgrupaciones.vue'),
         },
       ],
     },

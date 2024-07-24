@@ -1,7 +1,7 @@
 "use strict";
 
-const publicacionService = require("../services/publicacion.service.js");
-const { publicacionBodySchema, publicacionIdSchema } = require("../schema/publicacion.schema.js");
+const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion, deletePublicacion} = require("../services/publicacion.service.js");
+const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
 
 /**
  * Obtiene todas las publicaciones
@@ -9,17 +9,17 @@ const { publicacionBodySchema, publicacionIdSchema } = require("../schema/public
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getpublicaciones(req, res) {
+async function obtenerPublicaciones(req, res) {
     try {
         // Obtiene todas las publicaciones
-        const publicaciones = await publicacionService.getpublicaciones();
+        const publicaciones = await getPublicacion();
 
         // Retorna las publicaciones
-        res.status(200).json(publicaciones);
+        res.code(200).send(publicaciones);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener las publicaciones:', error);
-        res.status(500).send('Error al obtener las publicaciones');
+        res.code(500).send('Error al obtener las publicaciones');
     }
 }
 
@@ -29,20 +29,20 @@ async function getpublicaciones(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function getpublicacionById(req, res) {
+async function obtenerPublicacionesPorId(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
 
         // Obtiene la publicacion por su id
-        const publicacion = await publicacionService.getpublicacionById(id);
+        const publicacion = await getPublicacionById(id);
 
         // Retorna la publicacion
-        res.status(200).json(publicacion);
+        res.code(200).send(publicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la publicacion:', error);
-        res.status(500).send('Error al obtener la publicacion');
+        res.code(500).send('Error al obtener la publicacion');
     }
 }
 
@@ -52,24 +52,24 @@ async function getpublicacionById(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function createpublicacion(req, res) {
+async function crearPublicacion(req, res) {
     try {
         // Valida el cuerpo de la solicitud
         const { error, value } = publicacionBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.message);
+            return res.code(400).send(error.message);
         }
 
         // Crea una nueva publicacion
-        const newpublicacion = await publicacionService.createpublicacion(value);
+        const newpublicacion = await createPublicacion(value);
 
         // Retorna la nueva publicacion
-        res.status(201).json(newpublicacion);
+        res.code(201).send(newpublicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la publicacion:', error);
-        res.status(500).send('Error al insertar la publicacion');
+        res.code(500).send('Error al insertar la publicacion');
     }
 }
 
@@ -79,7 +79,7 @@ async function createpublicacion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function updatepublicacion(req, res) {
+async function actualizarPublicacion(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
@@ -88,18 +88,18 @@ async function updatepublicacion(req, res) {
         const { error, value } = publicacionBodySchema.validate(req.body);
 
         if (error) {
-            return res.status(400).send(error.message);
+            return res.code(400).send(error.message);
         }
 
         // Actualiza la publicacion
-        const updatedpublicacion = await publicacionService.updatepublicacion(id, value);
+        const updatedpublicacion = await updatePublicacion(id, value);
 
         // Retorna la publicacion actualizada
-        res.status(200).json(updatedpublicacion);
+        res.code(200).json(updatedpublicacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la publicacion:', error);
-        res.status(500).send('Error al actualizar la publicacion');
+        res.code(500).send('Error al actualizar la publicacion');
     }
 }
 
@@ -109,27 +109,27 @@ async function updatepublicacion(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function deletepublicacion(req, res) {
+async function eliminarPublicacion(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
 
         // Elimina la publicacion
-        await publicacionService.deletepublicacion(id);
+        await deletePublicacion(id);
 
         // Retorna un mensaje de éxito
-        res.status(200).send('Publicacion eliminada');
+        res.code(200).send('Publicacion eliminada');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la publicacion:', error);
-        res.status(500).send('Error al eliminar la publicacion');
+        res.code(500).send('Error al eliminar la publicacion');
     }
 }
 
 module.exports = {
-    getpublicaciones,
-    getpublicacionById,
-    createpublicacion,
-    updatepublicacion,
-    deletepublicacion
+    obtenerPublicaciones,
+    obtenerPublicacionesPorId,
+    crearPublicacion,
+    actualizarPublicacion,
+    eliminarPublicacion
 };

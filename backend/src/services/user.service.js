@@ -60,4 +60,57 @@ async function registrarUsuario(rut, rol){
     }
 }
 
-module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario };
+async function getTagsSimilares(tag){
+    try{
+        // Convertir el parámetro de búsqueda a minúsculas
+        const lowerTag = tag.toLowerCase();
+        const result = await pool.query(`SELECT * FROM "Tags" WHERE LOWER(nombre_tag) LIKE '%${lowerTag}%'`);
+        return result.rows;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+async function getPreferenciasUsuario(rut){
+    try{
+        const result = await pool.query(`SELECT * FROM "Posee_3" WHERE rut = $1;`, [rut]);
+        return result.rows;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+async function updatePreferenciasUsuario(rut, preferencias) {
+    let allInsertsSuccessful = true; // Asumimos que todas las inserciones serán exitosas inicialmente
+
+    for (let i = 0; i < preferencias.length; i++) {
+        try {
+            // Suponiendo que la tabla se llama 'preferencias_usuario' y tiene columnas 'rut' y 'preferencia'
+            // Ajusta la consulta según tu esquema de base de datos
+            const result = await pool.query(
+                `INSERT INTO "Posee_3" (rut, id_tag) VALUES ($1, $2)`,
+                [rut, preferencias[i]] // Asumiendo que preferencias[i] es un valor adecuado para insertar
+            );
+        } catch (error) {
+            console.error('Error en la inserción:', error);
+            allInsertsSuccessful = false; // Marca que al menos una inserción falló
+            break; // Opcional: detener el proceso en el primer error
+        }
+    }
+
+    return { success: allInsertsSuccessful };
+}
+async function getTagById(id){
+    try{
+        const result = await pool.query(`SELECT * FROM "Tags" WHERE id_tag = $1;`, [id]);
+        return result.rows;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById };

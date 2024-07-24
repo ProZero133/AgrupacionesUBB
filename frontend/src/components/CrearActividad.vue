@@ -111,6 +111,7 @@ export default {
     id_agr: '',
     defaultImageUrl: addImage,
     urlImagen: addImage,
+    idImagen: '',
   }),
   methods: {
     createImage(file) {
@@ -131,8 +132,30 @@ export default {
       }
     },
 
+
+
+//    createImage(file) {
+//      const reader = new FileReader();
+
+      // Extract the File object from the Proxy
+//      const actualFile = file[0];
+
+      //reader.onload = e => {
+        //this.urlImagen = e.target.result;
+      //};
+
+      // Ensure the extracted object is a File before calling readAsDataURL
+      //if (actualFile instanceof File) {
+        //reader.readAsDataURL(actualFile);
+      //} else {
+        //console.error("El archivo presentado no es un archivo.");
+      //}
+    //},
+
+
     onFileChange(e) {
       const file = e.target.files[0];
+      console.log(file) 
       if (!file) {
         this.urlImagen = this.defaultImageUrl;
         return;
@@ -142,6 +165,9 @@ export default {
         this.urlImagen = reader.result;
       };
       reader.readAsDataURL(file);
+
+      console.log("file");
+      console.log(this.urlImagen);
     },
 
     fileToBase64(file) {
@@ -158,38 +184,21 @@ export default {
     });
 },
 
-async CreaActividad(nom_act, descripcion, imagen, tipo) {
+async PostearImagen() {
   try {
-    console.log(nom_act, descripcion, imagen, tipo, this.groupId);
-    // Selecciona el primer archivo de imagen proporcionado
-    //const file = imagen[0];
-    // Crea una promesa para convertir la imagen a base64 utilizando FileReader
-    //const imagenBase64 = await new Promise((resolve, reject) => {
-    //  const reader = new FileReader();
-    //  reader.onloadend = () => {
-        // Resuelve la promesa con el resultado de la conversión
-    //    resolve(reader.result);
-    //  };
-    //  reader.onerror = reject;
-      // Inicia la lectura del archivo como Data URL
-    //  reader.readAsDataURL(file);
-    //});
-
-    imagen = "hola"; 
-    // Realiza una solicitud fetch a tu backend Fastify
-    const response = await fetch('http://localhost:3000/actividades', {
+    const response = await fetch('http://localhost:3000/imagen', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ nom_act, descripcion, imagen: '3', tipo, id_agr: this.groupId }),
+      body: JSON.stringify({ imagen: this.urlImagen }),
     });
     // Verifica si la respuesta es exitosa
     if (response.ok) {
       // Convierte la respuesta en formato JSON
       const data = await response.json();
-      this.$router.push(`/api/grupo/${this.groupId}`);
-      this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
+      console.log("Imagen subida");
+      this.idImagen = data.id_imagen;
     } else {
       console.error('Error en la respuesta:', response.status);
     }
@@ -197,7 +206,58 @@ async CreaActividad(nom_act, descripcion, imagen, tipo) {
     console.error('Error al hacer fetch:', error);
   }
 },
+
+  async CreaActividad(nom_act, descripcion, imagen, tipo) {
+    await this.PostearImagen();
+    if (this.idImagen === '') {
+      console.error('Error al subir la imagen');
+      this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
+      return;
+    }
+    else {
+      console.log("todo bien!");
+      console.log(this.idImagen);
+      try {
+
+          // Selecciona el primer archivo de imagen proporcionado
+          //const file = imagen[0];
+          // Crea una promesa para convertir la imagen a base64 utilizando FileReader
+          //const imagenBase64 = await new Promise((resolve, reject) => {
+          //  const reader = new FileReader();
+          //  reader.onloadend = () => {
+          // Resuelve la promesa con el resultado de la conversión
+          //    resolve(reader.result);
+          //  };
+          //  reader.onerror = reject;
+            // Inicia la lectura del archivo como Data URL
+          //  reader.readAsDataURL(file);
+          //});
+
+          imagen = "hola"; 
+          //console.log(this.urlImagen);
+          // Realiza una solicitud fetch a tu backend Fastify
+          const response = await fetch('http://localhost:3000/actividades', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId }),
+          });
+          // Verifica si la respuesta es exitosa
+          if (response.ok) {
+            // Convierte la respuesta en formato JSON
+            const data = await response.json();
+            this.$router.push(`/api/grupo/${this.groupId}`);
+            this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
+            } else {
+              console.error('Error en la respuesta:', response.status);
+            }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    }
   },
+},
 }
 
 </script>

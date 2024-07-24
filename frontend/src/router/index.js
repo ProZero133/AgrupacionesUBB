@@ -7,6 +7,10 @@ const routes = [
       redirect: '/api/home',
     },
     {
+      path: '/api/crear_actividad',
+      redirect: '/api/home',
+    },
+    {
       path: '/api',
       component: () => import('@/layouts/default/Dashboard.vue'),
       children: [
@@ -19,6 +23,11 @@ const routes = [
           path: 'adminhome',
           name: 'AdminHome',
           component: () => import('@/views/AdminHome.vue'),
+        },
+        {
+          path: 'solicitar_acreditacion',
+          name: 'SolicitarAcreditacion',
+          component: () => import('@/views/SolicitarAcreditacionView.vue'),
         },
         {
           path: 'verificaciones',
@@ -59,6 +68,11 @@ const routes = [
           path: 'solicitudes_agrupacion/:id_agr',
           name: 'Solicitudes Agrupacion',
           component: () => import('@/views/SolicitudesAgrupacionView.vue'),
+        },
+        {
+         path: 'perfil',
+          name: 'Perfil',
+          component: () => import('@/views/PerfilUsuarioView.vue'), 
         }
         
       ],

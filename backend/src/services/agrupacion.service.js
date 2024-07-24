@@ -73,7 +73,7 @@ async function updateAgrupacionVerificado(id) {
     // Actualiza solo el atributo verificado
     const update_Verificado = await pool.query(
       `UPDATE "Agrupacion" 
-       SET verificado = $1 
+       SET verificado = $1, fecha_verificacion = CURRENT_TIMESTAMP 
        WHERE id_agr = $2 
        RETURNING *`, 
       [

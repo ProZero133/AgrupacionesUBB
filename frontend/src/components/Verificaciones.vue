@@ -19,6 +19,9 @@
         </v-data-table>
       </v-card-text>
     </v-card>
+    <v-snackbar v-model="snackbar" :timeout="snackbarTimeout" :color="snackbarColor" class="snackbar-custom">
+      <span class="snackbar-text">{{ snackbarText }}</span>
+    </v-snackbar>
   </div>
 </template>
 
@@ -28,6 +31,10 @@ export default {
   data() {
     return {
       AgrupacionesPendientesObtenidas: [],
+      snackbar: false,
+      snackbarText: '',
+      snackbarColor: '',
+      snackbarTimeout: 3000,
       headers: [
         { text: 'Nombre', value: 'nombre_agr' },
         { text: 'RUT', value: 'rut' },
@@ -57,7 +64,7 @@ export default {
       try {
         // obtiene la agrupacion a la que le clickearon en aceptar
         const Agrupacion_a_Aceptar = this.AgrupacionesPendientesObtenidas.find(agrupacion => agrupacion.id_agr === id_agr);
-        console.log("Agrupacion_a_Aceptar");
+        console.log("Agrupacion_a_Aceptar", Agrupacion_a_Aceptar);
 
         const response = await fetch(`http://localhost:3000/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',
@@ -65,24 +72,31 @@ export default {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            verificado: 'Verificado',
           }),
         });
 
         if (response.ok) {
-          const updatedItem = await response.json();
-          this.AgrupacionesPendientesObtenidas = this.AgrupacionesPendientesObtenidas.map(agrupacion =>
-            agrupacion.id_agr === updatedItem.id_agr ? updatedItem : agrupacion
-          );
+          this.showSnackbar('Agrupación aceptada con éxito', 'success');
+          this.ObtenerAgrupacionesPendientes();
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.showSnackbar('Error al aceptar la agrupación', 'error');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+        this.showSnackbar('Error al aceptar la agrupación', 'error');
       }
     },
 
     async RechazarAgrupacion() {
       // Falta implementar
+    },
+
+    showSnackbar(message, color) {
+      this.snackbarText = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
     },
   },
   mounted() {
@@ -90,7 +104,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .B_Aceptar,
@@ -103,5 +116,16 @@ export default {
   margin: 100px;
   margin-left: 10%;
   margin-right: 10%;
+}
+
+.snackbar-custom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.snackbar-text {
+  text-align: center;
+  width: 100%;
 }
 </style>

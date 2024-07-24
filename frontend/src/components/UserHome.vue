@@ -8,13 +8,13 @@
         <v-card-title class="pasando">
             <span class="text-h4 textopasando">Qué está pasando?</span>
           </v-card-title>
-        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
+        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px" v-on:click="iragGrupo(actividad.id_agr)" >
           <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='urlImagen' />
+                <v-img class="image" aspect-ratio="1" :src=actividad.imagen />
               </v-col>
               <v-col cols="7">
                 <p>{{ actividad.descripcion }}</p>
@@ -27,24 +27,15 @@
       </v-col>
 
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">Mis Grupos</span>
-          </v-card-title>
-
-          <v-divider class="gruparador"></v-divider>
-          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" 
-          v-on:click="iragGrupo(grupo.id_agr)" 
-          >
-            <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-            <v-card-text>
-              <p>{{ grupo.descripcion }}</p>
-              <p>RUT: {{ grupo.rut }}</p>
-              <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-              <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
-              <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-            </v-card-text>
-          </v-card>
+        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
+          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+          <v-card-text>
+            <p>{{ grupo.descripcion }}</p>
+            <p>RUT: {{ grupo.rut }}</p>
+            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+            <p>Verificado: {{ grupo.verificado}}</p>
+            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -177,6 +168,28 @@ export default {
           console.log("actividades:");
           console.log(data);
           this.actividades = data;
+
+          for (const imagenes of this.actividades){
+            try {
+              const responde = await fetch('http://localhost:3000/imagen/'+imagenes.imagen, {
+                method: 'GET',
+              });
+              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                console.log("dataImagen");
+                console.log(dataImagen);
+                imagenes.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+
+            }
+            catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }

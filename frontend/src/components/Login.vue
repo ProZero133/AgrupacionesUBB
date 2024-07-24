@@ -34,6 +34,8 @@ export default {
   data: () => ({
     isLoading: false,
     email: '',
+    username: '',
+    password: '',
   }),
   methods: {
     async login() {

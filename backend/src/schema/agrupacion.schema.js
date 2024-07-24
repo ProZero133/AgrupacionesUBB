@@ -30,6 +30,10 @@ const agrupacionBodySchema = Joi.object({
         "any.required": "La fecha de creación es obligatoria.",
         "date.base": "La fecha de creación debe ser de tipo date.",
         }),
+    imagen: Joi.number().integer().opcional().messages({
+        "number.base": "La imagen debe ser de tipo number.",
+        "number.integer": "La imagen debe ser de tipo integer.",
+        }),    
     });
 
     module.exports = {

@@ -9,7 +9,7 @@
             <span class="text-h4 textopasando">Qué está pasando?</span>
           </v-card-title>
         <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
-          <p class="subtitle-1 publicadoen">Publicado por John Doe en Comunidad genérica</p>
+          <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
             <v-row>
@@ -33,8 +33,9 @@
           </v-card-title>
 
           <v-divider class="gruparador"></v-divider>
-
-          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
+          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" 
+          v-on:click="iragGrupo(grupo.id_agr)" 
+          >
             <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
             <v-card-text>
               <p>{{ grupo.descripcion }}</p>
@@ -105,8 +106,6 @@
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
 
-const router = useRouter();
-
 export default {
   name: 'UserHome',
   data: () => ({
@@ -114,7 +113,20 @@ export default {
     actividades: [],
     urlImagen: addImage
   }),
+  setup() {
+    const router = useRouter();
+
+    return {
+      router,
+    };
+  },
   methods: {
+    grupoOrigenActividad(id_agr) {
+      // Find the grupo that matches the id_agr
+      const grupo = this.grupos.find(grupo => grupo.id_agr === id_agr);
+      // Return the grupo description if found, else return a default string
+      return grupo ? grupo.nombre_agr : 'Grupo';
+    },
     convertirImagen(data) {
       console.log('Data passed to convertirImagen:', data);
     // Convertir el Proxy a un Array real si es necesario
@@ -141,6 +153,7 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
+          console.log("grupos:");
           console.log(data);
           this.grupos = data;
         } else {
@@ -161,6 +174,7 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
+          console.log("actividades:");
           console.log(data);
           this.actividades = data;
         } else {

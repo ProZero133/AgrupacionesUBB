@@ -7,8 +7,9 @@ const publicacionBodySchema = Joi.object({
         "any.required": "El título de la publicación es obligatorio.",
         "string.base": "El título de la publicación debe ser de tipo string.",
         }),
-    imagen: Joi.binary().optional().messages({
-        "string.base": "La imagen debe ser de tipo string.",
+    imagen: Joi.number().integer().optional().messages({
+        "number.base": "La imagen debe ser de tipo número.",
+        "number.integer": "La imagen debe ser un entero.",
         }),
     id_agr: Joi.number().integer().required().messages({
         "number.base": "El id de la agrupación debe ser de tipo número.",

@@ -17,7 +17,6 @@
 
   <v-container class="titulito">
     <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
-          <p class="subtitle-1 publicadoen">Publicado por John Doe en Comunidad genérica</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
             <v-row>
@@ -36,12 +35,43 @@
 
   </v-container>
 
+  <VLayoutItem model-value position="bottom" class="text-end pointer-events-none" size="120">
+    <div class="ma-9 pointer-events-initial">
+      <v-menu>
+        <template v-slot:activator="{ props: menu }">
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props: tooltip }">
+              <v-btn
+                icon="mdi-plus"
+                size="large"
+                color="primary"
+                v-bind="mergeProps(menu, tooltip)"
+              >
+              </v-btn>
+            </template>
+            <span>Publicar</span>
+          </v-tooltip>
+        </template>
+        <v-list class="tultipCrear">
+          <v-list-item
+            v-for="(item, index) in items"
+            :key="index"
+            v-on:click="this.$router.push(item.path+`${groupId}`)" 
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+  </VLayoutItem>
+
 </template>
 
 <script>
 import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
-  
+import { mergeProps } from 'vue';  
+
   export default {
     setup() {
     const route = useRoute();
@@ -67,13 +97,21 @@ import { useRoute } from 'vue-router';
       imagen: null,
       nombre_agr: 'h',
       rut: null,
-      verificado: null
+      verificado: null,
       },
+
+      items: [
+        { title: 'Crear Actividad', path: '/api/crear_actividad/' },
+        { title: 'Crear Publicación' },
+        { title: 'Crear Votación' },
+        { title: 'Crear Formulario' },
+      ],
 
       actividades: [],
       urlImagen: addImage,
     }),
     methods: {
+      mergeProps,
       async VerGrupos() {
         try {
           // Incorpora el groupID en la URL de la solicitud fetch
@@ -86,8 +124,8 @@ import { useRoute } from 'vue-router';
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             const data = await response.json();
-            console.log(data);
             this.datosGrupo = data.rows[0];
+            console.log("aqui datos grupo");
             console.log(this.datosGrupo);
           } else {
             console.error('Error en la respuesta:', response.status);
@@ -132,6 +170,9 @@ import { useRoute } from 'vue-router';
 </script>
 
 <style>
+.tultipCrear{
+  margin-bottom: 10px;
+}
 .titulito {
   margin-top: -10px;
 }

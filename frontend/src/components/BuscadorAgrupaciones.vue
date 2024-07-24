@@ -9,7 +9,7 @@
           <!-- Contenedor flex para el contenido, empujando v-card-actions al fondo -->
           <v-card-text class="d-flex flex-column flex-grow-1">
             <div class="flex-grow-1">
-              <img :src="'' +grupo.imagen" alt="Miniatura" class="miniatura">
+              <img :src="grupo.imagen" alt="Miniatura" class="miniatura">
               <p>{{ grupo.verificado }}</p>
               <p>Tipo: {{ grupo.descripcion }}</p>
             </div>
@@ -84,9 +84,12 @@ export default {
               console.error('Error al hacer fetch:', error);
           }
         }
+          console.log("data + dataTransformada"); 
           console.log(data);
           console.log(dataTransformada);
           this.grupos = dataTransformada;
+          console.log("this.grupos");
+          console.log(this.grupos);
         } else {
           console.error('Error en la respuesta:', response.status);
         }

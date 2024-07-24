@@ -1,4 +1,5 @@
 const { pool } = require('../db.js');
+const { getPublicacionById } = require('./publicacion.service.js'); // Asegúrate de que la ruta sea correcta
 
 async function getPosts() {
    try{
@@ -26,10 +27,17 @@ async function getPostById(id) {
 
 async function createPost(postData) {
     try {
+
+        const publicacion = await getPublicacionById(postData.id_pub);
+        
+        if (!publicacion) {
+            throw new Error('La publicación con el ID especificado no existe');
+        }
+
         // Arma la consulta SQL para insertar un post
-        const query = 'INSERT INTO "Post" (id_pub, encabezado) VALUES ($1, $2) RETURNING *';
+        const query = 'INSERT INTO "Post" (id_pub, cuerpo) VALUES ($1, $2) RETURNING *';
         // Inserta un nuevo post en la base de datos
-        const newPost = await pool.query(query, [postData.id_pub, postData.encabezado]);
+        const newPost = await pool.query(query, [postData.id_pub, postData.cuerpo]);
         // Retorna el nuevo post creado
         return newPost.rows[0];
     } catch (error) {
@@ -44,7 +52,7 @@ async function updatePost(id, postData) {
         // Arma la consulta SQL para actualizar un post
         const query = 'UPDATE "Post" SET encabezado = $1 WHERE id_pub = $2 RETURNING *';
         // Actualiza el post con el id especificado en la base de datos
-        const updatedPost = await pool.query(query, [postData.encabezado, id]);
+        const updatedPost = await pool.query(query, [postData.cuerpo, id]);
         // Retorna el post actualizado
         return updatedPost.rows[0];
     } catch (error) {

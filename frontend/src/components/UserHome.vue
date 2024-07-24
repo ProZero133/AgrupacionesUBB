@@ -27,24 +27,15 @@
       </v-col>
 
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">Mis Grupos</span>
-          </v-card-title>
-
-          <v-divider class="gruparador"></v-divider>
-          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" 
-          v-on:click="iragGrupo(grupo.id_agr)" 
-          >
-            <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-            <v-card-text>
-              <p>{{ grupo.descripcion }}</p>
-              <p>RUT: {{ grupo.rut }}</p>
-              <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-              <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
-              <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-            </v-card-text>
-          </v-card>
+        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
+          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+          <v-card-text>
+            <p>{{ grupo.descripcion }}</p>
+            <p>RUT: {{ grupo.rut }}</p>
+            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+            <p>Verificado: {{ grupo.verificado}}</p>
+            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>

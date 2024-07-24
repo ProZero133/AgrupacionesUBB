@@ -26,6 +26,23 @@ async function ObtenerAcreditaciones(req, reply) {
     }
 }
 
+
+async function SolicitarAcreditacionAgrupacion(req, reply) {
+    try {
+        
+
+        
+        reply.code(200).send();
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al solicitar Acreditacion: ', error);
+        reply.code(500).send('Error al solicitar Acreditacion: ');
+    }
+}
+
+
+
 module.exports = {
-    ObtenerAcreditaciones
+    ObtenerAcreditaciones,
+    SolicitarAcreditacionAgrupacion
 };

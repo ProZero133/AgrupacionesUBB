@@ -1,4 +1,5 @@
 const { pool } = require('../db.js');
+const { getPublicacionById } = require('./publicacion.service.js'); // Asegúrate de que la ruta sea correcta
 
 async function getFormularios() {
    try{
@@ -24,8 +25,26 @@ async function getFormularioById(id) {
     }
 }
 
+function isValidHyperlink(hyperlink) {
+    const validPrefixes = [
+        'https://forms.gle/',
+        'https://docs.google.com/forms/d/e/'
+    ];
+    return validPrefixes.some(prefix => hyperlink.startsWith(prefix));
+}
+
 async function createFormulario(formularioData) {
     try {
+        const publicacion = await getPublicacionById(postData.id_pub);
+        
+        if (!publicacion) {
+            throw new Error('La publicación con el ID especificado no existe');
+        }
+
+        if (!isValidHyperlink(formularioData.hyperlink)) {
+            throw new Error('El hyperlink debe comenzar con "https://forms.gle/" o "https://docs.google.com/forms/d/e/"');
+        }
+
         // Crea la consulta SQL para insertar un nuevo formulario
         const sql = 'INSERT INTO "Formulario" (id_pub, descripcion, hyperlink) VALUES ($1, $2, $3) RETURNING *';
         // Crea el formulario en la base de datos
@@ -41,6 +60,10 @@ async function createFormulario(formularioData) {
 
 async function updateFormulario(id, formularioData) {
     try {
+        if (!isValidHyperlink(formularioData.hyperlink)) {
+            throw new Error('El hyperlink debe comenzar con "https://forms.gle/" o "https://docs.google.com/forms/d/e/"');
+        }
+
         // Crea la consulta SQL para actualizar el formulario
         const sql = 'UPDATE "Formulario" SET id_pub = $1, descripcion = $2, hyperlink = $3 WHERE id = $4 RETURNING *';
         // Actualiza el formulario en la base de datos

@@ -1,4 +1,5 @@
 const { pool } = require('../db.js');
+const { getPublicacionById } = require('./publicacion.service.js'); // Asegúrate de que la ruta sea correcta
 
 async function getVotaciones() {
    try{
@@ -26,6 +27,12 @@ async function getVotacionById(id) {
 
 async function createVotacion(votacionData) {
     try {
+        const publicacion = await getPublicacionById(postData.id_pub);
+        
+        if (!publicacion) {
+            throw new Error('La publicación con el ID especificado no existe');
+        }
+
         // Inserta una nueva votacion en la base de datos
         const newVotacion = await pool.query('INSERT INTO "Votacion" (id_pub, descripcion) VALUES ($1, $2) RETURNING *', [votacionData.id_pub, votacionData.descripcion]);
 

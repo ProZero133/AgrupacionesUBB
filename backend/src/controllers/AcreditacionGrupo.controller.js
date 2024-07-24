@@ -27,22 +27,29 @@ async function ObtenerAcreditaciones(req, reply) {
 }
 
 
-async function SolicitarAcreditacionAgrupacion(req, reply) {
+async function AcreditaciondeGrupo(req, reply) {
     try {
-        
+        // se obtiene el id de la agrupacion
+        const id = req.params.id_agr;
+        console.log("asdfasdf");
 
+        // Obtiene todas las agrupaciones
+        const agrupacionesCompletas = await getAgrupaciones();
+        const Agrupacion_a_Verificar = agrupacionesCompletas.filter(Agrupacion => Agrupacion.id_agr === id); 
+        console.log("asdfasdfasdf");
         
-        reply.code(200).send();
+        reply.code(200).send(Agrupacion_a_Verificar);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
-        console.error('Error al solicitar Acreditacion: ', error);
-        reply.code(500).send('Error al solicitar Acreditacion: ');
+        console.error('Error al Acreditar: ', error);
+        reply.code(500).send('Error al Acreditar: ');
     }
 }
 
 
 
+
 module.exports = {
     ObtenerAcreditaciones,
-    SolicitarAcreditacionAgrupacion
+    AcreditaciondeGrupo
 };

@@ -67,9 +67,67 @@ async function getAgrupaciones() {
     }
   }
 
+  async function getImage(id) {
+    try {
+      // Obtiene la imagen con el id especificado
+      const imagen = await pool.query('SELECT * FROM "Imagenes" WHERE id_imagen = $1', [id]);
+      const imageData = imagen.rows[0].imagen;
+      return imageData;
+    } catch (error) {
+      // Maneja cualquier error que pueda ocurrir
+      console.error('Error al obtener la imagen:', error);
+      throw error;
+    }
+
+  }
+  async function createSolicitud(rut, id_agr) {
+    try {
+      // Crea una nueva solicitud
+    const rol_agr = 'Pendiente';
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, rol_agr) VALUES ($1, $2, $3) RETURNING *', [rut, id_agr, rol_agr]);
+    return response.rows[0];
+    }
+    catch (error) {
+      console.log('Error al crear la solicitud:', error);
+    }
+  }
+  async function getSolicitudes(id_agr) {
+    try {
+      // Obtiene todas las solicitudes de la agrupacion
+      const solicitudes = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr = $2', [id_agr, 'Pendiente']);
+      return solicitudes.rows;
+    } catch (error) {
+      console.log('Error al obtener las solicitudes:', error);
+    }
+  }
+  async function updateSolicitud(rut, id_agr) {
+    try{
+      // Actualiza la solicitud con el rut y id_agr especificados
+      const validarSolicitud = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
+      if (validarSolicitud.rows[0].rol_agr === 'Miembro') {
+        return 'El usuario ya es miembro de la agrupación';
+      }
+      //Si no existe la solicitud
+      else if(validarSolicitud.rows[0] < 0)
+        {
+          return 'No existe la solicitud';
+        }
+        const fecha_ingreso = new Date();
+      const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1, fecha_integracion = $2 WHERE rut = $3 AND id_agr = $4 RETURNING *', ['Miembro',fecha_ingreso, rut, id_agr]);
+      return response.rows[0];
+    }
+    catch (error) {
+      console.log('Error al actualizar la solicitud:', error);
+  }
+}
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
     createAgrupacion,
-    updateAgrupacion
+    updateAgrupacion,
+    getImage,
+    createSolicitud,
+    getSolicitudes,
+    updateSolicitud
   };

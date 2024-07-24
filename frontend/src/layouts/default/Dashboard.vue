@@ -8,18 +8,6 @@
             @click.stop="drawer = !drawer"
           ></v-app-bar-nav-icon>
   
-          <v-text-field
-              append-inner-icon="mdi-magnify"
-              density="compact"
-              label="Buscar..."
-              flat
-              variant="solo"
-              hide-details
-              single-line
-              bg-color="gray"
-              :style="{ 'margin-left': '20px' }"
-            ></v-text-field>
-  
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>

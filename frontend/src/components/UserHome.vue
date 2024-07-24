@@ -27,7 +27,7 @@
       </v-col>
 
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos">
+        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)" >
           <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
           <v-card-text>
             <p>{{ grupo.descripcion }}</p>
@@ -177,8 +177,6 @@ export default {
               //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
               if (responde.ok) {
                 const dataImagen = await responde.text();
-                console.log("dataImagen");
-                console.log(dataImagen);
                 imagenes.imagen = dataImagen;
               } else {
                 console.error('Error en la respuesta:', responde.status);

@@ -45,7 +45,7 @@ const routes = [
           component: () => import('@/views/CrearAgrupacionView.vue'),
         },
         {
-          path: 'crear_publicacion',
+          path: 'crear_publicacion/:id',
           name: 'Crear Publicacion',
           component: () => import('@/views/CrearPublicacionView.vue'),
         },

@@ -78,8 +78,8 @@ async function getAgrupaciones() {
       console.error('Error al obtener la imagen:', error);
       throw error;
     }
-
   }
+
   async function createSolicitud(rut, id_agr) {
     try {
       // Crea una nueva solicitud

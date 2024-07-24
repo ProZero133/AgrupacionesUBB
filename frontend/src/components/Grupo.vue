@@ -21,7 +21,7 @@
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='urlImagen' />
+                <v-img class="image" aspect-ratio="1" :src='actividad.imagen' />
               </v-col>
               <v-col cols="7">
                 <p>{{ actividad.descripcion }}</p>
@@ -152,6 +152,30 @@ import { mergeProps } from 'vue';
             console.log("Actividades obtenidas");
             console.log(response);
             this.actividades = data;
+            console.log(this.actividades[0]);
+
+            for (const imagenes of this.actividades){
+            try {
+              const responde = await fetch('http://localhost:3000/imagen/'+imagenes.imagen, {
+                method: 'GET',
+              });
+              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                console.log("dataImagen");
+                console.log(dataImagen);
+                imagenes.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+
+            }
+            catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
+
+
           }
         } else {
           console.error('Error en la respuesta:', response.status);

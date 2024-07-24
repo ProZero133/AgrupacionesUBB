@@ -7,6 +7,10 @@ const routes = [
       redirect: '/api/home',
     },
     {
+      path: '/api/crear_actividad',
+      redirect: '/api/home',
+    },
+    {
       path: '/api',
       component: () => import('@/layouts/default/Dashboard.vue'),
       children: [

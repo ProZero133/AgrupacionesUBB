@@ -77,6 +77,7 @@
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
             { name: 'Grupo', icon: 'mdi-account-group', path: '/api/grupo'},
+            { name: 'Solicitar Acreditacion', icon: 'mdi-check', path: '/api/solicitar_acreditacion'} 
             
         ],
     

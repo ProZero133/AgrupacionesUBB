@@ -21,6 +21,11 @@ const routes = [
           component: () => import('@/views/AdminHome.vue'),
         },
         {
+          path: 'solicitar_acreditacion',
+          name: 'SolicitarAcreditacion',
+          component: () => import('@/views/SolicitarAcreditacionView.vue'),
+        },
+        {
           path: 'verificaciones',
           name: 'Verificaciones',
           component: () => import('@/views/VerificacionesView.vue'),

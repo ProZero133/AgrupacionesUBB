@@ -19,7 +19,7 @@
                 </v-col>
 
                 <v-col cols="6" md="6">
-                    <v-text-field v-model="fecha_creacion" label="Fecha de creación" type="date" required :min="hoy"
+                    <v-text-field v-model="fecha_creacion" label="Fecha de creación" type="date" required
                         :rules="dateRules" :error-messages="dateErrors.creacion" @change="validateFechaCreacion"></v-text-field>
                 </v-col>
 
@@ -60,10 +60,18 @@ export default {
     },
     
     dateRules: [
-            value => {
-                if (value) return true
-                return 'La fecha es requerida.'
-            },
+        value => {
+            if (value) return true
+            return 'La fecha es requerida.'
+        },
+        value => {
+            const today = new Date();
+            const selectedDate = new Date(value);
+            today.setHours(0, 0, 0, 0); // Remove time part
+            selectedDate.setHours(0, 0, 0, 0); // Consistent with today's time removal
+            if (selectedDate >= today) return true;
+            return 'La fecha no puede ser antes de hoy.';
+        },
     ],
     }),
     methods: {

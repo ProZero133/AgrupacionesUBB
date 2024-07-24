@@ -94,7 +94,7 @@ import addImage from '../assets/imagePlaceholder.png';
     data: () => ({
       nom_act: '',
       descripcion: '',
-      imagen: '',
+      imagen: [],
       tipo: false,
       id_agr: '',
       defaultImageUrl: addImage,

@@ -3,7 +3,7 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-card class="mx-auto px-6 py-8" max-width="800">
-      <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo, id_agr)" fast-fail class="form"
+      <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo)" fast-fail class="form"
         ref="formulario">
         <v-row>
           <v-spacer></v-spacer>
@@ -69,10 +69,10 @@
 
             </v-col>
 
-            <v-col cols="12">
+            <!-- <v-col cols="12">
               <v-text-field class="idAct" v-model="id_agr" label="ID de la agrupación" clearable counter required>
               </v-text-field>
-            </v-col>
+            </v-col> -->
 
             <v-col cols="4">
               <v-btn class="form-submit" type="submit" color="#2CA2DC">Crear actividad</v-btn>
@@ -89,8 +89,17 @@
 
 <script>
 import addImage from '../assets/imagePlaceholder.png';
+import { useRoute } from 'vue-router';
 
 export default {
+  setup() {
+    const route = useRoute();
+    const groupId = route.params.id;
+
+    return {
+      groupId,
+    };
+  },
   name: 'HelloWorld',
 
   data: () => ({
@@ -149,8 +158,9 @@ export default {
     });
 },
 
-async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
+async CreaActividad(nom_act, descripcion, imagen, tipo) {
   try {
+    console.log(nom_act, descripcion, imagen, tipo, this.groupId);
     // Selecciona el primer archivo de imagen proporcionado
     //const file = imagen[0];
     // Crea una promesa para convertir la imagen a base64 utilizando FileReader
@@ -172,13 +182,14 @@ async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+      body: JSON.stringify({ nom_act, descripcion, imagen: '3', tipo, id_agr: this.groupId }),
     });
     // Verifica si la respuesta es exitosa
     if (response.ok) {
       // Convierte la respuesta en formato JSON
       const data = await response.json();
-      console.log(data);
+      this.$router.push(`/api/grupo/${this.groupId}`);
+      this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
     } else {
       console.error('Error en la respuesta:', response.status);
     }

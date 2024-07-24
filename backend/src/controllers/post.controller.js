@@ -1,7 +1,7 @@
 "use strict";
 
 const {getPosts, getPostById, createPost, updatePost, deletePost} = require("../services/post.service");
-const { postBodySchema } = require("../schema/post.schema.js");
+const postSchema  = require("../schema/post.schema.js");
 
 /**
  * Obtiene todas los posts
@@ -56,7 +56,7 @@ async function crearPost(req, res) {
     try {
 
         // Valida el cuerpo de la petición
-        const { error } = postBodySchema.validate(req.body);
+        const { error } = postSchema.validate(req.body);
 
         if (error) {
             res.code(400).send(error.details.map(detail => detail.message));
@@ -87,7 +87,7 @@ async function actualizarPost(req, res) {
         const { id } = req.params;
 
         // Valida el cuerpo de la petición
-        const { error } = postBodySchema.validate(req.body);
+        const { error } = postSchema.validate(req.body);
 
         if (error) {
             return res.code(400).send(error.details[0].message);

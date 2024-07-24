@@ -26,7 +26,7 @@ const routes = [
           component: () => import('@/views/VerificacionesView.vue'),
         },
         {
-          path: 'crear_actividad',
+          path: 'crear_actividad/:id',
           name: 'Crear Actividad',
           component: () => import('@/views/CrearActividadView.vue'),
         },

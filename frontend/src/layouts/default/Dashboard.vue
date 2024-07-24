@@ -9,16 +9,14 @@
           ></v-app-bar-nav-icon>
   
           <v-text-field
-              :loading="loading"
               append-inner-icon="mdi-magnify"
               density="compact"
               label="Buscar..."
-              flat="true"
+              flat
               variant="solo"
               hide-details
               single-line
               bg-color="gray"
-              @click:append-inner="onClick"
               :style="{ 'margin-left': '20px' }"
             ></v-text-field>
   
@@ -27,7 +25,7 @@
           <v-spacer></v-spacer>
   
           <template v-if="$vuetify.display.mdAndUp">
-            <v-text>Marco Araneda</v-text>
+            <p>Marco Araneda</p>
   
             <v-btn icon>
               <v-icon>mdi-account</v-icon>
@@ -67,7 +65,6 @@
     export default {
       data: () => ({
         drawer: true,
-        rail: true,
     
         items: [
             { name: 'Home', icon: 'mdi-home', path: '/api/home'},
@@ -76,12 +73,8 @@
             { name: 'Login', icon: 'mdi-login', path: '/api/login'},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
-            { name: 'Grupo', icon: 'mdi-account-group', path: '/api/grupo'},
             {name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
         ],
-    
-        user_RUT: '20.999.554-9',
-        user_name: 'Marco Araneda',
       }),
   }
     </script>

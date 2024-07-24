@@ -31,12 +31,14 @@ async function AcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
         const id = req.params.id_agr;
-        console.log("asdfasdf");
+        console.log(id);
 
         // Obtiene todas las agrupaciones
         const agrupacionesCompletas = await getAgrupaciones();
+        console.log(agrupacionesCompletas);
+
         const Agrupacion_a_Verificar = agrupacionesCompletas.filter(Agrupacion => Agrupacion.id_agr === id); 
-        console.log("asdfasdfasdf");
+        console.log([Agrupacion_a_Verificar]);
         
         reply.code(200).send(Agrupacion_a_Verificar);
     } catch (error) {

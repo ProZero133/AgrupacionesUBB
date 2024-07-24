@@ -18,8 +18,6 @@ async function obtenerImagenPorID(req, res) {
 		if (imagen.rowCount === 0) {
 			reply.code(404).send('Imagen no encontrada');
 		} else {
-			console.log('Imagen encontrada:');
-			console.log(imagen);
 			res.code(200).send(imagen);
 		}
 	} catch (error) {

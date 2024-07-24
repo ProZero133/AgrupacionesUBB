@@ -1,4 +1,5 @@
 const { pool } = require('../db.js');
+const { getVotacionById } = require('./votacion.service.js');
 
 async function getOpciones() {
     try {
@@ -20,8 +21,13 @@ async function getOpcionById(id) {
 
 async function createOpcion(opcionData) {
     try {
+        const votacion = await getVotacionById(opcionData.id_votacion);
+        if (!votacion) {
+            throw new Error('La votación con el ID especificado no existe');
+        }
+
         //Arma la consulta SQL para insertar una opcion
-        const newOpcion = await pool.query('INSERT INTO Opcion (nombre, resultado) VALUES ($1, $2) RETURNING *', [nombre, resultado]);
+        const newOpcion = await pool.query('INSERT INTO Opcion (nombre, resultado, id_votacion) VALUES ($1, $2, $3) RETURNING *', [nombre, resultado, id_votacion]);
         return newOpcion.rows[0];
     } catch (error) {
         console.error(error);

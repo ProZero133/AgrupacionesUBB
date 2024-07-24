@@ -12,5 +12,5 @@ const postSchema = Joi.object({
         }),
 });
 
-module.exports = postSchema;
+module.exports = postBodySchema;
 

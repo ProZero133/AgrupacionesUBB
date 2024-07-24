@@ -54,11 +54,13 @@ async function obtenerPostPorId(req, res) {
 
 async function crearPost(req, res) {
     try {
+
         // Valida el cuerpo de la petición
         const { error } = postBodySchema.validate(req.body);
 
         if (error) {
-            return res.code(400).send(error.details[0].message);
+            res.code(400).send(error.details.map(detail => detail.message));
+            return;
         }
 
         // Crea un nuevo post

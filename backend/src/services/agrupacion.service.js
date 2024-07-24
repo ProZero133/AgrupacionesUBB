@@ -42,30 +42,55 @@ async function getAgrupaciones() {
     }
 }
 
-  async function updateAgrupacion(id, agrupacion) {
-    try {
-      // Actualiza la agrupacion con el id especificado
-      const [rowsUpdated, [updatedAgrupacion]] = await Agrupacion.update({
-        id_agr: agrupacion.id_agr,
-        nombre_agr: agrupacion.nombre_agr,
-        descripcion: agrupacion.descripcion,
-        rut: agrupacion.rut,
-        fecha_creacion: agrupacion.fecha_creacion,
-        verificado: agrupacion.verificado,
-        fecha_verificacion: agrupacion.fecha_verificacion
-      }, {
-        where: { id: id },
-        returning: true
-      });
-  
-      // Retorna la agrupacion actualizada
-      return updatedAgrupacion;
-    } catch (error) {
-      // Maneja cualquier error que pueda ocurrir
-      console.error('Error al actualizar la agrupación:', error);
-      throw error;
+// wachito, esto no funciona y me taime asi que voy a hacer uno unica y explusivamente para el verificado
+async function updateAgrupacion(id) {
+  try {
+    // Verifica si la agrupación existe
+    const validarAgrupacion = await pool.query('SELECT * FROM "Agrupaciones" WHERE id = $1', [id]);
+    
+    if (validarAgrupacion.rows.length === 0) {
+      return 'La agrupación no existe';
     }
+
+    // Actualiza la agrupación con el id especificado
+    const NuevosDatosAgrupacion = await pool.query(
+      `UPDATE "Agrupacion" SET id_agr = $1, nombre_agr = $2, descripcion = $3, rut = $4, fecha_creacion = $5, verificado = $6, fecha_verificacion = $7 WHERE id = $8 RETURNING *`, 
+      [agrupacion.id_agr, agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, agrupacion.fecha_creacion, agrupacion.verificado, agrupacion.fecha_verificacion, id]
+    );
+
+    // Retorna la agrupación actualizada
+    return NuevosDatosAgrupacion.rows[0];
+  } catch (error) {
+    console.log('Error al actualizar la agrupación:', error);
+    throw error;
   }
+}
+
+
+async function updateAgrupacionVerificado(id) {
+  try {
+
+    // Actualiza solo el atributo verificado
+    const update_Verificado = await pool.query(
+      `UPDATE "Agrupacion" 
+       SET verificado = $1 
+       WHERE id_agr = $2 
+       RETURNING *`, 
+      [
+        'Verificado',
+        id
+      ]
+    );
+
+    // Retorna la agrupación actualizada
+    return update_Verificado.rows[0];
+  } catch (error) {
+    console.log('Error al actualizar la agrupación:', error);
+    throw error;
+  }
+}
+
+
 
   async function getImage(id) {
     try {
@@ -126,6 +151,7 @@ async function getAgrupaciones() {
     getAgrupacionById,
     createAgrupacion,
     updateAgrupacion,
+    updateAgrupacionVerificado,
     getImage,
     createSolicitud,
     getSolicitudes,

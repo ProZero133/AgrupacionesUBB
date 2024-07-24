@@ -30,7 +30,8 @@ async function createPublicacion(publicacionData) {
         const newpublicacion = await pool.query('INSERT INTO "Publicacion" (encabezado, imagen, id_agr, rut, fecha_publicacion) VALUES ($1, $2, $3, $4, $5) RETURNING *', [publicacionData.encabezado, publicacionData.imagen, publicacionData.id_agr, publicacionData.rut, publicacionData.fecha_publicacion]);
         
         // Retorna la nueva publicacion
-        return newpublicacion;
+        let pubInserted = newpublicacion.rows[0].id_pub;
+        return pubInserted;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la publicacion:', error);

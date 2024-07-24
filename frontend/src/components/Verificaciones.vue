@@ -6,10 +6,13 @@
       </v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="AgrupacionesPendientesObtenidas">
-          <template v-slot:item.action="{ item }">
+          <template v-slot:item.action="{ AgrupacionesPendientesObtenidas }">
             <div class="d-flex justify-end">
-              <v-btn color="primary" name="Botones">
-                Solicitud Pendiente
+              <v-btn color="green" name="B_Aceptar" class="B_Aceptar">
+                Aceptar
+              </v-btn>
+              <v-btn color="red" name="B_Rechazar" class="B_Rechazar">
+                Rechazar
               </v-btn>
             </div>
           </template>
@@ -25,12 +28,12 @@ export default {
   data() {
     return {
       AgrupacionesPendientesObtenidas: [],
+
+      // Falta añadir una columna en la que se muestre el numero total de integrantes de la agrupacion
+
       headers: [
         { text: 'Nombre', value: 'nombre_agr' },
-        { text: 'Descripción', value: 'descripcion' },
         { text: 'RUT', value: 'rut' },
-        { text: 'Verificado', value: 'verificado' },
-        { text: 'Fecha de verificación', value: 'fecha_verificacion' },
         { text: 'Acciones', value: 'action', sortable: false },
       ],
     };
@@ -59,9 +62,15 @@ export default {
 </script>
 
 <style scoped>
+
+.B_Aceptar, .B_Rechazar {
+  margin: 5px;
+  min-width: 20%;
+}
+
 .v-card-custom {
   margin: 100px;
-  margin-left: 300px;
-  margin-right: 300px;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 </style>

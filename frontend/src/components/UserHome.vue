@@ -52,6 +52,7 @@
 }
 
 .pasando {
+  min-width: 330px;
   margin-left: 3%;
   margin-bottom: 6%;
 }
@@ -72,16 +73,19 @@
 }
 
 .card-misgrupos {
+  min-width: 200px;
   width: 80%;
-  margin: 0 auto;
+  margin-left: 200px;
   /* This centers the card within its container */
 }
 
 .card-actividades {
+  margin-top: 40vh;
+  min-width: 325px;
   /* O la altura que prefieras para tus v-card */
   width: 90%;
   margin: 0 auto;
-  margin-top: -40px;
+
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
 }

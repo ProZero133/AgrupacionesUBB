@@ -5,16 +5,15 @@
       <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
       
       <v-label>Iniciar sesión con credenciales institucionales</v-label>
-      <v-text-field v-model="username" label="Rut" required></v-text-field>
-      <v-text-field v-model="password" label="Contraseña" type="password" required></v-text-field>
+      <v-text-field class="tfCredenciales" v-model="username" label="Rut" required></v-text-field>
+      <v-text-field class="tfCredenciales" v-model="password" label="Contraseña" type="password" required></v-text-field>
       <v-btn type="submit" color="primary">Iniciar sesión</v-btn>
     </v-form>
   </v-container>
 
   <v-container class="container-logincorreo">
     <v-form class="form-logincorreo">
-      <v-label>o</v-label>
-      <v-text-field v-model="email" label="Correo institucional" required></v-text-field>
+      <v-text-field class="tfCorreo" v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
       <div v-if="isLoading" class="loading-overlay">
         Cargando...
@@ -92,7 +91,10 @@ template{
   padding: 30px;                              /* Espacio interior */
   margin-top: 100px;
   border-radius: 15px;                        /* Bordes redondeados */
-  width: 32%;
+  width: 35%;
+  min-width: 400px;
+  max-width: 400px;
+
 }
 
 .loading-overlay {
@@ -111,14 +113,18 @@ template{
 .form-loginrut {
   position: center;
   display: table;
-  margin-left: auto;
+  margin-left: 5px;
   margin-right: auto;
 }
 
 .form-logincorreo {
   margin-top: 50px;
   position: center;
-  margin-left: 400px;
+  margin-left: 1vw;
   margin-right: 400px;
 }
+.tfCorreo{
+  min-width: 350px;
+}
+
 </style>

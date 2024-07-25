@@ -21,7 +21,7 @@ const url = config.URL;
 
 fastify.register(fastifyCors, {
     // Configura los orígenes permitidos
-    origin: url
+    origin: true
   });
   fastify.register(fastifyCookie, {
     secret: cookieSecret,

@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud, getUsuariosdeAgrupacion } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo, getUsuariosdeAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -174,6 +174,30 @@ async function ObtenerUsuariosdeAgrupacion (req, res) {
 
 
 
+async function eliminarAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        const user = await getUsuarioByRut(rut);
+        if (user.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const usuarioEsLider = await getLider(id_agr);
+        //si el rut no es lider de la agrupacion
+        if (usuarioEsLider[0].rut !== rut) {
+            return res.code(401).send('No tienes permisos para eliminar la agrupación');
+        }
+        const result = await validateEliminarGrupo(id_agr);
+        if (!result) {
+            return res.code(500).send('Error al eliminar la agrupación');
+        }
+        res.code(200).send('Agrupación eliminada');
+    } catch (error) {
+        console.error('Error al eliminar la agrupación:', error);
+        res.code(500).send('Error al eliminar la agrupación');
+    }
+}
+
 module.exports = {
         VerGrupos,
         ObtenerAgrupacionesPorID,
@@ -183,5 +207,6 @@ module.exports = {
         unirseAgrupacion,
         solicitudesAgrupacion,
         aceptarSolicitud,
-        ObtenerUsuariosdeAgrupacion
+        ObtenerUsuariosdeAgrupacion,
+        eliminarAgrupacion
     };

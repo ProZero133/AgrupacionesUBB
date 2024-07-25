@@ -43,6 +43,9 @@
             <v-col>
               <v-img class="image" max-height="280px" aspect-ratio="1" :src='urlImagen' />
             </v-col>
+            <v-col>
+              <v-date-picker class="fechaActividad" title="Fecha para la actividad" header="Fecha" v-model="date" locale="es" color="primary" required :rules="fechaRules"></v-date-picker>
+            </v-col>
 
           </v-col>
 
@@ -86,8 +89,8 @@
 
 <script>
 import addImage from '../assets/imagePlaceholder.png';
+import es from 'date-fns/locale/es';
 import { useRoute } from 'vue-router';
-
 export default {
   setup() {
     const route = useRoute();
@@ -103,6 +106,7 @@ export default {
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
     nombreRules: [v => !!v || 'Nombre de la actividad requerido'],
     cuposRules: [v => !!v || 'Cupos requeridos'],
+    fechaRules: [v => !!v || 'Fecha requerida'],
     nom_act: '',
     descripcion: '',
     imagen: [],
@@ -113,6 +117,7 @@ export default {
     idImagen: '',
     verificado: '',
     cupos: 1,
+    date: null,
   }),
   methods: {
     createImage(file) {
@@ -202,6 +207,12 @@ export default {
         this.$root.showSnackBar('error', 'Por favor, rellene todos los campos', 'Error de validación');
         return;
       }
+      //Validar fecha igual o mayor a la actual
+      const fechaActual = new Date();
+      if (this.date < fechaActual) {
+        this.$root.showSnackBar('error', 'Fecha no válida', 'Error de validación');
+        return;
+      }
       await this.PostearImagen();
       if (this.idImagen === '') {
         console.error('Error al subir la imagen');
@@ -215,17 +226,33 @@ export default {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId,cupos }),
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             const data = await response.json();
+            const id_act = data.id_act;
+            const fecha_actividad = new Date(this.date).toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
+            console.log("Fecha para la actividad: "+fecha_actividad);
+            const programarActividad = await fetch(`http://localhost:3000/programar/${id_act}/${this.groupId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ fecha_actividad }),
+            });
+
+
+
+
             this.$router.push(`/api/grupo/${this.groupId}`);
             this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
           } else {
             console.error('Error en la respuesta:', response.status);
           }
+
+
         } catch (error) {
           console.error('Error al hacer fetch:', error);
         }
@@ -239,6 +266,10 @@ export default {
 
 </script>
 <style>
+.fechaActividad {
+  margin-top: 2px;
+  height: 405px;
+}
 .descripcionAct {
   height: 20px !important;
   margin-top: -20px;
@@ -251,7 +282,7 @@ export default {
 }
 
 .bottomElement {
-  margin-top: 90px;
+  margin-top: 0px;
 }
 
 .title-card {

@@ -39,6 +39,56 @@ async function getActividadesByAgrupacion(id_agr) {
     }
 }
 
+async function getFechasActividades(id_agr) {
+    try{
+        const fechasActividades = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_agr = $1', [id_agr]);
+        return fechasActividades.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las fechas de las actividades:', error);
+    }
+}
+
+async function getFechaActividad(id_act) {
+    try{
+        const fechaActividad = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_act = $1', [id_act]);
+        return fechaActividad.rows[0];
+    }
+    catch (error) {
+        console.log('Error al obtener la fecha de la actividad:', error);
+    }
+}
+
+async function getParticipantesActividad(id_act) {
+    try{
+        const participantes = await pool.query('SELECT * FROM "Participa" WHERE id_act = $1', [id_act]);
+        return participantes.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener los participantes de la actividad:', error);
+    }
+}
+
+async function setParticipanteActividad(id_act, rut) {
+    try{
+        const response = await pool.query('INSERT INTO "Participa" (rut, id_act) VALUES ($1, $2) RETURNING *', [rut, id_act]);
+        return response.rows[0];
+    }
+    catch (error) {
+        console.log('Error al agregar un participante a la actividad:', error);
+    }
+}
+
+async function setProgramacionActividad(id_agr, id_act, fecha_actividad) {
+    try{
+        const response = await pool.query('INSERT INTO "Programa" (id_agr, id_act, fecha_actividad) VALUES ($1, $2, $3) RETURNING *', [id_agr, id_act, fecha_actividad]);
+        return response.rows[0];
+    }
+    catch (error) {
+        console.log('Error al programar una actividad:', error);
+    }
+}
+
 async function createActividad(actividadData) {
     try {
         const newActividad = await pool.query(
@@ -79,13 +129,21 @@ async function updateActividad(id, actividadData) {
 
 async function deleteActividad(id) {
     try {
-        // Elimina la actividad con el id especificado de la base de datos
-        const rowsDeleted = await Actividad.destroy({
-            where: { id: id }
-        });
+        //Validar que la actividad no tenga mas de un participante
+        const participantes = await getParticipantesActividad(id);
+        if(participantes.length > 1){
+            return 'No es posible eliminar una actividad con mas de un participante';
+        }
+        //Validar que la actividad aun no ocurra
+        const fechasActividades = await getFechaActividad(id);
+        const fechaActual = new Date();
+        if(fechaActual > fechasActividades.fecha_actividad){
+            return 'No es posible eliminar una actividad que ya ocurrio';
+        }
 
-        // Retorna la cantidad de actividades eliminadas
-        return rowsDeleted;
+
+        // Elimina la actividad con el id especificado de la base de datos
+        const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la actividad:', error);
@@ -100,5 +158,10 @@ module.exports = {
     createActividad,
     updateActividad,
     deleteActividad,
-    getActividadesByAgrupacion
+    getActividadesByAgrupacion,
+    getFechasActividades,
+    getParticipantesActividad,
+    setParticipanteActividad,
+    setProgramacionActividad,
+    getFechaActividad
 };

@@ -1,6 +1,7 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad } = require('../services/actividad.service');
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad, setProgramacionActividad, setParticipanteActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
+const {getLider} = require('../services/agrupacion.service.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -117,11 +118,51 @@ async function deleteActividad(req, res) {
     }
 }
 
+async function programarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const id_agr = req.params.id_agr;
+        const fecha_actividad = req.body.fecha_actividad; 
+        // Programa la actividad
+        const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
+        const lider = await getLider(id_agr);
+        const rut=lider.rut;
+        const insertarLiderEnParticipantes = await setParticipanteActividad(id_act, rut);
+
+        // Retorna la actividad programada
+        res.code(200).send(actividad);
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.code(500).send('Error al programar la actividad');
+    }
+}
+async function participarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+
+        // Programa la actividad
+        const actividad = await setParticipanteActividad(id_act, rut);
+
+        // Retorna la actividad programada
+        res.status(200).json(actividad);
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.status(500).send('Error al programar la actividad');
+    }
+}
+
 module.exports = {
     ObtenerActividades,
     ObtenerActividadPorID,
     crearActividad,
     updateActividad,
     deleteActividad,
-    ObtenerActividadesPorAgrupacion
+    ObtenerActividadesPorAgrupacion,
+    programarActividad,
+    participarActividad
 };

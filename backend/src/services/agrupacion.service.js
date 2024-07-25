@@ -27,12 +27,17 @@ async function getAgrupaciones() {
 
   async function createAgrupacion(agrupacion) {
     try {
+      const fechaActual = new Date();
         // Inserta una nueva agrupacion en la base de datos
         const newAgrupacion = await pool.query(
             'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, agrupacion.fecha_creacion, agrupacion.verificado, agrupacion.fecha_verificacion]
+            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion]
         );
-
+        //Insertar lider de la agrupacion
+        const lider = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [agrupacion.rut, newAgrupacion.rows[0].id_agr, fechaActual, 'Lider']);
+        if (lider.rows.length === 0) {
+          return 'Error al insertar el lider';
+        }
         // Retorna la nueva agrupacion insertada
         return newAgrupacion.rows[0];
     } catch (error) {

@@ -123,7 +123,6 @@ export default {
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
     convertirImagen(data) {
-      console.log('Data passed to convertirImagen:', data);
     // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
   
@@ -148,8 +147,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("grupos:");
-          console.log(data);
           this.grupos = data;
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -169,8 +166,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("actividades:");
-          console.log(data);
           this.actividades = data;
 
           for (const imagenes of this.actividades){

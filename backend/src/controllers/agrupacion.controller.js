@@ -43,7 +43,8 @@ async function crearAgrupacion(req, res) {
             res.code(400).send(error.details.map(detail => detail.message));
             return;
         }
-
+        const fechaActual = new Date();
+        req.body.fecha_creacion = fechaActual;
         // Crea una nueva agrupacion
         const agrupacion = await createAgrupacion(req.body);
 

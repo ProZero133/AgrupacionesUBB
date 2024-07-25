@@ -20,17 +20,8 @@
             </v-col>
 
             <v-col cols="12">
-              <v-textarea
-              class="descripcionAct"
-              v-model="descripcion"
-              label="Descripción de la actividad"
-              clearable
-              required
-              variant="solo-filled"
-              rows="10"
-              no-resize
-              :rules="descrules"
-              counter>
+              <v-textarea class="descripcionAct" v-model="descripcion" label="Descripción de la actividad" clearable
+                required variant="solo-filled" rows="10" no-resize :rules="descrules" counter>
               </v-textarea>
             </v-col>
 
@@ -56,13 +47,15 @@
 
             <v-col cols="12" class="bottomElement">
 
-              <v-checkbox v-model="tipo">
+              <v-checkbox v-model="tipo" :disabled="verificado !== 'Verificado'">
                 <template v-slot:label>
                   <div>
                     <h2 v-if=tipo>Actividad Pública: Activado</h2>
                     <h2 v-else>Actividad Pública: Desactivado</h2>
                     <h4 v-if=tipo>Todos podrán ver y participar en la actividad, sean miembros del grupo o no.</h4>
                     <h4 v-else>Sólo los miembros del grupo podrán ver y participar de la actividad.</h4>
+                    <h4 v-if="verificado !== 'Verificado'" class="warning-message">Debes acreditar tu grupo para crear
+                      actividades públicas.</h4>
                   </div>
                 </template>
               </v-checkbox>
@@ -112,19 +105,15 @@ export default {
     defaultImageUrl: addImage,
     urlImagen: addImage,
     idImagen: '',
+    verificado: '',
   }),
   methods: {
     createImage(file) {
       const reader = new FileReader();
-
-      // Extract the File object from the Proxy
       const actualFile = file[0];
-
       reader.onload = e => {
         this.urlImagen = e.target.result;
       };
-
-      // Ensure the extracted object is a File before calling readAsDataURL
       if (actualFile instanceof File) {
         reader.readAsDataURL(actualFile);
       } else {
@@ -132,30 +121,9 @@ export default {
       }
     },
 
-
-
-//    createImage(file) {
-//      const reader = new FileReader();
-
-      // Extract the File object from the Proxy
-//      const actualFile = file[0];
-
-      //reader.onload = e => {
-        //this.urlImagen = e.target.result;
-      //};
-
-      // Ensure the extracted object is a File before calling readAsDataURL
-      //if (actualFile instanceof File) {
-        //reader.readAsDataURL(actualFile);
-      //} else {
-        //console.error("El archivo presentado no es un archivo.");
-      //}
-    //},
-
-
     onFileChange(e) {
       const file = e.target.files[0];
-      console.log(file) 
+      console.log(file)
       if (!file) {
         this.urlImagen = this.defaultImageUrl;
         return;
@@ -165,59 +133,73 @@ export default {
         this.urlImagen = reader.result;
       };
       reader.readAsDataURL(file);
-
-      console.log("file");
-      console.log(this.urlImagen);
     },
 
     fileToBase64(file) {
-    return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
-            let base64String = reader.result;
-            // Remover el prefijo "data:image/png;base64," o similar
-            base64String = base64String.replace(/^data:image\/\w+;base64,/, '');
-            resolve(base64String);
+          let base64String = reader.result;
+          // Remover el prefijo "data:image/png;base64," o similar
+          base64String = base64String.replace(/^data:image\/\w+;base64,/, '');
+          resolve(base64String);
         };
         reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
-    });
-},
+      });
+    },
 
-async PostearImagen() {
-  try {
-    const response = await fetch('http://localhost:3000/imagen', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imagen: this.urlImagen }),
-    });
-    // Verifica si la respuesta es exitosa
-    if (response.ok) {
-      // Convierte la respuesta en formato JSON
-      const data = await response.json();
-      console.log("Imagen subida");
-      this.idImagen = data.id_imagen;
-    } else {
-      console.error('Error en la respuesta:', response.status);
-    }
-  } catch (error) {
-    console.error('Error al hacer fetch:', error);
-  }
-},
-
-  async CreaActividad(nom_act, descripcion, imagen, tipo) {
-    await this.PostearImagen();
-    if (this.idImagen === '') {
-      console.error('Error al subir la imagen');
-      this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
-      return;
-    }
-    else {
-      console.log("todo bien!");
-      console.log(this.idImagen);
+    async PostearImagen() {
       try {
+        const response = await fetch('http://localhost:3000/imagen', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ imagen: this.urlImagen }),
+        });
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log("Imagen subida");
+          this.idImagen = data.id_imagen;
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async getVerificado() {
+      try {
+        const response = await fetch(`http://localhost:3000/agrupaciones/${this.groupId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rows && data.rows.length > 0) {
+            this.verificado = data.rows[0].verificado;
+          } else {
+            console.error('No se encontraron filas en la respuesta');
+          }
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async CreaActividad(nom_act, descripcion, imagen, tipo) {
+      await this.PostearImagen();
+      if (this.idImagen === '') {
+        console.error('Error al subir la imagen');
+        this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
+        return;
+      }
+      else {
+        console.log("todo bien!");
+        console.log(this.idImagen);
+        try {
 
           // Selecciona el primer archivo de imagen proporcionado
           //const file = imagen[0];
@@ -229,11 +211,11 @@ async PostearImagen() {
           //    resolve(reader.result);
           //  };
           //  reader.onerror = reject;
-            // Inicia la lectura del archivo como Data URL
+          // Inicia la lectura del archivo como Data URL
           //  reader.readAsDataURL(file);
           //});
 
-          imagen = "hola"; 
+          imagen = "hola";
           //console.log(this.urlImagen);
           // Realiza una solicitud fetch a tu backend Fastify
           const response = await fetch('http://localhost:3000/actividades', {
@@ -249,15 +231,18 @@ async PostearImagen() {
             const data = await response.json();
             this.$router.push(`/api/grupo/${this.groupId}`);
             this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
-            } else {
-              console.error('Error en la respuesta:', response.status);
-            }
-      } catch (error) {
-        console.error('Error al hacer fetch:', error);
+          } else {
+            console.error('Error en la respuesta:', response.status);
+          }
+        } catch (error) {
+          console.error('Error al hacer fetch:', error);
+        }
       }
-    }
+    },
   },
-},
+  mounted() {
+    this.getVerificado();
+  },
 }
 
 </script>

@@ -18,11 +18,6 @@
                         clearable counter required></v-text-field>
                 </v-col>
 
-                <v-col cols="6" md="6">
-                    <v-text-field v-model="fecha_creacion" label="Fecha de creación" type="date" required
-                        :rules="dateRules" :error-messages="dateErrors.creacion" @change="validateFechaCreacion"></v-text-field>
-                </v-col>
-
                 <v-col cols="9">
                     <v-text-field v-model="rut" label="RUT"
                     clearable counter required></v-text-field>
@@ -107,18 +102,6 @@ export default {
         }
         } catch (error) {
         console.error('Error al hacer fetch:', error);
-        }
-    },
-    validateFechaCreacion() {
-        this.validateDate(this.fecha_creacion, this.dateErrors.creacion);
-    },
-    validateDate(fecha, errors) {
-        errors = [];
-        for (let rule of this.dateRules) {
-        let result = rule(fecha);
-        if (typeof result === 'string') {
-            this.dateErrors.push(result);
-        }
         }
     },
     },

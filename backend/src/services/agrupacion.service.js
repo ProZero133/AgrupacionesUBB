@@ -49,7 +49,7 @@ async function getAgrupaciones() {
     }
 }
 
-// wachito, esto no funciona y me taime asi que voy a hacer uno unica y explusivamente para el verificado
+/* wachito, esto no funciona y me taime asi que voy a hacer uno unica y explusivamente para el verificado
 async function updateAgrupacion(id) {
   try {
     // Verifica si la agrupación existe
@@ -72,7 +72,7 @@ async function updateAgrupacion(id) {
     throw error;
   }
 }
-
+*/
 
 async function updateAgrupacionVerificado(id) {
   try {
@@ -97,6 +97,18 @@ async function updateAgrupacionVerificado(id) {
   }
 }
 
+  async function getUsuariosdeAgrupacion(id) {
+    try {
+      // Obtiene los usuarios de la agrupación con el id especificado
+      // "sm_usuario" -> tabla de usuarios simulados
+      // "usuario" -> tabla de usuarios reales
+      const usuarios = await pool.query('SELECT * FROM "Pertenece" p, "sm_usuario" u,"Agrupacion" a WHERE p.rut = u.rut AND p.id_agr = a.id_agr AND a.id_agr = $1', [id]);      
+      
+      return usuarios.rows;
+    } catch (error) {
+      console.log('Error al obtener los usuarios de la agrupación:', error);
+    }
+  }
 
 
   async function getImage(id) {
@@ -233,7 +245,7 @@ async function validateEliminarGrupo(id_agr) {
     getAgrupaciones,
     getAgrupacionById,
     createAgrupacion,
-    updateAgrupacion,
+    getUsuariosdeAgrupacion,
     updateAgrupacionVerificado,
     getImage,
     createSolicitud,

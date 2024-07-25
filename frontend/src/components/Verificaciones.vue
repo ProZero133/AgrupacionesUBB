@@ -97,7 +97,7 @@ export default {
 // ------------------------------------------------------------------------------------------
 
     async RechazarAgrupacion() {
-      // Falta implementar
+      // Manda un update a la base de datos para cambiar el estado de la agrupacion a Noverificado junto con un mensaje con el motivo
     },
 
     showSnackbar(message, color) {

@@ -56,8 +56,8 @@
     
         items: [
             { name: 'Home', icon: 'mdi-home', path: '/api/home'},
-            {name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil'},
-            {name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
+            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil'},
+            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion'},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Administrar Roles del Grupo', icon: '', path: '/api/administrar_roles_agrupaciones'},

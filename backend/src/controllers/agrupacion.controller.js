@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo, getUsuariosdeAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -158,6 +158,22 @@ async function aceptarSolicitud(req, res) {
     }
 }
 
+async function ObtenerUsuariosdeAgrupacion (req, res) {
+    try {
+        const id = req.params.id_agr;
+        const usuarios = await getUsuariosdeAgrupacion(id);
+        if (usuarios.length === 0) {
+            return res.code(404).send('No se encontraron usuarios');
+        }
+        res.code(200).send(usuarios);
+    } catch (error) {
+        console.error('Error al obtener los usuarios de la agrupación:', error);
+        res.code(500).send('Error al obtener los usuarios de la agrupación');
+    }
+}
+
+
+
 async function eliminarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
@@ -191,5 +207,6 @@ module.exports = {
         unirseAgrupacion,
         solicitudesAgrupacion,
         aceptarSolicitud,
+        ObtenerUsuariosdeAgrupacion,
         eliminarAgrupacion
     };

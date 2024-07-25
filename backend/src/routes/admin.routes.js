@@ -7,6 +7,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/usuarios', ObtenerUsuarios);
   fastify.get('/acreditaciones', ObtenerAcreditaciones);
   fastify.put('/acreditaciones/:id_agr', AcreditaciondeGrupo);
-  fastify.get('/acreditaciones/:id_agr', ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
+  fastify.get('/administracionderoles/:id_agr', ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
   done();
 };

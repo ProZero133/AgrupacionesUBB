@@ -100,7 +100,9 @@ async function updateAgrupacionVerificado(id) {
   async function getUsuariosdeAgrupacion(id) {
     try {
       // Obtiene los usuarios de la agrupación con el id especificado
-      const usuarios = await pool.query('SELECT * FROM "Pertenece" p, "usuario" u,"Agrupacion" a WHERE p.rut = u.rut AND p.id_agr = a.id_agr AND a.id_agr = $1', [id]);      
+      // "sm_usuario" -> tabla de usuarios simulados
+      // "usuario" -> tabla de usuarios reales
+      const usuarios = await pool.query('SELECT * FROM "Pertenece" p, "sm_usuario" u,"Agrupacion" a WHERE p.rut = u.rut AND p.id_agr = a.id_agr AND a.id_agr = $1', [id]);      
       
       return usuarios.rows;
     } catch (error) {

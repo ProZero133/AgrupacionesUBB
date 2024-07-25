@@ -2,13 +2,13 @@
   <div>
     <v-card class="v-card-custom">
       <v-card-title>
-        Administrar roles de Agrupacion
+        Administrar roles de Agrupacion 
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="headers" :items="AgrupacionesPendientesObtenidas">
+        <v-data-table :headers="headers" :items="UsuariosDeAgrupacion">
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
-
+              
             </div>
           </template>
         </v-data-table>
@@ -25,16 +25,17 @@ export default {
   name: 'AdministrarRolesAgrupaciones',
   data() {
     return {
-      AgrupacionesPendientesObtenidas: [],
+      UsuariosDeAgrupacion: [],
       snackbar: false,
       snackbarText: '',
       snackbarColor: '',
       snackbarTimeout: 3000,
       headers: [
-        { text: 'Nombre', value: 'nombre_agr' },
-        { text: 'RUT', value: 'rut' },
-        { text: 'Fecha de Creación', value: 'fecha_creacion' },
-        { text: 'Acciones', value: 'action', sortable: false },
+        { text: 'Nombre', value: 'nombre' },
+        { text: 'Correo', value: 'correo' },
+        { text: 'Carrera', value : 'carrera' },
+        { text: 'rol_agr', value: 'Pendiente' },
+
       ],
     };
   },
@@ -42,14 +43,18 @@ export default {
   // ------------------------------------------------------------------------------------------
 
   methods: {
-    async ObtenerAgrupacionesPendientes() {
+    async ObtenerUsuariosDeAgrupacion() {
       try {
-        const response = await fetch('http://localhost:3000/acreditaciones', {
+        const response = await fetch('http://localhost:3000/administracionderoles/34', {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+
         if (response.ok) {
           const data = await response.json();
-          this.AgrupacionesPendientesObtenidas = data;
+          this.UsuariosDeAgrupacion = data;
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -58,14 +63,9 @@ export default {
       }
     },
 
-
-    // ------------------------------------------------------------------------------------------
-
-    mounted() {
-      this.ObtenerAgrupacionesPendientes();
-    },
-
-    // ------------------------------------------------------------------------------------------
+  },
+  mounted() {
+    this.ObtenerUsuariosDeAgrupacion();
   },
 };
 </script>

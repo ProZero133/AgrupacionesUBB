@@ -1,4 +1,5 @@
 const { pool } = require('../db.js');
+const {getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad} = require('../services/actividad.service.js');
 
 async function getAgrupaciones() {
    try{
@@ -28,10 +29,11 @@ async function getAgrupaciones() {
   async function createAgrupacion(agrupacion) {
     try {
       const fechaActual = new Date();
+      const visible = true;
         // Inserta una nueva agrupacion en la base de datos
         const newAgrupacion = await pool.query(
-            'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion]
+            'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible]
         );
         //Insertar lider de la agrupacion
         const lider = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [agrupacion.rut, newAgrupacion.rows[0].id_agr, fechaActual, 'Lider']);
@@ -151,6 +153,82 @@ async function updateAgrupacionVerificado(id) {
   }
 }
 
+async function deleteAgrupacion(id_agr) {
+  try {
+    // Elimina la agrupación con el id especificado
+    const agrupacion = await pool.query('DELETE FROM "Agrupacion" WHERE id_agr = $1 RETURNING *', [id_agr]);
+    return agrupacion.rows[0];
+  } catch (error) {
+    console.log('Error al eliminar la agrupación:', error);
+  }
+}
+
+async function softDeleteAgrupacion(id_agr) {
+  try {
+    // Establece la visibilidad de la agrupación en falso
+    const agrupacion = await pool.query('UPDATE "Agrupacion" SET visible = $1 WHERE id_agr = $2 RETURNING *', [false, id_agr]);
+    return agrupacion.rows[0];
+  } catch (error) {
+    console.log('Error al eliminar la agrupación:', error);
+  }
+}
+
+async function getLider(id_agr) {
+  try {
+    // Obtiene el lider de la agrupacion
+    const lider = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr = $2', [id_agr, 'Lider']);
+    return lider.rows[0];
+  } catch (error) {
+    console.log('Error al obtener el lider:', error);
+  }
+}
+
+async function validateEliminarGrupo(id_agr) {
+  try {
+    // Obtiene todas las actividades de una agrupacion
+    const actividades = await getActividadesByAgrupacion(id_agr);
+    //Evaluar si hay actividades pasadas la fecha actual
+    if(actividades.length > 0){
+      const fechasActividades = await getFechasActividades(id_agr);
+      const fechaActual = new Date();
+      for (let i = 0; i < fechasActividades.length; i++) {
+        if(fechaActual > fechasActividades[i].fecha){
+          //Soft delete por ya haber organizado actividades
+          const agrupacion = await softDeleteAgrupacion(id_agr);
+          if(agrupacion.length === 0){
+            return 'Error al eliminar la agrupación';
+          }
+          return 'Agrupacion eliminada para los usuarios'; 
+        }
+      }
+    }
+    if(actividades.length > 0){
+      //Obtener la cantidad de participantes para cada actividad
+      for (let i = 0; i < actividades.length; i++) {
+        const participantes = await getParticipantesActividad(actividades[i].id_act);
+        if(participantes.length > 1){
+          //Soft delete por tener actividades con mas de un participante
+          const agrupacion = await softDeleteAgrupacion(id_agr);
+          if(agrupacion.length === 0){
+            return 'Error al eliminar la agrupación';
+          }
+          return 'Agrupacion eliminada para los usuarios';
+        }
+      }
+    }
+    //Eliminar la agrupacion si no tiene actividades o tiene actividades con un solo participante
+    const agrupacion = await deleteAgrupacion(id_agr);
+
+    if(agrupacion.length === 0){
+      return 'Error al eliminar la agrupación';
+    }
+    return 'Agrupacion eliminada';
+  }
+  catch (error) {
+    console.log('Error al obtener las actividades:', error);
+  }
+}
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
@@ -160,5 +238,8 @@ async function updateAgrupacionVerificado(id) {
     getImage,
     createSolicitud,
     getSolicitudes,
-    updateSolicitud
+    updateSolicitud,
+    deleteAgrupacion,
+    getLider,
+    validateEliminarGrupo
   };

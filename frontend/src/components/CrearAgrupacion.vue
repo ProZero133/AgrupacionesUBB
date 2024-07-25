@@ -2,12 +2,12 @@
     <v-container cols="12"></v-container>
     <v-container cols="12">
       <v-card class="mx-auto px-6 py-8" max-width="800">
-        <v-form @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado)" fast-fail class="form" ref="formulario">
+        <v-form @submit.prevent="CreaAgrupacion(nombre_agr, descripcion, rut, verificado)" fast-fail class="form" ref="formulario">
           <v-row>
                 <v-spacer></v-spacer>
                 <v-col cols="12" justify="center">
                     <h1 class="texto">Crear agrupación</h1>
-                    <p class="text-left">Por favor, introducir abajo los datos correspondientes a crear una branch.</p>
+                    <p class="text-left">Por favor, introducir abajo los datos correspondientes a crear una agrupacion.</p>
                 </v-col>
                 <v-col cols="4">
                     <v-text-field class="nombreAgrupa" v-model="nombre_agr" label="Nombre de la agrupación"
@@ -45,7 +45,6 @@ export default {
     nombre_agr: '',
     descripcion: '',
     rut: '',
-    fecha_creacion: '',
     verificado: 'Noverificado',
     fecha_verificacion: null,
 
@@ -79,11 +78,9 @@ export default {
         body: JSON.stringify({ email: this.email }),
         });
     },
-    async CreaAgrupacion(nombre_agr, descripcion, rut, fecha_creacion, verificado) {
+    async CreaAgrupacion(nombre_agr, descripcion, rut, verificado) {
         try {
-        // Realiza una solicitud fetch a tu backend Fastify
-        console.log(nombre_agr, descripcion, rut, fecha_creacion, verificado);
-
+            const fecha_creacion= new Date();
         const response = await fetch('http://localhost:3000/agrupaciones', {
             method: 'POST',
             headers: {

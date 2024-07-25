@@ -15,6 +15,7 @@
     "@mdi/font": "5.9.55",
     "all": "^0.0.0",
     "core-js": "^3.8.3",
+    "date-fns": "^3.6.0",
     "roboto-fontface": "*",
     "vue": "^3.2.13",
     "vue-router": "^4.3.2",

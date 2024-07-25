@@ -136,7 +136,7 @@ import { mergeProps } from 'vue';
       async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/actividades/grupo/${this.groupId}`, {
+        const response = await fetch(`http://localhost:3000/actividadesgrupo/${this.groupId}`, {
           method: 'GET',
         });
 

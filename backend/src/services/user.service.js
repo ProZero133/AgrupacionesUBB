@@ -13,6 +13,17 @@ async function obtenerUsuarios() {
         return error;
     }
 }
+async function getUsuarioServidor(rut){
+    try{
+        const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
+        return result.rows[0];
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return { error: "Ocurrió un error al obtener el usuario por RUT." };
+    }
+}
+
 
 // Obtiene todos los usuarios registrados en la plataforma
 async function obtenerUsuariosPlataforma(){
@@ -113,4 +124,4 @@ async function getTagById(id){
     }
 }
 
-module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById };
+module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById, getUsuarioServidor };

@@ -1,6 +1,6 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 const { getAgrupaciones } = require('../services/agrupacion.service');
-const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById } = require('../services/user.service');
+const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById, getUsuarioServidor } = require('../services/user.service');
 const { func } = require('joi');
 async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
@@ -118,4 +118,19 @@ async function ObtenerTag(req, res){
 
 
 }
-module.exports = { EmailLogin, VerGrupos, obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, ActualizarPreferenciasUsuario, ObtenerTag };
+async function obtenerUsuarioServidor(req, res) {
+  try{
+    const { rut } = req.params;
+    const result = await getUsuarioServidor(rut);
+    if(result.length === 0){
+      return res.send({ success: false, message: 'No se encontró el usuario' });
+    }
+    return result;
+
+  }
+  catch(error){
+    console.error('Error al obtener el usuario:', error);
+    res.code(500).send('Error al obtener el usuario');
+  }
+}
+module.exports = { EmailLogin, VerGrupos, obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, ActualizarPreferenciasUsuario, ObtenerTag, obtenerUsuarioServidor };

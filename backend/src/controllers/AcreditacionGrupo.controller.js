@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, updateAgrupacionVerificado } = require("../services/agrupacion.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
     try {
@@ -31,16 +31,11 @@ async function AcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
         const id = req.params.id_agr;
-        console.log(id);
 
-        // Obtiene todas las agrupaciones
-        const agrupacionesCompletas = await getAgrupaciones();
-        console.log(agrupacionesCompletas);
-
-        const Agrupacion_a_Verificar = agrupacionesCompletas.filter(Agrupacion => Agrupacion.id_agr === id); 
-        console.log([Agrupacion_a_Verificar]);
+        // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Verificado"
+        await updateAgrupacionVerificado(id);
         
-        reply.code(200).send(Agrupacion_a_Verificar);
+        reply.code(200).send('Acreditación exitosa');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al Acreditar: ', error);

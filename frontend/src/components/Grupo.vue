@@ -103,6 +103,7 @@ import { mergeProps } from 'vue';
       items: [
         { title: 'Crear Actividad', path: '/api/crear_actividad/' },
         { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
+        { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
       ],
 
       actividades: [],

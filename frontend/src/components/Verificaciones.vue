@@ -43,6 +43,9 @@ export default {
       ],
     };
   },
+
+// ------------------------------------------------------------------------------------------
+
   methods: {
     async ObtenerAgrupacionesPendientes() {
       try {
@@ -59,6 +62,8 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+    
+// ------------------------------------------------------------------------------------------
 
     async AceptarAgrupacion(id_agr) {
       try {
@@ -89,6 +94,8 @@ export default {
       }
     },
 
+// ------------------------------------------------------------------------------------------
+
     async RechazarAgrupacion() {
       // Falta implementar
     },
@@ -99,9 +106,14 @@ export default {
       this.snackbar = true;
     },
   },
+
+// ------------------------------------------------------------------------------------------
+  
   mounted() {
     this.ObtenerAgrupacionesPendientes();
   },
+
+// ------------------------------------------------------------------------------------------
 };
 </script>
 

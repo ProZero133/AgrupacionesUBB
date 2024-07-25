@@ -41,10 +41,9 @@ async function getActividadesByAgrupacion(id_agr) {
 
 async function createActividad(actividadData) {
     try {
-        //actividadData.imagen = actividadData.imagen.toString('hex');
         const newActividad = await pool.query(
-            'INSERT INTO "Actividad"(nom_act, descripcion, imagen, tipo, id_agr) VALUES($1, $2, $3, $4, $5) RETURNING *',
-            [actividadData.nom_act, actividadData.descripcion, actividadData.imagen, actividadData.tipo, actividadData.id_agr]
+            'INSERT INTO "Actividad"(nom_act, descripcion, imagen, tipo, id_agr, cupos) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+            [actividadData.nom_act, actividadData.descripcion, actividadData.imagen, actividadData.tipo, actividadData.id_agr, actividadData.cupos]
         );
         // Retorna la nueva actividad insertada
         return newActividad.rows[0];

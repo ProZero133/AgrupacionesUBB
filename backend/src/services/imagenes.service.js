@@ -28,36 +28,13 @@ async function getImagenbyId(id) {
 
 async function createImagen(imgData) {
     try {
-        const imagenLength = imgData.imagen.length;
-        const step = Math.floor(imagenLength / 3);
-        
-        // Calcular las posiciones de los caracteres. Ajustar por -1 porque los índices de cadena comienzan en 0.
-        let pos1 = step - 1;
-        let pos2 = (2 * step) - 1;
-        let pos3 = imagenLength - 1; // Asegurar que el último carácter siempre sea seleccionado.
-        
-        // Concatenar caracteres en las posiciones calculadas.
-        let codigoPre = imgData.imagen.charAt(pos1) + imgData.imagen.charAt(pos2) + imgData.imagen.charAt(pos3);
-
-        let numericString = "";
-
-        for (let i = 0; i < codigoPre.length; i++) {
-            let asciiValue = codigoPre.charCodeAt(i); // Get ASCII value of the character
-            numericString += asciiValue.toString(); // Concatenate ASCII value as string
-        }
-
-        let id_imagen = parseInt(numericString);
-
-        console.log("id_imagen");
-        console.log(numericString);
-
+        // Crea una nueva imagen
         const newImagen = await pool.query(
-            'INSERT INTO "Imagenes"(id_imagen, imagen) VALUES($1, $2) RETURNING *',
-            [id_imagen, imgData.imagen]
+            'INSERT INTO "Imagenes"(imagen) VALUES($1) RETURNING *',
+            [imgData.imagen]
         );
         // Retorna la nueva imagen insertada
-        let imagenInserted = newImagen.rows[0];
-        imagenInserted.id_imagen = id_imagen;
+        const imagenInserted = newImagen.rows[0];
         return imagenInserted;
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir

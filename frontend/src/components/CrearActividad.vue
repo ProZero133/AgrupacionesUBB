@@ -3,7 +3,7 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-card class="mx-auto px-6 py-8" max-width="800">
-      <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo)" fast-fail class="form"
+      <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo, cupos)" fast-fail class="form"
         ref="formulario">
         <v-row>
           <v-spacer></v-spacer>
@@ -16,7 +16,11 @@
 
             <v-col cols="12">
               <v-text-field class="nombreAct" v-model="nom_act" label="Nombre de la actividad" clearable required
-                variant="solo-filled"></v-text-field>
+                variant="solo-filled" :rules="nombreRules"></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field class="Cupos" v-model="cupos" label="Cupos para la actividad" type="number"
+                min="1" required :rules="cuposRules"></v-text-field>
             </v-col>
 
             <v-col cols="12">
@@ -97,6 +101,8 @@ export default {
 
   data: () => ({
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
+    nombreRules: [v => !!v || 'Nombre de la actividad requerido'],
+    cuposRules: [v => !!v || 'Cupos requeridos'],
     nom_act: '',
     descripcion: '',
     imagen: [],
@@ -106,6 +112,7 @@ export default {
     urlImagen: addImage,
     idImagen: '',
     verificado: '',
+    cupos: 1,
   }),
   methods: {
     createImage(file) {
@@ -162,7 +169,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("Imagen subida");
           this.idImagen = data.id_imagen;
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -189,7 +195,13 @@ export default {
       }
     },
 
-    async CreaActividad(nom_act, descripcion, imagen, tipo) {
+    async CreaActividad(nom_act, descripcion, imagen, tipo, cupos) {
+      //Validar todos los campos antes de insertar imagen
+      const isValid = this.$refs.formulario.validate();
+      if (!isValid) {
+        this.$root.showSnackBar('error', 'Por favor, rellene todos los campos', 'Error de validación');
+        return;
+      }
       await this.PostearImagen();
       if (this.idImagen === '') {
         console.error('Error al subir la imagen');
@@ -197,33 +209,13 @@ export default {
         return;
       }
       else {
-        console.log("todo bien!");
-        console.log(this.idImagen);
         try {
-
-          // Selecciona el primer archivo de imagen proporcionado
-          //const file = imagen[0];
-          // Crea una promesa para convertir la imagen a base64 utilizando FileReader
-          //const imagenBase64 = await new Promise((resolve, reject) => {
-          //  const reader = new FileReader();
-          //  reader.onloadend = () => {
-          // Resuelve la promesa con el resultado de la conversión
-          //    resolve(reader.result);
-          //  };
-          //  reader.onerror = reject;
-          // Inicia la lectura del archivo como Data URL
-          //  reader.readAsDataURL(file);
-          //});
-
-          imagen = "hola";
-          //console.log(this.urlImagen);
-          // Realiza una solicitud fetch a tu backend Fastify
           const response = await fetch('http://localhost:3000/actividades', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId }),
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId,cupos }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
@@ -259,7 +251,7 @@ export default {
 }
 
 .bottomElement {
-  margin-top: -0px;
+  margin-top: 90px;
 }
 
 .title-card {

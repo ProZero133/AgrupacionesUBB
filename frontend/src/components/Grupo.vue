@@ -320,15 +320,16 @@ export default {
         const response = await fetch(url, {
           method: 'GET',
         });
-        if (response.ok) {
+        if (response.ok || response.status === 404) {
           const data = await response.json();
-          console.log(data);
           this.solicitudes = data;
         } else {
           console.log('Error al obtener las solicitudes');
+          this.solicitudes = [];
         }
       } catch (error) {
         console.log('Error al obtener las solicitudes');
+        this.solicitudes = [];
       }
     },
     async aceptarSolicitud(rut) {

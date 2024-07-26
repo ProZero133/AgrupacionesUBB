@@ -8,82 +8,90 @@
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
       <v-expansion-panels>
-    <v-expansion-panel>
-      <v-expansion-panel-title>
-        <template v-slot:default="{ expanded }">
-          <v-row no-gutters>
-            <v-col class="d-flex justify-start" cols="4">
-              Gestionar grupo
-            </v-col>
-            <v-col class="text-grey" cols="8">
-              <v-fade-transition leave-absolute>
-                <span v-if="expanded" key="0">
-                  Seleccione una accion
-                </span>
-                <span v-else key="1">
-                </span>
-              </v-fade-transition>
-            </v-col>
-          </v-row>
-        </template>
-      </v-expansion-panel-title>
-      <v-expansion-panel-text>
-        <v-row>
-          <v-col cols="12">
-            <v-btn color="primary" @click="dialog = true">Ver miembros</v-btn>
-          </v-col>
-          <v-col cols="12">
-            <v-btn color="secondary">Button 2</v-btn>
-          </v-col>
-          <v-col cols="12">
-            <v-btn color="success">Button 3</v-btn>
-          </v-col>
-          <v-col cols="12">
-            <v-btn color="error">Button 4</v-btn>
-          </v-col>
-        </v-row>
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            <template v-slot:default="{ expanded }">
+              <v-row no-gutters>
+                <v-col class="d-flex justify-start" cols="4">
+                  Gestionar grupo
+                </v-col>
+                <v-col class="text-grey" cols="8">
+                  <v-fade-transition leave-absolute>
+                    <span v-if="expanded" key="0">
+                      Seleccione una accion
+                    </span>
+                    <span v-else key="1">
+                    </span>
+                  </v-fade-transition>
+                </v-col>
+              </v-row>
+            </template>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row>
+              <v-col cols="12">
+                <v-btn color="primary" @click="dialog = true">Ver miembros</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="secondary">Button 2</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="success">Button 3</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="error">Button 4</v-btn>
+              </v-col>
+            </v-row>
 
-        <v-dialog v-model="dialog" max-width="500px">
-          <v-card>
-            <v-toolbar color="primary">
-              <v-app-bar-nav-icon></v-app-bar-nav-icon>
-              <v-toolbar-title>Miembros</v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-btn icon="mdi-magnify"></v-btn>
-              <v-btn icon="mdi-dots-vertical"></v-btn>
-              <template v-slot:extension>
-                <v-tabs v-model="tab" align-tabs="title">
-                  <v-tab v-for="item in gestionmiembros" :key="item" :text="item" :value="item"></v-tab>
-                </v-tabs>
-              </template>
-            </v-toolbar>
+            <v-dialog v-model="dialog" max-width="500px">
+              <v-card>
+                <v-toolbar color="primary">
+                  <v-app-bar-nav-icon></v-app-bar-nav-icon>
+                  <v-toolbar-title>Miembros</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <v-btn icon="mdi-magnify"></v-btn>
+                  <v-btn icon="mdi-dots-vertical"></v-btn>
+                  <template v-slot:extension>
+                    <v-tabs v-model="tab" align-tabs="title">
+                      <v-tab v-for="item in gestionmiembros" :key="item" :text="item" :value="item"></v-tab>
+                    </v-tabs>
+                  </template>
+                </v-toolbar>
 
-            <v-tabs-window v-model="tab">
-              <v-tabs-window-item v-for="item in gestionmiembros" :key="item" :value="item">
-                <v-card flat>
-                  <v-card-text v-if="item === 'Miembros'">
-                    <v-list>
-                      <v-list-item v-for="(miembro, index) in miembros" :key="index">
-                        <v-list-item-title>{{ miembro.title }}</v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-card-text>
-                  <v-card-text v-else>
-                    {{ text }}
-                  </v-card-text>
-                </v-card>
-              </v-tabs-window-item>
-            </v-tabs-window>
+                <v-tabs-window v-model="tab">
+                  <v-tabs-window-item v-for="item in gestionmiembros" :key="item" :value="item">
+                    <v-card flat>
+                      <v-card-text v-if="item === 'Miembros'">
+                        <v-list>
+                          <v-list-item v-for="(item, index) in MiembrosdeAgr" :key="index">
 
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="dialog = false">Cerrar</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-expansion-panel-text>
-    </v-expansion-panel>
-  </v-expansion-panels>
+                            <v-list-item-title>{{ item.nombre }} <v-select class="SeleccionarRol" v-model="panita"
+                                label="Seleccionar rol" density="comfortable"
+                                :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled ></v-select>
+                            </v-list-item-title>
+
+                          </v-list-item>
+                        </v-list>
+
+
+
+                      </v-card-text>
+                      <v-card-text v-else>
+                        {{ text }}
+                      </v-card-text>
+                    </v-card>
+                  </v-tabs-window-item>
+                </v-tabs-window>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialog = false">Cerrar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
     </v-card>
 
@@ -151,15 +159,10 @@ export default {
   },
 
   data: () => ({
-    dialog:false,
+    dialog: false,
     tab: null,
-    gestionmiembros: ['Miembros', 'Opción 2', 'Opción 3'],
-    miembros: [
-        { title: 'Miembro 1' },
-        { title: 'Miembro 2' },
-        { title: 'Miembro 3' },
-        { title: 'Miembro 4' },
-      ],
+    gestionmiembros: ['Miembros', 'Opción 2'],
+    MiembrosdeAgr: [],
     panita: '',
     groupName: 'Club de Tetris UBB',
     groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
@@ -174,18 +177,49 @@ export default {
       verificado: null,
     },
 
-      items: [
-        { title: 'Crear Actividad', path: '/api/crear_actividad/' },
-        { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
-        { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
-        { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
-      ],
+    items: [
+      { title: 'Crear Actividad', path: '/api/crear_actividad/' },
+      { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
+      { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
+      { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
+    ],
 
     actividades: [],
     urlImagen: addImage,
   }),
   methods: {
     mergeProps,
+
+    async ObtenerUsuariosDeAgrupacion() {
+      try {
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(response);
+
+        if (response.ok) {
+          const data = await response.json();
+          this.MiembrosdeAgr = data;
+          this.MiembrosdeAgr.push(data);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    selectItem(item) {
+      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+      //          this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
+
     async VerGrupos() {
       try {
         // Incorpora el groupID en la URL de la solicitud fetch
@@ -208,6 +242,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -260,6 +295,7 @@ export default {
   mounted() {
     this.VerGrupos();
     this.VerActividades();
+    this.ObtenerUsuariosDeAgrupacion();
   },
 }
 

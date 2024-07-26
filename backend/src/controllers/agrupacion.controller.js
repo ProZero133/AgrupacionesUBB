@@ -1,7 +1,7 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, 
-    createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo, 
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateRolUsuario, getImage,
+    createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
@@ -160,7 +160,7 @@ async function aceptarSolicitud(req, res) {
     }
 }
 
-async function ObtenerUsuariosdeAgrupacion (req, res) {
+async function ObtenerUsuariosdeAgrupacion(req, res) {
     try {
         const id = req.params.id_agr;
         const usuarios = await getUsuariosdeAgrupacion(id);
@@ -218,10 +218,46 @@ async function obtenerAgrupacionesDeUsuario(req, res) {
     }
 }
 
+async function CambiarRoldeUsuario(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        const rol = req.body.rol;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        console.log("Rut: ", rut);
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        console.log("id_agr: ", id_agr);
+        /* 
+                const usuarioEsLider = await getLider(id_agr);
+                if (usuarioEsLider[0].rut !== rut) {
+                    return res.code(401).send('No tienes permisos para cambiar el rol del usuario');
+                }
+         */
+        const result = await updateRolUsuario(rut, id_agr, rol);
+        if (!result) {
+            return res.code(500).send('Error al cambiar el rol del usuario');
+        }
+        res.code(200).send('Rol cambiado');
+    } catch (error) {
+        console.error('Error al cambiar el rol del usuario:', error);
+        res.code(500).send('Error al cambiar el rol del usuario');
+    }
+}
+
+
+
+
 async function abandonarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const rut = req.params.rut;
+
         const user = await getUsuarioByRut(rut);
         if (user.length === 0) {
             return res.code(404).send('Usuario no encontrado');
@@ -230,14 +266,19 @@ async function abandonarAgrupacion(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
+/* 
         const usuarioEnAgrupacion = await obtenerAgrupacionesDeUsuario(rut);
+
         if (usuarioEnAgrupacion.length === 0) {
             return res.code(404).send('Usuario no pertenece a la agrupación');
         }
+ */
         const result = await deleteUsuarioAgrupacion(rut, id_agr);
         if (!result) {
             return res.code(500).send('Error al abandonar la agrupación');
         }
+        console.log("Resultado: ");
+
         res.code(200).send('Agrupación abandonada');
     } catch (error) {
         console.error('Error al abandonar la agrupación:', error);
@@ -269,17 +310,18 @@ async function rechazarSolicitud(req, res) {
 }
 
 module.exports = {
-        VerGrupos,
-        ObtenerAgrupacionesPorID,
-        crearAgrupacion,
-        editarAgrupacion,
-        obtenerImagenAgrupacion,
-        unirseAgrupacion,
-        solicitudesAgrupacion,
-        aceptarSolicitud,
-        ObtenerUsuariosdeAgrupacion,
-        eliminarAgrupacion,
-        abandonarAgrupacion,
-        obtenerAgrupacionesDeUsuario,
-        rechazarSolicitud
-    };
+    VerGrupos,
+    ObtenerAgrupacionesPorID,
+    crearAgrupacion,
+    editarAgrupacion,
+    obtenerImagenAgrupacion,
+    unirseAgrupacion,
+    solicitudesAgrupacion,
+    aceptarSolicitud,
+    ObtenerUsuariosdeAgrupacion,
+    eliminarAgrupacion,
+    abandonarAgrupacion,
+    obtenerAgrupacionesDeUsuario,
+    CambiarRoldeUsuario,
+    rechazarSolicitud
+};

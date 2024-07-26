@@ -50,7 +50,7 @@
                   <template v-slot:extension>
                     <v-tabs v-model="tab" align-tabs="title">
                       <v-tab prepend-icon="mdi-account" value="miembros">Miembros</v-tab>
-                      <v-tab prepend-icon="mdi-lock" value="solicitudes" @click="VerSolicitudes">Solicitudes</v-tab>
+                      <v-tab prepend-icon="mdi-account-plus" value="solicitudes" @click="VerSolicitudes">Solicitudes</v-tab>
                     </v-tabs>
                   </template>
                 </v-toolbar>
@@ -60,11 +60,75 @@
 
                     <v-data-table :headers="headers" :items="MiembrosdeAgr">
                       <template v-slot:item.action="{ item }">
+
                         <div class="d-flex justify-end">
-                          <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
-                            density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
-                            @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)">
-                          </v-select>
+
+                          <!-- Dialog editar -->
+
+                          <v-dialog width="auto" scrollable>
+
+                            <template v-slot:activator="{ props: activatorProps }">
+                              <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined"
+                                v-bind="activatorProps"></v-btn>
+                            </template>
+
+                            <template v-slot:default="{ isActive }">
+                              <v-card prepend-icon="mdi-pencil" title="Editar">
+                                <v-divider class="mt-3"></v-divider>
+
+                                <v-card-text class="px-4" style="height: 300px">
+                                  <v-radio-group v-model="dialog" messages="Select a Country from the radio group"
+                                    column>
+                                    <v-radio label="Bahamas, The" value="bahamas"></v-radio>
+                                    <v-radio label="Bahrain" value="bahrain"></v-radio>
+                                    <v-radio label="Bangladesh" value="bangladesh"></v-radio>
+                                  </v-radio-group>
+                                </v-card-text>
+
+                                <v-divider></v-divider>
+
+                                <v-card-actions>
+                                  <v-btn text="Close" @click="isActive.value = false"></v-btn>
+
+                                  <v-spacer></v-spacer>
+
+                                  <v-btn color="surface-variant" text="Save" variant="flat"
+                                    @click="isActive.value = false"></v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </template>
+
+                          </v-dialog>
+
+                          <!-- Dialog de eliminar -->
+                          <v-dialog width="auto" scrollable>
+
+                            <template v-slot:activator="{ props: activatorProps }">
+                              <v-btn color="red" prepend-icon="mdi-account-cancel" variant="outlined"
+                                v-bind="activatorProps"></v-btn>
+                            </template>
+
+                            <template v-slot:default="{ isActive }">
+                              <v-card prepend-icon="mdi-account-cancel" title="Eliminar Miembro">
+                                <v-divider class="mt-3"></v-divider>
+
+                                <v-card-text class="px-4" style="height: 150px">
+                                  <p>¿Está seguro que desea eliminar a este miembro?</p>
+
+                                  <v-row class="justify-end" style="margin-top: 10%">
+                                    <v-col cols="6">
+                                      <v-btn color="red" @click="EliminarMiembro(item.rut), isActive.value = false, dialog = false;">Eliminar</v-btn>
+                                    </v-col>
+                                    <v-col cols="4">
+                                      <v-btn color="blue" @click="isActive.value = false">Cancelar</v-btn>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+
+                              </v-card>
+                            </template>
+                          </v-dialog>
+
                         </div>
                       </template>
                     </v-data-table>
@@ -78,7 +142,7 @@
                         <v-menu :location="location" offset-y>
                           <template v-slot:activator="{ props }">
                             <v-btn v-bind="props">
-                              {{ solicitud.rut }} 
+                              {{ solicitud.rut }}
                             </v-btn>
                           </template>
 
@@ -102,6 +166,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+            
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -230,7 +295,6 @@ export default {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
-          console.log("miembros agrupacion: ", this.MiembrosdeAgr);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -239,6 +303,44 @@ export default {
       }
     },
 
+    async CambiarRolAgrupacion(rut, rol_agr) {
+      console.log("Rol cambiado para:", rut, "Nuevo rol:", rol_agr);
+      try {
+        const url = `http://localhost:3000/actualizar_rol/${rut}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ rol_agr }),
+        });
+
+        if (response.ok) {
+          console.log("Rol actualizado correctamente.");
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async EliminarMiembro(rut) {
+      try {
+        const url = `http://localhost:3000/abandonaragrupacion/${this.groupId}/${rut}`;
+        const response = await fetch(url, {
+          method: 'DELETE',
+        });
+        this.ObtenerUsuariosDeAgrupacion();
+        if (response.ok) {
+          console.log("Usuario eliminado correctamente.");
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
 
     selectItem(item) {
       this.selectedItems.push(item); // Añade el item a la lista de seleccionados
@@ -279,14 +381,14 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log(data.success);
+          //console.log(data.success);
           if (data.success === false) {
-            console.log("No hay actividades");
+            //console.log("No hay actividades");
           } else {
-            console.log("Actividades obtenidas");
-            console.log(response);
+            //console.log("Actividades obtenidas");
+            //console.log(response);
             this.actividades = data;
-            console.log(this.actividades[0]);
+            //console.log(this.actividades[0]);
 
             for (const imagenes of this.actividades) {
               try {
@@ -343,6 +445,7 @@ export default {
         if (response.ok) {
           console.log('Solicitud aceptada');
           this.VerSolicitudes();
+          this.ObtenerUsuariosDeAgrupacion();
         } else {
           console.log('Error al aceptar la solicitud');
         }
@@ -366,7 +469,7 @@ export default {
         console.log('Error al rechazar la solicitud');
       }
     },
-    handleOptionClick(title,rut) {
+    handleOptionClick(title, rut) {
       if (title === 'aceptar') {
         console.log('aceptar');
         this.aceptarSolicitud(rut);

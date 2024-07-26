@@ -111,6 +111,15 @@ async function updateAgrupacionVerificado(id) {
     }
   }
 
+  async function updateRolUsuario(rut, id_agr, rol) {
+    try {
+      // Actualiza el rol del usuario con el rut y id_agr especificados
+      const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1 WHERE rut = $2 AND id_agr = $3 RETURNING *', [rol, rut, id_agr]);
+      return response.rows[0];
+    } catch (error) {
+      console.log('Error al actualizar el rol del usuario:', error);
+    }
+  }
 
   async function getImage(id) {
     try {
@@ -287,6 +296,7 @@ async function rejectSolicitud(rut, id_agr) {
     getAgrupacionById,
     createAgrupacion,
     getUsuariosdeAgrupacion,
+    updateRolUsuario,
     updateAgrupacionVerificado,
     getImage,
     createSolicitud,

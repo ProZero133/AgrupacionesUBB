@@ -16,6 +16,6 @@ module.exports = function(fastify, options, done) {
   fastify.post('/aceptarsolicitud/:rut/:id_agr', aceptarSolicitud);
   fastify.post('/rechazarsolicitud/:rut/:id_agr', rechazarSolicitud);
   fastify.post('/eliminaragrupacion/:id_agr/:rut', eliminarAgrupacion);
-  fastify.post('/abandonaragrupacion/:id_agr/:rut', abandonarAgrupacion);
+  fastify.delete('/abandonaragrupacion/:id_agr/:rut', abandonarAgrupacion);
   done();
 };

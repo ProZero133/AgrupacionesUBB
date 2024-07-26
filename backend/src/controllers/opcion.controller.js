@@ -1,7 +1,7 @@
 "use strict";
 
 const {getOpciones, getOpcionById, createOpcion, updateOpcion, deleteOpcion} = require("../services/opcion.service");
-const opcionBodySchema = require("../schema/opcion.schema");
+const { opcionBodySchema } = require("../schema/opcion.schema");
 
 /**
  * Obtiene todas las opciones
@@ -11,7 +11,7 @@ const opcionBodySchema = require("../schema/opcion.schema");
 
 async function obtenerOpciones(req, res) {
   try {
-    const opciones = await opcionService.getOpciones();
+    const opciones = await getOpciones();
     res.send(opciones);
   } catch (error) {
     res.code(500).send(error.message);
@@ -27,7 +27,7 @@ async function obtenerOpciones(req, res) {
 async function obtenerOpcionPorId(req, res) {
     try {
         const id = req.params.id;
-        const opcion = await opcionService.getOpcionById(id);
+        const opcion = await getOpcionById(id);
         res.send(opcion);
     } catch (error) {
         res.code(500).send(error.message);
@@ -46,7 +46,7 @@ async function crearOpcion(req, res) {
         if (error) {
         return res.code(400).send(error.message);
         }
-        const opcion = await opcionService.createOpcion(value);
+        const opcion = await createOpcion(req.body);
         res.send(opcion);
     } catch (error) {
         res.code(500).send(error.message);
@@ -66,7 +66,7 @@ async function actualizarOpcion(req, res) {
         if (error) {
         return res.code(400).send(error.message);
         }
-        const opcion = await opcionService.updateOpcion(id, value);
+        const opcion = await updateOpcion(id, value);
         res.send(opcion);
     } catch (error) {
         res.code(500).send(error.message);
@@ -82,7 +82,7 @@ async function actualizarOpcion(req, res) {
 async function eliminarOpcion(req, res) {
     try {
         const id = req.params.id;
-        await opcionService.deleteOpcion(id);
+        await deleteOpcion(id);
         res.send({ success: true });
     } catch (error) {
         res.code(500).send(error.message);

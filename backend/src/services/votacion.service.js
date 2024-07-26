@@ -27,7 +27,7 @@ async function getVotacionById(id) {
 
 async function createVotacion(votacionData) {
     try {
-        const publicacion = await getPublicacionById(postData.id_pub);
+        const publicacion = await getPublicacionById(votacionData.id_pub);
         
         if (!publicacion) {
             throw new Error('La publicación con el ID especificado no existe');

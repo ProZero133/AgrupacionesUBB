@@ -12,4 +12,6 @@ const votacionBodySchema = Joi.object({
         }),
     });
 
-module.exports = votacionBodySchema;
+    module.exports = {
+        votacionBodySchema,
+    };

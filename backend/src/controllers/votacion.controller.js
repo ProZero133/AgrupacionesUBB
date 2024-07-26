@@ -1,7 +1,7 @@
 "use strict";
 
 const {getVotaciones, getVotacionById, createVotacion, updateVotacion, deleteVotacion} = require("../services/votacion.service");
-const {votacionBodySchema} = require("../schema/votacion.schema.js");
+const { votacionBodySchema } = require("../schema/votacion.schema.js");
 
 /**
  * Obtiene todas las votaciones
@@ -11,7 +11,7 @@ const {votacionBodySchema} = require("../schema/votacion.schema.js");
 
 const obtenerVotaciones = async (req, res) => {
     try {
-        const votaciones = await votacionService.getVotaciones();
+        const votaciones = await getVotaciones();
         res.code(200).send(votaciones);
     } catch (error) {
         res.code(500).send({message: error.message});
@@ -27,7 +27,7 @@ const obtenerVotaciones = async (req, res) => {
 const obtenerVotacionPorId = async (req, res) => {
     try {
         const {id} = req.params;
-        const votacion = await votacionService.getVotacionById(id);
+        const votacion = await getVotacionById(id);
         res.code(200).send(votacion);
     } catch (error) {
         res.code(500).send({message: error.message});
@@ -42,9 +42,16 @@ const obtenerVotacionPorId = async (req, res) => {
 
 const crearVotacion = async (req, res) => {
     try {
-        const {body} = req;
-        await votacionBodySchema.validateAsync(body);
-        const votacion = await votacionService.createVotacion(body);
+        
+        const { error, value } = votacionBodySchema.validate(req.body);
+
+        if (error) {
+            // Retorna un error si el cuerpo de la solicitud es inválido
+            res.code(400).send(error.details.map(detail => detail.message));
+            return;
+        }
+
+        const votacion = await createVotacion(req.body);
         res.code(201).send(votacion);
     } catch (error) {
         res.code(500).send({message: error.message});
@@ -70,7 +77,7 @@ const actualizarVotacion = async (req, res) => {
         }
 
         // Actualiza la votacion por su id
-        const post = await votacionService.updateVotacion(id, req.body);
+        const post = await updateVotacion(id, req.body);
 
         // Retorna la votacion actualizada
         res.code(200).send(post);
@@ -93,7 +100,7 @@ const eliminarVotacion = async (req, res) => {
         const { id } = req.params;
 
         // Elimina la votacion por su id
-        await votacionService.deleteVotacion(id);
+        await deleteVotacion(id);
 
         // Retorna un mensaje de éxito
         res.code(200).send('Votacion eliminada');

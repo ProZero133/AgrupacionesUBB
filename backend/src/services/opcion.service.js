@@ -3,7 +3,7 @@ const { getVotacionById } = require('./votacion.service.js');
 
 async function getOpciones() {
     try {
-        const opciones = await pool.query('SELECT * FROM Opcion');
+        const opciones = await pool.query('SELECT * FROM "Opcion"');
         return opciones.rows;
     } catch (error) {
         console.error(error);
@@ -25,19 +25,22 @@ async function createOpcion(opcionData) {
         if (!votacion) {
             throw new Error('La votación con el ID especificado no existe');
         }
-
         //Arma la consulta SQL para insertar una opcion
-        const newOpcion = await pool.query('INSERT INTO Opcion (nombre, resultado, id_votacion) VALUES ($1, $2, $3) RETURNING *', [nombre, resultado, id_votacion]);
+        console.log("weas insertadas");
+        console.log(opcionData);
+        const newOpcion = await pool.query('INSERT INTO "Opcion" (nombre, respuestas, id_votacion) VALUES ($1, $2, $3) RETURNING *', [opcionData.nombre, 0, opcionData.id_votacion]);
         return newOpcion.rows[0];
+
     } catch (error) {
-        console.error(error);
+        console.error('Error al insertar la opcion:', error);
+        throw error;
     }
-}    
+}
 
 async function updateOpcion(id, opcionData) {
     try {
         const { nombre, resultado } = opcionData;
-        const updateOpcion = await pool.query('UPDATE Opcion SET nombre = $1, resultado = $2 WHERE id = $3 RETURNING *', [nombre, resultado, id]);
+        const updateOpcion = await pool.query('UPDATE "Opcion" SET nombre = $1, resultado = $2 WHERE id = $3 RETURNING *', [opcionData.nombre, opcionData.resultado, id]);
         return updateOpcion.rows[0];
     } catch (error) {
         console.error(error);
@@ -46,7 +49,7 @@ async function updateOpcion(id, opcionData) {
 
 async function deleteOpcion(id) {
     try {
-        await pool.query('DELETE FROM Opcion WHERE id = $1', [id]);
+        await pool.query('DELETE FROM "Opcion" WHERE id = $1', [id]);
         return true;
     } catch (error) {
         console.error(error);

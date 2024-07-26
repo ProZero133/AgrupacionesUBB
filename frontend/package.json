@@ -9,7 +9,7 @@
     "start": "concurrently \"npm run dev\" \"npm run start-backend\"",
     "start-backend": "nodemon ../backend/src/main.js",
     "dev": "vite",
-    "installall": "npm install && cd ../backend && npm install"
+    "superstart": "npm install && cd ../backend && npm install && cd .. && cd frontend && npm run start"
   },
   "dependencies": {
     "@mdi/font": "5.9.55",

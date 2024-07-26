@@ -41,14 +41,18 @@ const obtenerFormularioPorId = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const crearFormulario = async (req, res) => {
+async function crearFormulario(req, res) {
     try {
-        const {body} = req;
-        await formularioBodySchema.validateAsync(body);
-        const formulario = await formularioService.createFormulario(body);
-        return res.code(201).send(formulario);
+        const { error, value } = formularioBodySchema.validate(req.body);
+        if (error) {
+        console.error('Error al validar el formulario:', error);
+        res.status(400).send('Error al validar el formulario');
+        }
+        const formulario = await createFormulario(req.body);
+        res.send(formulario);
     } catch (error) {
-        return res.code(500).send({ message: error.message });
+        console.error('Error al crear el formulario:', error);
+        res.status(500).send('Error al crear el formulario');
     }
 }
 
@@ -61,7 +65,7 @@ const crearFormulario = async (req, res) => {
 const actualizarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
-        const {error} = await formularioBodySchema.validateAsync(req.body);
+        const {error} = await formularioBodySchema.validate(req.body);
         if (error) {
             return res.code(400).send({ message: error.message });
         }

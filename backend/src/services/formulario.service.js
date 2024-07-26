@@ -35,20 +35,20 @@ function isValidHyperlink(hyperlink) {
 
 async function createFormulario(formularioData) {
     try {
-        const publicacion = await getPublicacionById(postData.id_pub);
+        const publicacion = await getPublicacionById(formularioData.id_pub);
         
         if (!publicacion) {
             throw new Error('La publicación con el ID especificado no existe');
         }
 
-        if (!isValidHyperlink(formularioData.hyperlink)) {
+        if (!isValidHyperlink(formularioData.hipervinculo)) {
             throw new Error('El hyperlink debe comenzar con "https://forms.gle/" o "https://docs.google.com/forms/d/e/"');
         }
 
         // Crea la consulta SQL para insertar un nuevo formulario
-        const sql = 'INSERT INTO "Formulario" (id_pub, descripcion, hyperlink) VALUES ($1, $2, $3) RETURNING *';
+        const sql = 'INSERT INTO "Formulario" (id_pub, descripcion, hipervinculo) VALUES ($1, $2, $3) RETURNING *';
         // Crea el formulario en la base de datos
-        const newformulario = await pool.query(sql, [formularioData.id_pub, formularioData.descripcion, formularioData.hyperlink]);
+        const newformulario = await pool.query(sql, [formularioData.id_pub, formularioData.descripcion, formularioData.hipervinculo]);
         // Retorna el formulario creado
         return newformulario.rows[0];
     } catch (error) {

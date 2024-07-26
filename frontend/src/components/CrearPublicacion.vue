@@ -3,7 +3,7 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-card class="mx-auto px-6 py-8" max-width="800">
-      <v-form @submit.prevent="CreaPublicacion(nom_pub, descripcion, imagen, tipo)" fast-fail class="form"
+      <v-form @submit.prevent="formSubmit(nom_pub, descripcion, imagen, tipo)" fast-fail class="form"
         ref="formulario">
         <v-row>
           <v-spacer></v-spacer>
@@ -24,8 +24,13 @@
           <v-col cols="12" md="7">
 
             <v-col cols="12">
-              <v-text-field v-model="nom_pub" label="Nombre de la publicación" clearable required
-                variant="solo-filled"></v-text-field>
+              <v-text-field
+              v-model="nom_pub"
+              label="Nombre de la publicación"
+              clearable required
+              variant="solo-filled"
+              :rules="namerules"
+              ></v-text-field>
             </v-col>
 
             <v-col cols="12">
@@ -99,6 +104,21 @@
     
     </template>
 
+    <template v-if="tipo == 'Formulario'">
+        
+        <v-col cols="12">
+          <v-text-field
+            v-model="enlace"
+            label="Hipervínculo del formulario"
+            clearable
+            required
+            variant="solo-filled"
+            class="mb-n7 mt-3"
+          ></v-text-field>
+        </v-col>
+
+    </template>
+
       <v-col cols="4">
         <v-btn :disabled="disabledForm()" class="form-submit mb-n5" type="submit">Crear publicación</v-btn>
       </v-col>
@@ -125,28 +145,33 @@ export default {
   name: 'HelloWorld',
 
   data: () => ({
+    namerules: [v => v.length <= 50 || 'Máximo 50 carácteres.'],
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
     nom_pub: '',
     descripcion: '',
     imagen: [],
     tipo: 'Post',
+    tipoReal: '',
     id_agr: '',
     defaultImageUrl: addImage,
     urlImagen: addImage,
     idImagen: '',
     opciones: ['Si','No'],
     pubId: 0,
+
+    enlace: 'https://forms.gle/poooo',
+
+    subiendo: false,
   }),
+
   methods: {
     formSubmit() {
-      if (this.tipo === 'Votación') {
-        this.CreaPublicacion();
-      } else {
-        console.log('que');
-      }
+      this.tipoReal = this.tipo;
+      this.subiendo = true;
+      this.CreaPublicacion();
     },
     disabledForm() {
-      if (this.tipo === 'Votación' && (this.opciones.length < 2 || this.opciones.includes('') || this.opciones.length > 13)) {
+      if (this.tipo === 'Votación' && (this.opciones.length < 2 || this.opciones.includes('') || this.opciones.length > 13 || this.subiendo)) {
         return true;
       } else {
         return false;
@@ -175,27 +200,6 @@ export default {
         console.error("El archivo presentado no es un archivo.");
       }
     },
-
-
-
-//    createImage(file) {
-//      const reader = new FileReader();
-
-      // Extract the File object from the Proxy
-//      const actualFile = file[0];
-
-      //reader.onload = e => {
-        //this.urlImagen = e.target.result;
-      //};
-
-      // Ensure the extracted object is a File before calling readAsDataURL
-      //if (actualFile instanceof File) {
-        //reader.readAsDataURL(actualFile);
-      //} else {
-        //console.error("El archivo presentado no es un archivo.");
-      //}
-    //},
-
 
     onFileChange(e) {
       const file = e.target.files[0];
@@ -226,7 +230,7 @@ export default {
         reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
     });
-},
+    },
 
 async PostearImagen() {
   try {
@@ -292,12 +296,22 @@ async PostearImagen() {
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             this.pubId = await response.json();
-            console.log("Publicación creada");
+            console.log("Publicación base creada");
             console.log(this.pubId);
-            // Luego de eso, aca hay que poner el codigo para subir las opciones de la votación. Pendiente.
-            this.$router.push(`/api/grupo/${this.groupId}`);
-            this.$root.showSnackBar('success', data.id_pub, 'Publicada con éxito!');
+
+            // Si tipoReal es 'Votación', se ejecuta crearVotacion. Si es 'Post', se ejecuta crearPost. Si es 'Formulario', se ejecuta crearFormulario. Si es otro valor, se muestra un mensaje de error.
+            if (this.tipoReal === 'Votación') {
+              this.crearVotacion();
+            } else if (this.tipoReal === 'Post') {
+              this.crearPost();
+            } else if (this.tipoReal === 'Formulario') {
+              this.crearFormulario();
             } else {
+              this.$root.showSnackBar('error', this.tipoReal, 'Error de creación: Tipo de publicación no válido');
+            }
+            // Luego de eso, aca hay que poner el codigo para subir las opciones de la votación. Pendiente.
+            } else {
+              this.subiendo = false;
               console.error('Error en la respuesta:', response.status);
               console.log(response)
             }
@@ -306,6 +320,113 @@ async PostearImagen() {
       }
     }
   },
+
+  async crearVotacion() {
+    try {
+      const response = await fetch('http://localhost:3000/votaciones', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_pub: this.pubId, descripcion: this.descripcion }),
+      });
+  
+      // Verifica si la respuesta es exitosa
+      if (response.ok) {
+        // Convierte la respuesta en formato JSON
+        const data = await response.json();
+        console.log("Votación creada");
+        console.log(data);
+  
+        // Envío de las opciones
+        const fetchPromises = this.opciones.map(async (opcion) => {
+          try {
+            const response = await fetch('http://localhost:3000/opcion', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ nombre: opcion, id_votacion: this.pubId }),
+            });
+  
+            // Verifica si la respuesta es exitosa
+            if (response.ok) {
+              // Convierte la respuesta en formato JSON
+              const data = await response.json();
+              console.log("Opción creada");
+              console.log(data);
+            } else {
+              console.error('Error en la respuesta:', response.status);
+            }
+          } catch (error) {
+            console.error('Error al hacer fetch:', error);
+          }
+        });
+        // Espera a que todas las promesas de fetch se resuelvan
+        await Promise.all(fetchPromises);
+        // Mostrar el snackbar después de que todas las solicitudes se hayan completado
+        this.$root.showSnackBar('success', 'Votación creada con éxito!');
+        this.$router.push(`/api/grupo/${this.groupId}`);
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
+    } catch (error) {
+      console.error('Error al hacer fetch:', error);
+    }
+  },
+
+  async crearFormulario() {
+    try {
+      const response = await fetch('http://localhost:3000/formulario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_pub: this.pubId, descripcion: this.descripcion, hipervinculo: this.enlace }),
+      });
+
+      // Verifica si la respuesta es exitosa
+      if (response.ok) {
+        // Convierte la respuesta en formato JSON
+        const data = await response.json();
+        console.log("Formulario creado");
+        console.log(data);
+        this.$root.showSnackBar('success', 'Formulario creado con éxito!');
+        this.$router.push(`/api/grupo/${this.groupId}`);
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
+    } catch (error) {
+      console.error('Error al hacer fetch:', error);
+    }
+  },
+
+  async crearPost() {
+    try {
+      const response = await fetch('http://localhost:3000/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_pub: this.pubId, cuerpo: this.descripcion }),
+      });
+
+      // Verifica si la respuesta es exitosa
+      if (response.ok) {
+        // Convierte la respuesta en formato JSON
+        const data = await response.json();
+        console.log("Post creado");
+        console.log(data);
+        this.$root.showSnackBar('success', 'Post creado con éxito!');
+        this.$router.push(`/api/grupo/${this.groupId}`);
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
+    } catch (error) {
+      console.error('Error al hacer fetch:', error);
+    }
+  },
+
 },
 mounted() {
   this.opcionesCounter = this.opciones.length;
@@ -315,7 +436,7 @@ mounted() {
 </script>
 <style>
 .descripcionAct {
-  height: 20px !important;
+  height: 10px !important;
   margin-top: -20px;
   margin-bottom: -260px;
 }

@@ -84,7 +84,7 @@
 
                           <v-list>
                             <v-list-item v-for="(item, index) in opciones" :key="index">
-                              <v-btn @click="handleOptionClick(item.title)">
+                              <v-btn @click="handleOptionClick(item.title, solicitud.rut)">
                                 {{ item.title }}
                               </v-btn>
                             </v-list-item>
@@ -322,15 +322,16 @@ export default {
         const response = await fetch(url, {
           method: 'GET',
         });
-        if (response.ok) {
+        if (response.ok || response.status === 404) {
           const data = await response.json();
-          console.log(data);
           this.solicitudes = data;
         } else {
           console.log('Error al obtener las solicitudes');
+          this.solicitudes = [];
         }
       } catch (error) {
         console.log('Error al obtener las solicitudes');
+        this.solicitudes = [];
       }
     },
     async aceptarSolicitud(rut) {
@@ -365,11 +366,13 @@ export default {
         console.log('Error al rechazar la solicitud');
       }
     },
-    handleOptionClick(title) {
-      if (title === 'Aceptar') {
-        this.aceptarSolicitud();
-      } else if (title === 'Rechazar') {
-        this.rechazarSolicitud();
+    handleOptionClick(title,rut) {
+      if (title === 'aceptar') {
+        console.log('aceptar');
+        this.aceptarSolicitud(rut);
+      } else if (title === 'rechazar') {
+        console.log('rechazar');
+        this.rechazarSolicitud(rut);
       }
     },
   },

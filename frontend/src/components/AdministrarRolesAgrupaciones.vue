@@ -23,8 +23,22 @@
 </template>
 
 <script>
+
+
+import { useRoute } from 'vue-router';
+  
 export default {
   name: 'AdministrarRolesAgrupaciones',
+  
+  setup() {
+    const route = useRoute();
+    const groupId = route.params.id;
+
+    return {
+      groupId,
+    };
+  },
+
   data() {
     return {
       UsuariosDeAgrupacion: [],
@@ -40,15 +54,19 @@ export default {
       ],
     };
   },
+
   methods: {
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const response = await fetch('http://localhost:3000/administracionderoles/34', {
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const response = await fetch(url , {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
+
+        console.log(response);
 
         if (response.ok) {
           const data = await response.json();
@@ -61,13 +79,17 @@ export default {
       }
     },
 
-    async ActualizarRolAgrupacion(id_usr, rol_agr) {
+    async ActualizarRolAgrupacion(rut, id_agr) {
       try {
-        const response = await fetch('http://localhost:3000/administracionderoles/34/{}', {
+        const response = await fetch('http://localhost:3000/administracionderoles/34/', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            rut,
+            id_agr,
+          }),
         });
       } catch (error) {
         console.error('Error al hacer fetch:', error);

@@ -4,7 +4,7 @@ async function validarTokenController(fastify, reply) {
   const { token } = fastify.query;
   try {
     const decoded = fastify.jwt.verify(token);
-const rol = decoded.rol; // Asegúrate de usar 'rol_u' para coincidir con tu estructura de datos
+    const rol = decoded.rol; // Asegúrate de usar 'rol_u' para coincidir con tu estructura de datos
     // Establece una cookie de primera parte
     reply.setCookie('authToken', token, {
       path: '/',

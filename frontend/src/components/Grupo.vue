@@ -38,6 +38,9 @@
               <v-col cols="12">
                 <v-btn color="error" @click="dialogsolicitar = true">Solicitar acreditación</v-btn>
               </v-col>
+              <v-col cols="12">
+                <v-btn color="error" @click="dialogeliminar = true">Eliminar agrupación</v-btn>
+              </v-col>
             </v-row>
 
             <v-dialog v-model="dialogmiembros" max-width="500px">
@@ -75,7 +78,7 @@
                         <v-menu :location="location" offset-y>
                           <template v-slot:activator="{ props }">
                             <v-btn v-bind="props">
-                              {{ solicitud.rut }} 
+                              {{ solicitud.rut }}
                             </v-btn>
                           </template>
 
@@ -146,6 +149,25 @@
                 </v-card-actions>
               </v-card>
 
+            </v-dialog>
+
+            <v-dialog v-model="dialogeliminar" max-width="500px" min-width="400px">
+              <v-card text="Eliminar agrupación">
+                <v-card-title class="acred">¿Estas seguro de eliminar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
+                <v-card-text>
+                  <!-- Confirmar si esta seguro de eliminar su grupo -->
+                  <v-row>
+                    La agrupacion sera eliminada de forma permanente
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogeliminar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+                    @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+                    depressed>Aceptar</v-btn>
+                </v-card-actions>
+              </v-card>
             </v-dialog>
           </v-expansion-panel-text>
         </v-expansion-panel>
@@ -220,6 +242,10 @@ export default {
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
+    dialogeliminar: false,
+    pressTimer: null,
+    pressTime: 0,
+    progress: 0,
     imagengrupo: [],
     idImagen: '',
     location: 'end',
@@ -279,7 +305,6 @@ export default {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
-          console.log("miembros agrupacion: ", this.MiembrosdeAgr);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -307,8 +332,6 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.datosGrupo = data.rows[0];
-          console.log("aqui datos grupo");
-          console.log(this.datosGrupo);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -332,11 +355,7 @@ export default {
           if (data.success === false) {
             console.log("No hay actividades");
           } else {
-            console.log("Actividades obtenidas");
-            console.log(response);
             this.actividades = data;
-            console.log(this.actividades[0]);
-
             for (const imagenes of this.actividades) {
               try {
                 const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
@@ -476,13 +495,42 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
 
-    }
+    },
+    startHold() {
+      this.pressTime = 0;
+      this.progress = 0;
+      this.pressTimer = setInterval(() => {
+        this.pressTime += 100;
+        this.progress = (this.pressTime / 2000) * 100;
+        if (this.pressTime >= 2000) {
+          this.EliminarGrupo();
+          this.cancelHold();
+        }
+      }, 100);
+    },
+    cancelHold() {
+      clearInterval(this.pressTimer);
+      this.progress = 0;
+    },
+    EliminarGrupo() {
+      // Lógica para eliminar el grupo
+      console.log(`Grupo ${this.datosGrupo.nombre_agr} eliminado`);
+      this.dialogeliminar = false;
+    },
+
 
   },
   mounted() {
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
+  },
+  computed: {
+    progressStyle() {
+      return {
+        background: `linear-gradient(to right, blue ${this.progress}%, white ${this.progress}%)`
+      };
+    },
   },
 }
 
@@ -531,5 +579,10 @@ export default {
 .acred {
   white-space: pre-wrap;
   min-width: 500px;
+}
+
+.botoneliminar {
+  position: relative;
+  overflow: hidden;
 }
 </style>

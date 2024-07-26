@@ -50,7 +50,8 @@
                   <template v-slot:extension>
                     <v-tabs v-model="tab" align-tabs="title">
                       <v-tab prepend-icon="mdi-account" value="miembros">Miembros</v-tab>
-                      <v-tab prepend-icon="mdi-account-plus" value="solicitudes" @click="VerSolicitudes">Solicitudes</v-tab>
+                      <v-tab prepend-icon="mdi-account-plus" value="solicitudes"
+                        @click="VerSolicitudes">Solicitudes</v-tab>
                     </v-tabs>
                   </template>
                 </v-toolbar>
@@ -66,7 +67,6 @@
                           <!-- Dialog editar -->
 
                           <v-dialog width="auto" scrollable>
-
                             <template v-slot:activator="{ props: activatorProps }">
                               <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined"
                                 v-bind="activatorProps"></v-btn>
@@ -76,28 +76,24 @@
                               <v-card prepend-icon="mdi-pencil" title="Editar">
                                 <v-divider class="mt-3"></v-divider>
 
-                                <v-card-text class="px-4" style="height: 300px">
-                                  <v-radio-group v-model="dialog" messages="Select a Country from the radio group"
-                                    column>
-                                    <v-radio label="Bahamas, The" value="bahamas"></v-radio>
-                                    <v-radio label="Bahrain" value="bahrain"></v-radio>
-                                    <v-radio label="Bangladesh" value="bangladesh"></v-radio>
+                                <v-card-text class="px-4" style="min-width: 300px; max-width: 300px">
+                                  <v-radio-group v-model="selectedRole" column>
+                                    <v-radio label="Líder" value="Lider"></v-radio>
+                                    <v-radio label="Miembro Oficial" value="Miembro Oficial"></v-radio>
+                                    <v-radio label="Miembro" value="Miembro"></v-radio>
                                   </v-radio-group>
                                 </v-card-text>
 
                                 <v-divider></v-divider>
 
                                 <v-card-actions>
-                                  <v-btn text="Close" @click="isActive.value = false"></v-btn>
-
+                                  <v-btn text="Cancelar" @click="isActive.value = false"></v-btn>
                                   <v-spacer></v-spacer>
-
-                                  <v-btn color="surface-variant" text="Save" variant="flat"
-                                    @click="isActive.value = false"></v-btn>
+                                  <v-btn color="surface-variant" text="Guardar" variant="flat"
+                                    @click="CambiarRolAgrupacion(item.rut, selectedRole)"></v-btn>
                                 </v-card-actions>
                               </v-card>
                             </template>
-
                           </v-dialog>
 
                           <!-- Dialog de eliminar -->
@@ -117,7 +113,8 @@
 
                                   <v-row class="justify-end" style="margin-top: 10%">
                                     <v-col cols="6">
-                                      <v-btn color="red" @click="EliminarMiembro(item.rut), isActive.value = false, dialog = false;">Eliminar</v-btn>
+                                      <v-btn color="red"
+                                        @click="EliminarMiembro(item.rut), isActive.value = false, dialog = false;">Eliminar</v-btn>
                                     </v-col>
                                     <v-col cols="4">
                                       <v-btn color="blue" @click="isActive.value = false">Cancelar</v-btn>
@@ -233,7 +230,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
-            
+
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -326,6 +323,7 @@ export default {
     ],
     solicitudes: [],
     MiembrosdeAgr: [],
+    selectedRole: '',
     headers: [
       { text: 'Nombre', value: 'nombre' },
       { text: 'Rol Agrupación', value: 'action', sortable: false },
@@ -381,9 +379,9 @@ export default {
     async CambiarRolAgrupacion(rut, rol_agr) {
       console.log("Rol cambiado para:", rut, "Nuevo rol:", rol_agr);
       try {
-        const url = `http://localhost:3000/actualizar_rol/${rut}`;
+        const url = `http://localhost:3000/administracionderoles/${this.groupID}/${rut}`;
         const response = await fetch(url, {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },

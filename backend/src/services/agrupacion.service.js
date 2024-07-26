@@ -281,6 +281,28 @@ async function rejectSolicitud(rut, id_agr) {
   }
 }
 
+async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificacion, rut, fecha_creacion, imagen) {
+  try{
+    // Actualiza la agrupación con el id especificado
+    console.log('nombre:',agrupacion.nombre_agr);
+    console.log('descripcion:',agrupacion.descripcion);
+    console.log('verificado:',verificado);
+    console.log('fecha_verificacion:',fecha_verificacion);
+    console.log('rut:',rut);
+    console.log('fecha_creacion:',fecha_creacion);
+    const NuevosDatosAgrupacion = await pool.query(
+      `UPDATE "Agrupacion" SET nombre_agr = $1, descripcion = $2, verificado = $3, fecha_verificacion = $4, rut = $5, fecha_creacion = $6 WHERE id_agr = $7 RETURNING *`, 
+      [agrupacion.nombre_agr, agrupacion.descripcion, verificado,fecha_verificacion,rut, fecha_creacion, id_agr]
+    );
+
+    // Retorna la agrupación actualizada
+    return NuevosDatosAgrupacion.rows[0];
+  }
+  catch (error) {
+    console.log('Error al actualizar la agrupación:', error);
+  }
+}
+
 
   module.exports = {
     getAgrupaciones,
@@ -297,5 +319,6 @@ async function rejectSolicitud(rut, id_agr) {
     validateEliminarGrupo,
     getAgrupacionesDeUsuario,
     deleteUsuarioAgrupacion,
-    rejectSolicitud
+    rejectSolicitud,
+    updateAgrupacion
   };

@@ -448,19 +448,21 @@ export default {
         console.error("El archivo presentado no es un archivo.");
       }
     },
-    async ActualizarGrupo() {
+    async ActualizarGrupo(nombre_agr, descripcion, imagengrupo) {
       //Realiza un fetch a la ruta para actualizar los valores del grupo
       try {
-        const url = `http://localhost:3000/actualizargrupo/${this.groupId}`;
+        const nombre = nombre_agr;
+        const descripciongrupo = descripcion;
+        const imagen = imagengrupo;
+        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
         const response = await fetch(url, {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            nombre_agr: this.datosGrupo.nombre_agr,
-            descripcion: this.datosGrupo.descripcion,
-            imagen: this.urlImagen,
+            nombre_agr: nombre,
+            descripcion: descripciongrupo,
           }),
         });
 

@@ -81,7 +81,7 @@
 
                           <v-list>
                             <v-list-item v-for="(item, index) in opciones" :key="index">
-                              <v-btn @click="handleOptionClick(item.title)">
+                              <v-btn @click="handleOptionClick(item.title, solicitud.rut)">
                                 {{ item.title }}
                               </v-btn>
                             </v-list-item>
@@ -363,11 +363,13 @@ export default {
         console.log('Error al rechazar la solicitud');
       }
     },
-    handleOptionClick(title) {
-      if (title === 'Aceptar') {
-        this.aceptarSolicitud();
-      } else if (title === 'Rechazar') {
-        this.rechazarSolicitud();
+    handleOptionClick(title,rut) {
+      if (title === 'aceptar') {
+        console.log('aceptar');
+        this.aceptarSolicitud(rut);
+      } else if (title === 'rechazar') {
+        console.log('rechazar');
+        this.rechazarSolicitud(rut);
       }
     },
   },

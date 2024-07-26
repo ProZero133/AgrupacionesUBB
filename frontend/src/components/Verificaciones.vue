@@ -69,7 +69,6 @@ export default {
       try {
         // obtiene la agrupacion a la que le clickearon en aceptar
         const Agrupacion_a_Aceptar = this.AgrupacionesPendientesObtenidas.find(agrupacion => agrupacion.id_agr === id_agr);
-        console.log("Agrupacion_a_Aceptar", Agrupacion_a_Aceptar);
 
         const response = await fetch(`http://localhost:3000/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',

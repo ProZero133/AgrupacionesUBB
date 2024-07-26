@@ -1,5 +1,5 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad, setProgramacionActividad, setParticipanteActividad } = require('../services/actividad.service');
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad, setProgramacionActividad, setParticipanteActividad, deleteActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -22,6 +22,7 @@ async function ObtenerActividadPorID(req, res) {
         return res.send(respuesta);
     }
 }
+
 
 async function ObtenerActividadesPorAgrupacion(req, res) {
     try {
@@ -101,13 +102,21 @@ async function updateActividad(req, res) {
 
 
 
-async function deleteActividad(req, res) {
+async function eliminarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
-        const id = req.params.id;
-
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+        const actividad = await getActividadById(id_act);
+        if (actividad.length === 0) {
+            return res.send({ success: false, message: 'No se encontro la actividad' });
+        }
+        const lider = await getLider(actividad[0].id_agr);
+        if (rut !== lider.rut) {
+            return res.send({ success: false, message: 'No eres el lider de la agrupacion' });
+        }
         // Elimina la actividad
-        await actividadService.deleteActividad(id);
+        await deleteActividad(id_act);
 
         // Retorna un mensaje de éxito
         res.status(200).send('Actividad eliminada');
@@ -161,7 +170,7 @@ module.exports = {
     ObtenerActividadPorID,
     crearActividad,
     updateActividad,
-    deleteActividad,
+    eliminarActividad,
     ObtenerActividadesPorAgrupacion,
     programarActividad,
     participarActividad

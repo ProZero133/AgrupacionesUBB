@@ -44,55 +44,54 @@
             </v-row>
 
             <v-dialog v-model="dialog" max-width="500px">
+
               <v-card>
                 <v-toolbar color="primary">
                   <template v-slot:extension>
                     <v-tabs v-model="tab" align-tabs="title">
-                      <v-tab v-for="item in gestionmiembros" :key="item" :text="item" :value="item"></v-tab>
+                      <v-tab prepend-icon="mdi-account" value="miembros">Miembros</v-tab>
+                      <v-tab prepend-icon="mdi-lock" value="solicitudes" @click="VerSolicitudes">Solicitudes</v-tab>
                     </v-tabs>
                   </template>
                 </v-toolbar>
 
-                <v-tabs-window v-model="tab">
-                  <v-tabs-window-item v-for="item in gestionmiembros" :key="item" :value="item">
-                    <v-card flat>
-                      <v-card-text v-if="item === 'Miembros'">
+                <v-card-text>
+                  <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
+                    <v-data-table :headers="headers" :items="MiembrosdeAgr">
+                      <template v-slot:item.action="{ item }">
+                        <div class="d-flex justify-end">
+                          <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
+                            density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
+                            @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
+                        </div>
+                      </template>
+                    </v-data-table>
+                  </v-tab-item>
+                  <v-tab-item value="solicitudes" v-if="tab === 'solicitudes'">
 
-                        <v-data-table :headers="headers" :items="MiembrosdeAgr">
-                          <template v-slot:item.action="{ item }">
-                            <div class="d-flex justify-end">
-                              <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
-                                density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
-                                @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
-                            </div>
+                    <v-list>
+                      <v-list-item v-for="(solicitud, index) in solicitudes" :key="index">
+                        <v-menu :location="location" offset-y>
+                          <template v-slot:activator="{ props }">
+                            <v-btn v-bind="props">
+                              {{ solicitud.rut }}
+                            </v-btn>
                           </template>
-                        </v-data-table>
 
+                          <v-list>
+                            <v-list-item v-for="(item, index) in opciones" :key="index">
+                              <v-btn @click="handleOptionClick(item.title)">
+                                {{ item.title }}
+                              </v-btn>
+                            </v-list-item>
+                          </v-list>
 
-                        <!-- 
-                        <v-list>
-                          <v-list-item v-for="(item, index) in MiembrosdeAgr" :key="index">
-                            <v-list-item-title>
-                              {{ item.nombre }}
-                              <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
-                                density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
-                                @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
-                            </v-list-item-title>
-                          </v-list-item>
-                        </v-list>
- -->
-
-                      </v-card-text>
-
-                      <v-card-text v-else>
-
-                        {{ text }}
-
-                      </v-card-text>
-                    </v-card>
-                  </v-tabs-window-item>
-                </v-tabs-window>
+                        </v-menu>
+                      </v-list-item>
+                    </v-list>
+                  </v-tab-item>
+                </v-card-text>
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -171,8 +170,18 @@ export default {
 
   data: () => ({
     dialog: false,
-    tab: null,
-    gestionmiembros: ['Miembros', 'Opción 2'],
+    location: 'end',
+    opciones: [{ title: 'aceptar', action: 'aceptar' }, { title: 'rechazar', action: 'rechazar' }],
+    locations: ['Location 1', 'Location 2', 'Location 3'],
+    tab: 'miembros',
+    gestionmiembros: ['Miembros', 'Solicitudes'],
+    miembros: [
+      { title: 'Miembro 1' },
+      { title: 'Miembro 2' },
+      { title: 'Miembro 3' },
+      { title: 'Miembro 4' },
+    ],
+    solicitudes: [],
     MiembrosdeAgr: [],
     headers: [
       { text: 'Nombre', value: 'nombre' },
@@ -219,7 +228,7 @@ export default {
           console.log("data: ", data);
           this.MiembrosdeAgr = data;
           this.MiembrosdeAgr.push(data);
-          console.log("miembros agrupacion: ",this.MiembrosdeAgr);
+          console.log("miembros agrupacion: ", this.MiembrosdeAgr);
 
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -303,6 +312,62 @@ export default {
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      }
+    },
+    async VerSolicitudes() {
+      try {
+        const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          this.solicitudes = data;
+        } else {
+          console.log('Error al obtener las solicitudes');
+        }
+      } catch (error) {
+        console.log('Error al obtener las solicitudes');
+      }
+    },
+    async aceptarSolicitud(rut) {
+      try {
+        const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'POST',
+        });
+        if (response.ok) {
+          console.log('Solicitud aceptada');
+          this.VerSolicitudes();
+        } else {
+          console.log('Error al aceptar la solicitud');
+        }
+      } catch (error) {
+        console.log('Error al aceptar la solicitud');
+      }
+    },
+    async rechazarSolicitud(rut) {
+      try {
+        const url = `http://localhost:3000/rechazarsolicitud/${rut}/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'POST',
+        });
+        if (response.ok) {
+          console.log('Solicitud rechazada');
+          this.VerSolicitudes();
+        } else {
+          console.log('Error al rechazar la solicitud');
+        }
+      } catch (error) {
+        console.log('Error al rechazar la solicitud');
+      }
+    },
+    handleOptionClick(title) {
+      if (title === 'Aceptar') {
+        this.aceptarSolicitud();
+      } else if (title === 'Rechazar') {
+        this.rechazarSolicitud();
       }
     },
   },

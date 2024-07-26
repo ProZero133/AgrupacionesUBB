@@ -271,6 +271,16 @@ async function deleteUsuarioAgrupacion(rut, id_agr) {
   }
 }
 
+async function rejectSolicitud(rut, id_agr) {
+  try {
+    // Rechaza la solicitud con el rut y id_agr especificados
+    const response = await pool.query('DELETE FROM "Pertenece" WHERE rut = $1 AND id_agr = $2 RETURNING *', [rut, id_agr]);
+    return response.rows[0];
+  } catch (error) {
+    console.log('Error al rechazar la solicitud:', error);
+  }
+}
+
 
   module.exports = {
     getAgrupaciones,
@@ -286,5 +296,6 @@ async function deleteUsuarioAgrupacion(rut, id_agr) {
     getLider,
     validateEliminarGrupo,
     getAgrupacionesDeUsuario,
-    deleteUsuarioAgrupacion
+    deleteUsuarioAgrupacion,
+    rejectSolicitud
   };

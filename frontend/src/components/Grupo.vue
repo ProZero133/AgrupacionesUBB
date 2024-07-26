@@ -54,8 +54,8 @@
                     </v-tabs>
                   </template>
                 </v-toolbar>
-
                 <v-card-text>
+
                   <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
                     <v-data-table :headers="headers" :items="MiembrosdeAgr">
@@ -63,11 +63,14 @@
                         <div class="d-flex justify-end">
                           <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
                             density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
-                            @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
+                            @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)">
+                          </v-select>
                         </div>
                       </template>
                     </v-data-table>
+
                   </v-tab-item>
+
                   <v-tab-item value="solicitudes" v-if="tab === 'solicitudes'">
 
                     <v-list>
@@ -75,7 +78,7 @@
                         <v-menu :location="location" offset-y>
                           <template v-slot:activator="{ props }">
                             <v-btn v-bind="props">
-                              {{ solicitud.rut }}
+                              {{ solicitud.rut }} 
                             </v-btn>
                           </template>
 
@@ -225,11 +228,9 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("data: ", data);
-          this.MiembrosdeAgr = data;
-          this.MiembrosdeAgr.push(data);
+          const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
+          this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
           console.log("miembros agrupacion: ", this.MiembrosdeAgr);
-
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -237,6 +238,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
 
     selectItem(item) {
       this.selectedItems.push(item); // Añade el item a la lista de seleccionados

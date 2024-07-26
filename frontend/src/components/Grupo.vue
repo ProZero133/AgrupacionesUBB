@@ -46,11 +46,6 @@
             <v-dialog v-model="dialog" max-width="500px">
               <v-card>
                 <v-toolbar color="primary">
-                  <v-app-bar-nav-icon></v-app-bar-nav-icon>
-                  <v-toolbar-title>Miembros</v-toolbar-title>
-                  <v-spacer></v-spacer>
-                  <v-btn icon="mdi-magnify"></v-btn>
-                  <v-btn icon="mdi-dots-vertical"></v-btn>
                   <template v-slot:extension>
                     <v-tabs v-model="tab" align-tabs="title">
                       <v-tab v-for="item in gestionmiembros" :key="item" :text="item" :value="item"></v-tab>
@@ -62,22 +57,38 @@
                   <v-tabs-window-item v-for="item in gestionmiembros" :key="item" :value="item">
                     <v-card flat>
                       <v-card-text v-if="item === 'Miembros'">
+
+
+                        <v-data-table :headers="headers" :items="MiembrosdeAgr">
+                          <template v-slot:item.action="{ item }">
+                            <div class="d-flex justify-end">
+                              <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
+                                density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
+                                @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
+                            </div>
+                          </template>
+                        </v-data-table>
+
+
+                        <!-- 
                         <v-list>
                           <v-list-item v-for="(item, index) in MiembrosdeAgr" :key="index">
-
-                            <v-list-item-title>{{ item.nombre }} <v-select class="SeleccionarRol" v-model="panita"
-                                label="Seleccionar rol" density="comfortable"
-                                :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled ></v-select>
+                            <v-list-item-title>
+                              {{ item.nombre }}
+                              <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol"
+                                density="comfortable" :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled
+                                @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
                             </v-list-item-title>
-
                           </v-list-item>
                         </v-list>
-
-
+ -->
 
                       </v-card-text>
+
                       <v-card-text v-else>
+
                         {{ text }}
+
                       </v-card-text>
                     </v-card>
                   </v-tabs-window-item>
@@ -163,7 +174,10 @@ export default {
     tab: null,
     gestionmiembros: ['Miembros', 'Opción 2'],
     MiembrosdeAgr: [],
-    panita: '',
+    headers: [
+      { text: 'Nombre', value: 'nombre' },
+      { text: 'Rol Agrupación', value: 'action', sortable: false },
+    ],
     groupName: 'Club de Tetris UBB',
     groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
     datosGrupo: {
@@ -200,12 +214,12 @@ export default {
           },
         });
 
-        console.log(response);
-
         if (response.ok) {
           const data = await response.json();
+          console.log("data: ", data);
           this.MiembrosdeAgr = data;
           this.MiembrosdeAgr.push(data);
+          console.log("miembros agrupacion: ",this.MiembrosdeAgr);
 
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -329,5 +343,15 @@ export default {
   margin-top: 20px;
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
+}
+
+.SeleccionarRol {
+  margin-top: 10px;
+  width: 150px;
+}
+
+.div_usuarios {
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>

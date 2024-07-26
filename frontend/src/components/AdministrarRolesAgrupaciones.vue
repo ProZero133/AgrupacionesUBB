@@ -48,8 +48,6 @@ export default {
       snackbarTimeout: 3000,
       headers: [
         { text: 'Nombre', value: 'nombre' },
-        { text: 'Correo', value: 'correo' },
-        { text: 'Carrera', value: 'carrera' },
         { text: 'Rol Agrupación', value: 'action', sortable: false },
       ],
     };
@@ -123,7 +121,7 @@ export default {
 
 .SeleccionarRol {
   margin-top: 10px;
-  width: 200px;
+  width: 120px;
 }
 
 </style>

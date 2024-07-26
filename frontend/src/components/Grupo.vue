@@ -174,11 +174,12 @@ export default {
       verificado: null,
     },
 
-    items: [
-      { title: 'Crear Actividad', path: '/api/crear_actividad/' },
-      { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
-      { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
-    ],
+      items: [
+        { title: 'Crear Actividad', path: '/api/crear_actividad/' },
+        { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
+        { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
+        { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
+      ],
 
     actividades: [],
     urlImagen: addImage,

@@ -2,13 +2,15 @@
   <div>
     <v-card class="v-card-custom">
       <v-card-title>
-        Administrar roles de Agrupacion 
+        Administrar roles de Agrupacion
       </v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="UsuariosDeAgrupacion">
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
-              
+              <v-select class="SeleccionarRol" v-model="item.rol_agr" label="Seleccionar rol" density="comfortable"
+                :items="['Lider', 'Miembro Oficial', 'Miembro']" solo filled 
+                @change="ActualizarRolAgrupacion(item.id_usr, item.rol_agr)"></v-select>
             </div>
           </template>
         </v-data-table>
@@ -21,8 +23,22 @@
 </template>
 
 <script>
+
+
+import { useRoute } from 'vue-router';
+  
 export default {
   name: 'AdministrarRolesAgrupaciones',
+  
+  setup() {
+    const route = useRoute();
+    const groupId = route.params.id;
+
+    return {
+      groupId,
+    };
+  },
+
   data() {
     return {
       UsuariosDeAgrupacion: [],
@@ -33,24 +49,24 @@ export default {
       headers: [
         { text: 'Nombre', value: 'nombre' },
         { text: 'Correo', value: 'correo' },
-        { text: 'Carrera', value : 'carrera' },
-        { text: 'rol_agr', value: 'Pendiente' },
-
+        { text: 'Carrera', value: 'carrera' },
+        { text: 'Rol Agrupación', value: 'action', sortable: false },
       ],
     };
   },
 
-  // ------------------------------------------------------------------------------------------
-
   methods: {
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const response = await fetch('http://localhost:3000/administracionderoles/34', {
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const response = await fetch(url , {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
+
+        console.log(response);
 
         if (response.ok) {
           const data = await response.json();
@@ -63,7 +79,24 @@ export default {
       }
     },
 
+    async ActualizarRolAgrupacion(rut, id_agr) {
+      try {
+        const response = await fetch('http://localhost:3000/administracionderoles/34/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rut,
+            id_agr,
+          }),
+        });
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
   },
+
   mounted() {
     this.ObtenerUsuariosDeAgrupacion();
   },
@@ -71,12 +104,6 @@ export default {
 </script>
 
 <style scoped>
-.B_Aceptar,
-.B_Rechazar {
-  margin: 5px;
-  min-width: 20%;
-}
-
 .v-card-custom {
   margin: 100px;
   margin-left: 10%;
@@ -93,4 +120,10 @@ export default {
   text-align: center;
   width: 100%;
 }
+
+.SeleccionarRol {
+  margin-top: 10px;
+  width: 200px;
+}
+
 </style>

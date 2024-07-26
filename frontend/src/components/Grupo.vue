@@ -1,37 +1,124 @@
 <template>
 
   <v-container cols="12"></v-container>
-  <v-container cols="12" >
-    <v-img
-        :width="1600"
-        :height="200"
-        aspect-ratio="16/9"
-        cover
-        class="mx-auto"
-        src="https://t3.ftcdn.net/jpg/04/56/11/06/360_F_456110688_0RbzwTy8UVyZwtObuxr8lb3XRr28R24X.jpg"
-      ></v-img>
+  <v-container cols="12">
+    <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto"
+      src="https://t3.ftcdn.net/jpg/04/56/11/06/360_F_456110688_0RbzwTy8UVyZwtObuxr8lb3XRr28R24X.jpg"></v-img>
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
-    </v-card>
-
-  <v-container class="titulito">
-    <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
-          <v-card-title>{{ actividad.nom_act }}</v-card-title>
-          <v-card-text>
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            <template v-slot:default="{ expanded }">
+              <v-row no-gutters>
+                <v-col class="d-flex justify-start" cols="4">
+                  Gestionar grupo
+                </v-col>
+                <v-col class="text-grey" cols="8">
+                  <v-fade-transition leave-absolute>
+                    <span v-if="expanded" key="0">
+                      Seleccione una accion
+                    </span>
+                    <span v-else key="1">
+                    </span>
+                  </v-fade-transition>
+                </v-col>
+              </v-row>
+            </template>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
             <v-row>
-              <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='actividad.imagen' />
+              <v-col cols="12">
+                <v-btn color="primary" @click="dialog = true">Ver miembros</v-btn>
               </v-col>
-              <v-col cols="7">
-                <p>{{ actividad.descripcion }}</p>
+              <v-col cols="12">
+                <v-btn color="secondary">Button 2</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="success">Button 3</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="error">Button 4</v-btn>
               </v-col>
             </v-row>
-            <!-- <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura"> -->
-            <!--<p>Tipo: {{ actividad.tipo }}</p>-->
-          </v-card-text>
+
+            <v-dialog v-model="dialog" max-width="500px">
+              <v-card>
+                <v-toolbar color="primary">
+                  <v-app-bar-nav-icon></v-app-bar-nav-icon>
+                  <v-toolbar-title>Miembros</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <v-btn icon="mdi-magnify"></v-btn>
+                  <v-btn icon="mdi-dots-vertical"></v-btn>
+                  <template v-slot:extension>
+                    <v-tabs v-model="tab" align-tabs="title">
+                      <v-tab prepend-icon="mdi-account" value="miembros">Miembros</v-tab>
+                      <v-tab prepend-icon="mdi-lock" value="solicitudes" @click="VerSolicitudes">Solicitudes</v-tab>
+                    </v-tabs>
+                  </template>
+                </v-toolbar>
+
+                <v-card-text>
+                  <v-tab-item value="miembros" v-if="tab === 'miembros'">
+                    <v-list>
+                      <v-list-item v-for="(miembro, index) in miembros" :key="index">
+                        <v-list-item-title>{{ miembro.title }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-tab-item>
+
+                  <v-tab-item value="solicitudes" v-if="tab === 'solicitudes'">
+                    <v-list>
+                      <v-list-item v-for="(solicitud, index) in solicitudes" :key="index">
+                        <v-menu :location="location" offset-y>
+                          <template v-slot:activator="{ props }">
+                            <v-btn v-bind="props">{{ solicitud.rut }}</v-btn>
+                          </template>
+
+                          <v-list>
+                            <v-list-item v-for="(item, index) in opciones" :key="index">
+                              <v-btn @click="handleOptionClick(item.title)">
+                                {{ item.title }}
+                              </v-btn>
+                            </v-list-item>
+                          </v-list>
+
+                        </v-menu>
+                      </v-list-item>
+                    </v-list>
+                  </v-tab-item>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialog = false">Cerrar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
     </v-card>
-  </v-container>
+
+    <v-container class="titulito">
+      <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
+        <v-card-title>{{ actividad.nom_act }}</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="5">
+              <v-img class="image" aspect-ratio="1" :src='actividad.imagen' />
+            </v-col>
+            <v-col cols="7">
+              <p>{{ actividad.descripcion }}</p>
+            </v-col>
+          </v-row>
+          <!-- <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura"> -->
+          <!--<p>Tipo: {{ actividad.tipo }}</p>-->
+        </v-card-text>
+      </v-card>
+    </v-container>
 
   </v-container>
 
@@ -41,23 +128,15 @@
         <template v-slot:activator="{ props: menu }">
           <v-tooltip location="bottom">
             <template v-slot:activator="{ props: tooltip }">
-              <v-btn
-                icon="mdi-plus"
-                size="large"
-                color="primary"
-                v-bind="mergeProps(menu, tooltip)"
-              >
+              <v-btn icon="mdi-plus" size="large" color="primary" v-bind="mergeProps(menu, tooltip)">
               </v-btn>
             </template>
             <span>Publicar</span>
           </v-tooltip>
         </template>
         <v-list class="tultipCrear">
-          <v-list-item
-            v-for="(item, index) in items"
-            :key="index"
-            v-on:click="this.$router.push(item.path+`${groupId}`)" 
-          >
+          <v-list-item v-for="(item, index) in items" :key="index"
+            v-on:click="this.$router.push(item.path + `${groupId}`)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -70,26 +149,41 @@
 <script>
 import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
-import { mergeProps } from 'vue';  
+import { mergeProps } from 'vue';
+import { fa } from 'vuetify/lib/locale/index.mjs';
 
-  export default {
-    setup() {
+export default {
+  setup() {
     const route = useRoute();
     const groupId = route.params.id; // Access the parameter
     // You can now use groupId in your component
     console.log(groupId); // For demonstration, logs the parameter value
-    
+
 
     return {
       groupId, // Return it to use in the template if needed
     };
-    },
-  
-    data: () => ({
-      panita: '',
-      groupName: 'Club de Tetris UBB',
-      groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
-      datosGrupo: {
+  },
+
+  data: () => ({
+    dialog: false,
+    location: 'end',
+    opciones: [{ title: 'aceptar', action: 'aceptar' }, { title: 'rechazar', action: 'rechazar' }],
+    locations: ['Location 1', 'Location 2', 'Location 3'],
+    tab: 'miembros',
+    gestionmiembros: ['Miembros', 'Solicitudes'],
+    miembros: [
+      { title: 'Miembro 1' },
+      { title: 'Miembro 2' },
+      { title: 'Miembro 3' },
+      { title: 'Miembro 4' },
+    ],
+    solicitudes: [],
+    MiembrosdeAgr: [],
+    panita: '',
+    groupName: 'Club de Tetris UBB',
+    groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
+    datosGrupo: {
       descripcion: null,
       fecha_creacion: null,
       fecha_verificacion: null,
@@ -98,43 +192,75 @@ import { mergeProps } from 'vue';
       nombre_agr: 'h',
       rut: null,
       verificado: null,
-      },
+    },
 
-      items: [
-        { title: 'Crear Actividad', path: '/api/crear_actividad/' },
-        { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
-        { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
-        { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
-      ],
+    items: [
+      { title: 'Crear Actividad', path: '/api/crear_actividad/' },
+      { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
+      { title: 'Ver solicitudes', path: '/api/solicitudes_agrupacion/' },
+      { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
+    ],
 
-      actividades: [],
-      urlImagen: addImage,
-    }),
-    methods: {
-      mergeProps,
-      async VerGrupos() {
-        try {
-          // Incorpora el groupID en la URL de la solicitud fetch
-          const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
-          const response = await fetch(url, {
-            method: 'GET',
-          });
-      
-          // Verifica si la respuesta es exitosa
-          if (response.ok) {
-            // Convierte la respuesta en formato JSON
-            const data = await response.json();
-            this.datosGrupo = data.rows[0];
-            console.log("aqui datos grupo");
-            console.log(this.datosGrupo);
-          } else {
-            console.error('Error en la respuesta:', response.status);
-          }
-        } catch (error) {
-          console.error('Error al hacer fetch:', error);
+    actividades: [],
+    urlImagen: addImage,
+  }),
+  methods: {
+    mergeProps,
+
+    async ObtenerUsuariosDeAgrupacion() {
+      try {
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(response);
+
+        if (response.ok) {
+          const data = await response.json();
+          this.MiembrosdeAgr = data;
+          this.MiembrosdeAgr.push(data);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
         }
-      },
-      async VerActividades() {
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    selectItem(item) {
+      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+      //          this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
+
+    async VerGrupos() {
+      try {
+        // Incorpora el groupID en la URL de la solicitud fetch
+        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+        });
+
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          this.datosGrupo = data.rows[0];
+          console.log("aqui datos grupo");
+          console.log(this.datosGrupo);
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`http://localhost:3000/actividadesgrupo/${this.groupId}`, {
@@ -154,24 +280,24 @@ import { mergeProps } from 'vue';
             this.actividades = data;
             console.log(this.actividades[0]);
 
-            for (const imagenes of this.actividades){
-            try {
-              const responde = await fetch('http://localhost:3000/imagen/'+imagenes.imagen, {
-                method: 'GET',
-              });
-              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
-              if (responde.ok) {
-                const dataImagen = await responde.text();
-                imagenes.imagen = dataImagen;
-              } else {
-                console.error('Error en la respuesta:', responde.status);
-              }
+            for (const imagenes of this.actividades) {
+              try {
+                const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
+                  method: 'GET',
+                });
+                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+                if (responde.ok) {
+                  const dataImagen = await responde.text();
+                  imagenes.imagen = dataImagen;
+                } else {
+                  console.error('Error en la respuesta:', responde.status);
+                }
 
+              }
+              catch (error) {
+                console.error('Error al hacer fetch:', error);
+              }
             }
-            catch (error) {
-              console.error('Error al hacer fetch:', error);
-            }
-          }
 
 
           }
@@ -182,22 +308,81 @@ import { mergeProps } from 'vue';
         console.error('Error al hacer fetch:', error);
       }
     },
+    async VerSolicitudes() {
+      try {
+        const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          this.solicitudes = data;
+        } else {
+          console.log('Error al obtener las solicitudes');
+        }
+      } catch (error) {
+        console.log('Error al obtener las solicitudes');
+      }
     },
-    mounted() {
+    async aceptarSolicitud(rut) {
+      try {
+        const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'POST',
+        });
+        if (response.ok) {
+          console.log('Solicitud aceptada');
+          this.VerSolicitudes();
+        } else {
+          console.log('Error al aceptar la solicitud');
+        }
+      } catch (error) {
+        console.log('Error al aceptar la solicitud');
+      }
+    },
+    async rechazarSolicitud(rut) {
+      try {
+        const url = `http://localhost:3000/rechazarsolicitud/${rut}/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'POST',
+        });
+        if (response.ok) {
+          console.log('Solicitud rechazada');
+          this.VerSolicitudes();
+        } else {
+          console.log('Error al rechazar la solicitud');
+        }
+      } catch (error) {
+        console.log('Error al rechazar la solicitud');
+      }
+    },
+    handleOptionClick(title) {
+      if (title === 'Aceptar') {
+        this.aceptarSolicitud();
+      } else if (title === 'Rechazar') {
+        this.rechazarSolicitud();
+      }
+    },
+  },
+  mounted() {
     this.VerGrupos();
     this.VerActividades();
-    },
-  }
-  
+    this.ObtenerUsuariosDeAgrupacion();
+  },
+}
+
 </script>
 
 <style>
-.tultipCrear{
+.tultipCrear {
   margin-bottom: 10px;
 }
+
 .titulito {
   margin-top: -10px;
 }
+
 .texto {
   border-radius: 0px;
 }

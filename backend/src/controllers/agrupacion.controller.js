@@ -1,6 +1,8 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo, getUsuariosdeAgrupacion } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateAgrupacion, getImage, 
+    createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo, 
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -198,6 +200,74 @@ async function eliminarAgrupacion(req, res) {
     }
 }
 
+async function obtenerAgrupacionesDeUsuario(req, res) {
+    try {
+        const rut = req.params.rut;
+        const user = await getUsuarioByRut(rut);
+        if (user.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const result = await getAgrupacionesDeUsuario(rut);
+        if (result.length === 0) {
+            return res.code(404).send('No se encontraron agrupaciones');
+        }
+        res.code(200).send(result);
+    } catch (error) {
+        console.error('Error al obtener las agrupaciones del usuario:', error);
+        res.code(500).send('Error al obtener las agrupaciones del usuario');
+    }
+}
+
+async function abandonarAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        const user = await getUsuarioByRut(rut);
+        if (user.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const usuarioEnAgrupacion = await obtenerAgrupacionesDeUsuario(rut);
+        if (usuarioEnAgrupacion.length === 0) {
+            return res.code(404).send('Usuario no pertenece a la agrupación');
+        }
+        const result = await deleteUsuarioAgrupacion(rut, id_agr);
+        if (!result) {
+            return res.code(500).send('Error al abandonar la agrupación');
+        }
+        res.code(200).send('Agrupación abandonada');
+    } catch (error) {
+        console.error('Error al abandonar la agrupación:', error);
+        res.code(500).send('Error al abandonar la agrupación');
+    }
+}
+
+async function rechazarSolicitud(req, res) {
+    try {
+        const rut = req.params.rut;
+        const id_agr = req.params.id_agr;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const result = await rejectSolicitud(rut, id_agr);
+        if (!result) {
+            return res.code(500).send('Error al rechazar la solicitud');
+        }
+        res.code(200).send('Solicitud rechazada');
+    } catch (error) {
+        console.error('Error al rechazar la solicitud:', error);
+        res.code(500).send('Error al rechazar la solicitud');
+    }
+}
+
 module.exports = {
         VerGrupos,
         ObtenerAgrupacionesPorID,
@@ -208,5 +278,8 @@ module.exports = {
         solicitudesAgrupacion,
         aceptarSolicitud,
         ObtenerUsuariosdeAgrupacion,
-        eliminarAgrupacion
+        eliminarAgrupacion,
+        abandonarAgrupacion,
+        obtenerAgrupacionesDeUsuario,
+        rechazarSolicitud
     };

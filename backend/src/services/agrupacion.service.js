@@ -1,5 +1,6 @@
 const { pool } = require('../db.js');
 const {getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad} = require('../services/actividad.service.js');
+const { getUsuarioByRut } = require('../services/user.service.js');
 
 async function getAgrupaciones() {
    try{
@@ -241,6 +242,46 @@ async function validateEliminarGrupo(id_agr) {
   }
 }
 
+async function getAgrupacionesDeUsuario(rut) {
+  try {
+    // Obtiene las agrupaciones del usuario con el rut especificado
+    const agrupaciones = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1', [rut]);
+    //Listado de agrupaciones del usuario
+    let agrupacionesUsuario = [];
+    for (let i = 0; i < agrupaciones.rows.length; i++) {
+      const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [agrupaciones.rows[i].id_agr]);
+      if (agrupacion.rows.length === 0) {
+        return 'No se encontraron agrupaciones';
+      }
+      agrupacionesUsuario.push(agrupacion.rows[0]);
+    }
+    return agrupacionesUsuario;
+  } catch (error) {
+    console.log('Error al obtener las agrupaciones del usuario:', error);
+  }
+}
+
+async function deleteUsuarioAgrupacion(rut, id_agr) {
+  try {
+    // Elimina al usuario de la agrupación
+    const usuario = await pool.query('DELETE FROM "Pertenece" WHERE rut = $1 AND id_agr = $2 RETURNING *', [rut, id_agr]);
+    return 'Usuario eliminado de la agrupación';
+  } catch (error) {
+    console.log('Error al eliminar el usuario de la agrupación:', error);
+  }
+}
+
+async function rejectSolicitud(rut, id_agr) {
+  try {
+    // Rechaza la solicitud con el rut y id_agr especificados
+    const response = await pool.query('DELETE FROM "Pertenece" WHERE rut = $1 AND id_agr = $2 RETURNING *', [rut, id_agr]);
+    return response.rows[0];
+  } catch (error) {
+    console.log('Error al rechazar la solicitud:', error);
+  }
+}
+
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
@@ -253,5 +294,8 @@ async function validateEliminarGrupo(id_agr) {
     updateSolicitud,
     deleteAgrupacion,
     getLider,
-    validateEliminarGrupo
+    validateEliminarGrupo,
+    getAgrupacionesDeUsuario,
+    deleteUsuarioAgrupacion,
+    rejectSolicitud
   };

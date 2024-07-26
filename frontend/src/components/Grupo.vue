@@ -30,20 +30,17 @@
           <v-expansion-panel-text>
             <v-row>
               <v-col cols="12">
-                <v-btn color="primary" @click="dialog = true">Ver miembros</v-btn>
+                <v-btn color="primary" @click="dialogmiembros = true">Ver miembros</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn color="secondary">Button 2</v-btn>
+                <v-btn color="secondary" @click="dialogeditar = true">Editar grupo</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn color="success">Button 3</v-btn>
-              </v-col>
-              <v-col cols="12">
-                <v-btn color="error">Button 4</v-btn>
+                <v-btn color="error" @click="dialogsolicitar = true">Solicitar acreditación</v-btn>
               </v-col>
             </v-row>
 
-            <v-dialog v-model="dialog" max-width="500px">
+            <v-dialog v-model="dialogmiembros" max-width="500px">
 
               <v-card>
                 <v-toolbar color="primary">
@@ -98,9 +95,57 @@
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="primary" text @click="dialog = false">Cerrar</v-btn>
+                  <v-btn color="primary" text @click="dialogmiembros = false">Cerrar</v-btn>
                 </v-card-actions>
               </v-card>
+            </v-dialog>
+            <v-dialog v-model="dialogeditar" max-width="500px">
+              <v-card>
+                <v-card-title>Editar grupo</v-card-title>
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field v-model="datosGrupo.nombre_agr" label="Nombre" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-textarea v-model="datosGrupo.descripcion" label="Descripción" required></v-textarea>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
+                        label="Imagen para la actividad" clearable required variant="solo-filled" prepend-icon=""
+                        @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl">
+                      </v-file-input>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogeditar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text
+                    @click="ActualizarGrupo(datosGrupo.nombre_agr, datosGrupo.descripcion, imagengrupo)">Guardar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+            <v-dialog v-model="dialogsolicitar" max-width="500px" min-width="400px">
+              <v-card text="Solicitar acreditación">
+                <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr
+                  }}?</v-card-title>
+                <v-card-text>
+                  <!-- Confirmar si esta seguro de solicitar la acreditacion de su grupo -->
+                  <v-row>
+                    La agrupacion quedara sujeta a evaluacion por la administración
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogsolicitar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text @click="ActualizarGrupo">Aceptar</v-btn>
+                </v-card-actions>
+              </v-card>
+
             </v-dialog>
           </v-expansion-panel-text>
         </v-expansion-panel>
@@ -172,7 +217,11 @@ export default {
   },
 
   data: () => ({
-    dialog: false,
+    dialogmiembros: false,
+    dialogeditar: false,
+    dialogsolicitar: false,
+    imagengrupo: [],
+    idImagen: '',
     location: 'end',
     opciones: [{ title: 'aceptar', action: 'aceptar' }, { title: 'rechazar', action: 'rechazar' }],
     locations: ['Location 1', 'Location 2', 'Location 3'],
@@ -366,7 +415,7 @@ export default {
         console.log('Error al rechazar la solicitud');
       }
     },
-    handleOptionClick(title,rut) {
+    handleOptionClick(title, rut) {
       if (title === 'aceptar') {
         console.log('aceptar');
         this.aceptarSolicitud(rut);
@@ -375,6 +424,60 @@ export default {
         this.rechazarSolicitud(rut);
       }
     },
+    onFileChange(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        this.urlImagen = this.defaultImageUrl;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.urlImagen = reader.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    createImage(file) {
+      const reader = new FileReader();
+      const actualFile = file[0];
+      reader.onload = e => {
+        this.urlImagen = e.target.result;
+      };
+      if (actualFile instanceof File) {
+        reader.readAsDataURL(actualFile);
+      } else {
+        console.error("El archivo presentado no es un archivo.");
+      }
+    },
+    async ActualizarGrupo(nombre_agr, descripcion, imagengrupo) {
+      //Realiza un fetch a la ruta para actualizar los valores del grupo
+      try {
+        const nombre = nombre_agr;
+        const descripciongrupo = descripcion;
+        const imagen = imagengrupo;
+        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre_agr: nombre,
+            descripcion: descripciongrupo,
+          }),
+        });
+
+        if (response.ok) {
+          console.log('Grupo actualizado');
+          this.VerGrupos();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+
+    }
+
   },
   mounted() {
     this.VerGrupos();
@@ -423,5 +526,10 @@ export default {
 .div_usuarios {
   margin-left: auto;
   margin-right: auto;
+}
+
+.acred {
+  white-space: pre-wrap;
+  min-width: 500px;
 }
 </style>

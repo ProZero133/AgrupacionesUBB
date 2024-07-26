@@ -179,6 +179,7 @@ export default {
       { title: 'Miembro 4' },
     ],
     solicitudes: [],
+    MiembrosdeAgr: [],
     panita: '',
     groupName: 'Club de Tetris UBB',
     groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
@@ -205,6 +206,37 @@ export default {
   }),
   methods: {
     mergeProps,
+
+    async ObtenerUsuariosDeAgrupacion() {
+      try {
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(response);
+
+        if (response.ok) {
+          const data = await response.json();
+          this.MiembrosdeAgr = data;
+          this.MiembrosdeAgr.push(data);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    selectItem(item) {
+      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+      //          this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
+
     async VerGrupos() {
       try {
         // Incorpora el groupID en la URL de la solicitud fetch
@@ -227,6 +259,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -335,6 +368,7 @@ export default {
   mounted() {
     this.VerGrupos();
     this.VerActividades();
+    this.ObtenerUsuariosDeAgrupacion();
   },
 }
 

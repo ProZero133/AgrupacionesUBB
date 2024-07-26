@@ -35,9 +35,9 @@ const url = config.URL;
       // Establece una cookie de primera parte
       reply.setCookie('authToken', token, {
         path: '/',
-        httpOnly: true,
-        sameSite: 'strict', // Considera 'lax' si necesitas que la cookie sea enviada en solicitudes de terceros (dependiendo del contexto)
-        secure: true, // Establece en false si estás desarrollando en localhost sin HTTPS
+        httpOnly: false,
+        sameSite: 'lax', // Considera 'lax' si necesitas que la cookie sea enviada en solicitudes de terceros (dependiendo del contexto)
+        secure: false, // Establece en false si estás desarrollando en localhost sin HTTPS
         maxAge: 3600 // Expire después de 1 hora, ajusta según sea necesario
       });
   

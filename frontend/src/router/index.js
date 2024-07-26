@@ -4,6 +4,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
       path: '/',
+      redirect: '/api/login'
+    },
+    {
+      path: '/',
       redirect: '/api/home',
     },
     {
@@ -18,6 +22,7 @@ const routes = [
           path: 'home',
           name: 'Home',
           component: () => import('@/views/UserHomeView.vue'),
+          meta: {requiresAuth: true}
         },
         {
           path: 'adminhome',
@@ -82,6 +87,11 @@ const routes = [
         
       ],
     },
+    {
+      path: '/api/login',
+      name: 'Login',
+      component: () => import('@/views/LoginView.vue')
+    }
 ]
 
 const router = createRouter({
@@ -89,4 +99,4 @@ const router = createRouter({
   routes,
 })
 
-export default router
+export default router;

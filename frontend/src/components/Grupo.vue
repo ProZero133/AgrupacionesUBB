@@ -30,20 +30,20 @@
           <v-expansion-panel-text>
             <v-row>
               <v-col cols="12">
-                <v-btn color="primary" @click="dialog = true">Ver miembros</v-btn>
+                <v-btn color="primary" @click="dialogmiembros = true">Ver miembros</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn color="secondary">Button 2</v-btn>
+                <v-btn color="secondary" @click="dialogeditar = true">Editar grupo</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn color="success">Button 3</v-btn>
+                <v-btn color="error" @click="dialogsolicitar = true">Solicitar acreditación</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn color="error">Button 4</v-btn>
+                <v-btn color="error" @click="dialogeliminar = true">Eliminar agrupación</v-btn>
               </v-col>
             </v-row>
 
-            <v-dialog v-model="dialog" max-width="500px">
+            <v-dialog v-model="dialogmiembros" max-width="500px">
 
               <v-card>
                 <v-toolbar color="primary">
@@ -162,7 +162,74 @@
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="primary" text @click="dialog = false">Cerrar</v-btn>
+                  <v-btn color="primary" text @click="dialogmiembros = false">Cerrar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+            <v-dialog v-model="dialogeditar" max-width="500px">
+              <v-card>
+                <v-card-title>Editar grupo</v-card-title>
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field v-model="datosGrupo.nombre_agr" label="Nombre" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-textarea v-model="datosGrupo.descripcion" label="Descripción" required></v-textarea>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
+                        label="Imagen para la actividad" clearable required variant="solo-filled" prepend-icon=""
+                        @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl">
+                      </v-file-input>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogeditar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text
+                    @click="ActualizarGrupo(datosGrupo.nombre_agr, datosGrupo.descripcion, imagengrupo)">Guardar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+            <v-dialog v-model="dialogsolicitar" max-width="500px" min-width="400px">
+              <v-card text="Solicitar acreditación">
+                <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr
+                  }}?</v-card-title>
+                <v-card-text>
+                  <!-- Confirmar si esta seguro de solicitar la acreditacion de su grupo -->
+                  <v-row>
+                    La agrupacion quedara sujeta a evaluacion por la administración
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogsolicitar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text @click="ActualizarGrupo">Aceptar</v-btn>
+                </v-card-actions>
+              </v-card>
+
+            </v-dialog>
+
+            <v-dialog v-model="dialogeliminar" max-width="500px" min-width="400px">
+              <v-card text="Eliminar agrupación">
+                <v-card-title class="acred">¿Estas seguro de eliminar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
+                <v-card-text>
+                  <!-- Confirmar si esta seguro de eliminar su grupo -->
+                  <v-row>
+                    La agrupacion sera eliminada de forma permanente
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogeliminar = false">Cancelar</v-btn>
+                  <v-btn color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+                    @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+                    depressed>Aceptar</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -237,7 +304,15 @@ export default {
   },
 
   data: () => ({
-    dialog: false,
+    dialogmiembros: false,
+    dialogeditar: false,
+    dialogsolicitar: false,
+    dialogeliminar: false,
+    pressTimer: null,
+    pressTime: 0,
+    progress: 0,
+    imagengrupo: [],
+    idImagen: '',
     location: 'end',
     opciones: [{ title: 'aceptar', action: 'aceptar' }, { title: 'rechazar', action: 'rechazar' }],
     locations: ['Location 1', 'Location 2', 'Location 3'],
@@ -360,8 +435,6 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.datosGrupo = data.rows[0];
-          console.log("aqui datos grupo");
-          console.log(this.datosGrupo);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -385,11 +458,7 @@ export default {
           if (data.success === false) {
             //console.log("No hay actividades");
           } else {
-            //console.log("Actividades obtenidas");
-            //console.log(response);
             this.actividades = data;
-            //console.log(this.actividades[0]);
-
             for (const imagenes of this.actividades) {
               try {
                 const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
@@ -478,11 +547,94 @@ export default {
         this.rechazarSolicitud(rut);
       }
     },
+    onFileChange(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        this.urlImagen = this.defaultImageUrl;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.urlImagen = reader.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    createImage(file) {
+      const reader = new FileReader();
+      const actualFile = file[0];
+      reader.onload = e => {
+        this.urlImagen = e.target.result;
+      };
+      if (actualFile instanceof File) {
+        reader.readAsDataURL(actualFile);
+      } else {
+        console.error("El archivo presentado no es un archivo.");
+      }
+    },
+    async ActualizarGrupo(nombre_agr, descripcion, imagengrupo) {
+      //Realiza un fetch a la ruta para actualizar los valores del grupo
+      try {
+        const nombre = nombre_agr;
+        const descripciongrupo = descripcion;
+        const imagen = imagengrupo;
+        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre_agr: nombre,
+            descripcion: descripciongrupo,
+          }),
+        });
+
+        if (response.ok) {
+          console.log('Grupo actualizado');
+          this.VerGrupos();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+
+    },
+    startHold() {
+      this.pressTime = 0;
+      this.progress = 0;
+      this.pressTimer = setInterval(() => {
+        this.pressTime += 100;
+        this.progress = (this.pressTime / 2000) * 100;
+        if (this.pressTime >= 2000) {
+          this.EliminarGrupo();
+          this.cancelHold();
+        }
+      }, 100);
+    },
+    cancelHold() {
+      clearInterval(this.pressTimer);
+      this.progress = 0;
+    },
+    EliminarGrupo() {
+      // Lógica para eliminar el grupo
+      console.log(`Grupo ${this.datosGrupo.nombre_agr} eliminado`);
+      this.dialogeliminar = false;
+    },
+
+
   },
   mounted() {
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
+  },
+  computed: {
+    progressStyle() {
+      return {
+        background: `linear-gradient(to right, blue ${this.progress}%, white ${this.progress}%)`
+      };
+    },
   },
 }
 
@@ -526,5 +678,15 @@ export default {
 .div_usuarios {
   margin-left: auto;
   margin-right: auto;
+}
+
+.acred {
+  white-space: pre-wrap;
+  min-width: 500px;
+}
+
+.botoneliminar {
+  position: relative;
+  overflow: hidden;
 }
 </style>

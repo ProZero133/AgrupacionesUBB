@@ -17,9 +17,10 @@ async function getAgrupaciones() {
     try {
       // Obtiene la agrupacion con el id especificado
       const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [id]);
-  
+
       // Retorna la agrupacion
-      return agrupacion;
+      return agrupacion.rows[0];
+
     } catch (error) {
       // Maneja cualquier error que pueda ocurrir
       console.error('Error al obtener la agrupación:', error);
@@ -113,8 +114,15 @@ async function updateAgrupacionVerificado(id) {
 
   async function updateRolUsuario(rut, id_agr, rol) {
     try {
+
+      console.log("rut update: ",rut);
+      console.log("id_agr update: ",id_agr);
+      console.log("rol update: ",rol);
+
       // Actualiza el rol del usuario con el rut y id_agr especificados
       const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1 WHERE rut = $2 AND id_agr = $3 RETURNING *', [rol, rut, id_agr]);
+      console.log("response updateRolUsuario: ",response.rows[0]);
+
       return response.rows[0];
     } catch (error) {
       console.log('Error al actualizar el rol del usuario:', error);

@@ -377,15 +377,15 @@ export default {
     },
 
     async CambiarRolAgrupacion(rut, rol_agr) {
-      console.log("Rol cambiado para:", rut, "Nuevo rol:", rol_agr);
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupID}/${rut}`;
+        const url = `http://localhost:3000/administracionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ rol_agr }),
+          body: JSON.stringify({ 
+            rol_agr }),
         });
 
         if (response.ok) {

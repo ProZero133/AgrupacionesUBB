@@ -235,17 +235,18 @@ async function CambiarRoldeUsuario(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const rut = req.params.rut;
-        const rol = req.body.rol;
+        const rol = req.body.rol_agr;
+
+
         const usuario = await getUsuarioByRut(rut);
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');
         }
-        console.log("Rut: ", rut);
+
         const agrupacion = await getAgrupacionById(id_agr);
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
-        console.log("id_agr: ", id_agr);
         /* 
                 const usuarioEsLider = await getLider(id_agr);
                 if (usuarioEsLider[0].rut !== rut) {
@@ -253,6 +254,7 @@ async function CambiarRoldeUsuario(req, res) {
                 }
          */
         const result = await updateRolUsuario(rut, id_agr, rol);
+
         if (!result) {
             return res.code(500).send('Error al cambiar el rol del usuario');
         }

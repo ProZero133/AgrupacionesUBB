@@ -64,7 +64,6 @@ export default {
           const data = await response.json();
           console.log('Respuesta del servidor:', data.codigo);
           this.userData = data.result.usuario;
-          console.log('Datos del usuario:', this.userData.rol);
           this.serverCode = data.codigo;
           this.dialog = true;
         } else {
@@ -78,8 +77,12 @@ export default {
     async verifyCode() {
       if (this.verificationCode === this.serverCode) {
         try {
+        const nombre = this.userData.nombre;
+        const rut = this.userData.rut;
         const role = this.userData.rol;
-        this.tokenValue = `rol=${role}`;
+        const email = this.userData.correo;
+        const carrera = this.userData.carrera;
+        this.tokenValue = `rol=${role} & nombre=${nombre} & rut=${rut} & email=${email} & carrera=${carrera}`;
         this.$cookies.set('token', this.tokenValue);
           this.$router.push(`/api/home`);
         } catch (error) {
@@ -144,7 +147,7 @@ export default {
 }
 
 .tfCorreo {
-  min-width: 350px;
+  min-width: 300px;
 }
 
 .tfCredenciales {

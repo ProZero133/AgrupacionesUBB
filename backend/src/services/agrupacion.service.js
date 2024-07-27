@@ -144,13 +144,24 @@ async function updateAgrupacionVerificado(id) {
       // Obtiene los usuarios de la agrupación con el id especificado
       // "sm_usuario" -> tabla de usuarios simulados
       // "usuario" -> tabla de usuarios reales
-      const usuarios = await pool.query('SELECT * FROM "Pertenece" p, "sm_usuario" u,"Agrupacion" a WHERE p.rut = u.rut AND p.id_agr = a.id_agr AND a.id_agr = $1', [id]);      
+      const usuarios = await pool.query('SELECT   u.rut AS user_rut,   u.nombre AS user_nombre,   a.id_agr AS agrupacion_id,   a.nombre_agr AS agrupacion_nombre, p.* FROM "Pertenece" p JOIN "sm_usuario" u ON u.rut = p.rut JOIN "Agrupacion" a ON a.id_agr = p.id_agr WHERE p.id_agr = $1;', [id]);      
       
       return usuarios.rows;
     } catch (error) {
       console.log('Error al obtener los usuarios de la agrupación:', error);
     }
   }
+
+  async function getRolUsuario(rut, id_agr) {
+    try {
+      // Obtiene el rol del usuario con el rut y id_agr especificados
+      const rol = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
+      return rol.rows[0];
+    } catch (error) {
+      console.log('Error al obtener el rol del usuario:', error);
+    }
+  }
+
 
   async function updateRolUsuario(rut, id_agr, rol) {
     try {
@@ -387,6 +398,7 @@ async function insertTagsAgrupacion(id_agr, tags) {
     createAgrupacion,
     createSolicitarAcreditacion,
     getUsuariosdeAgrupacion,
+    getRolUsuario,
     updateRolUsuario,
     updateAgrupacionVerificado,
     getImage,

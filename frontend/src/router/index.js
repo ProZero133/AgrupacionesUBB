@@ -1,6 +1,6 @@
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
-
+import VueCookies from 'vue-cookies'
 const routes = [
     {
       path: '/',
@@ -97,6 +97,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const publicPages = ['/api/login'];
+  const authRequired = !publicPages.includes(to.path);
+  const token = VueCookies.get('token');
+
+  if (authRequired && (!token || token === 'undefined')) {
+    return next('/api/login');
+  }
+
+  next();
 })
 
 export default router;

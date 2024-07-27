@@ -9,7 +9,7 @@
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
     </v-card>
 
-            <v-dialog v-model="dialogmiembros" max-width="500px">
+            <v-dialog v-model="dialogmiembros" max-width="600px">
 
               <v-card>
                 <v-toolbar color="primary">
@@ -35,10 +35,11 @@
                           <v-dialog width="auto" scrollable>
                             <template v-slot:activator="{ props: activatorProps }">
                               <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined"
-                                v-bind="activatorProps"></v-btn>
+                                v-bind="activatorProps" @click="ObtenerRolUsr(item.user_rut)"></v-btn>
                             </template>
 
-                            <template v-slot:default="{ isActive }">
+                            <template v-slot:default="{ isActive }" >
+                              
                               <v-card prepend-icon="mdi-pencil" title="Editar">
                                 <v-divider class="mt-3"></v-divider>
 
@@ -241,7 +242,7 @@
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
-          <v-tooltip location="bottom">
+          <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
               <v-btn icon="mdi-plus" size="large" color="primary" v-bind="mergeProps(menu, tooltip)">
               </v-btn>
@@ -264,7 +265,7 @@
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
-          <v-tooltip location="bottom">
+          <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
               <v-btn icon="mdi-account-edit" size="large" color="warning" v-bind="mergeProps(menu, tooltip)">
               </v-btn>
@@ -323,7 +324,8 @@ export default {
     selectedRole: '',
 
     headers: [
-      { text: 'Nombre', value: 'nombre' },
+      { text: 'Nombre', value: 'user_nombre' },
+      { text: 'Rut', value: 'rut' },
       { text: 'Rol Agrupación', value: 'action', sortable: false },
     ],
 
@@ -393,6 +395,8 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
+          console.log("Datos filtrados: ", filtrada);
+
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -401,6 +405,33 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
+    async ObtenerRolUsr(rut) {
+      console.log("Rut seleccionado: ", rut);
+
+      try {
+        const url = `http://localhost:3000/obtencionderoles/${this.groupId}/${rut}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log ("Datos de la respuesta: ", data);
+          this.selectedRole = data.rol_agr;
+          console.log("Rol seleccionado: ", this.selectedRole);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
@@ -720,8 +751,6 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
-
 
 
     startHold() {

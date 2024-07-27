@@ -34,6 +34,7 @@ async function validarUsuario(email) {
     const usuario = result.rows[0];
     // busca el usuario en la base de datos de la plataforma
     const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+    usuario.rol= resultPlataforma.user[0].rol;
     // retorna toda la información del usuario
     if (resultPlataforma.success) {
       //añade el codigo de verificacion al usuario

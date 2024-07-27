@@ -100,10 +100,11 @@
 <script>
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
-
+import VueCookies from 'vue-cookies';
 export default {
   name: 'UserHome',
   data: () => ({
+    tokenValue: this.$cookies.get('token'),
     grupos: [],
     actividades: [],
     urlImagen: addImage
@@ -201,6 +202,7 @@ export default {
   mounted() {
     this.VerGrupos();
     this.VerActividades();
+    console.log(this.tokenValue)
   }
 }
 

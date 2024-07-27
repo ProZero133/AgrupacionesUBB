@@ -61,7 +61,6 @@ async function validarUsuarioEnPlataforma(rut) {
   } catch (error) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
-
 }
 
 async function asignarToken(fastify, usuario,codigo, reply) {

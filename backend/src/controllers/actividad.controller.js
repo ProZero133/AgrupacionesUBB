@@ -100,8 +100,6 @@ async function updateActividad(req, res) {
     }
 }
 
-
-
 async function eliminarActividad(req, res) {
     try {
         // Obtiene el id de la actividad

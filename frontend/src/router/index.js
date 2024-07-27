@@ -56,6 +56,11 @@ const routes = [
           component: () => import('@/views/BuscadorAgrupacionesView.vue'),
         },
         {
+          path: 'crear_tag',
+          name: 'Crear Tag',
+          component: () => import('@/views/CrearTagView.vue'),
+        },
+        {
           path: 'solicitudes_agrupacion/:id_agr',
           name: 'Solicitudes Agrupacion',
           component: () => import('@/views/SolicitudesAgrupacionView.vue'),

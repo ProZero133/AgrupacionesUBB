@@ -74,6 +74,7 @@
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
             { name: 'Crear Publicacion', icon: 'mdi-newspaper-plus', path: '/api/crear_publicacion'},
             {name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
+            {name: 'Crear Tag', icon: 'mdi-tag-plus', path: '/api/crear_tag'},
         ],
       }),
   }

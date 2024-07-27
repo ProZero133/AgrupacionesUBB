@@ -44,16 +44,14 @@ export default {
       serverCode: '',
       verificationCode: '',
       showLoginByRut: true, // Estado del slider, inicialmente muestra el formulario por RUT
-      tokenValue: this.$cookies.get('token')
+      tokenValue: this.$cookies.get('token'),
+      userData: {},
     };
   },
   methods: {
     async login() {
       this.isLoading = true;
       try {
-        const role = 'Estudiante';
-        this.tokenValue = `rol=${role}`;
-        this.$cookies.set('token', this.tokenValue);
         const response = await fetch('http://localhost:3000/EmailLogin', {
           method: 'POST',
           headers: {
@@ -65,6 +63,8 @@ export default {
         if (response.ok) {
           const data = await response.json();
           console.log('Respuesta del servidor:', data.codigo);
+          this.userData = data.result.usuario;
+          console.log('Datos del usuario:', this.userData.rol);
           this.serverCode = data.codigo;
           this.dialog = true;
         } else {
@@ -78,6 +78,9 @@ export default {
     async verifyCode() {
       if (this.verificationCode === this.serverCode) {
         try {
+        const role = this.userData.rol;
+        this.tokenValue = `rol=${role}`;
+        this.$cookies.set('token', this.tokenValue);
           this.$router.push(`/api/home`);
         } catch (error) {
           console.error('Error en la verificación del código:', error);

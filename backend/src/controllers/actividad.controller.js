@@ -154,14 +154,17 @@ async function participarActividad(req, res) {
         const rut = req.params.rut;
 
         // Programa la actividad
+        console.log("Participando en la actividad");
+        console.log(id_act);
+        console.log(rut);
         const actividad = await setParticipanteActividad(id_act, rut);
 
-        // Retorna la actividad programada
-        res.status(200).json(actividad);
+        // operacion exitosa
+        res.code(200).send({ success: true, message: 'Participacion exitosa' });
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al programar la actividad:', error);
-        res.status(500).send('Error al programar la actividad');
+        res.code(500).send({success: false, message: 'Error al programar la actividad'});
     }
 }
 

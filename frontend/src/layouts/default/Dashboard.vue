@@ -54,17 +54,52 @@
       data: () => ({
         drawer: true,
     
-        items: [
-            { name: 'Home', icon: 'mdi-home', path: '/api/home'},
-            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil'},
-            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones'},
-            { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion'},
-            { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones'},
-            { name: 'Solicitar Acreditacion', icon: 'mdi-check', path: '/api/solicitar_acreditacion'},
-            { name: 'Logout', icon: 'mdi-login', path: '/api/login'}, 
+        items: [],
+
+        allItems: [
+            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 0},
+            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 0},
+            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 0},
+            { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 0},
+            { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones', tier: 2},
+            { name: 'Solicitar Acreditacion', icon: 'mdi-check', path: '/api/solicitar_acreditacion',tier: 1},
+            { name: 'Logout', icon: 'mdi-login', path: '/api/login', tier: 0}, 
             
         ],
       }),
+
+      methods: {
+        getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('=');
+              return tokenParts[1] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+        filterItemsByRole() {
+          const role = this.getRol();
+          console.log(role);
+          this.items = this.allItems.filter(item => {
+                switch (role) {
+                    case 'Admin':
+                        return item.tier !== 1;
+                    case 'Estudiante':
+                        return item.tier === 0 || item.tier=== 1;
+                    default:
+                        return item.tier === 0;
+                }
+            }).map(({ name, icon, path }) => ({ name, icon, path }));
+        },
+    },
+
+    created() {
+        this.filterItemsByRole();
+    },
   }
     </script>
     

@@ -1,13 +1,28 @@
 <template>
   <v-container cols="12"></v-container>
+  <v-toolbar color="primary">
+      <template v-slot:extension>
+        <v-tabs v-model="tab" align-tabs="title">
+          <v-tab prepend-icon="mdi-bell-ring" value="actividades">Actividades</v-tab>
+          <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
+        </v-tabs>
+      </template>
+    </v-toolbar>
   <v-col cols="12" class="pagina" align-self:>
-    <v-row>
-      <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
+    
 
+    
+
+
+    <v-row>
+      
+      <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
+      <v-tab-item value="actividades" v-if="tab === 'actividades'">
       <v-col cols="7" class="flex-grow-0 flex-shrink-0">
         <v-card-title class="pasando">
           <span class="text-h4 textopasando">Qué está pasando?</span>
         </v-card-title>
+        
         <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px"
           v-on:click="seleccionarActividad(actividad.id_act)">
           <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
@@ -25,8 +40,10 @@
             <!--<p>Tipo: {{ actividad.tipo }}</p>-->
           </v-card-text>
         </v-card>
+      
       </v-col>
-
+    </v-tab-item>
+    <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
         <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos"
           v-on:click="iragGrupo(grupo.id_agr)">
@@ -40,6 +57,7 @@
           </v-card-text>
         </v-card>
       </v-col>
+    </v-tab-item>
     </v-row>
     <v-dialog v-model="dialogactividad">
       <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id_act"
@@ -104,8 +122,8 @@
 
 .card-misgrupos {
   min-width: 200px;
-  width: 80%;
-  margin-left: 200px;
+  width: 80vw;
+  margin-left: 10vw;
   /* This centers the card within its container */
 }
 
@@ -139,7 +157,8 @@ export default {
     actividades: [],
     urlImagen: addImage,
     idactActual: null,
-    rut:'20.487.563-4',
+    rut: '20.487.563-4',
+    tab: 'actividades',
   }),
   setup() {
     const router = useRouter();
@@ -239,7 +258,7 @@ export default {
       this.idactActual = id;
       this.dialogactividad = true;
     },
-    async ParticiparActividad(id){
+    async ParticiparActividad(id) {
       try {
         console.log('Rut:', this.rut);
         console.log('ID:', id);

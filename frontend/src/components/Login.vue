@@ -83,7 +83,6 @@ export default {
         const email = this.userData.correo;
         const carrera = this.userData.carrera;
         this.tokenValue = `rol=${role} & nombre=${nombre} & rut=${rut} & email=${email} & carrera=${carrera}`;
-        console.log('Token:', this.tokenValue);
         this.$cookies.set('token', this.tokenValue);
           this.$router.push(`/api/home`);
         } catch (error) {

@@ -321,6 +321,8 @@ export default {
     solicitudes: [],
     MiembrosdeAgr: [],
     selectedRole: '',
+    rut: '',
+    rol: '',
 
     headers: [
       { text: 'Nombre', value: 'nombre' },
@@ -527,7 +529,33 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
     // Función para ver publicaciones
     // muy similar a VerActividades, hace una llamada al backend para obtener las publicaciones con el id del grupo,
     // y las almacena en el array publicaciones. Luego, por cada publicación, se hace una llamada al backend para obtener la imagen.
@@ -763,6 +791,8 @@ export default {
 
   },
   mounted() {
+    this.rut = this.getRut();
+    this.rol = this.getRol();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();

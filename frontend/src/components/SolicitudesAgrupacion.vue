@@ -56,8 +56,37 @@ export default {
     name: 'SolicitudesAgrupacion',
     data: () => ({
         solicitudes: [],
+        rol: '',
+        rut: '',
     }),
     methods: {
+        getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
         async VerSolicitudes() {
             try {
                 const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
@@ -93,6 +122,8 @@ export default {
         }
     },
     mounted() {
+        this.rol = this.getRol();
+        this.rut = this.getRut();
         this.VerSolicitudes();
     }
 

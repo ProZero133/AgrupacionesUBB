@@ -44,7 +44,7 @@ export default {
     rut: '',
     verificado: 'Noverificado',
     fecha_verificacion: null,
-
+    rol: 'admin',
     dateErrors: {
         creacion: [],
         verificacion: [],
@@ -67,7 +67,34 @@ export default {
     }),
     
     methods: {
-    async PostearImagen() {
+        getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+        async PostearImagen() {
         try {
             const response = await fetch('http://localhost:3000/imagen', {
             method: 'POST',
@@ -123,6 +150,10 @@ export default {
         console.error('Error al hacer fetch:', error);
         }
     },
+    },
+    mounted() {
+        this.rut = this.getRut();
+        this.rol = this.getRol();
     },
 }
 

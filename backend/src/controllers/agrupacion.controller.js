@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -301,6 +301,30 @@ async function abandonarAgrupacion(req, res) {
     }
 }
 
+
+async function solicitarAcreditacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const result = await createSolicitarAcreditacion(id_agr, rut);
+        if (!result) {
+            return res.code(500).send('Error al enviar solicitud');
+        }
+        res.code(201).send(result);
+    } catch (error) {
+        console.error('Error al enviar solicitud:', error);
+        res.code(500).send('Error al enviar solicitud');
+    }
+}
+
 async function rechazarSolicitud(req, res) {
     try {
         const rut = req.params.rut;
@@ -324,6 +348,10 @@ async function rechazarSolicitud(req, res) {
     }
 }
 
+
+
+
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -338,5 +366,6 @@ module.exports = {
     abandonarAgrupacion,
     obtenerAgrupacionesDeUsuario,
     CambiarRoldeUsuario,
+    solicitarAcreditacion,
     rechazarSolicitud
 };

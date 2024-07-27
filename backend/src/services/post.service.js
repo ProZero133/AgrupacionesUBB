@@ -4,9 +4,9 @@ const { getPublicacionById } = require('./publicacion.service.js'); // Asegúrat
 async function getPosts() {
    try{
     // Obtiene todos los posts
-    const posts = await pool.query('SELECT * FROM "Post"');
+    const post = await pool.query('SELECT * FROM "Post"');
     // Retorna los posts
-    return posts.rows;
+    return post.rows;
    }
     catch (error) {
       console.log('Error al obtener los posts:', error);
@@ -18,7 +18,12 @@ async function getPostById(id) {
         // Obtiene la publicacion con el id especificado
         const post = await pool.query('SELECT * FROM "Post" WHERE id_pub = $1', [id]);
         // Retorna el post
-        return post;
+        if (post.rows.length === 0) {
+            return null;
+        } else {
+            return post.rows[0];
+        }
+        
     }
     catch (error) {
         console.log('Error al obtener el post:', error);

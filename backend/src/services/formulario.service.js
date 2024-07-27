@@ -18,7 +18,11 @@ async function getFormularioById(id) {
         // Obtiene el formulario con el id especificado
         const formulario = await pool.query('SELECT * FROM "Formulario" WHERE id_pub = $1', [id]);
         // Retorna el formulario
-        return formulario;
+        if (formulario.rows.length === 0) {
+            return null;
+        } else {
+            return formulario.rows[0];
+        }
     }
     catch (error) {
         console.log('Error al obtener el formulario:', error);

@@ -24,6 +24,19 @@ async function getPublicacionById(id) {
     }
 }
 
+
+async function getPublicacionesByAgrupacion(id_agr) {
+    try{
+        // Obtiene todas las publicaciones de una agrupacion
+        const publicaciones = await pool.query('SELECT * FROM "Publicacion" WHERE id_agr = $1', [id_agr]);
+        // Retorna las publicaciones
+        return publicaciones.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las publicaciones:', error);
+    }
+}
+
 async function createPublicacion(publicacionData) {
     try {
         // Inserta una nueva publicacion en la base de datos
@@ -85,6 +98,7 @@ async function deletePublicacion(id) {
 module.exports = {
     getPublicacion,
     getPublicacionById,
+    getPublicacionesByAgrupacion,
     createPublicacion,
     updatePublicacion,
     deletePublicacion

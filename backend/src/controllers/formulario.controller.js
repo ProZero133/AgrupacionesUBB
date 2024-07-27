@@ -11,7 +11,7 @@ const { formularioBodySchema } = require("../schema/formulario.schema.js");
 
 const obtenerFormularios = async (req, res) => {
     try {
-        const formularios = await formularioService.getFormularios();
+        const formularios = await getFormularios();
         return res.code(200).send(formularios);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -27,7 +27,7 @@ const obtenerFormularios = async (req, res) => {
 const obtenerFormularioPorId = async (req, res) => {
     try {
         const {id} = req.params;
-        const formulario = await formularioService.getFormularioById(id);
+        const formulario = await getFormularioById(id);
         return res.code(200).send(formulario);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -69,7 +69,7 @@ const actualizarFormulario = async (req, res) => {
         if (error) {
             return res.code(400).send({ message: error.message });
         }
-        const formulario = await formularioService.updateFormulario(id, req.body);
+        const formulario = await updateFormulario(id, req.body);
         return res.code(200).send(formulario);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -85,7 +85,7 @@ const actualizarFormulario = async (req, res) => {
 const eliminarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
-        await formularioService.deleteFormulario(id);
+        await deleteFormulario(id);
         return res.code(204).send();
     } catch (error) {
         return res.code(500).send({ message: error.message });

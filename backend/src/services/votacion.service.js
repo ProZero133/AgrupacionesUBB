@@ -2,26 +2,69 @@ const { pool } = require('../db.js');
 const { getPublicacionById } = require('./publicacion.service.js'); // Asegúrate de que la ruta sea correcta
 
 async function getVotaciones() {
-   try{
-    // Obtiene todas las votaciones
-    const votaciones = await pool.query('SELECT * FROM "Votacion"');
-    // Retorna las votaciones
-    return posts.rows;
-   }
-    catch (error) {
-      console.log('Error al obtener las votaciones:', error);
+    try {
+        // Obtiene todas las votaciones
+        const votacionesResult = await pool.query('SELECT * FROM "Votacion"');
+        const votaciones = votacionesResult.rows;
+
+        // Procesar cada votación
+        for (let i = 0; i < votaciones.length; i++) {
+            const votacionId = votaciones[i].id_pub;
+            try {
+                // Obtener opciones para la votación actual
+                const opcionesResult = await pool.query('SELECT * FROM "Opcion" WHERE id_votacion = $1', [votacionId]);
+                const opciones = opcionesResult.rows;
+
+                // Eliminar id_pub de cada opción
+                for (let j = 0; j < opciones.length; j++) {
+                    delete opciones[j].id_votacion;
+                }
+
+                // Adjuntar opciones a la votación
+                votaciones[i].opciones = opciones;
+            } catch (error) {
+                console.log(`Error al obtener opciones para la votación con id ${votacionId}:`, error);
+                votaciones[i].opciones = [];
+            }
+        }
+
+        // Retorna las votaciones con sus opciones
+        return votaciones;
+    } catch (error) {
+        console.log('Error al obtener las votaciones:', error);
+        return [];
     }
 }
 
 async function getVotacionById(id) {
-    try{
+    try {
         // Obtiene la votacion con el id especificado
-        const votacion = await pool.query('SELECT * FROM "Votacion" WHERE id_pub = $1', [id]);
-        // Retorna la votacion
+        const votacionResult = await pool.query('SELECT * FROM "Votacion" WHERE id_pub = $1', [id]);
+
+        // Retorna null si no se encuentra la votacion
+        if (votacionResult.rows.length === 0) {
+            return null;
+        }
+
+        const votacion = votacionResult.rows[0];
+
+        // Obtener opciones para la votacion
+        const opcionesResult = await pool.query('SELECT * FROM "Opcion" WHERE id_votacion = $1', [id]);
+        const opciones = opcionesResult.rows;
+
+        // Eliminar id_pub de cada opción
+        for (let i = 0; i < opciones.length; i++) {
+            delete opciones[i].id_votacion;
+        }
+
+        // Adjuntar opciones a la votacion
+        votacion.opciones = opciones;
+
+        // Retorna la votacion con sus opciones
         return votacion;
-    }
-    catch (error) {
+    } catch (error) {
         console.log('Error al obtener la votacion:', error);
+        return null;
     }
 }
 

@@ -101,7 +101,7 @@ async function obtenerImagenAgrupacion(req, res) {
     try {
         const id = req.params.id;
         const idImagenAgrupacion = await getAgrupacionById(id);
-        const imagen = await getImage(idImagenAgrupacion.rows[0].imagen);
+        const imagen = await getImage(idImagenAgrupacion.imagen);
         if (!idImagenAgrupacion) {
             return res.code(404).send('Agrupación no encontrada');
         }

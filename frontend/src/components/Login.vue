@@ -33,12 +33,16 @@ export default {
       username: '',
       password: '',
       showLoginByRut: true, // Estado del slider, inicialmente muestra el formulario por RUT
+      tokenValue: this.$cookies.get('token')
     };
   },
   methods: {
     async login() {
       this.isLoading = true;
       try {
+        const role = 'Estudiante';
+        this.tokenValue = `rol=${role}`;
+        this.$cookies.set('token', this.tokenValue);
         const response = await fetch('http://localhost:3000/EmailLogin', {
           method: 'POST',
           headers: {

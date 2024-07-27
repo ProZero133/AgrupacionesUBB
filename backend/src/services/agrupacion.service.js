@@ -369,6 +369,16 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
   }
 }
 
+async function insertTagsAgrupacion(id_agr, tags) {
+  try {
+      const response = await pool.query('INSERT INTO "Posee_1" (id_agr, id_tag) VALUES ($1, $2) RETURNING *', [id_agr, tags]);
+    
+    return 'Tags ingresados correctamente';
+  } catch (error) {
+    console.log('Error al ingresar los tags:', error);
+  }
+}
+
 
 
   module.exports = {
@@ -390,4 +400,5 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
     deleteUsuarioAgrupacion,
     rejectSolicitud,
     updateAgrupacion,
+    insertTagsAgrupacion
   };

@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -348,9 +348,24 @@ async function rechazarSolicitud(req, res) {
     }
 }
 
-
-
-
+async function ingresarTagsAgrupacion(req, res) {
+    try {
+        const id_agr = req.body.id_agr;
+        const tags = req.body.id_tag;
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const result = await insertTagsAgrupacion(id_agr, tags);
+        if (!result) {
+            return res.code(500).send('Error al ingresar tags');
+        }
+        res.code(200).send('Tags ingresados');
+    } catch (error) {
+        console.error('Error al ingresar tags:', error);
+        res.code(500).send('Error al ingresar tags');
+    }
+}
 
 module.exports = {
     VerGrupos,
@@ -367,5 +382,6 @@ module.exports = {
     obtenerAgrupacionesDeUsuario,
     CambiarRoldeUsuario,
     solicitarAcreditacion,
-    rechazarSolicitud
+    rechazarSolicitud,
+    ingresarTagsAgrupacion
 };

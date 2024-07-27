@@ -11,7 +11,7 @@
               <v-btn color="green" name="B_Aceptar" class="B_Aceptar" @click="AceptarAgrupacion(item.id_agr)">
                 Aceptar
               </v-btn>
-              <v-btn color="red" name="B_Rechazar" class="B_Rechazar">
+              <v-btn color="red" name="B_Rechazar" class="B_Rechazar" @click="openRechazarDialog(item.id_agr)">
                 Rechazar
               </v-btn>
             </div>
@@ -19,6 +19,31 @@
         </v-data-table>
       </v-card-text>
     </v-card>
+
+    <v-dialog v-model="rechazarDialog" max-width="500">
+      <v-card>
+        <v-card-title>
+          Indique el motivo:
+        </v-card-title>
+        <v-card-text>
+          <v-textarea
+            v-model="motivoRechazo"
+            label="Escriba aquí su motivo"
+            style="margin: 0%"
+          ></v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue">
+            Enviar
+          </v-btn>
+          <v-btn color="red" @click="rechazarDialog = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar" :timeout="snackbarTimeout" :color="snackbarColor" class="snackbar-custom">
       <span class="snackbar-text">{{ snackbarText }}</span>
     </v-snackbar>
@@ -35,6 +60,9 @@ export default {
       snackbarText: '',
       snackbarColor: '',
       snackbarTimeout: 3000,
+      motivoRechazo: '',
+      rechazarDialog: false,
+      selectedId: null,
       headers: [
         { text: 'Nombre', value: 'nombre_agr' },
         { text: 'RUT', value: 'rut' },
@@ -43,9 +71,6 @@ export default {
       ],
     };
   },
-
-// ------------------------------------------------------------------------------------------
-
   methods: {
     async ObtenerAgrupacionesPendientes() {
       try {
@@ -62,14 +87,9 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-    
-// ------------------------------------------------------------------------------------------
-
     async AceptarAgrupacion(id_agr) {
       try {
-        // obtiene la agrupacion a la que le clickearon en aceptar
         const Agrupacion_a_Aceptar = this.AgrupacionesPendientesObtenidas.find(agrupacion => agrupacion.id_agr === id_agr);
-
         const response = await fetch(`http://localhost:3000/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',
           headers: {
@@ -92,27 +112,46 @@ export default {
         this.showSnackbar('Error al aceptar la agrupación', 'error');
       }
     },
-
-// ------------------------------------------------------------------------------------------
-
-    async RechazarAgrupacion() {
-      // Manda un update a la base de datos para cambiar el estado de la agrupacion a Noverificado junto con un mensaje con el motivo
+    openRechazarDialog(id_agr) {
+      this.selectedId = id_agr;
+      this.motivoRechazo = '';
+      this.rechazarDialog = true;
     },
 
+    async RechazarAgrupacion(id_agr, motivo) {
+      try {
+        const response = await fetch(`http://localhost:3000/acreditaciones/${id_agr}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            verificado: 'No verificado',
+            motivo: motivo,
+          }),
+        });
+
+        if (response.ok) {
+          this.showSnackbar('Agrupación rechazada con éxito', 'success');
+          this.ObtenerAgrupacionesPendientes();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+          this.showSnackbar('Error al rechazar la agrupación', 'error');
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+        this.showSnackbar('Error al rechazar la agrupación', 'error');
+      }
+    },
     showSnackbar(message, color) {
       this.snackbarText = message;
       this.snackbarColor = color;
       this.snackbar = true;
     },
   },
-
-// ------------------------------------------------------------------------------------------
-  
   mounted() {
     this.ObtenerAgrupacionesPendientes();
   },
-
-// ------------------------------------------------------------------------------------------
 };
 </script>
 

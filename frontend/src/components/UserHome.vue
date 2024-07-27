@@ -198,7 +198,8 @@ export default {
 
     urlImagen: addImage,
     idactActual: null,
-    rut: '20.487.563-4',
+    rut: '',
+    rol: '',
     tab: 'actividades',
   }),
   setup() {
@@ -214,6 +215,33 @@ export default {
     }
   },
   methods: {
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
     grupoOrigenActividad(id_agr) {
       // Find the grupo that matches the id_agr
       const grupo = this.grupos.find(grupo => grupo.id_agr === id_agr);
@@ -438,6 +466,8 @@ export default {
     }
   },
   mounted() {
+    this.rut = this.getRut();
+    this.rol = this.getRol();
     this.VerGrupos();
     this.VerActividades();
   }

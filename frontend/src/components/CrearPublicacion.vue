@@ -158,13 +158,41 @@ export default {
     idImagen: '',
     opciones: ['Si','No'],
     pubId: 0,
-
-    enlace: 'https://forms.gle/poooo',
+    rut: '',
+    rol: '',
+    enlace: 'https://forms.gle/',
 
     subiendo: false,
   }),
 
   methods: {
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
     formSubmit() {
       this.tipoReal = this.tipo;
       this.subiendo = true;
@@ -429,6 +457,8 @@ async PostearImagen() {
 
 },
 mounted() {
+  this.rut = this.getRut();
+  this.rol = this.getRol();
   this.opcionesCounter = this.opciones.length;
 }
 }

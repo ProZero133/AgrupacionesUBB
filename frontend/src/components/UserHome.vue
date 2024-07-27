@@ -100,7 +100,7 @@
 <script>
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
-import { getUserRole } from '../plugins/auth';
+//import { getUserRole } from '../plugins/auth.js';
 
 export default {
   name: 'UserHome',
@@ -202,8 +202,9 @@ export default {
   mounted() {
     this.VerGrupos();
     this.VerActividades();
-    const userRole = getUserRole();
-    console.log('User Role:', userRole);  }
+    //const userRole = getUserRole();
+    //console.log('User Role:', userRole);  
+  }
 }
 
 

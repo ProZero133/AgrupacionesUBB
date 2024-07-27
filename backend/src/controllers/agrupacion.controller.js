@@ -198,8 +198,8 @@ async function eliminarAgrupacion(req, res) {
             return res.code(404).send('Usuario no encontrado');
         }
         const usuarioEsLider = await getLider(id_agr);
-        //si el rut no es lider de la agrupacion
-        if (usuarioEsLider[0].rut !== rut) {
+        const lider = usuarioEsLider;
+        if (lider.rut !== rut) {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }
         const result = await validateEliminarGrupo(id_agr);

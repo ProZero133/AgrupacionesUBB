@@ -163,7 +163,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="primary" text @click="dialogeliminar = false">Cancelar</v-btn>
-                  <v-btn color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+                  <v-btn width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
                     @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
                     depressed>Aceptar</v-btn>
                 </v-card-actions>
@@ -246,34 +246,26 @@ export default {
     pressTimer: null,
     pressTime: 0,
     progress: 0,
+    rutactual: '20.487.563-4',
     imagengrupo: [],
     idImagen: '',
     location: 'end',
     opciones: [{ title: 'aceptar', action: 'aceptar' }, { title: 'rechazar', action: 'rechazar' }],
-    locations: ['Location 1', 'Location 2', 'Location 3'],
     tab: 'miembros',
     gestionmiembros: ['Miembros', 'Solicitudes'],
-    miembros: [
-      { title: 'Miembro 1' },
-      { title: 'Miembro 2' },
-      { title: 'Miembro 3' },
-      { title: 'Miembro 4' },
-    ],
     solicitudes: [],
     MiembrosdeAgr: [],
     headers: [
       { text: 'Nombre', value: 'nombre' },
       { text: 'Rol Agrupación', value: 'action', sortable: false },
     ],
-    groupName: 'Club de Tetris UBB',
-    groupDescription: 'Bienvenidos! Somos un grupo de entusiastas del Tetris que nos reunimos para jugar y compartir experiencias. Jugamos Notris, Nullpomino y PPT. Si te gusta el Tetris, no dudes en unirte a nosotros!',
     datosGrupo: {
       descripcion: null,
       fecha_creacion: null,
       fecha_verificacion: null,
       id_agr: null,
       imagen: null,
-      nombre_agr: 'h',
+      nombre_agr: '',
       rut: null,
       verificado: null,
     },
@@ -500,21 +492,35 @@ export default {
       this.pressTime = 0;
       this.progress = 0;
       this.pressTimer = setInterval(() => {
-        this.pressTime += 100;
+        this.pressTime += 10;
         this.progress = (this.pressTime / 2000) * 100;
         if (this.pressTime >= 2000) {
           this.EliminarGrupo();
           this.cancelHold();
         }
-      }, 100);
+      }, 10);
     },
     cancelHold() {
       clearInterval(this.pressTimer);
       this.progress = 0;
     },
     EliminarGrupo() {
+      this.$router.push('/api/home');
       // Lógica para eliminar el grupo
-      console.log(`Grupo ${this.datosGrupo.nombre_agr} eliminado`);
+      try {
+        const url = `http://localhost:3000/eliminaragrupacion/${this.groupId}/${this.rutactual}`;
+        const response = fetch(url, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          console.log('Grupo eliminado');
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+
       this.dialogeliminar = false;
     },
 
@@ -528,7 +534,7 @@ export default {
   computed: {
     progressStyle() {
       return {
-        background: `linear-gradient(to right, blue ${this.progress}%, white ${this.progress}%)`
+        background: `linear-gradient(to right, red ${this.progress}%, white ${this.progress}%)`
       };
     },
   },

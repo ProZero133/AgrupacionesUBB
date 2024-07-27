@@ -168,7 +168,25 @@ async function updateAgrupacionVerificado(id) {
 
 async function deleteAgrupacion(id_agr) {
   try {
-    // Elimina la agrupación con el id especificado
+    // Elimina las actividades asociadas a la agrupación
+    const idactByAgr = await pool.query('SELECT id_act FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+    const actividadesIds = idactByAgr.rows.map(row => row.id_act);
+
+    // Elimina las participaciones asociadas a las actividades
+    for (const id_act of actividadesIds) {
+      await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id_act]);
+    }
+
+    // Elimina los miembros de la agrupación
+    await pool.query('DELETE FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
+
+    // Elimina los programas de la agrupación
+    await pool.query('DELETE FROM "Programa" WHERE id_agr = $1', [id_agr]);
+
+    // Elimina las actividades de la agrupación
+    await pool.query('DELETE FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+
+    // Finalmente, elimina la agrupación
     const agrupacion = await pool.query('DELETE FROM "Agrupacion" WHERE id_agr = $1 RETURNING *', [id_agr]);
     return agrupacion.rows[0];
   } catch (error) {
@@ -232,9 +250,6 @@ async function validateEliminarGrupo(id_agr) {
     //Eliminar la agrupacion si no tiene actividades o tiene actividades con un solo participante
     const agrupacion = await deleteAgrupacion(id_agr);
 
-    if(agrupacion.length === 0){
-      return 'Error al eliminar la agrupación';
-    }
     return 'Agrupacion eliminada';
   }
   catch (error) {
@@ -298,6 +313,7 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
 }
 
 
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
@@ -314,5 +330,5 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
     getAgrupacionesDeUsuario,
     deleteUsuarioAgrupacion,
     rejectSolicitud,
-    updateAgrupacion
+    updateAgrupacion,
   };

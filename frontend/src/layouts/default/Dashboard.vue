@@ -13,8 +13,8 @@
           <v-spacer></v-spacer>
   
           <template v-if="$vuetify.display.mdAndUp">
-            <p>Marco Araneda</p>
-  
+            <span>{{ userNombre }}</span>
+            
             <v-btn icon>
               <v-icon>mdi-account</v-icon>
             </v-btn>
@@ -25,7 +25,7 @@
       v-model="drawer"
       temporary>
         <v-list density="compact">
-          <v-list-subheader>AGRUPACIONES UBB</v-list-subheader>
+          <v-list-subheader>Conecta UBB</v-list-subheader>
 
           <v-list-item
             v-for="(item, i) in items"
@@ -66,14 +66,18 @@
             { name: 'Logout', icon: 'mdi-login', path: '/api/login', tier: 0}, 
             
         ],
+
+        userNombre: '',
+
       }),
 
       methods: {
-        getRol() {
+        getNombre() {
           const token = this.$cookies.get('token');
           if (token) {
             try {
-              const tokenParts = token.split('=');
+              const tokenParts = token.split('&');
+              tokenParts[1] = tokenParts[1].replace('nombre=', '');
               return tokenParts[1] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -81,9 +85,23 @@
           }
           return null;
         },
+
+        getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+
         filterItemsByRole() {
           const role = this.getRol();
-          console.log(role);
           this.items = this.allItems.filter(item => {
                 switch (role) {
                     case 'Admin':
@@ -96,8 +114,8 @@
             }).map(({ name, icon, path }) => ({ name, icon, path }));
         },
     },
-
     created() {
+        this.userNombre = this.getNombre();
         this.filterItemsByRole();
     },
   }

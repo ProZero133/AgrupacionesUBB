@@ -116,13 +116,69 @@ export default {
         searchResults: [],
         preferencias: [],
         selectedItems: [],
-        userName: 'Sebastián Vallejos Constanzo',
-        rut: '20.487.563-4',
-        correo: 'sebastian.vallejos2001@alumnos.ubiobio.cl',
-        carrera: 'Ingenieria Civil Informatica',
+        userName: '',
+        rut: '',
+        correo: '',
+        carrera: '',
 
     }),
     methods: {
+        getNombre() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[1] = tokenParts[1].replace('nombre=', '');
+              console.log('Token:', tokenParts[1]);
+              return tokenParts[1] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+        getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+        getCorreo() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[3] = tokenParts[3].replace('email=', '');
+              console.log('Token:', tokenParts[3]);
+              return tokenParts[3] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+        getCarrera() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[4] = tokenParts[4].replace('carrera=', '');
+              console.log('Token:', tokenParts[4]);
+              return tokenParts[4] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
         async fetchSearchResults(searchValue) {
             // Convertir searchValue a cadena explícitamente
             const stringValue = searchValue.trim();
@@ -197,9 +253,13 @@ export default {
 
     },
     mounted() {
+        this.userName = this.getNombre();
+        this.rut = this.getRut();
+        this.correo = this.getCorreo();
+        this.carrera = this.getCarrera();
         this.obtenerPreferencias();
-    }
-
+    },
+    
 }
 
 

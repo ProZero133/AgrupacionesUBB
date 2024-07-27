@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, getAgrupacionById, createAgrupacion, updateRolUsuario, getImage,
+const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
@@ -231,6 +231,20 @@ async function obtenerAgrupacionesDeUsuario(req, res) {
     }
 }
 
+async function ObtenerRolUsuario(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        
+        const rolUsr = await getRolUsuario(rut, id_agr);
+        
+        res.code(200).send(rolUsr);
+    } catch (error) {
+        console.error('Error al obtener el rol del usuario:', error);
+        res.code(500).send('Error al obtener el rol del usuario');
+    }
+}
+
 async function CambiarRoldeUsuario(req, res) {
     try {
         const id_agr = req.params.id_agr;
@@ -365,6 +379,7 @@ module.exports = {
     eliminarAgrupacion,
     abandonarAgrupacion,
     obtenerAgrupacionesDeUsuario,
+    ObtenerRolUsuario,
     CambiarRoldeUsuario,
     solicitarAcreditacion,
     rechazarSolicitud

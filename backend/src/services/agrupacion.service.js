@@ -76,6 +76,46 @@ async function updateAgrupacion(id) {
 }
 */
 
+async function createSolicitarAcreditacion(id_agr, rut) {
+  try {
+    const agrupacion = await getAgrupacionById(id_agr);
+    const usuario = await getUsuarioByRut(rut);
+
+    if (!agrupacion) {
+      return 'La agrupación no existe';
+    }
+
+    if (!usuario) {
+      return 'El usuario no existe';
+    }
+
+    if (agrupacion.rut !== rut) {
+      return 'El usuario no es el lider de la agrupación';
+    }
+
+    if (agrupacion.verificado === 'Verificado') {
+      return 'La agrupación ya está verificada';
+    }
+
+    if (agrupacion.verificado === 'Pendiente') {
+      return 'La agrupación ya solicitó la acreditación';
+    }
+
+    const NuevosDatosAgrupacion = await pool.query(
+      `UPDATE "Agrupacion" SET verificado = $1, fecha_verificacion = CURRENT_TIMESTAMP WHERE id_agr = $2 RETURNING *`,
+      [
+        'Pendiente',
+        id_agr
+      ]
+    );
+    // Retorna la agrupación actualizada
+    return NuevosDatosAgrupacion.rows[0];
+  } catch (error) {
+    console.log('Error al solicitar la acreditación:', error);
+    throw error;
+  }
+}
+
 async function updateAgrupacionVerificado(id) {
   try {
 
@@ -335,6 +375,7 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
     getAgrupaciones,
     getAgrupacionById,
     createAgrupacion,
+    createSolicitarAcreditacion,
     getUsuariosdeAgrupacion,
     updateRolUsuario,
     updateAgrupacionVerificado,

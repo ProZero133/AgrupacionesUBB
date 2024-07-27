@@ -206,7 +206,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="primary" text @click="dialogsolicitar = false">Cancelar</v-btn>
-                  <v-btn color="primary" text @click="ActualizarGrupo">Aceptar</v-btn>
+                  <v-btn color="primary" text @click="SolicitarAcreditaciondeGrupo">Aceptar</v-btn>
                 </v-card-actions>
               </v-card>
 
@@ -567,7 +567,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
-        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const url = `http://localhost:3000/agrupaciones/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -590,6 +590,26 @@ export default {
       }
 
     },
+
+    async SolicitarAcreditaciondeGrupo () {
+      try {
+        const url = `http://localhost:3000/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
+        const response = await fetch(url, {
+          method: 'PUT',
+        });
+        if (response.ok) {
+          console.log('Solicitud enviada');
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+
+
+
     startHold() {
       this.pressTime = 0;
       this.progress = 0;

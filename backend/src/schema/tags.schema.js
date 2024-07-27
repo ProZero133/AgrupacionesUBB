@@ -7,7 +7,7 @@ const tagsBodySchema = Joi.object({
         "any.required": "El nombre del tag es obligatorio.",
         "string.base": "El nombre del tag debe ser de tipo string.",
         }),
-    RUT: Joi.string().required().messages({
+    rut: Joi.string().required().regex(/^\d{1,2}\.\d{3}\.\d{3}[-][0-9kK]{1}$/).messages({
         "string.empty": "El RUT no puede estar vacío.",
         "any.required": "El RUT es obligatorio.",
         "string.base": "El RUT debe ser de tipo string.",

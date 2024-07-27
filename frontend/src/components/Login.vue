@@ -147,7 +147,7 @@ export default {
 }
 
 .tfCorreo {
-  min-width: 350px;
+  min-width: 300px;
 }
 
 .tfCredenciales {

@@ -1,7 +1,7 @@
 <template>
   <v-container class="container-loginrut">
-    
-    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom" ></v-switch>
+
+    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
     <v-form v-if="showLoginByRut" class="form-loginrut">
@@ -16,10 +16,19 @@
       <v-label>Iniciar sesión con Correo institucional</v-label>
       <v-text-field class="tfCorreo" v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
-      <div v-if="isLoading" class="loading-overlay">
-        Cargando...
-      </div>
     </v-form>
+    <v-dialog v-model="dialog" persistent max-width="290">
+    <v-card>
+      <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="verificationCode" label="Código de verificación" required></v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" text @click="verifyCode">Verificar</v-btn>
+      </v-card-actions>
+    </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -28,10 +37,12 @@ export default {
   name: 'Login',
   data() {
     return {
-      isLoading: false,
+      dialog: false,
       email: '',
       username: '',
       password: '',
+      serverCode: '',
+      verificationCode: '',
       showLoginByRut: true, // Estado del slider, inicialmente muestra el formulario por RUT
       tokenValue: this.$cookies.get('token')
     };
@@ -52,7 +63,10 @@ export default {
         });
 
         if (response.ok) {
-          this.checkAuthenticationStatus();
+          const data = await response.json();
+          console.log('Respuesta del servidor:', data.codigo);
+          this.serverCode = data.codigo;
+          this.dialog = true;
         } else {
           this.isLoading = false; // Desactiva la pantalla de carga si hay un error
         }
@@ -61,20 +75,17 @@ export default {
         this.isLoading = false;
       }
     },
-    async checkAuthenticationStatus() {
-      const checkStatus = async () => {
-        const response = await fetch('http://localhost:3000/api/auth/status');
-        const data = await response.json();
-        if (data.isAuthenticated) {
-          this.isLoading = false; // Desactiva la pantalla de carga
-          // Aquí puedes redirigir al usuario o realizar alguna acción adicional
-        } else {
-          setTimeout(checkStatus, 5000); // Reintenta después de 5 segundos
+    async verifyCode() {
+      if (this.verificationCode === this.serverCode) {
+        try {
+          this.$router.push(`/api/home`);
+        } catch (error) {
+          console.error('Error en la verificación del código:', error);
         }
-      };
-
-      checkStatus();
-    },
+      } else {
+        console.error('El código ingresado no coincide');
+      }
+    }
   },
 };
 

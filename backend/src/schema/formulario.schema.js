@@ -10,11 +10,13 @@ const formularioBodySchema = Joi.object({
         "string.base": "La descripción debe ser de tipo texto.",
         "any.required": "La descripción es obligatoria.",
         }),
-    hyperlink: Joi.string().uri().required().messages({
-        "string.base": "El hyperlink debe ser de tipo texto.",
-        "string.uri": "El hyperlink debe ser una URL válida.",
-        "any.required": "El hyperlink es obligatorio.",
+    hipervinculo: Joi.string().uri().required().messages({
+        "string.base": "El hipervinculo debe ser de tipo texto.",
+        "string.uri": "El hipervinculo debe ser una URL válida.",
+        "any.required": "El hipervinculo es obligatorio.",
         }),
     });
 
-module.exports = formularioBodySchema;
+    module.exports = {
+        formularioBodySchema
+    };

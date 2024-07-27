@@ -4,6 +4,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
       path: '/',
+      redirect: '/api/login'
+    },
+    {
+      path: '/api/crear_actividad',
       redirect: '/api/home',
     },
     {
@@ -21,9 +25,19 @@ const routes = [
           component: () => import('@/views/AdminHome.vue'),
         },
         {
+          path: 'solicitar_acreditacion',
+          name: 'SolicitarAcreditacion',
+          component: () => import('@/views/SolicitarAcreditacionView.vue'),
+        },
+        {
           path: 'verificaciones',
           name: 'Verificaciones',
           component: () => import('@/views/VerificacionesView.vue'),
+        },
+        {
+          path: 'administrar_roles_agrupaciones/:id',
+          name: 'Administrar_Roles_Agrupaciones',
+          component: () => import('@/views/AdministrarRolesAgrupacionesview.vue'),
         },
         {
           path: 'crear_actividad/:id',
@@ -36,7 +50,7 @@ const routes = [
           component: () => import('@/views/CrearAgrupacionView.vue'),
         },
         {
-          path: 'crear_publicacion',
+          path: 'crear_publicacion/:id',
           name: 'Crear Publicacion',
           component: () => import('@/views/CrearPublicacionView.vue'),
         },
@@ -64,10 +78,20 @@ const routes = [
           path: 'solicitudes_agrupacion/:id_agr',
           name: 'Solicitudes Agrupacion',
           component: () => import('@/views/SolicitudesAgrupacionView.vue'),
+        },
+        {
+         path: 'perfil',
+          name: 'Perfil',
+          component: () => import('@/views/PerfilUsuarioView.vue'), 
         }
         
       ],
     },
+    {
+      path: '/api/login',
+      name: 'Login',
+      component: () => import('@/views/LoginView.vue')
+    }
 ]
 
 const router = createRouter({
@@ -75,4 +99,4 @@ const router = createRouter({
   routes,
 })
 
-export default router
+export default router;

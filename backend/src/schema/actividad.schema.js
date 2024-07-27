@@ -26,6 +26,11 @@ const actividadBodySchema = Joi.object({
         "number.integer": "El id de la agrupación debe ser un entero.",
         "any.required": "El id de la agrupación es obligatorio.",
     }),
+    cupos: Joi.number().integer().min(1).required().messages({
+        "number.base": "El cupo debe ser de tipo número.",
+        "number.integer": "El cupo debe ser un entero.",
+        "any.required": "El cupo es obligatorio.",
+    }),
   });
   
   

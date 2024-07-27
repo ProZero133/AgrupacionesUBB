@@ -28,28 +28,23 @@ async function validarUsuario(email) {
   try {
     // busca el usuario en la base de datos servidor universidad (Simulado por el momento)
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
-    console.log('Resultado de la consulta:', result.rows);
-    // Si no se encuentra el usuario
     if (result.rows.length === 0) {
       return { success: false, message: 'Usuario no encontrado' };
     }
-    // Si se encuentra el usuario, se valida que exista en la base de datos de la plaforma
-    else {
-      const validarUsuario = await validarUsuarioEnPlataforma(result.rows[0].rut);
-      // Si el usuario existe en el servidor de la universidad pero no en la plataforma, se registra el usuario en la plataforma
-      if (!validarUsuario.success) {
-        const ingresarUsuario = await registrarUsuario(result.rows[0].rut, result.rows[0].rol_u);
-        if (ingresarUsuario.success) {
-          return { success: true, message: 'Usuario registrado en la plataforma', user: result.rows };
-        } else {
-          return { success: false, message: 'Error al registrar usuario en la plataforma' };
-        }
-      }
-      // Si el usuario existe en la plataforma y en el servidor de la universida, simplemente se retorna el usuario
-      else {
-        return { success: true, message: 'Usuario encontrado', user: result.rows };
-      }
+    const usuario = result.rows[0];
+    // busca el usuario en la base de datos de la plataforma
+    const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+    usuario.rol= resultPlataforma.user[0].rol;
+    // retorna toda la información del usuario
+    if (resultPlataforma.success) {
+      //añade el codigo de verificacion al usuario
+
+      return { success: true, message: 'Usuario encontrado', usuario };
+    } else {
+      return { success: false, message: 'Usuario no encontrado' };
     }
+
+   
   } catch (error) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
@@ -58,7 +53,6 @@ async function validarUsuario(email) {
 async function validarUsuarioEnPlataforma(rut) {
   try {
     const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
-    console.log('Resultado de la consulta:', result.rows);
     if (result.rows.length === 0) {
       return { success: false, message: 'Usuario no encontrado' };
     } else {
@@ -69,25 +63,16 @@ async function validarUsuarioEnPlataforma(rut) {
   }
 }
 
-async function asignarToken(fastify, usuario, reply) {
-  const token = fastify.jwt.sign({
-    rol: usuario.rol_u,
-    email: usuario.correo,
-    nombre_completo: usuario.nombre,
-    rut: usuario.rut,
-    carrera: usuario.carrera
-  }, { expiresIn: '1h' });
+async function asignarToken(fastify, usuario,codigo, reply) {
 
-  console.log('Enviando token al correo: ', usuario.correo);
-  const decoded = fastify.jwt.verify(token);
-  console.log('Decodificado:', decoded);
+  const token = codigo;
 
   const mailOptions = {
     from: '"ConectaUBB" <conectaubb@gmail.com>', // dirección del remitente
-    to: usuario.correo, // dirección del destinatario, pasada en la solicitud
-    subject: 'Enlace de verificación de inicio de sesión',
-    text: 'Haz clic en el enlace para iniciar sesión.',
-    html: `<b>Haz clic en el enlace para iniciar sesión:</b> <a href="http://localhost:3000/validarToken?token=${token}">Iniciar Sesión</a>`
+    to: usuario.usuario.correo, // dirección del destinatario, pasada en la solicitud
+    subject: 'Codigo de verificación de inicio de sesión',
+    text: 'Aquí esta tu codigo de acceso unico.',
+    html: `<b>Aquí esta tu codigo de acceso unico:</b> ${token}`
   };
 
   try {

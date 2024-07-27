@@ -6,15 +6,16 @@
 
       <v-col cols="7" class="flex-grow-0 flex-shrink-0">
         <v-card-title class="pasando">
-            <span class="text-h4 textopasando">Qué está pasando?</span>
-          </v-card-title>
-        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
+          <span class="text-h4 textopasando">Qué está pasando?</span>
+        </v-card-title>
+        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px"
+          v-on:click="seleccionarActividad(actividad.id_act)">
           <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
           <v-card-title>{{ actividad.nom_act }}</v-card-title>
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='urlImagen' />
+                <v-img class="image" aspect-ratio="1" :src=actividad.imagen />
               </v-col>
               <v-col cols="7">
                 <p>{{ actividad.descripcion }}</p>
@@ -27,27 +28,47 @@
       </v-col>
 
       <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">Mis Grupos</span>
-          </v-card-title>
-
-          <v-divider class="gruparador"></v-divider>
-          <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos" 
-          v-on:click="iragGrupo(grupo.id_agr)" 
-          >
-            <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-            <v-card-text>
-              <p>{{ grupo.descripcion }}</p>
-              <p>RUT: {{ grupo.rut }}</p>
-              <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-              <p>Verificado: {{ grupo.verificado ? 'Sí' : 'No' }}</p>
-              <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-            </v-card-text>
-          </v-card>
+        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos"
+          v-on:click="iragGrupo(grupo.id_agr)">
+          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+          <v-card-text>
+            <p>{{ grupo.descripcion }}</p>
+            <p>RUT: {{ grupo.rut }}</p>
+            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+            <p>Verificado: {{ grupo.verificado }}</p>
+            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog v-model="dialogactividad">
+      <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id_act"
+        class="mb-15 card-actividades" border="10px">
+        <v-card-title class="headline">Actividad</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="5">
+              <v-img class="image" aspect-ratio="1" :src="actividad.imagen" />
+            </v-col>
+            <v-col cols="7">
+              <p>{{ actividad.descripcion }}</p>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-row>
+            <v-col cols="6">
+              <v-btn color="green darken-1" text @click="dialogactividad = false">Cerrar</v-btn>
+            </v-col>
+            <v-col cols="6">
+              <v-btn color="green darken-1" text @click="ParticiparActividad(actividad.id_act)">Participar</v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+
+    </v-dialog>
   </v-col>
 </template>
 
@@ -61,6 +82,7 @@
 }
 
 .pasando {
+  min-width: 330px;
   margin-left: 3%;
   margin-bottom: 6%;
 }
@@ -81,16 +103,19 @@
 }
 
 .card-misgrupos {
+  min-width: 200px;
   width: 80%;
-  margin: 0 auto;
+  margin-left: 200px;
   /* This centers the card within its container */
 }
 
 .card-actividades {
+  margin-top: 40vh;
+  min-width: 325px;
   /* O la altura que prefieras para tus v-card */
   width: 90%;
   margin: 0 auto;
-  margin-top: -40px;
+
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
 }
@@ -105,13 +130,16 @@
 <script>
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
-
+import VueCookies from 'vue-cookies';
 export default {
   name: 'UserHome',
   data: () => ({
+    dialogactividad: false,
     grupos: [],
     actividades: [],
-    urlImagen: addImage
+    urlImagen: addImage,
+    idactActual: null,
+    rut:'20.487.563-4',
   }),
   setup() {
     const router = useRouter();
@@ -119,6 +147,11 @@ export default {
     return {
       router,
     };
+  },
+  computed: {
+    actividadFiltrada() {
+      return this.actividades.filter(actividad => actividad.id_act === this.idactActual);
+    }
   },
   methods: {
     grupoOrigenActividad(id_agr) {
@@ -128,10 +161,9 @@ export default {
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
     convertirImagen(data) {
-      console.log('Data passed to convertirImagen:', data);
-    // Convertir el Proxy a un Array real si es necesario
+      // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
-  
+
       if (!dataArray || dataArray.length === 0) {
         return '';
       }
@@ -153,8 +185,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("grupos:");
-          console.log(data);
           this.grupos = data;
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -174,9 +204,27 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("actividades:");
-          console.log(data);
           this.actividades = data;
+
+          for (const imagenes of this.actividades) {
+            try {
+              const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
+                method: 'GET',
+              });
+              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                imagenes.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+
+            }
+            catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -187,12 +235,38 @@ export default {
     iragGrupo(id) {
       this.$router.push(`/api/grupo/${id}`);
     },
+    seleccionarActividad(id) {
+      this.idactActual = id;
+      this.dialogactividad = true;
+    },
+    async ParticiparActividad(id){
+      try {
+        console.log('Rut:', this.rut);
+        console.log('ID:', id);
+        const response = await fetch(`http://localhost:3000/participar/${id}/${this.rut}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          this.dialogactividad = false;
+          this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+        } else {
+          console.error(data.message);
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    }
   },
   mounted() {
     this.VerGrupos();
     this.VerActividades();
   }
-
 }
 
 

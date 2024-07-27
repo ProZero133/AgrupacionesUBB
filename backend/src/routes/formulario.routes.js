@@ -2,7 +2,7 @@ const fastify = require('../config/configFastify.js');
 
 const { obtenerFormularios, obtenerFormularioPorId, crearFormulario, actualizarFormulario, eliminarFormulario } = require('../controllers/formulario.controller.js');
 
-module.exports = async function (fastify, opts, done) {
+module.exports = function (fastify, opts, done) {
     fastify.get('/formulario', obtenerFormularios);
     fastify.get('/formulario/:id', obtenerFormularioPorId);
     fastify.post('/formulario', crearFormulario);

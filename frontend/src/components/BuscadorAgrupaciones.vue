@@ -84,12 +84,7 @@ export default {
               console.error('Error al hacer fetch:', error);
           }
         }
-          console.log("data + dataTransformada"); 
-          console.log(data);
-          console.log(dataTransformada);
           this.grupos = dataTransformada;
-          console.log("this.grupos");
-          console.log(this.grupos);
         } else {
           console.error('Error en la respuesta:', response.status);
         }

@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, updateAgrupacionVerificado } = require("../services/agrupacion.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
     try {
@@ -26,6 +26,27 @@ async function ObtenerAcreditaciones(req, reply) {
     }
 }
 
+
+async function AcreditaciondeGrupo(req, reply) {
+    try {
+        // se obtiene el id de la agrupacion
+        const id = req.params.id_agr;
+
+        // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Verificado"
+        await updateAgrupacionVerificado(id);
+        
+        reply.code(200).send('Acreditación exitosa');
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al Acreditar: ', error);
+        reply.code(500).send('Error al Acreditar: ');
+    }
+}
+
+
+
+
 module.exports = {
-    ObtenerAcreditaciones
+    ObtenerAcreditaciones,
+    AcreditaciondeGrupo
 };

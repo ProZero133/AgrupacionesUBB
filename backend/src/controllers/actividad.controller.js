@@ -1,6 +1,7 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad } = require('../services/actividad.service');
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad, setProgramacionActividad, setParticipanteActividad, deleteActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
+const {getLider} = require('../services/agrupacion.service.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -21,6 +22,7 @@ async function ObtenerActividadPorID(req, res) {
         return res.send(respuesta);
     }
 }
+
 
 async function ObtenerActividadesPorAgrupacion(req, res) {
     try {
@@ -98,14 +100,21 @@ async function updateActividad(req, res) {
     }
 }
 
-
-async function deleteActividad(req, res) {
+async function eliminarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
-        const id = req.params.id;
-
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+        const actividad = await getActividadById(id_act);
+        if (actividad.length === 0) {
+            return res.send({ success: false, message: 'No se encontro la actividad' });
+        }
+        const lider = await getLider(actividad[0].id_agr);
+        if (rut !== lider.rut) {
+            return res.send({ success: false, message: 'No eres el lider de la agrupacion' });
+        }
         // Elimina la actividad
-        await actividadService.deleteActividad(id);
+        await deleteActividad(id_act);
 
         // Retorna un mensaje de éxito
         res.status(200).send('Actividad eliminada');
@@ -116,11 +125,54 @@ async function deleteActividad(req, res) {
     }
 }
 
+async function programarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const id_agr = req.params.id_agr;
+        const fecha_actividad = req.body.fecha_actividad; 
+        // Programa la actividad
+        const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
+        const lider = await getLider(id_agr);
+        const rut=lider.rut;
+        const insertarLiderEnParticipantes = await setParticipanteActividad(id_act, rut);
+
+        // Retorna la actividad programada
+        res.code(200).send(actividad);
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.code(500).send('Error al programar la actividad');
+    }
+}
+async function participarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+
+        // Programa la actividad
+        console.log("Participando en la actividad");
+        console.log(id_act);
+        console.log(rut);
+        const actividad = await setParticipanteActividad(id_act, rut);
+
+        // operacion exitosa
+        res.code(200).send({ success: true, message: 'Participacion exitosa' });
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.code(500).send({success: false, message: 'Error al programar la actividad'});
+    }
+}
+
 module.exports = {
     ObtenerActividades,
     ObtenerActividadPorID,
     crearActividad,
     updateActividad,
-    deleteActividad,
-    ObtenerActividadesPorAgrupacion
+    eliminarActividad,
+    ObtenerActividadesPorAgrupacion,
+    programarActividad,
+    participarActividad
 };

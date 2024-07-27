@@ -11,6 +11,7 @@ const post = require('../routes/post.routes');
 const agrupacion = require('../routes/agrupacion.routes');
 const actividad = require('../routes/actividad.routes');
 const publicacion = require('../routes/publicacion.routes');
+const imagenes = require('../routes/imagenes.routes');
 const acreditaciones = require('../routes/admin.routes');
 const tag  = require('../routes/tags.routes');
 
@@ -21,7 +22,7 @@ const url = config.URL;
 
 fastify.register(fastifyCors, {
     // Configura los orígenes permitidos
-    origin: url
+    origin: true
   });
   fastify.register(fastifyCookie, {
     secret: cookieSecret,
@@ -40,5 +41,6 @@ fastify.register(fastifyCors, {
   fastify.register(actividad);
   fastify.register(publicacion);
   fastify.register(acreditaciones);
-  fastify.register(tag);  
+  fastify.register(imagenes);
+  fastify.register(tag);
 module.exports = fastify;

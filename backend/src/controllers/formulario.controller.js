@@ -11,7 +11,7 @@ const { formularioBodySchema } = require("../schema/formulario.schema.js");
 
 const obtenerFormularios = async (req, res) => {
     try {
-        const formularios = await formularioService.getFormularios();
+        const formularios = await getFormularios();
         return res.code(200).send(formularios);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -27,7 +27,7 @@ const obtenerFormularios = async (req, res) => {
 const obtenerFormularioPorId = async (req, res) => {
     try {
         const {id} = req.params;
-        const formulario = await formularioService.getFormularioById(id);
+        const formulario = await getFormularioById(id);
         return res.code(200).send(formulario);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -41,14 +41,18 @@ const obtenerFormularioPorId = async (req, res) => {
  * @param {Object} res - Objeto de respuesta
  */
 
-const crearFormulario = async (req, res) => {
+async function crearFormulario(req, res) {
     try {
-        const {body} = req;
-        await formularioBodySchema.validateAsync(body);
-        const formulario = await formularioService.createFormulario(body);
-        return res.code(201).send(formulario);
+        const { error, value } = formularioBodySchema.validate(req.body);
+        if (error) {
+        console.error('Error al validar el formulario:', error);
+        res.status(400).send('Error al validar el formulario');
+        }
+        const formulario = await createFormulario(req.body);
+        res.send(formulario);
     } catch (error) {
-        return res.code(500).send({ message: error.message });
+        console.error('Error al crear el formulario:', error);
+        res.status(500).send('Error al crear el formulario');
     }
 }
 
@@ -61,11 +65,11 @@ const crearFormulario = async (req, res) => {
 const actualizarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
-        const {error} = await formularioBodySchema.validateAsync(req.body);
+        const {error} = await formularioBodySchema.validate(req.body);
         if (error) {
             return res.code(400).send({ message: error.message });
         }
-        const formulario = await formularioService.updateFormulario(id, req.body);
+        const formulario = await updateFormulario(id, req.body);
         return res.code(200).send(formulario);
     } catch (error) {
         return res.code(500).send({ message: error.message });
@@ -81,7 +85,7 @@ const actualizarFormulario = async (req, res) => {
 const eliminarFormulario = async (req, res) => {
     try {
         const {id} = req.params;
-        await formularioService.deleteFormulario(id);
+        await deleteFormulario(id);
         return res.code(204).send();
     } catch (error) {
         return res.code(500).send({ message: error.message });

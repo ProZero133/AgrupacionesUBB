@@ -13,7 +13,10 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
-  define: { 'process.env': {} },
+  define: {
+    'process.env': {},
+    'global.BACKEND_URL': JSON.stringify('http://localhost:3000')
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

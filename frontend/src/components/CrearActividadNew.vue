@@ -66,7 +66,7 @@
           console.log(nom_act, descripcion, imagen, tipo, id_agr);
           try {
             // Realiza una solicitud fetch a tu backend Fastify
-            const response = await fetch('http://localhost:3000/actividad', {
+            const response = await fetch(`${global.BACKEND_URL}/actividad`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

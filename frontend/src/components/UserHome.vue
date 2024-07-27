@@ -49,19 +49,30 @@
 
     <!-- Mis grupos -->
     <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
-      <v-col cols="12" class="flex-grow-0 flex-shrink-0">
-        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-2 card-misgrupos"
-          v-on:click="iragGrupo(grupo.id_agr)">
-          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-          <v-card-text>
-            <p>{{ grupo.descripcion }}</p>
-            <p>RUT: {{ grupo.rut }}</p>
-            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-            <p>Verificado: {{ grupo.verificado }}</p>
-            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-          </v-card-text>
-        </v-card>
+      <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n4">
       </v-col>
+      <v-col v-for="grupo in grupos" :key="grupo.id_agr" cols="12" md="6">
+        <v-card class="card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
+          <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+            <v-card-text>
+
+              <v-row>
+                <v-col cols="4">
+                  <v-img class="image" aspect-ratio="1" :src='grupo.imagen' />
+                </v-col>
+                <v-col cols="8">
+                  <p>{{ grupo.descripcion }}</p>
+                  <p>RUT: {{ grupo.rut }}</p>
+                  <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+                  <p>Verificado: {{ grupo.verificado }}</p>
+                  <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+                </v-col>
+              </v-row>
+
+            </v-card-text>
+          </v-card>
+        </v-col>
+    
     </v-tab-item>
 
     <v-dialog v-model="dialog">
@@ -154,9 +165,9 @@
 
 .card-misgrupos {
   min-width: 200px;
-  width: 80vw;
-  margin-left: 10vw;
-  /* This centers the card within its container */
+  width: 95%;
+  margin: 0 auto;
+  border: 1px solid rgb(235, 235, 235) !important
 }
 
 .card-actividades {
@@ -169,11 +180,6 @@
   min-height: 250px;
 }
 
-.card-misgrupos {
-  max-width: 600px;
-  /* O el ancho máximo que prefieras para tus v-card */
-  border: 1px solid rgb(235, 235, 235) !important
-}
 </style>
 
 <script>
@@ -214,6 +220,7 @@ export default {
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
+
     convertirImagen(data) {
       // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
@@ -228,22 +235,40 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
-    
+
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         console.log('llamando a VerGrupos');
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
         });
-
+    
         console.log("esta es la respuesta ", response);
-
+    
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.grupos = data;
+    
+          // Itera sobre cada grupo para obtener su imagen
+          for (const grupo of this.grupos) {
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + grupo.imagen, {
+                method: 'GET',
+              });
+              // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                grupo.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+            } catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -255,7 +280,7 @@ export default {
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/VerActividadesGruposUsuario/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut}`, {
           method: 'GET',
         });
 
@@ -270,7 +295,7 @@ export default {
             this.actividades = data;
             for (const actis of this.actividades) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
                   method: 'GET',
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -315,7 +340,7 @@ export default {
 
     async VerPublicaciones() {
       try {
-        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${32}`, {
+        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${32}`, {
           method: 'GET',
         });
     
@@ -329,7 +354,7 @@ export default {
             console.log(this.publicaciones);
             for (const publis of this.publicaciones) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
                 });
                 if (responde.ok) {
@@ -392,7 +417,7 @@ export default {
       try {
         console.log('Rut:', this.rut);
         console.log('ID:', id);
-        const response = await fetch(`http://localhost:3000/participar/${id}/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

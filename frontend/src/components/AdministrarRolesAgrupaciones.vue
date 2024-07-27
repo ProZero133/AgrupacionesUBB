@@ -56,7 +56,7 @@ export default {
   methods: {
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
         const response = await fetch(url , {
           method: 'GET',
           headers: {
@@ -79,7 +79,7 @@ export default {
 
     async ActualizarRolAgrupacion(rut, id_agr) {
       try {
-        const response = await fetch('http://localhost:3000/administracionderoles/34/', {
+        const response = await fetch(`${global.BACKEND_URL}:3000/administracionderoles/34/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

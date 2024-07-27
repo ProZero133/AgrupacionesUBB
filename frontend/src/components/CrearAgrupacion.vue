@@ -107,7 +107,7 @@
     methods: {
         async PostearImagen() {
             try {
-                const response = await fetch('http://localhost:3000/imagen', {
+                const response = await fetch(`${global.BACKEND_URL}/imagen`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -129,7 +129,7 @@
         },
     
         async login() {
-            const response = await fetch('http://localhost:3000/login', {
+            const response = await fetch(`${global.BACKEND_URL}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,7 +140,7 @@
         async CreaAgrupacion(nombre_agr, descripcion, rut, verificado) {
             try {
                 const fecha_creacion= new Date();
-                const response = await fetch('http://localhost:3000/agrupaciones', {
+                const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

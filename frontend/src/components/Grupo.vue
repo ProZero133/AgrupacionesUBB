@@ -389,7 +389,7 @@ export default {
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -415,7 +415,7 @@ export default {
       console.log("Rut seleccionado: ", rut);
 
       try {
-        const url = `http://localhost:3000/obtencionderoles/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/obtencionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -440,7 +440,7 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -462,7 +462,7 @@ export default {
 
     async EliminarMiembro(rut) {
       try {
-        const url = `http://localhost:3000/abandonaragrupacion/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/abandonaragrupacion/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'DELETE',
         });
@@ -485,7 +485,7 @@ export default {
     async VerGrupos() {
       try {
         // Incorpora el groupID en la URL de la solicitud fetch
-        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
         });
@@ -506,7 +506,7 @@ export default {
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/actividadesgrupo/${this.groupId}`, {
+        const response = await fetch(`${global.BACKEND_URL}/actividadesgrupo/${this.groupId}`, {
           method: 'GET',
         });
 
@@ -521,7 +521,7 @@ export default {
             this.actividades = data;
             for (const actis of this.actividades) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
                   method: 'GET',
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -569,7 +569,7 @@ export default {
     // y las almacena en el array publicaciones. Luego, por cada publicación, se hace una llamada al backend para obtener la imagen.
     async VerPublicaciones() {
       try {
-        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${this.groupId}`, {
+        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${this.groupId}`, {
           method: 'GET',
         });
     
@@ -583,7 +583,7 @@ export default {
             console.log(this.publicaciones);
             for (const publis of this.publicaciones) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
                 });
                 if (responde.ok) {
@@ -629,7 +629,7 @@ export default {
 
     async VerSolicitudes() {
       try {
-        const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
         });
@@ -648,7 +648,7 @@ export default {
     
     async aceptarSolicitud(rut) {
       try {
-        const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/aceptarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
         });
@@ -665,7 +665,7 @@ export default {
     },
     async rechazarSolicitud(rut) {
       try {
-        const url = `http://localhost:3000/rechazarsolicitud/${rut}/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/rechazarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
         });
@@ -718,7 +718,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
-        const url = `http://localhost:3000/agrupaciones/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -744,7 +744,7 @@ export default {
 
     async SolicitarAcreditaciondeGrupo () {
       try {
-        const url = `http://localhost:3000/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',
         });
@@ -779,7 +779,7 @@ export default {
       this.$router.push('/api/home');
       // Lógica para eliminar el grupo
       try {
-        const url = `http://localhost:3000/eliminaragrupacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rutactual}`;
         const response = fetch(url, {
           method: 'DELETE',
         });

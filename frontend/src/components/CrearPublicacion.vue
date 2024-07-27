@@ -234,7 +234,7 @@ export default {
 
 async PostearImagen() {
   try {
-    const response = await fetch('http://localhost:3000/imagen', {
+    const response = await fetch(`${global.BACKEND_URL}/imagen`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ async PostearImagen() {
             rut: '20.999.554-9',
             fecha_publicacion: today
           }));
-          const response = await fetch('http://localhost:3000/publicaciones', {
+          const response = await fetch(`${global.BACKEND_URL}/publicaciones`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ async PostearImagen() {
 
   async crearVotacion() {
     try {
-      const response = await fetch('http://localhost:3000/votaciones', {
+      const response = await fetch(`${global.BACKEND_URL}/votaciones`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -341,7 +341,7 @@ async PostearImagen() {
         // Envío de las opciones
         const fetchPromises = this.opciones.map(async (opcion) => {
           try {
-            const response = await fetch('http://localhost:3000/opcion', {
+            const response = await fetch(`${global.BACKEND_URL}/opcion`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -377,7 +377,7 @@ async PostearImagen() {
 
   async crearFormulario() {
     try {
-      const response = await fetch('http://localhost:3000/formulario', {
+      const response = await fetch(`${global.BACKEND_URL}/formulario`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -403,7 +403,7 @@ async PostearImagen() {
 
   async crearPost() {
     try {
-      const response = await fetch('http://localhost:3000/post', {
+      const response = await fetch(`${global.BACKEND_URL}/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

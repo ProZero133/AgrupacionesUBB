@@ -200,7 +200,7 @@ export default {
 
     async PostearImagen() {
       try {
-        const response = await fetch('http://localhost:3000/imagen', {
+        const response = await fetch(`${global.BACKEND_URL}/imagen`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ export default {
     },
     async getVerificado() {
       try {
-        const response = await fetch(`http://localhost:3000/agrupaciones/${this.groupId}`);
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones/${this.groupId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.rows && data.rows.length > 0) {
@@ -257,7 +257,7 @@ export default {
       }
       else {
         try {
-          const response = await fetch('http://localhost:3000/actividades', {
+          const response = await fetch(`${global.BACKEND_URL}/actividades`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -271,7 +271,7 @@ export default {
             const id_act = data.id_act;
             const fecha_actividad = new Date(this.date).toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
             console.log("Fecha para la actividad: "+fecha_actividad);
-            const programarActividad = await fetch(`http://localhost:3000/programar/${id_act}/${this.groupId}`, {
+            const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

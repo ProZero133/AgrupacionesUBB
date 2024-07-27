@@ -74,7 +74,7 @@ export default {
   methods: {
     async ObtenerAgrupacionesPendientes() {
       try {
-        const response = await fetch('http://localhost:3000/acreditaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
           method: 'GET',
         });
         if (response.ok) {
@@ -90,7 +90,7 @@ export default {
     async AceptarAgrupacion(id_agr) {
       try {
         const Agrupacion_a_Aceptar = this.AgrupacionesPendientesObtenidas.find(agrupacion => agrupacion.id_agr === id_agr);
-        const response = await fetch(`http://localhost:3000/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default {
 
     async RechazarAgrupacion(id_agr, motivo) {
       try {
-        const response = await fetch(`http://localhost:3000/acreditaciones/${id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/acreditaciones/${id_agr}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

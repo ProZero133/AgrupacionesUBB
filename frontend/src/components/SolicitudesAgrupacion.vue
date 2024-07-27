@@ -60,7 +60,7 @@ export default {
     methods: {
         async VerSolicitudes() {
             try {
-                const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
+                const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
                 const response = await fetch(url, {
                     method: 'GET',
                 });
@@ -77,7 +77,7 @@ export default {
         },
         async aceptarSolicitud(rut) {
             try {
-                const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
+                const url = `${global.BACKEND_URL}/aceptarsolicitud/${rut}/${this.groupId}`;
                 const response = await fetch(url, {
                     method: 'POST',
                 });

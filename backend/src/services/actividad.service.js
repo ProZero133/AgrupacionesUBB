@@ -151,6 +151,16 @@ async function deleteActividad(id) {
     }
 }
 
+async function getActividadesByGrupoUsuario(rut) {
+    try{
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
+        return actividades.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las actividades de un grupo de usuario:', error);
+    }
+}
+
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -163,5 +173,6 @@ module.exports = {
     getParticipantesActividad,
     setParticipanteActividad,
     setProgramacionActividad,
-    getFechaActividad
+    getFechaActividad,
+    getActividadesByGrupoUsuario
 };

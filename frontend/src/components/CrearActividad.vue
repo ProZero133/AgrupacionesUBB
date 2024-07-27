@@ -12,15 +12,11 @@
             <p class="text-left">Por favor, introducir abajo los datos correspondientes a la actividad a crear.</p>
           </v-col>
 
-          <v-col cols="12" md="7">
+          <v-col cols="12" md="7" class="nomdes">
 
             <v-col cols="12">
               <v-text-field class="nombreAct" v-model="nom_act" label="Nombre de la actividad" clearable required
                 variant="solo-filled" :rules="nombreRules"></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field class="Cupos" v-model="cupos" label="Cupos para la actividad" type="number"
-                min="1" required :rules="cuposRules"></v-text-field>
             </v-col>
 
             <v-col cols="12">
@@ -43,12 +39,27 @@
             <v-col>
               <v-img class="image" max-height="280px" aspect-ratio="1" :src='urlImagen' />
             </v-col>
+
+          </v-col>
+
+          <v-col cols="12" md="7" class="botcosos">
+
             <v-col>
-              <v-date-picker class="fechaActividad" title="Fecha para la actividad" header="Fecha" v-model="date" locale="es" color="primary" required :rules="fechaRules"></v-date-picker>
+                <v-text-field v-model="date" label="Fecha para la actividad" type="date" required :min="hoy"
+                :rules="dateRules" :error-messages="dateErrors" @change="validateDate"></v-text-field>
             </v-col>
 
           </v-col>
 
+          <v-col cols="12" md="5" class="botcosos">
+
+            <v-col>
+              <v-text-field class="Cupos" v-model="cupos" label="Cupos para la actividad" type="number"
+              min="1" required :rules="cuposRules"></v-text-field>
+            </v-col>
+
+          </v-col>
+          
 
           <v-col cols="12" md="12">
 
@@ -103,10 +114,26 @@ export default {
   name: 'HelloWorld',
 
   data: () => ({
+    hoy: new Date().toISOString().substr(0, 10),
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
     nombreRules: [v => !!v || 'Nombre de la actividad requerido'],
     cuposRules: [v => !!v || 'Cupos requeridos'],
     fechaRules: [v => !!v || 'Fecha requerida'],
+    dateRules: [
+        value => {
+            if (value) return true
+            return 'La fecha es requerida.'
+        },
+        value => {
+            const inputDate = new Date(value);
+            const today = new Date();
+            if (inputDate.setHours(0, 0, 0, 0) >= today.setHours(0, 0, 0, 0)) return true
+            return `La fecha no puede ser antes que hoy.`
+        },
+    ],
+    dateErrors: [],
+
+
     nom_act: '',
     descripcion: '',
     imagen: [],
@@ -118,8 +145,19 @@ export default {
     verificado: '',
     cupos: 1,
     date: null,
+
   }),
   methods: {
+    validateDate() {
+      this.dateErrors = [];
+      for (let rule of this.dateRules) {
+          let result = rule(this.datosDeuda.fechaVencimiento);
+          if (typeof result === 'string') {
+            this.dateErrors.push(result);
+          }
+        }
+    },
+
     createImage(file) {
       const reader = new FileReader();
       const actualFile = file[0];
@@ -207,8 +245,7 @@ export default {
         return;
       }
       //Validar fecha igual o mayor a la actual
-      const fechaActual = new Date();
-      if (this.date < fechaActual) {
+      if (this.date < this.hoy) {
         this.$root.showSnackBar('error', 'Fecha no válida', 'Error de validación');
         return;
       }
@@ -265,6 +302,11 @@ export default {
 
 </script>
 <style>
+
+.nomdes {
+  margin-bottom: 220px;
+}
+
 .fechaActividad {
   margin-top: 2px;
   height: 405px;
@@ -272,7 +314,6 @@ export default {
 .descripcionAct {
   height: 20px !important;
   margin-top: -20px;
-  margin-bottom: -260px;
 }
 
 .image {
@@ -287,4 +328,9 @@ export default {
 .title-card {
   margin-left: 12px;
 }
+
+.botcosos {
+  margin-bottom: -40px;
+}
+
 </style>

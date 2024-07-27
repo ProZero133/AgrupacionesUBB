@@ -7,9 +7,10 @@
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
+
     </v-card>
 
-            <v-dialog v-model="dialogmiembros" max-width="500px">
+            <v-dialog v-model="dialogmiembros" max-width="600px">
 
               <v-card>
                 <v-toolbar color="primary">
@@ -35,10 +36,11 @@
                           <v-dialog width="auto" scrollable>
                             <template v-slot:activator="{ props: activatorProps }">
                               <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined"
-                                v-bind="activatorProps"></v-btn>
+                                v-bind="activatorProps" @click="ObtenerRolUsr(item.user_rut)"></v-btn>
                             </template>
 
-                            <template v-slot:default="{ isActive }">
+                            <template v-slot:default="{ isActive }" >
+                              
                               <v-card prepend-icon="mdi-pencil" title="Editar">
                                 <v-divider class="mt-3"></v-divider>
 
@@ -129,6 +131,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+
             <v-dialog v-model="dialogeditar" max-width="500px">
               <v-card>
                 <v-card-title>Editar grupo</v-card-title>
@@ -197,19 +200,21 @@
               </v-card>
           </v-dialog>
 
-    <v-container class="titulito">
-      <v-card v-for="elemento in elementos" :key="elemento.id" class="mb-15 card-actividades" border="10px">
-        <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
-            </v-col>
-            <v-col cols="7">
-              <p>{{ elemento.descripcion }}</p>
-            </v-col>
-          </v-row>
-          <v-col v-if="elemento.hipervinculo" cols="12">
+    <!-- ACTIVIDADES Y PUBLICACIONES -->
+    <v-row align="start" no-gutters class="mt-6">
+      <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+        <v-card class="card-actividades">
+          <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="5">
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
+              </v-col>
+              <v-col cols="7">
+                <p>{{ elemento.descripcion }}</p>
+              </v-col>
+            </v-row>
+            <v-col v-if="elemento.hipervinculo" cols="12">
               <v-btn
               class="text-link"
               :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
@@ -219,20 +224,21 @@
                 Contestar formulario
               </v-btn>
           </v-col>
-          <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
-            <v-row>
-              <v-radio-group v-model="elemento.opcionPreferida">
-                <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
-                </v-radio>
-              </v-radio-group>
-            </v-row>
-            <v-row>
-              <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
-            </v-row>
-          </v-col>
-        </v-card-text>
-      </v-card>
-    </v-container>
+            <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
+              <v-row>
+                <v-radio-group v-model="elemento.opcionPreferida">
+                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                  </v-radio>
+                </v-radio-group>
+              </v-row>
+              <v-row>
+                <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+              </v-row>
+            </v-col>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
   </v-container>
 
@@ -241,7 +247,7 @@
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
-          <v-tooltip location="bottom">
+          <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
               <v-btn icon="mdi-plus" size="large" color="primary" v-bind="mergeProps(menu, tooltip)">
               </v-btn>
@@ -264,7 +270,7 @@
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
-          <v-tooltip location="bottom">
+          <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
               <v-btn icon="mdi-account-edit" size="large" color="warning" v-bind="mergeProps(menu, tooltip)">
               </v-btn>
@@ -325,7 +331,8 @@ export default {
     rol: '',
 
     headers: [
-      { text: 'Nombre', value: 'nombre' },
+      { text: 'Nombre', value: 'user_nombre' },
+      { text: 'Rut', value: 'rut' },
       { text: 'Rol Agrupación', value: 'action', sortable: false },
     ],
 
@@ -395,6 +402,8 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
+          console.log("Datos filtrados: ", filtrada);
+
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -403,6 +412,33 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
+    async ObtenerRolUsr(rut) {
+      console.log("Rut seleccionado: ", rut);
+
+      try {
+        const url = `http://localhost:3000/obtencionderoles/${this.groupId}/${rut}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log ("Datos de la respuesta: ", data);
+          this.selectedRole = data.rol_agr;
+          console.log("Rol seleccionado: ", this.selectedRole);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
@@ -637,6 +673,7 @@ export default {
         this.solicitudes = [];
       }
     },
+    
     async aceptarSolicitud(rut) {
       try {
         const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
@@ -749,9 +786,6 @@ export default {
       }
     },
 
-
-
-
     startHold() {
       this.pressTime = 0;
       this.progress = 0;
@@ -764,6 +798,7 @@ export default {
         }
       }, 10);
     },
+
     cancelHold() {
       clearInterval(this.pressTimer);
       this.progress = 0;
@@ -814,7 +849,7 @@ export default {
 }
 
 .titulito {
-  margin-top: -10px;
+  margin-top: 0px;
 }
 
 .texto {
@@ -831,11 +866,12 @@ export default {
 
 .card-actividades {
   /* O la altura que prefieras para tus v-card */
-  width: 90%;
+  width: 95%;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-bottom: -40px;
   /* This centers the card within its container */
-  border: 2px solid rgb(207, 207, 207) !important
+  border: 2px solid rgb(207, 207, 207) !important;
+  min-height: 350px;
 }
 
 .SeleccionarRol {

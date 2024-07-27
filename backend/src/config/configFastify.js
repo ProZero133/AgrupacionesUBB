@@ -13,6 +13,7 @@ const actividad = require('../routes/actividad.routes');
 const publicacion = require('../routes/publicacion.routes');
 const imagenes = require('../routes/imagenes.routes');
 const acreditaciones = require('../routes/admin.routes');
+const tag  = require('../routes/tags.routes');
 
 const fastifyCors = require('@fastify/cors');
 const secret = config.JWT_SECRET;
@@ -41,4 +42,5 @@ fastify.register(fastifyCors, {
   fastify.register(publicacion);
   fastify.register(acreditaciones);
   fastify.register(imagenes);
+  fastify.register(tag);
 module.exports = fastify;

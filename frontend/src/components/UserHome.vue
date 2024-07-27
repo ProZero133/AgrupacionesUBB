@@ -8,44 +8,49 @@
         </v-tabs>
       </template>
     </v-toolbar>
-  <v-col cols="12" class="pagina" align-self:>
-    
 
-    
-
-
-    <v-row>
-      
-      <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
-      <v-tab-item value="actividades" v-if="tab === 'actividades'">
-      <v-col cols="7" class="flex-grow-0 flex-shrink-0">
+      <!-- Actividades -->
+    <v-tab-item value="actividades" v-if="tab === 'actividades'">
+      <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n10">
         <v-card-title class="pasando">
           <span class="text-h4 textopasando">Qué está pasando?</span>
         </v-card-title>
-        
-        <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px"
-          v-on:click="seleccionarActividad(actividad.id_act)">
-          <p class="subtitle-1 publicadoen">Publicado en {{ grupoOrigenActividad(actividad.id_agr) }}</p>
-          <v-card-title>{{ actividad.nom_act }}</v-card-title>
-          <v-card-text>
+      </v-col>
+      <v-container cols="12">
+      <v-row align="start" no-gutters class="mt-6">
+        <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+          <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
+            <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+            <v-card-text>
+
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src=actividad.imagen />
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
               </v-col>
               <v-col cols="7">
-                <p>{{ actividad.descripcion }}</p>
+                <p>{{ elemento.descripcion }}</p>
               </v-col>
             </v-row>
-            <!-- <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura"> -->
-            <!--<p>Tipo: {{ actividad.tipo }}</p>-->
-          </v-card-text>
-        </v-card>
-      
-      </v-col>
+
+              <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
+                <v-row>
+                  <v-radio-group v-model="elemento.opcionPreferida" disabled>
+                    <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                    </v-radio>
+                  </v-radio-group>
+                </v-row>
+              </v-col>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      </v-container>
     </v-tab-item>
+
+    <!-- Mis grupos -->
     <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
-      <v-col cols="3" class="flex-grow-0 flex-shrink-0">
-        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-3 card-misgrupos"
+      <v-col cols="12" class="flex-grow-0 flex-shrink-0">
+        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-2 card-misgrupos"
           v-on:click="iragGrupo(grupo.id_agr)">
           <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
           <v-card-text>
@@ -58,36 +63,64 @@
         </v-card>
       </v-col>
     </v-tab-item>
-    </v-row>
-    <v-dialog v-model="dialogactividad">
-      <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id_act"
+
+    <v-dialog v-model="dialog">
+      <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id"
         class="mb-15 card-actividades" border="10px">
-        <v-card-title class="headline">Actividad</v-card-title>
+        <v-card-title class="headline">{{ elemento.nombre }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src="actividad.imagen" />
+              <v-img class="image" aspect-ratio="1" :src="elemento.imagen" />
             </v-col>
             <v-col cols="7">
-              <p>{{ actividad.descripcion }}</p>
+              <p>{{ elemento.descripcion }}</p>
             </v-col>
+
+            <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
+              <v-row>
+                <v-radio-group v-model="elemento.opcionPreferida">
+                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                  </v-radio>
+                </v-radio-group>
+              </v-row>
+              <v-row>
+                <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+              </v-row>
+            </v-col>
+
           </v-row>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-row>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+
+          <v-row v-if="elemento.tipo_elemento === 'Actividad'">
             <v-col cols="6">
-              <v-btn color="green darken-1" text @click="dialogactividad = false">Cerrar</v-btn>
+              <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
             </v-col>
             <v-col cols="6">
               <v-btn color="green darken-1" text @click="ParticiparActividad(actividad.id_act)">Participar</v-btn>
             </v-col>
           </v-row>
-        </v-card-actions>
+
+          <v-row v-if="elemento.tipo_elemento === 'Formulario'">
+            <v-col v-if="elemento.hipervinculo" cols="12">
+              <v-btn
+                class="text-link"
+                :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
+                target="_blank"
+                rel="noopener noreferrer" 
+                color="primary">
+                Contestar formulario
+              </v-btn>
+            </v-col>
+          </v-row>
+
+      </v-card-actions>
+
       </v-card>
 
     </v-dialog>
-  </v-col>
 </template>
 
 <style scoped>
@@ -102,7 +135,6 @@
 .pasando {
   min-width: 330px;
   margin-left: 3%;
-  margin-bottom: 6%;
 }
 
 .textopasando {
@@ -117,7 +149,7 @@
 
 .pagina {
   margin-top: 30px;
-  width: 90%;
+  width: 100%;
 }
 
 .card-misgrupos {
@@ -128,14 +160,13 @@
 }
 
 .card-actividades {
-  margin-top: 40vh;
-  min-width: 325px;
   /* O la altura que prefieras para tus v-card */
-  width: 90%;
+  width: 95%;
   margin: 0 auto;
-
+  margin-bottom: -40px;
   /* This centers the card within its container */
-  border: 2px solid rgb(207, 207, 207) !important
+  border: 2px solid rgb(207, 207, 207) !important;
+  min-height: 250px;
 }
 
 .card-misgrupos {
@@ -152,9 +183,13 @@ import VueCookies from 'vue-cookies';
 export default {
   name: 'UserHome',
   data: () => ({
-    dialogactividad: false,
+    dialog: false,
     grupos: [],
+
     actividades: [],
+    elementos: [],
+    publicaciones: [],
+
     urlImagen: addImage,
     idactActual: null,
     rut: '',
@@ -169,8 +204,8 @@ export default {
     };
   },
   computed: {
-    actividadFiltrada() {
-      return this.actividades.filter(actividad => actividad.id_act === this.idactActual);
+    elementoFiltrado() {
+      return this.elementos.filter(elemento => elemento.id === this.idactActual);
     }
   },
   methods: {
@@ -221,12 +256,16 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
+    
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
+        console.log('llamando a VerGrupos');
         const response = await fetch('http://localhost:3000/agrupaciones', {
           method: 'GET',
         });
+
+        console.log("esta es la respuesta ", response);
 
         // Verifica si la respuesta es exitosa
         if (response.ok) {
@@ -240,6 +279,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -251,26 +291,47 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          this.actividades = data;
+          //console.log(data.success);
+          if (data.success === false) {
+            //console.log("No hay actividades");
+          } else {
+            this.actividades = data;
+            for (const actis of this.actividades) {
+              try {
+                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
+                  method: 'GET',
+                });
+                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+                if (responde.ok) {
+                  const dataImagen = await responde.text();
+                  actis.imagen = dataImagen;
+                } else {
+                  console.error('Error en la respuesta:', responde.status);
+                }
 
-          for (const imagenes of this.actividades) {
-            try {
-              const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
-                method: 'GET',
-              });
-              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
-              if (responde.ok) {
-                const dataImagen = await responde.text();
-                imagenes.imagen = dataImagen;
-              } else {
-                console.error('Error en la respuesta:', responde.status);
               }
+              catch (error) {
+                console.error('Error al hacer fetch:', error);
+              }
+            }
 
-            }
-            catch (error) {
-              console.error('Error al hacer fetch:', error);
-            }
+          // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+          // Los campos de actividad se pasarán de la siguiente manera a elementos:
+          // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+          this.elementos = this.actividades.map((elemento) => {
+            return {
+              id: elemento.id_act,
+              nombre: elemento.nom_act,
+              descripcion: elemento.descripcion,
+              tipo: elemento.tipo,
+              imagen: elemento.imagen,
+              id_agr: elemento.id_agr,
+              tipo_elemento: 'Actividad',
+            };
+          });
           }
+        
+        this.VerPublicaciones();
 
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -279,13 +340,82 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
+    async VerPublicaciones() {
+      try {
+        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${32}`, {
+          method: 'GET',
+        });
+    
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success === false) {
+            //console.log("No hay publicaciones");
+          } else {
+            this.publicaciones = data;
+            console.log("this.publicaciones");
+            console.log(this.publicaciones);
+            for (const publis of this.publicaciones) {
+              try {
+                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                  method: 'GET',
+                });
+                if (responde.ok) {
+                  const dataImagen = await responde.text();
+                  publis.imagen = dataImagen;
+                } else {
+                  console.error('Error en la respuesta:', responde.status);
+                }
+              } catch (error) {
+                console.error('Error al hacer fetch:', error);
+              }
+            }
+    
+            const nuevosElementos = this.publicaciones.map(publicacion => {
+              const elemento = {
+                id: publicacion.id_pub,
+                nombre: publicacion.encabezado,
+                descripcion: publicacion.descripcion,
+                imagen: publicacion.imagen,
+                id_agr: publicacion.id_agr,
+              };
+    
+              if (publicacion.tipoPub === 'formulario') {
+                elemento.hipervinculo = publicacion.hipervinculo;
+                elemento.tipo_elemento = 'Formulario'
+              } else if (publicacion.tipoPub === 'votacion') {
+                elemento.opciones = publicacion.opciones;
+                elemento.opcionPreferida = '';
+                elemento.tipo_elemento = 'Votación';
+              } else {
+                elemento.tipo_elemento = 'Publicación';
+              }
+    
+              return elemento;
+            });
+    
+            this.elementos = [...this.elementos, ...nuevosElementos];
+          }
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+
     iragGrupo(id) {
       this.$router.push(`/api/grupo/${id}`);
     },
-    seleccionarActividad(id) {
+
+    seleccionar(id) {
+      console.log('Seleccionar:', id);
+      console.log('this.dialog:', this.dialog);
       this.idactActual = id;
-      this.dialogactividad = true;
+      this.dialog = true;
     },
+
     async ParticiparActividad(id) {
       try {
         console.log('Rut:', this.rut);
@@ -299,7 +429,7 @@ export default {
         });
         const data = await response.json();
         if (response.ok) {
-          this.dialogactividad = false;
+          this.dialog = false;
           this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
         } else {
           console.error(data.message);

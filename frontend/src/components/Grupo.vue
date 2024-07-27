@@ -424,7 +424,7 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          this.datosGrupo = data.rows[0];
+          this.datosGrupo = data;
         } else {
           console.error('Error en la respuesta:', response.status);
         }

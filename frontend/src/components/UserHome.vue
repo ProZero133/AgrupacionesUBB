@@ -196,7 +196,7 @@ export default {
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/VerActividadesGrupos', {
+        const response = await fetch(`http://localhost:3000/VerActividadesGruposUsuario/${this.rut}`, {
           method: 'GET',
         });
 

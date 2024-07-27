@@ -228,12 +228,16 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
+    
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:5173/agrupaciones', {
+        console.log('llamando a VerGrupos');
+        const response = await fetch('http://localhost:3000/agrupaciones', {
           method: 'GET',
         });
+
+        console.log("esta es la respuesta ", response);
 
         // Verifica si la respuesta es exitosa
         if (response.ok) {

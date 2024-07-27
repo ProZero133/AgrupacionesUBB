@@ -758,10 +758,6 @@ export default {
       }
     },
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b0c8e680bf37f31a85d2090b081da1c9c572c64d
     startHold() {
       this.pressTime = 0;
       this.progress = 0;

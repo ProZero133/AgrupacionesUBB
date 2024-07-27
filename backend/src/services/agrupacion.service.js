@@ -13,6 +13,7 @@ async function getAgrupaciones() {
       console.log('Error al obtener las agrupaciones:', error);
   }
 }
+
   async function getAgrupacionById(id) {
     try {
       // Obtiene la agrupacion con el id especificado

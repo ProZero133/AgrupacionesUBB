@@ -1,6 +1,10 @@
 "use strict";
 
-const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion, deletePublicacion} = require("../services/publicacion.service.js");
+const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion, deletePublicacion, getPublicacionesByAgrupacion} = require("../services/publicacion.service.js");
+const { getPostById } = require("../services/post.service.js");
+const { getFormularioById } = require("../services/formulario.service");
+const { getVotacionById } = require("../services/votacion.service");
+
 const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
 
 /**
@@ -45,6 +49,88 @@ async function obtenerPublicacionesPorId(req, res) {
         res.code(500).send('Error al obtener la publicacion');
     }
 }
+
+async function obtenerPublicacionesPorGrupo(req, res) {
+    try {
+        const respuesta = await getPublicacionesByAgrupacion(req.params.id);
+        if (respuesta.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron publicaciones en la agrupación ' + req.params.id });
+        } else {
+            // Procesar cada elemento en la respuesta
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                try {
+                    const post = await getPostById(publicacion.id_pub);
+                    if (post) {
+                        publicacion.descripcion = post.cuerpo;
+                        publicacion.tipoPub = 'post';
+                    } else {
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener el post con id ${publicacion.id_pub}: `, error);
+                    publicacion.descripcion = 'No hay descripción disponible';
+                    publicacion.tipoPub = 'nulo';
+                }
+            }
+
+            // Procesar publicaciones que son formularios
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                if (publicacion.tipoPub === 'nulo') {
+                    try {
+                        const formulario = await getFormularioById(publicacion.id_pub);
+                        if (formulario) {
+                            publicacion.descripcion = formulario.descripcion;
+                            publicacion.hipervinculo = formulario.hipervinculo;
+                            publicacion.tipoPub = 'formulario';
+                        } else {
+                            publicacion.descripcion = 'No hay descripción disponible';
+                            publicacion.tipoPub = 'nulo';
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener el formulario con id ${publicacion.id_pub}: `, error);
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                }
+            }
+
+            // Procesar publicaciones que son votaciones
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                if (publicacion.tipoPub === 'nulo') {
+                    try {
+                        const votacion = await getVotacionById(publicacion.id_pub);
+                        if (votacion && votacion.opciones && votacion.opciones.length > 0) {
+                            publicacion.descripcion = votacion.descripcion;
+                            publicacion.tipoPub = 'votacion';
+                            publicacion.opciones = votacion.opciones;
+                        } else {
+                            publicacion.descripcion = 'No hay descripción disponible';
+                            publicacion.tipoPub = 'nulo';
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                }
+            }
+
+            // Eliminar publicaciones que no tienen descripción disponible
+            const publicacionesFiltradas = respuesta.filter(publicacion => publicacion.tipoPub !== 'nulo');
+
+            console.log("Publicaciones encontradas:, ", publicacionesFiltradas);
+            return res.send(publicacionesFiltradas);
+        }
+    } catch (error) {
+        console.error("Error al obtener publicaciones: ", error);
+        return res.status(500).send({ success: false, message: 'Error al obtener publicaciones' });
+    }
+}
+
 
 /**
  * Crea una nueva publicacion
@@ -129,6 +215,7 @@ async function eliminarPublicacion(req, res) {
 module.exports = {
     obtenerPublicaciones,
     obtenerPublicacionesPorId,
+    obtenerPublicacionesPorGrupo,
     crearPublicacion,
     actualizarPublicacion,
     eliminarPublicacion

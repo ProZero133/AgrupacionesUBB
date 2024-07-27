@@ -7,41 +7,7 @@
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
-      <v-expansion-panels>
-        <v-expansion-panel>
-          <v-expansion-panel-title>
-            <template v-slot:default="{ expanded }">
-              <v-row no-gutters>
-                <v-col class="d-flex justify-start" cols="4">
-                  Gestionar grupo
-                </v-col>
-                <v-col class="text-grey" cols="8">
-                  <v-fade-transition leave-absolute>
-                    <span v-if="expanded" key="0">
-                      Seleccione una accion
-                    </span>
-                    <span v-else key="1">
-                    </span>
-                  </v-fade-transition>
-                </v-col>
-              </v-row>
-            </template>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <v-row>
-              <v-col cols="12">
-                <v-btn color="primary" @click="dialogmiembros = true">Ver miembros</v-btn>
-              </v-col>
-              <v-col cols="12">
-                <v-btn color="secondary" @click="dialogeditar = true">Editar grupo</v-btn>
-              </v-col>
-              <v-col cols="12">
-                <v-btn color="error" @click="dialogsolicitar = true">Solicitar acreditación</v-btn>
-              </v-col>
-              <v-col cols="12">
-                <v-btn color="error" @click="dialogeliminar = true">Eliminar agrupación</v-btn>
-              </v-col>
-            </v-row>
+    </v-card>
 
             <v-dialog v-model="dialogmiembros" max-width="500px">
 
@@ -229,34 +195,48 @@
                     depressed>Aceptar</v-btn>
                 </v-card-actions>
               </v-card>
-            </v-dialog>
-
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-
-    </v-card>
+          </v-dialog>
 
     <v-container class="titulito">
-      <v-card v-for="actividad in actividades" :key="actividad.id_act" class="mb-15 card-actividades" border="10px">
-        <v-card-title>{{ actividad.nom_act }}</v-card-title>
+      <v-card v-for="elemento in elementos" :key="elemento.id" class="mb-15 card-actividades" border="10px">
+        <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src='actividad.imagen' />
+              <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
             </v-col>
             <v-col cols="7">
-              <p>{{ actividad.descripcion }}</p>
+              <p>{{ elemento.descripcion }}</p>
             </v-col>
           </v-row>
-          <!-- <img :src="convertirImagen(actividad.imagen.data)" alt="Miniatura" class="miniatura"> -->
-          <!--<p>Tipo: {{ actividad.tipo }}</p>-->
+          <v-col v-if="elemento.hipervinculo" cols="12">
+              <v-btn
+              class="text-link"
+              :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
+              target="_blank"
+              rel="noopener noreferrer" 
+              color="primary">
+                Contestar formulario
+              </v-btn>
+          </v-col>
+          <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
+            <v-row>
+              <v-radio-group v-model="elemento.opcionPreferida">
+                <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                </v-radio>
+              </v-radio-group>
+            </v-row>
+            <v-row>
+              <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+            </v-row>
+          </v-col>
         </v-card-text>
       </v-card>
     </v-container>
 
   </v-container>
 
+  <!-- Botón de Crear Actividad o Publicación -->
   <VLayoutItem model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
       <v-menu>
@@ -272,6 +252,29 @@
         <v-list class="tultipCrear">
           <v-list-item v-for="(item, index) in items" :key="index"
             v-on:click="this.$router.push(item.path + `${groupId}`)">
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+  </VLayoutItem>
+
+  <!-- Botón de admin -->
+  <VLayoutItem model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
+    <div class="ma-9 pointer-events-initial">
+      <v-menu>
+        <template v-slot:activator="{ props: menu }">
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props: tooltip }">
+              <v-btn icon="mdi-account-edit" size="large" color="warning" v-bind="mergeProps(menu, tooltip)">
+              </v-btn>
+            </template>
+            <span>Moderar</span>
+          </v-tooltip>
+        </template>
+        <v-list class="tultipCrear">
+          <v-list-item v-for="(item, index) in modItems" :key="index"
+            v-on:click="modalMaker(item.path)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -318,20 +321,24 @@ export default {
     solicitudes: [],
     MiembrosdeAgr: [],
     selectedRole: '',
+
     headers: [
       { text: 'Nombre', value: 'nombre' },
       { text: 'Rol Agrupación', value: 'action', sortable: false },
     ],
+
     datosGrupo: {
       descripcion: null,
       fecha_creacion: null,
       fecha_verificacion: null,
       id_agr: null,
       imagen: null,
-      nombre_agr: '',
+      nombre_agr: 'h',
       rut: null,
       verificado: null,
     },
+
+    urlImagen: addImage,
 
     items: [
       { title: 'Crear Actividad', path: '/api/crear_actividad/' },
@@ -340,11 +347,38 @@ export default {
       { title: 'Ver miembros', path: '/api/administrar_roles_agrupaciones/' },
     ],
 
+    modItems: [
+      { title: 'Ver Miembros', path: 'dialogmiembros' },
+      { title: 'Editar Grupo', path: 'dialogeditar' },
+      { title: 'Solicitar Acreditación', path: 'dialogsolicitar' },
+      { title: 'Eliminar Agrupación', path: 'dialogeliminar' },
+    ],
+
+    // Lista de elementos
+    // Los que son actividades, tienen los siguientes campos:
+    // id_act, nom_act, descripcion, tipo, imagen, id_agr, tipo_elemento
+    // Si son publicaciones, pueden tener, además, los siguientes:
+    // hipervinculo, opciones (arreglo de strings)
     actividades: [],
-    urlImagen: addImage,
+    publicaciones: [],
+    elementos: [],
+    
   }),
   methods: {
     mergeProps,
+
+    modalMaker(modal) {
+      if (modal === 'dialogmiembros') {
+        this.dialogmiembros = true;
+      } else if (modal === 'dialogeditar') {
+        console.log('dialogeditar se hace true');
+        this.dialogeditar = true;
+      } else if (modal === 'dialogsolicitar') {
+        this.dialogsolicitar = true;
+      } else if (modal === 'dialogeliminar') {
+        this.dialogeliminar = true;
+      }
+    },
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
@@ -449,15 +483,15 @@ export default {
             //console.log("No hay actividades");
           } else {
             this.actividades = data;
-            for (const imagenes of this.actividades) {
+            for (const actis of this.actividades) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
+                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
                   method: 'GET',
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
                 if (responde.ok) {
                   const dataImagen = await responde.text();
-                  imagenes.imagen = dataImagen;
+                  actis.imagen = dataImagen;
                 } else {
                   console.error('Error en la respuesta:', responde.status);
                 }
@@ -468,7 +502,86 @@ export default {
               }
             }
 
+          // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+          // Los campos de actividad se pasarán de la siguiente manera a elementos:
+          // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+          this.elementos = this.actividades.map((elemento) => {
+            return {
+              id: elemento.id_act,
+              nombre: elemento.nom_act,
+              descripcion: elemento.descripcion,
+              tipo: elemento.tipo,
+              imagen: elemento.imagen,
+              id_agr: elemento.id_agr,
+              tipo_elemento: 'actividad',
+            };
+          });
+          }
+        
+        this.VerPublicaciones();
 
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    // Función para ver publicaciones
+    // muy similar a VerActividades, hace una llamada al backend para obtener las publicaciones con el id del grupo,
+    // y las almacena en el array publicaciones. Luego, por cada publicación, se hace una llamada al backend para obtener la imagen.
+    async VerPublicaciones() {
+      try {
+        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${this.groupId}`, {
+          method: 'GET',
+        });
+    
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success === false) {
+            //console.log("No hay publicaciones");
+          } else {
+            this.publicaciones = data;
+            console.log("this.publicaciones");
+            console.log(this.publicaciones);
+            for (const publis of this.publicaciones) {
+              try {
+                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                  method: 'GET',
+                });
+                if (responde.ok) {
+                  const dataImagen = await responde.text();
+                  publis.imagen = dataImagen;
+                } else {
+                  console.error('Error en la respuesta:', responde.status);
+                }
+              } catch (error) {
+                console.error('Error al hacer fetch:', error);
+              }
+            }
+    
+            const nuevosElementos = this.publicaciones.map(publicacion => {
+              const elemento = {
+                id: publicacion.id_pub,
+                nombre: publicacion.encabezado,
+                descripcion: publicacion.descripcion,
+                imagen: publicacion.imagen,
+                id_agr: publicacion.id_agr,
+                tipo_elemento: publicacion.tipoPub
+              };
+    
+              if (publicacion.tipoPub === 'formulario') {
+                elemento.hipervinculo = publicacion.hipervinculo;
+              } else if (publicacion.tipoPub === 'votacion') {
+                elemento.opciones = publicacion.opciones;
+                elemento.opcionPreferida = '';
+              }
+    
+              return elemento;
+            });
+    
+            this.elementos = [...this.elementos, ...nuevosElementos];
           }
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -477,6 +590,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async VerSolicitudes() {
       try {
         const url = `http://localhost:3000/versolicitudes/${this.groupId}`;

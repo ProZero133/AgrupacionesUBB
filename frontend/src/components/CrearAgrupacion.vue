@@ -26,6 +26,11 @@
                         <v-btn class="form-submit" type="submit"
                         color="#2CA2DC">Crear Agrupación</v-btn>
                     </v-col>
+
+                    <v-col cols="12" md="6">
+                    <v-text-field v-model="datosDeuda.fechaVencimiento" label="Fecha" type="date" required :min="hoy"
+                        :rules="dateRules" :error-messages="dateErrors" @change="validateFechaVencimiento"></v-text-field>
+                </v-col>
                 </v-row>
             </v-form>
         </v-card>
@@ -65,7 +70,7 @@ export default {
         },
     ],
     }),
-    
+
     methods: {
     async PostearImagen() {
         try {

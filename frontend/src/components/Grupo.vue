@@ -7,6 +7,7 @@
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
+
     </v-card>
 
             <v-dialog v-model="dialogmiembros" max-width="500px">
@@ -129,6 +130,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+
             <v-dialog v-model="dialogeditar" max-width="500px">
               <v-card>
                 <v-card-title>Editar grupo</v-card-title>
@@ -197,19 +199,21 @@
               </v-card>
           </v-dialog>
 
-    <v-container class="titulito">
-      <v-card v-for="elemento in elementos" :key="elemento.id" class="mb-15 card-actividades" border="10px">
-        <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
-            </v-col>
-            <v-col cols="7">
-              <p>{{ elemento.descripcion }}</p>
-            </v-col>
-          </v-row>
-          <v-col v-if="elemento.hipervinculo" cols="12">
+    <!-- ACTIVIDADES Y PUBLICACIONES -->
+    <v-row align="start" no-gutters class="mt-6">
+      <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+        <v-card class="card-actividades">
+          <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="5">
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
+              </v-col>
+              <v-col cols="7">
+                <p>{{ elemento.descripcion }}</p>
+              </v-col>
+            </v-row>
+            <v-col v-if="elemento.hipervinculo" cols="12">
               <v-btn
               class="text-link"
               :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
@@ -219,20 +223,21 @@
                 Contestar formulario
               </v-btn>
           </v-col>
-          <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
-            <v-row>
-              <v-radio-group v-model="elemento.opcionPreferida">
-                <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
-                </v-radio>
-              </v-radio-group>
-            </v-row>
-            <v-row>
-              <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
-            </v-row>
-          </v-col>
-        </v-card-text>
-      </v-card>
-    </v-container>
+            <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
+              <v-row>
+                <v-radio-group v-model="elemento.opcionPreferida">
+                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                  </v-radio>
+                </v-radio-group>
+              </v-row>
+              <v-row>
+                <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+              </v-row>
+            </v-col>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
   </v-container>
 
@@ -609,6 +614,7 @@ export default {
         this.solicitudes = [];
       }
     },
+    
     async aceptarSolicitud(rut) {
       try {
         const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
@@ -721,9 +727,6 @@ export default {
       }
     },
 
-
-
-
     startHold() {
       this.pressTime = 0;
       this.progress = 0;
@@ -736,6 +739,7 @@ export default {
         }
       }, 10);
     },
+
     cancelHold() {
       clearInterval(this.pressTimer);
       this.progress = 0;
@@ -784,7 +788,7 @@ export default {
 }
 
 .titulito {
-  margin-top: -10px;
+  margin-top: 0px;
 }
 
 .texto {
@@ -801,11 +805,12 @@ export default {
 
 .card-actividades {
   /* O la altura que prefieras para tus v-card */
-  width: 90%;
+  width: 95%;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-bottom: -40px;
   /* This centers the card within its container */
-  border: 2px solid rgb(207, 207, 207) !important
+  border: 2px solid rgb(207, 207, 207) !important;
+  min-height: 350px;
 }
 
 .SeleccionarRol {

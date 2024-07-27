@@ -7,10 +7,6 @@ const routes = [
       redirect: '/api/login'
     },
     {
-      path: '/',
-      redirect: '/api/home',
-    },
-    {
       path: '/api/crear_actividad',
       redirect: '/api/home',
     },
@@ -22,7 +18,6 @@ const routes = [
           path: 'home',
           name: 'Home',
           component: () => import('@/views/UserHomeView.vue'),
-          meta: {requiresAuth: true}
         },
         {
           path: 'adminhome',

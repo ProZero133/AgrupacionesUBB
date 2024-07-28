@@ -187,7 +187,19 @@ async function ObtenerUsuariosdeAgrupacion(req, res) {
     }
 }
 
-
+async function obtenerLider(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const lider = await getLider(id_agr);
+        if (lider.length === 0) {
+            return res.code(404).send('No se encontró el líder');
+        }
+        res.code(200).send(lider);
+    } catch (error) {
+        console.error('Error al obtener el líder:', error);
+        res.code(500).send('Error al obtener el líder');
+    }
+}
 
 async function eliminarAgrupacion(req, res) {
     try {
@@ -399,5 +411,6 @@ module.exports = {
     CambiarRoldeUsuario,
     solicitarAcreditacion,
     rechazarSolicitud,
-    ingresarTagsAgrupacion
+    ingresarTagsAgrupacion,
+    obtenerLider
 };

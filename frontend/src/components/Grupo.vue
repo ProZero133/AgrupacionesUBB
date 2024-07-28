@@ -268,7 +268,7 @@
   <!-- Botón de admin -->
   <VLayoutItem model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
     <div class="ma-9 pointer-events-initial">
-      <v-menu>
+      <v-menu v-if="lider">
         <template v-slot:activator="{ props: menu }">
           <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
@@ -362,6 +362,7 @@ export default {
       { title: 'Solicitar Acreditación', path: 'dialogsolicitar' },
       { title: 'Eliminar Agrupación', path: 'dialogeliminar' },
     ],
+    lider: false,
 
     // Lista de elementos
     // Los que son actividades, tienen los siguientes campos:
@@ -410,6 +411,34 @@ export default {
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async ObtenerLider(){
+      const rutLider = this.getRut(); // Ensure rutLider is properly scoped
+      try {
+        const url = `${global.BACKEND_URL}/obtenerLider/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const filtrada = data.filter((item) => item.rol_agr === 'Lider');
+          // Check if any item matches rutLider and update Lider value
+          filtrada.forEach((item) => {
+            if (item.rut === rutLider) {
+              thi.lider = true; // Change the Lider value
+            }
+          });
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al obtener el líder:', error);
       }
     },
 
@@ -871,6 +900,7 @@ export default {
   mounted() {
     this.rut = this.getRut();
     this.rol = this.getRol();
+    this.lider = this.ObtenerLider();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();

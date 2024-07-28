@@ -273,6 +273,7 @@ export default {
       }
     },
     async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
+      const today = new Date();
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/actividad`, {
@@ -280,7 +281,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+          body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr, fecha_creacion: today }),
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {

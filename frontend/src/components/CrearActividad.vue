@@ -266,6 +266,7 @@ export default {
     },
 
     async CreaActividad(nom_act, descripcion, imagen, tipo, cupos) {
+      const hoy = new Date().toISOString().substr(0, 10);
       //Validar todos los campos antes de insertar imagen
       const isValid = this.$refs.formulario.validate();
       if (!isValid) {
@@ -290,7 +291,7 @@ export default {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos, fecha_creacion: hoy }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {

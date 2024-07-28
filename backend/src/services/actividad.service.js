@@ -92,8 +92,8 @@ async function setProgramacionActividad(id_agr, id_act, fecha_actividad) {
 async function createActividad(actividadData) {
     try {
         const newActividad = await pool.query(
-            'INSERT INTO "Actividad"(nom_act, descripcion, imagen, tipo, id_agr, cupos) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
-            [actividadData.nom_act, actividadData.descripcion, actividadData.imagen, actividadData.tipo, actividadData.id_agr, actividadData.cupos]
+            'INSERT INTO "Actividad"(nom_act, descripcion, imagen, tipo, id_agr, cupos, fecha_creacion) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [actividadData.nom_act, actividadData.descripcion, actividadData.imagen, actividadData.tipo, actividadData.id_agr, actividadData.cupos, actividadData.fecha_creacion]
         );
         // Retorna la nueva actividad insertada
         return newActividad.rows[0];

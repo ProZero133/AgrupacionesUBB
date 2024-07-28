@@ -181,13 +181,14 @@ import addImage from '../assets/imagePlaceholder51.png';
         
         console.log(nom_act, descripcion, imagen, tipo, id_agr);
         try {
+          const today = new Date();
           // Realiza una solicitud fetch a tu backend Fastify
           const response = await fetch(`${global.BACKEND_URL}/actividad`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr, fecha_creacion: today }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {

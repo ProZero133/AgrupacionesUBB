@@ -505,6 +505,29 @@ export default {
       }
     },
 
+    findInsertIndex(array, element) {
+    let low = 0;
+    let high = array.length;
+
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        if (new Date(array[mid].fecha_creacion) > new Date(element.fecha_creacion)) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+      return low;
+    },
+
+    // Function to insert elements from array1 into array2 in sorted order
+    anadirAElementos(array) {
+      array.forEach(element => {
+        const index = this.findInsertIndex(this.elementos, element);
+        this.elementos.splice(index, 0, element);
+      });
+    },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -543,7 +566,7 @@ export default {
           // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
           // Los campos de actividad se pasarán de la siguiente manera a elementos:
           // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-          this.elementos = this.actividades.map((elemento) => {
+          let elementosAct = this.actividades.map((elemento) => {
             return {
               id: elemento.id_act,
               nombre: elemento.nom_act,
@@ -552,8 +575,11 @@ export default {
               imagen: elemento.imagen,
               id_agr: elemento.id_agr,
               tipo_elemento: 'actividad',
+              fecha_creacion: elemento.fecha_creacion
             };
           });
+
+          this.anadirAElementos(elementosAct);
           }
         
         this.VerPublicaciones();
@@ -645,7 +671,7 @@ export default {
               return elemento;
             });
     
-            this.elementos = [...this.elementos, ...nuevosElementos];
+            this.anadirAElementos(nuevosElementos);
           }
         } else {
           console.error('Error en la respuesta:', response.status);

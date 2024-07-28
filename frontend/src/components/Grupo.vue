@@ -874,6 +874,7 @@ export default {
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
+    console.log(this.imageSrc);
   },
   computed: {
     progressStyle() {

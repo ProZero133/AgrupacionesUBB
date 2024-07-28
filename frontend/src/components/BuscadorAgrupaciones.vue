@@ -11,7 +11,7 @@
             <div class="flex-grow-1">
               <v-img :src="grupo.imagen" alt="Miniatura" class="miniatura" max-height="200" cover></v-img>
               <p>{{ grupo.verificado }}</p>
-            <div class="mb-n12">
+            <div class="mb-n12">  
               <p>Tipo: {{ grupo.descripcion }}</p>
             </div>
             </div>

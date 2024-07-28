@@ -2,22 +2,29 @@
   <v-app>
       <!-- Toolbar -->
     <v-container>
-      <v-app-bar color="#EEEEEE" prominent>
+      <v-app-bar color="#EEEEEE" density="default" class="barra">
           <v-app-bar-nav-icon
             variant="text"
             @click.stop="drawer = !drawer"
+            class="mt-2"
           ></v-app-bar-nav-icon>
   
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
   
           <template v-if="$vuetify.display.mdAndUp">
-            <span>{{ userNombre }}</span>
+            <span class="mt-2">{{ userNombre }}</span>
             
             <v-btn icon>
-              <v-icon>mdi-account</v-icon>
+              <v-icon class="mt-2">mdi-account</v-icon>
             </v-btn>
+
+            <v-img :src="imageSrc" max-height="50" class="mt-2"></v-img>
+
           </template>
       </v-app-bar>
   
@@ -48,10 +55,17 @@
     
   </v-app>
   </template>
-    <script>
+  <script>
+  import addImage from '../../assets/v-escudo-monocromatico-negro.png';
     
     export default {
-      data: () => ({
+      setup() {
+      return {
+        imageSrc: addImage
+      };
+      },
+      data: () => {
+        return {
         drawer: true,
     
         items: [],
@@ -68,8 +82,9 @@
         ],
 
         userNombre: '',
-
-      }),
+        imageSrc: addImage,
+        };
+      },
 
       methods: {
         getNombre() {
@@ -117,6 +132,13 @@
     created() {
         this.userNombre = this.getNombre();
         this.filterItemsByRole();
+        console.log(this.imageSrc);
     },
   }
     </script>
+
+<style>
+.barra{
+  height: 70px;
+}
+</style>

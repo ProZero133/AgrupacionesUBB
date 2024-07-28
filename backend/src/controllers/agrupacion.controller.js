@@ -292,9 +292,6 @@ async function CambiarRoldeUsuario(req, res) {
     }
 }
 
-
-
-
 async function abandonarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;

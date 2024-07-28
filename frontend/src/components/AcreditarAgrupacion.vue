@@ -128,7 +128,6 @@ import addImage from '../assets/imagePlaceholder51.png';
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);

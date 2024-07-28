@@ -84,7 +84,12 @@ export default {
         const carrera = this.userData.carrera;
         this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
         this.$cookies.set('token', this.tokenValue);
-          this.$router.push(`/api/home`);
+          if(role === 'Admin'){
+            this.$router.push(`/api/adminhome`);
+
+          }else{
+            this.$router.push(`/api/home`);
+          }
         } catch (error) {
           console.error('Error en la verificación del código:', error);
         }

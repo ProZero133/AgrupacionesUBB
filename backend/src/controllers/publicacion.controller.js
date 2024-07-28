@@ -1,6 +1,7 @@
 "use strict";
 
-const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion, deletePublicacion, getPublicacionesByAgrupacion} = require("../services/publicacion.service.js");
+const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
+    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario} = require("../services/publicacion.service.js");
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
 const { getVotacionById } = require("../services/votacion.service");
@@ -122,7 +123,6 @@ async function obtenerPublicacionesPorGrupo(req, res) {
             // Eliminar publicaciones que no tienen descripción disponible
             const publicacionesFiltradas = respuesta.filter(publicacion => publicacion.tipoPub !== 'nulo');
 
-            console.log("Publicaciones encontradas:, ", publicacionesFiltradas);
             return res.send(publicacionesFiltradas);
         }
     } catch (error) {
@@ -212,11 +212,93 @@ async function eliminarPublicacion(req, res) {
     }
 }
 
+async function obtenerPublicacionesPorGrupoUsuario(req, res) {
+    try {
+        const { rut } = req.params;
+        const respuesta = await getPublicacionesByGrupoUsuario(rut);
+        if (respuesta.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron publicaciones' });
+        } else {
+            // Procesar cada elemento en la respuesta
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                try {
+                    const post = await getPostById(publicacion.id_pub);
+                    if (post) {
+                        publicacion.descripcion = post.cuerpo;
+                        publicacion.tipoPub = 'post';
+                    } else {
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener el post con id ${publicacion.id_pub}: `, error);
+                    publicacion.descripcion = 'No hay descripción disponible';
+                    publicacion.tipoPub = 'nulo';
+                }
+            }
+
+            // Procesar publicaciones que son formularios
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                if (publicacion.tipoPub === 'nulo') {
+                    try {
+                        const formulario = await getFormularioById(publicacion.id_pub);
+                        if (formulario) {
+                            publicacion.descripcion = formulario.descripcion;
+                            publicacion.hipervinculo = formulario.hipervinculo;
+                            publicacion.tipoPub = 'formulario';
+                        } else {
+                            publicacion.descripcion = 'No hay descripción disponible';
+                            publicacion.tipoPub = 'nulo';
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener el formulario con id ${publicacion.id_pub}: `, error);
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                }
+            }
+
+            // Procesar publicaciones que son votaciones
+            for (let i = 0; i < respuesta.length; i++) {
+                const publicacion = respuesta[i];
+                if (publicacion.tipoPub === 'nulo') {
+                    try {
+                        const votacion = await getVotacionById(publicacion.id_pub);
+                        if (votacion && votacion.opciones && votacion.opciones.length > 0) {
+                            publicacion.descripcion = votacion.descripcion;
+                            publicacion.tipoPub = 'votacion';
+                            publicacion.opciones = votacion.opciones;
+                        } else {
+                            publicacion.descripcion = 'No hay descripción disponible';
+                            publicacion.tipoPub = 'nulo';
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
+                        publicacion.descripcion = 'No hay descripción disponible';
+                        publicacion.tipoPub = 'nulo';
+                    }
+                }
+            }
+
+            // Eliminar publicaciones que no tienen descripción disponible
+            const publicacionesFiltradas = respuesta.filter(publicacion => publicacion.tipoPub !== 'nulo');
+
+            return res.send(publicacionesFiltradas);
+        }
+    } catch (error) {
+        console.error("Error al obtener publicaciones de los grupos del usuario: ", error);
+        return res.status(500).send({ success: false, message: 'Error al obtener publicaciones de los grupos del usuario:' });
+    }
+}
+
 module.exports = {
     obtenerPublicaciones,
     obtenerPublicacionesPorId,
     obtenerPublicacionesPorGrupo,
     crearPublicacion,
     actualizarPublicacion,
-    eliminarPublicacion
+    eliminarPublicacion,
+    obtenerPublicacionesPorGrupoUsuario
 };

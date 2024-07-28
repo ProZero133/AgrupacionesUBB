@@ -2,22 +2,29 @@
   <v-app>
       <!-- Toolbar -->
     <v-container>
-      <v-app-bar color="#EEEEEE" prominent>
+      <v-app-bar color="#EEEEEE" density="default" class="barra">
           <v-app-bar-nav-icon
             variant="text"
             @click.stop="drawer = !drawer"
+            class="mt-2"
           ></v-app-bar-nav-icon>
   
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
   
           <template v-if="$vuetify.display.mdAndUp">
-            <span>{{ userNombre }}</span>
+            <span class="mt-2">{{ userNombre }}</span>
             
             <v-btn icon>
-              <v-icon>mdi-account</v-icon>
+              <v-icon class="mt-2">mdi-account</v-icon>
             </v-btn>
+
+            <v-img :src="imageSrc" max-height="50" class="mt-2"></v-img>
+
           </template>
       </v-app-bar>
   
@@ -48,29 +55,37 @@
     
   </v-app>
   </template>
-    <script>
+  <script>
+  import addImage from '../../assets/v-escudo-monocromatico-negro.png';
     
     export default {
-      data: () => ({
+      setup() {
+      return {
+        imageSrc: addImage
+      };
+      },
+      data: () => {
+        return {
         drawer: true,
     
         items: [],
 
         allItems: [
-            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 0},
-            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 0},
-            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 0},
+            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 1},
+            { name: 'Home', icon: 'mdi-home', path: '/api/adminhome', tier: 2},
+            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 1},
+            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 1},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 0},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones', tier: 2},
             { name: 'Solicitar Acreditacion', icon: 'mdi-check', path: '/api/solicitar_acreditacion',tier: 1},
             { name: 'Generar Informes', icon: 'mdi-file-document', path: '/api/generarInformes', tier: 0},
             { name: 'Logout', icon: 'mdi-login', path: '/api/login', tier: 0}, 
-            
         ],
 
         userNombre: '',
-
-      }),
+        imageSrc: addImage,
+        };
+      },
 
       methods: {
         getNombre() {
@@ -121,3 +136,9 @@
     },
   }
     </script>
+
+<style>
+.barra{
+  height: 70px;
+}
+</style>

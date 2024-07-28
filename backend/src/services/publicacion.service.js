@@ -95,11 +95,23 @@ async function deletePublicacion(id) {
     }
 }
 
+async function getPublicacionesByGrupoUsuario(rut) {
+    try{
+        console.log('RUT:', rut);
+        const publicaciones = await pool.query('SELECT * FROM "Publicacion" WHERE id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
+        return publicaciones.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las publicaciones de un grupo de usuario:', error);
+    }
+}
+
 module.exports = {
     getPublicacion,
     getPublicacionById,
     getPublicacionesByAgrupacion,
     createPublicacion,
     updatePublicacion,
-    deletePublicacion
+    deletePublicacion,
+    getPublicacionesByGrupoUsuario
 };

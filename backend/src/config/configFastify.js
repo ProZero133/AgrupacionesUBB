@@ -1,4 +1,4 @@
-const fastify = require('fastify')();
+const fastify = require('fastify')({ bodyLimit: 1572864 });
 const config = require('../config/configEnv.js');
 const fastifyCookie = require('@fastify/cookie');
 const fastifyMultipart = require('@fastify/multipart');

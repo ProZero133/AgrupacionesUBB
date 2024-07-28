@@ -187,7 +187,19 @@ async function ObtenerUsuariosdeAgrupacion(req, res) {
     }
 }
 
-
+async function obtenerLider(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const lider = await getLider(id_agr);
+        if (lider.length === 0) {
+            return res.code(404).send('No se encontró el líder');
+        }
+        res.code(200).send(lider);
+    } catch (error) {
+        console.error('Error al obtener el líder:', error);
+        res.code(500).send('Error al obtener el líder');
+    }
+}
 
 async function eliminarAgrupacion(req, res) {
     try {
@@ -199,6 +211,7 @@ async function eliminarAgrupacion(req, res) {
         }
         const usuarioEsLider = await getLider(id_agr);
         const lider = usuarioEsLider;
+        console.log("Usuario lider: ", usuarioEsLider);
         if (lider.rut !== rut) {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }
@@ -413,5 +426,6 @@ module.exports = {
     solicitarAcreditacion,
     rechazarSolicitud,
     ingresarTagsAgrupacion,
-    VerGruposPorNombre
+    VerGruposPorNombre,
+    obtenerLider
 };

@@ -36,8 +36,8 @@ async function getAgrupaciones() {
         // Inserta una nueva agrupacion en la base de datos
         console.log("rut ingresado: ",agrupacion.rut);
         const newAgrupacion = await pool.query(
-            'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible]
+            'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible, imagen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible, agrupacion.imagen]
         );
         //Insertar lider de la agrupacion
         const lider = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [agrupacion.rut, newAgrupacion.rows[0].id_agr, fechaActual, 'Lider']);
@@ -206,6 +206,7 @@ async function updateAgrupacionVerificado(id) {
       console.log('Error al crear la solicitud:', error);
     }
   }
+
   async function getSolicitudes(id_agr) {
     try {
       // Obtiene todas las solicitudes de la agrupacion
@@ -247,15 +248,30 @@ async function deleteAgrupacion(id_agr) {
       await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id_act]);
     }
 
-    // Elimina los miembros de la agrupación
-    await pool.query('DELETE FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
-
     // Elimina los programas de la agrupación
     await pool.query('DELETE FROM "Programa" WHERE id_agr = $1', [id_agr]);
 
     // Elimina las actividades de la agrupación
     await pool.query('DELETE FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+    // Primero, toma todas las publicaciones cuya id_agr sea igual a la id_agr de la agrupación, y guardamos sus id_pub en un array
+    // Luego, elimina todas las votaciones, posts, formularios y opciones asociadas a las publicaciones
+    // Finalmente, elimina las publicaciones
 
+    const idpubByAgr = await pool.query('SELECT id_pub FROM "Publicacion" WHERE id_agr = $1', [id_agr]);
+    const publicacionesIds = idpubByAgr.rows.map(row => row.id_pub);
+
+    for (const id_pub of publicacionesIds) {
+      await pool.query('DELETE FROM "Votacion" WHERE id_pub = $1', [id_pub]);
+      await pool.query('DELETE FROM "Post" WHERE id_pub = $1', [id_pub]);
+      await pool.query('DELETE FROM "Formulario" WHERE id_pub = $1', [id_pub]);
+      await pool.query('DELETE FROM "Opcion" WHERE id_votacion = $1', [id_pub]);
+    }
+
+    await pool.query('DELETE FROM "Publicacion" WHERE id_agr = $1', [id_agr]);
+
+    await pool.query('DELETE FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
+
+    await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
     // Finalmente, elimina la agrupación
     const agrupacion = await pool.query('DELETE FROM "Agrupacion" WHERE id_agr = $1 RETURNING *', [id_agr]);
     return agrupacion.rows[0];
@@ -303,6 +319,7 @@ async function validateEliminarGrupo(id_agr) {
         }
       }
     }
+
     if(actividades.length > 0){
       //Obtener la cantidad de participantes para cada actividad
       for (let i = 0; i < actividades.length; i++) {

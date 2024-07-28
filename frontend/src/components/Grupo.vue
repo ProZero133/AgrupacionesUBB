@@ -861,6 +861,7 @@ export default {
 
     async SolicitarAcreditaciondeGrupo () {
       try {
+        this.rutactual=this.getRut();
         const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',

@@ -266,7 +266,7 @@
   </VLayoutItem>
 
   <!-- Botón de admin -->
-  <VLayoutItem v-if="lider" model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
+  <VLayoutItem v-if="adminOlider" model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
@@ -301,8 +301,6 @@ export default {
     const route = useRoute();
     const groupId = route.params.id; // Access the parameter
     // You can now use groupId in your component
-    console.log(groupId); // For demonstration, logs the parameter value
-
 
     return {
       groupId, // Return it to use in the template if needed
@@ -311,6 +309,7 @@ export default {
 
   data: () => ({
     lider: false,
+    adminOlider: false,
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
@@ -359,10 +358,10 @@ export default {
     ],
 
     modItems: [
-      { title: 'Ver Miembros', path: 'dialogmiembros' },
-      { title: 'Editar Grupo', path: 'dialogeditar' },
-      { title: 'Solicitar Acreditación', path: 'dialogsolicitar' },
-      { title: 'Eliminar Agrupación', path: 'dialogeliminar' },
+      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1 },
+      { title: 'Editar Grupo', path: 'dialogeditar', tier: 0 },
+      { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0 },
+      { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1 },
     ],
 
     // Lista de elementos
@@ -390,6 +389,19 @@ export default {
         this.dialogeliminar = true;
       }
     },
+    filterItemsByRole() {
+          const role = this.getRol();
+          this.items = this.allItems.filter(item => {
+                switch (role) {
+                    case 'Admin':
+                        return item.tier !== 0;
+                    case 'Estudiante':
+                        return item.tier === 0 || item.tier=== 1;
+                    default:
+                        return item.tier === 0;
+                }
+            }).map(({ name, icon, path }) => ({ name, icon, path }));
+          },
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
@@ -418,7 +430,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -439,6 +450,7 @@ export default {
           }
           return null;
         },
+
     async esMiembro(){
       const rutMiembro = this.getRut(); // Ensure rutMiembro is properly scoped
       try {
@@ -487,6 +499,18 @@ export default {
         }
       } catch (error) {
         console.error('Error al obtener el líder:', error);
+      }
+    },
+    async esAdminOLider(){
+      this.rol = this.getRol();
+      this.rut = this.getRut();
+      await this.ObtenerLider();
+      if (this.rol === 'Admin' || this.lider === true){
+        console.log("Es admin o lider");
+        return this.adminOlider = true;
+      } else {
+        console.log("No es admin ni lider");
+        return this.adminOlider = false;
       }
     },
 
@@ -696,8 +720,6 @@ export default {
             //console.log("No hay publicaciones");
           } else {
             this.publicaciones = data;
-            console.log("this.publicaciones");
-            console.log(this.publicaciones);
             for (const publis of this.publicaciones) {
               try {
                 const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
@@ -921,6 +943,7 @@ export default {
     this.rolA = this.esMiembro();
     this.lider = this.ObtenerLider();
     this.rol = this.getRol();
+    this.adminOlider=this.esAdminOLider();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();

@@ -3,10 +3,11 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto"
-      src="https://t3.ftcdn.net/jpg/04/56/11/06/360_F_456110688_0RbzwTy8UVyZwtObuxr8lb3XRr28R24X.jpg"></v-img>
+    :src=datosGrupo.imagen></v-img>
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
+
     </v-card>
 
             <v-dialog v-model="dialogmiembros" max-width="600px">
@@ -130,6 +131,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+
             <v-dialog v-model="dialogeditar" max-width="500px">
               <v-card>
                 <v-card-title>Editar grupo</v-card-title>
@@ -198,19 +200,21 @@
               </v-card>
           </v-dialog>
 
-    <v-container class="titulito">
-      <v-card v-for="elemento in elementos" :key="elemento.id" class="mb-15 card-actividades" border="10px">
-        <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
-            </v-col>
-            <v-col cols="7">
-              <p>{{ elemento.descripcion }}</p>
-            </v-col>
-          </v-row>
-          <v-col v-if="elemento.hipervinculo" cols="12">
+    <!-- ACTIVIDADES Y PUBLICACIONES -->
+    <v-row align="start" no-gutters class="mt-6">
+      <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+        <v-card class="card-actividades">
+          <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="5">
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover/>
+              </v-col>
+              <v-col cols="7">
+                <p>{{ elemento.descripcion }}</p>
+              </v-col>
+            </v-row>
+            <v-col v-if="elemento.hipervinculo" cols="12">
               <v-btn
               class="text-link"
               :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
@@ -220,20 +224,21 @@
                 Contestar formulario
               </v-btn>
           </v-col>
-          <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
-            <v-row>
-              <v-radio-group v-model="elemento.opcionPreferida">
-                <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
-                </v-radio>
-              </v-radio-group>
-            </v-row>
-            <v-row>
-              <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
-            </v-row>
-          </v-col>
-        </v-card-text>
-      </v-card>
-    </v-container>
+            <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
+              <v-row>
+                <v-radio-group v-model="elemento.opcionPreferida">
+                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre" :value="opcion.id_opcion">
+                  </v-radio>
+                </v-radio-group>
+              </v-row>
+              <v-row>
+                <v-btn color="primary" @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+              </v-row>
+            </v-col>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
   </v-container>
 
@@ -261,7 +266,7 @@
   </VLayoutItem>
 
   <!-- Botón de admin -->
-  <VLayoutItem model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
+  <VLayoutItem v-if="lider" model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
@@ -305,6 +310,7 @@ export default {
   },
 
   data: () => ({
+    lider: false,
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
@@ -322,6 +328,8 @@ export default {
     solicitudes: [],
     MiembrosdeAgr: [],
     selectedRole: '',
+    rut: '',
+    rol: '',
 
     headers: [
       { text: 'Nombre', value: 'user_nombre' },
@@ -384,7 +392,7 @@ export default {
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -395,8 +403,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
-          console.log("Datos filtrados: ", filtrada);
-
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -406,11 +412,40 @@ export default {
       }
     },
 
+    async ObtenerLider(){
+      const rutLider = this.getRut(); // Ensure rutLider is properly scoped
+      try {
+        const url = `${global.BACKEND_URL}/obtenerLider/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Data:', data);
+          if (data.rut === rutLider) {
+            this.lider = true;
+            console.log('Es líder');
+          }else{
+            this.lider = false;
+            console.log('No es líder');
+          }
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al obtener el líder:', error);
+      }
+    },
+
     async ObtenerRolUsr(rut) {
       console.log("Rut seleccionado: ", rut);
 
       try {
-        const url = `http://localhost:3000/obtencionderoles/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/obtencionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -435,7 +470,7 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-        const url = `http://localhost:3000/administracionderoles/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -457,7 +492,7 @@ export default {
 
     async EliminarMiembro(rut) {
       try {
-        const url = `http://localhost:3000/abandonaragrupacion/${this.groupId}/${rut}`;
+        const url = `${global.BACKEND_URL}/abandonaragrupacion/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'DELETE',
         });
@@ -480,7 +515,7 @@ export default {
     async VerGrupos() {
       try {
         // Incorpora el groupID en la URL de la solicitud fetch
-        const url = `http://localhost:3000/agrupaciones/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
         });
@@ -490,6 +525,22 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.datosGrupo = data;
+
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + this.datosGrupo.imagen, {
+                  method: 'GET',
+                });
+                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                this.datosGrupo.imagen = dataImagen;
+              } else {
+                console.error('Error al conseguir la imagen del grupo:', responde.status);
+              }
+            }
+            catch (error) {
+                console.error('Error al hacer fetch:', error);
+            }
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -498,10 +549,33 @@ export default {
       }
     },
 
+    findInsertIndex(array, element) {
+    let low = 0;
+    let high = array.length;
+
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        if (new Date(array[mid].fecha_creacion) > new Date(element.fecha_creacion)) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+      return low;
+    },
+
+    // Function to insert elements from array1 into array2 in sorted order
+    anadirAElementos(array) {
+      array.forEach(element => {
+        const index = this.findInsertIndex(this.elementos, element);
+        this.elementos.splice(index, 0, element);
+      });
+    },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/actividadesgrupo/${this.groupId}`, {
+        const response = await fetch(`${global.BACKEND_URL}/actividadesgrupo/${this.groupId}`, {
           method: 'GET',
         });
 
@@ -516,7 +590,7 @@ export default {
             this.actividades = data;
             for (const actis of this.actividades) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
                   method: 'GET',
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -536,7 +610,7 @@ export default {
           // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
           // Los campos de actividad se pasarán de la siguiente manera a elementos:
           // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-          this.elementos = this.actividades.map((elemento) => {
+          let elementosAct = this.actividades.map((elemento) => {
             return {
               id: elemento.id_act,
               nombre: elemento.nom_act,
@@ -545,8 +619,11 @@ export default {
               imagen: elemento.imagen,
               id_agr: elemento.id_agr,
               tipo_elemento: 'actividad',
+              fecha_creacion: elemento.fecha_creacion
             };
           });
+
+          this.anadirAElementos(elementosAct);
           }
         
         this.VerPublicaciones();
@@ -558,13 +635,39 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
     // Función para ver publicaciones
     // muy similar a VerActividades, hace una llamada al backend para obtener las publicaciones con el id del grupo,
     // y las almacena en el array publicaciones. Luego, por cada publicación, se hace una llamada al backend para obtener la imagen.
     async VerPublicaciones() {
       try {
-        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${this.groupId}`, {
+        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${this.groupId}`, {
           method: 'GET',
         });
     
@@ -578,7 +681,7 @@ export default {
             console.log(this.publicaciones);
             for (const publis of this.publicaciones) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
                 });
                 if (responde.ok) {
@@ -612,7 +715,7 @@ export default {
               return elemento;
             });
     
-            this.elementos = [...this.elementos, ...nuevosElementos];
+            this.anadirAElementos(nuevosElementos);
           }
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -624,7 +727,7 @@ export default {
 
     async VerSolicitudes() {
       try {
-        const url = `http://localhost:3000/versolicitudes/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
         });
@@ -640,9 +743,10 @@ export default {
         this.solicitudes = [];
       }
     },
+    
     async aceptarSolicitud(rut) {
       try {
-        const url = `http://localhost:3000/aceptarsolicitud/${rut}/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/aceptarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
         });
@@ -659,7 +763,7 @@ export default {
     },
     async rechazarSolicitud(rut) {
       try {
-        const url = `http://localhost:3000/rechazarsolicitud/${rut}/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/rechazarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
         });
@@ -712,7 +816,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
-        const url = `http://localhost:3000/agrupaciones/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -738,7 +842,7 @@ export default {
 
     async SolicitarAcreditaciondeGrupo () {
       try {
-        const url = `http://localhost:3000/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
         const response = await fetch(url, {
           method: 'PUT',
         });
@@ -752,7 +856,6 @@ export default {
       }
     },
 
-
     startHold() {
       this.pressTime = 0;
       this.progress = 0;
@@ -765,15 +868,17 @@ export default {
         }
       }, 10);
     },
+
     cancelHold() {
       clearInterval(this.pressTimer);
       this.progress = 0;
     },
     EliminarGrupo() {
-      this.$router.push('/api/home');
       // Lógica para eliminar el grupo
+      console.log("rut", this.rut);
+      
       try {
-        const url = `http://localhost:3000/eliminaragrupacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rut}`;
         const response = fetch(url, {
           method: 'DELETE',
         });
@@ -787,11 +892,14 @@ export default {
       }
 
       this.dialogeliminar = false;
+      this.$router.push('/api/home');
     },
-
 
   },
   mounted() {
+    this.rut = this.getRut();
+    this.lider = this.ObtenerLider();
+    this.rol = this.getRol();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
@@ -813,7 +921,7 @@ export default {
 }
 
 .titulito {
-  margin-top: -10px;
+  margin-top: 0px;
 }
 
 .texto {
@@ -830,11 +938,12 @@ export default {
 
 .card-actividades {
   /* O la altura que prefieras para tus v-card */
-  width: 90%;
+  width: 95%;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-bottom: -40px;
   /* This centers the card within its container */
-  border: 2px solid rgb(207, 207, 207) !important
+  border: 2px solid rgb(207, 207, 207) !important;
+  min-height: 350px;
 }
 
 .SeleccionarRol {

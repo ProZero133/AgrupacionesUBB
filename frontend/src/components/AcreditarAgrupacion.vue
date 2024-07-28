@@ -118,8 +118,37 @@ import addImage from '../assets/imagePlaceholder51.png';
       id_agr: '',
       defaultImageUrl: addImage,
       urlImagen: addImage,
+      rut: '',
+      rol: '',
     }),
     methods: {
+      getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+      },
+      getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+      },        
       createImage(file) {
         const reader = new FileReader();
       
@@ -152,13 +181,14 @@ import addImage from '../assets/imagePlaceholder51.png';
         
         console.log(nom_act, descripcion, imagen, tipo, id_agr);
         try {
+          const today = new Date();
           // Realiza una solicitud fetch a tu backend Fastify
-          const response = await fetch('http://localhost:3000/actividad', {
+          const response = await fetch(`${global.BACKEND_URL}/actividad`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr, fecha_creacion: today }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
@@ -172,6 +202,10 @@ import addImage from '../assets/imagePlaceholder51.png';
           console.error('Error al hacer fetch:', error);
         }
       },
+    },
+    created() {
+      this.rut = this.getRut();
+      this.rol = this.getRol();
     },
   }
   

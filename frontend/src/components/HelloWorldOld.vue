@@ -176,7 +176,7 @@ export default {
     async SaludoBackend() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/usuarios', {
+        const response = await fetch(`${global.BACKEND_URL}/usuarios`, {
           method: 'GET',
           // Puedes agregar más configuraciones a la solicitud aquí si es necesario
         });
@@ -199,7 +199,7 @@ export default {
     async ObtenAgrupaciones() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
         });
 
@@ -216,7 +216,7 @@ export default {
       }
     },
     async login() {
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch(`${global.BACKEND_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ export default {
     async ObtenAgrupaciones() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
           // Puedes agregar más configuraciones a la solicitud aquí si es necesario
         });
@@ -252,7 +252,7 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         console.log(nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion);
 
-        const response = await fetch('http://localhost:3000/agrupacion', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupacion`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -273,14 +273,15 @@ export default {
       }
     },
     async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
+      const today = new Date();
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/actividad', {
+        const response = await fetch(`${global.BACKEND_URL}/actividad`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+          body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr, fecha_creacion: today }),
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {

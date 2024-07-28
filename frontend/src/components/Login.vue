@@ -52,7 +52,7 @@ export default {
     async login() {
       this.isLoading = true;
       try {
-        const response = await fetch('http://localhost:3000/EmailLogin', {
+        const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export default {
         const role = this.userData.rol;
         const email = this.userData.correo;
         const carrera = this.userData.carrera;
-        this.tokenValue = `rol=${role} & nombre=${nombre} & rut=${rut} & email=${email} & carrera=${carrera}`;
+        this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
         this.$cookies.set('token', this.tokenValue);
           this.$router.push(`/api/home`);
         } catch (error) {

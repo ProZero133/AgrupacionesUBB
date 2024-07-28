@@ -158,13 +158,41 @@ export default {
     idImagen: '',
     opciones: ['Si','No'],
     pubId: 0,
-
-    enlace: 'https://forms.gle/poooo',
+    rut: '',
+    rol: '',
+    enlace: 'https://forms.gle/',
 
     subiendo: false,
   }),
 
   methods: {
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
     formSubmit() {
       this.tipoReal = this.tipo;
       this.subiendo = true;
@@ -234,7 +262,7 @@ export default {
 
 async PostearImagen() {
   try {
-    const response = await fetch('http://localhost:3000/imagen', {
+    const response = await fetch(`${global.BACKEND_URL}/imagen`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -280,7 +308,7 @@ async PostearImagen() {
             rut: '20.999.554-9',
             fecha_publicacion: today
           }));
-          const response = await fetch('http://localhost:3000/publicaciones', {
+          const response = await fetch(`${global.BACKEND_URL}/publicaciones`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -323,7 +351,7 @@ async PostearImagen() {
 
   async crearVotacion() {
     try {
-      const response = await fetch('http://localhost:3000/votaciones', {
+      const response = await fetch(`${global.BACKEND_URL}/votaciones`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -341,7 +369,7 @@ async PostearImagen() {
         // Envío de las opciones
         const fetchPromises = this.opciones.map(async (opcion) => {
           try {
-            const response = await fetch('http://localhost:3000/opcion', {
+            const response = await fetch(`${global.BACKEND_URL}/opcion`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -377,7 +405,7 @@ async PostearImagen() {
 
   async crearFormulario() {
     try {
-      const response = await fetch('http://localhost:3000/formulario', {
+      const response = await fetch(`${global.BACKEND_URL}/formulario`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -403,7 +431,7 @@ async PostearImagen() {
 
   async crearPost() {
     try {
-      const response = await fetch('http://localhost:3000/post', {
+      const response = await fetch(`${global.BACKEND_URL}/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -429,6 +457,8 @@ async PostearImagen() {
 
 },
 mounted() {
+  this.rut = this.getRut();
+  this.rol = this.getRol();
   this.opcionesCounter = this.opciones.length;
 }
 }

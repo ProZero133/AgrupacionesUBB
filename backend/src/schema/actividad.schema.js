@@ -31,6 +31,10 @@ const actividadBodySchema = Joi.object({
         "number.integer": "El cupo debe ser un entero.",
         "any.required": "El cupo es obligatorio.",
     }),
+    fecha_creacion: Joi.date().required().messages({
+        "date.base": "La fecha de creación debe ser de tipo fecha.",
+        "any.required": "La fecha de creación es obligatoria.",
+    }),
   });
   
   

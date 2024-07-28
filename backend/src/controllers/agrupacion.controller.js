@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getTagsByAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -54,7 +54,7 @@ async function crearAgrupacion(req, res) {
         res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
-        console.error('Error al crear la agrupacion:', error);
+        console.error('Error al crear la agrupacionnn:', error);
         res.status(500).send('Error al crear la agrupacion');
     }
 }
@@ -187,7 +187,19 @@ async function ObtenerUsuariosdeAgrupacion(req, res) {
     }
 }
 
-
+async function obtenerLider(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const lider = await getLider(id_agr);
+        if (lider.length === 0) {
+            return res.code(404).send('No se encontró el líder');
+        }
+        res.code(200).send(lider);
+    } catch (error) {
+        console.error('Error al obtener el líder:', error);
+        res.code(500).send('Error al obtener el líder');
+    }
+}
 
 async function eliminarAgrupacion(req, res) {
     try {
@@ -199,6 +211,7 @@ async function eliminarAgrupacion(req, res) {
         }
         const usuarioEsLider = await getLider(id_agr);
         const lider = usuarioEsLider;
+        console.log("Usuario lider: ", usuarioEsLider);
         if (lider.rut !== rut) {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }
@@ -381,6 +394,31 @@ async function ingresarTagsAgrupacion(req, res) {
     }
 }
 
+async function VerGruposPorPreferencias(req, res) {
+    try {
+        const { rut } = req.params; // Suponiendo que se pasa el rut del usuario
+        const usuarioPreferencias = await getPreferenciasDeUsuario(rut); // Implementar según sea necesario
+
+        const agrupaciones = await getAgrupaciones();
+        const agrupacionesConTags = await Promise.all(agrupaciones.map(async agrupacion => {
+            const tags = await getTagsByAgrupacion(agrupacion.id_agr);
+            return { ...agrupacion, tags };
+        }));
+
+        const preferenciaTags = usuarioPreferencias.map(pref => pref.toLowerCase());
+        agrupacionesConTags.sort((a, b) => {
+            const aCoincidencias = a.tags.filter(tag => preferenciaTags.includes(tag)).length;
+            const bCoincidencias = b.tags.filter(tag => preferenciaTags.includes(tag)).length;
+            return bCoincidencias - aCoincidencias;
+        });
+
+        res.code(200).send(agrupacionesConTags);
+    } catch (error) {
+        console.error('Error al obtener las agrupaciones por preferencias:', error);
+        res.code(500).send('Error al obtener las agrupaciones por preferencias');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -398,5 +436,7 @@ module.exports = {
     CambiarRoldeUsuario,
     solicitarAcreditacion,
     rechazarSolicitud,
-    ingresarTagsAgrupacion
+    ingresarTagsAgrupacion,
+    obtenerLider,
+    VerGruposPorPreferencias
 };

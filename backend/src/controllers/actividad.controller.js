@@ -1,5 +1,6 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad, setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario } = require('../services/actividad.service');
+const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
+    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 

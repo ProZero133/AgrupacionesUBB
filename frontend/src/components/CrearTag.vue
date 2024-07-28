@@ -42,7 +42,7 @@ export default {
     methods: {
         async CreaTag() {
             try {
-                const response = await fetch('http://localhost:3000/tags', {
+                const response = await fetch(`${global.BACKEND_URL}/tags`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -2,7 +2,7 @@ const fastify = require('../config/configFastify.js');
 
 const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion, 
   obtenerImagenAgrupacion, unirseAgrupacion, solicitudesAgrupacion, aceptarSolicitud, 
-  eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion } = require('../controllers/agrupacion.controller.js');
+  eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion, VerGruposPorNombre } = require('../controllers/agrupacion.controller.js');
 
 module.exports = function(fastify, options, done) {
     
@@ -19,5 +19,6 @@ module.exports = function(fastify, options, done) {
   fastify.delete('/abandonaragrupacion/:id_agr/:rut', abandonarAgrupacion);
   fastify.put('/solicitaracreditacion/:id_agr/:rut', solicitarAcreditacion);
   fastify.post('/ingresartagsagrupacion', ingresarTagsAgrupacion);
+  fastify.get('/agrupacionesNombre/:nombre_agr', VerGruposPorNombre);
   done();
 };

@@ -66,7 +66,7 @@ export default {
         nombre_agr: '',
         descripcion: '',
         rutUsuario: '',
-        verificado: 'Noverificado',
+        grupoverificado: 'Noverificado',
         fecha_verificacion: null,
         tags: [],
         rol: '',
@@ -153,6 +153,7 @@ export default {
 
         async CreaAgrupacion(nombre_agr, descripcion, tags) {
         try {
+            const verificado = this.grupoverificado;
             const rut = this.rutUsuario;
             const fecha_creacion= new Date();
             const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {

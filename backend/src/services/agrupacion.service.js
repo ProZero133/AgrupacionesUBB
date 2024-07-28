@@ -392,6 +392,16 @@ async function insertTagsAgrupacion(id_agr, tags) {
   }
 }
 
+async function getAgrupacionesPorNombre(nombre_agr) {
+  try {
+    // Obtiene las agrupaciones con el nombre especificado (búsqueda no exacta)
+    const agrupaciones = await pool.query('SELECT * FROM "Agrupacion" WHERE nombre_agr ILIKE $1', [`%${nombre_agr}%`]);
+    return agrupaciones.rows;
+  } catch (error) {
+    console.log('Error al obtener las agrupaciones:', error);
+  }
+}
+
 
 
   module.exports = {
@@ -414,5 +424,6 @@ async function insertTagsAgrupacion(id_agr, tags) {
     deleteUsuarioAgrupacion,
     rejectSolicitud,
     updateAgrupacion,
-    insertTagsAgrupacion
+    insertTagsAgrupacion,
+    getAgrupacionesPorNombre
   };

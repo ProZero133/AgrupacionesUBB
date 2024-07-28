@@ -50,7 +50,7 @@
 
           </v-col>
 
-          <v-col cols="12" md="5">
+          <v-col cols="12" md="5" class="img">
 
             <v-col cols="12">
               <v-file-input v-model="imagen" accept="image/png, image/jpeg, image/bmp" label="Imagen para la publicación"
@@ -99,7 +99,7 @@
       </template>
 
       <v-container>
-        <button type="button" @click="addOption" class="ml-6 mt-2"><p style="color:#2CA2DC"><b>+ Añadir opción</b></p></button>
+        <button type="button" @click="addOption" class="butt ml-6 mt-2"><p style="color:#2CA2DC"><b>+ Añadir opción</b></p></button>
       </v-container>
     
     </template>
@@ -299,7 +299,6 @@ async PostearImagen() {
       console.log("todo bien!");
       console.log(this.idImagen);
       try {
-
           console.log("json");
           console.log(JSON.stringify({
             encabezado: this.nom_pub,
@@ -315,7 +314,7 @@ async PostearImagen() {
             },
             body: JSON.stringify({
               encabezado: this.nom_pub,
-              imagen: 3,
+              imagen: this.idImagen,
               id_agr: this.groupId,
               rut: '20.999.554-9',
               fecha_publicacion: today}),
@@ -466,9 +465,9 @@ mounted() {
 </script>
 <style>
 .descripcionAct {
-  height: 10px !important;
+  height: 20px !important;
   margin-top: -20px;
-  margin-bottom: -260px;
+  margin-bottom: 230px;
 }
 
 .image {
@@ -483,4 +482,9 @@ mounted() {
 .title-card {
   margin-left: 12px;
 }
+
+.butt{
+  width: 1200px;
+}
+
 </style>

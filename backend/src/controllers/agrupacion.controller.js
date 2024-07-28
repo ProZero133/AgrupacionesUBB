@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 
@@ -391,6 +391,20 @@ async function ingresarTagsAgrupacion(req, res) {
     }
 }
 
+async function VerGruposPorNombre(req, res) {
+    try {
+        const nombre_agr = req.params.nombre_agr;
+        const agrupaciones = await getAgrupacionesPorNombre(nombre_agr);
+        if (agrupaciones.length === 0) {
+            return res.code(404).send('No se encontraron agrupaciones');
+        }
+        res.code(200).send(agrupaciones);
+    } catch (error) {
+        console.error('Error al obtener las agrupaciones por nombre:', error);
+        res.code(500).send('Error al obtener las agrupaciones por nombre');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -409,5 +423,6 @@ module.exports = {
     solicitarAcreditacion,
     rechazarSolicitud,
     ingresarTagsAgrupacion,
+    VerGruposPorNombre,
     obtenerLider
 };

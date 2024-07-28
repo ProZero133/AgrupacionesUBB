@@ -231,6 +231,7 @@ export default {
             });
         },
 
+        
         async PostearImagen() {
             try {
                 const response = await fetch(`${global.BACKEND_URL}/imagen`, {

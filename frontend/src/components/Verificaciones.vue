@@ -159,7 +159,7 @@ export default {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            verificado: 'No verificado',
+            verificado: 'Noverificado',
             motivo: motivo,
           }),
         });

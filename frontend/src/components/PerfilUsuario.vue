@@ -129,7 +129,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[1] = tokenParts[1].replace('nombre=', '');
-              console.log('Token:', tokenParts[1]);
               return tokenParts[1] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -142,8 +141,7 @@ export default {
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -157,7 +155,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[3] = tokenParts[3].replace('email=', '');
-              console.log('Token:', tokenParts[3]);
               return tokenParts[3] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -171,7 +168,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[4] = tokenParts[4].replace('carrera=', '');
-              console.log('Token:', tokenParts[4]);
               return tokenParts[4] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -187,11 +183,9 @@ export default {
                 return;
             }
             try {
-                console.log('Buscando:', stringValue);
-                const response = await fetch(`http://localhost:3000/buscarTags/${stringValue}`);
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
-                console.log(data);
                 this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
             } catch (error) {
                 console.error('Error al buscar:', error);
@@ -204,7 +198,7 @@ export default {
         },
         async obtenerPreferencias() {
             try {
-                const response = await fetch(`http://localhost:3000/obtenerPreferencias/${this.rut}`, {
+                const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -215,7 +209,7 @@ export default {
                 const data = await response.json();
                 this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
                 const tagsPromises = data.map(async (item) => {
-                    const tagResponse = await fetch(`http://localhost:3000/obtenerTagPorId/${item.id_tag}`, {
+                    const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json'
@@ -236,7 +230,7 @@ export default {
         async ConfirmarSeleccion() {
             try {
                 const idTags = this.selectedItems.map(item => item.id_tag); // Suponiendo que cada item tiene un campo id_tag
-                const response = await fetch(`http://localhost:3000/actualizarPreferencias/${this.rut}`, {
+                const response = await fetch(`${global.BACKEND_URL}/actualizarPreferencias/${this.rut}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -244,7 +238,6 @@ export default {
                     body: JSON.stringify({ preferencias: idTags })
                 });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
-                console.log('Preferencias actualizadas');
                 this.obtenerPreferencias();
             } catch (error) {
                 console.error('Error al actualizar preferencias:', error);

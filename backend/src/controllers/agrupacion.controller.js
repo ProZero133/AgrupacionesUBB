@@ -54,7 +54,7 @@ async function crearAgrupacion(req, res) {
         res.code(201).send(agrupacion);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
-        console.error('Error al crear la agrupacion:', error);
+        console.error('Error al crear la agrupacionnn:', error);
         res.status(500).send('Error al crear la agrupacion');
     }
 }

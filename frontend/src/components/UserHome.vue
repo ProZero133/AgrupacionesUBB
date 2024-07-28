@@ -215,7 +215,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -260,13 +259,9 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        console.log('llamando a VerGrupos');
         const response = await fetch('http://localhost:3000/agrupaciones', {
           method: 'GET',
         });
-
-        console.log("esta es la respuesta ", response);
-
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
@@ -291,7 +286,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          //console.log(data.success);
           if (data.success === false) {
             //console.log("No hay actividades");
           } else {
@@ -353,8 +347,6 @@ export default {
             //console.log("No hay publicaciones");
           } else {
             this.publicaciones = data;
-            console.log("this.publicaciones");
-            console.log(this.publicaciones);
             for (const publis of this.publicaciones) {
               try {
                 const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
@@ -410,16 +402,12 @@ export default {
     },
 
     seleccionar(id) {
-      console.log('Seleccionar:', id);
-      console.log('this.dialog:', this.dialog);
       this.idactActual = id;
       this.dialog = true;
     },
 
     async ParticiparActividad(id) {
       try {
-        console.log('Rut:', this.rut);
-        console.log('ID:', id);
         const response = await fetch(`http://localhost:3000/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {

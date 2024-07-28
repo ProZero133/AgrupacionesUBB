@@ -419,6 +419,38 @@ async function getAgrupacionesPorNombre(nombre_agr) {
   }
 }
 
+// notifyMiembroPublicacion
+// Es una funcion que recibe dos parametros: id_agr y id_pub
+// Primero, se obtienen todos los 'pertenece' cuyo id_agr sea igual a id_agr, y se guarda el "rut" de cada uno en un array
+// Luego, por cada rut, se obtienen todos los usuarios de "sm_usuario" cuyo rut coincida con el rut obtenido. De estos usuarios, se obtiene el "correo" y se guarda en un array
+// Finalmente, se envia un correo a cada uno de los correos obtenidos, notificandoles de la publicacion
+
+
+async function notifyMiembroPublicacion(id_agr, id_pub) {
+  try {
+    // Step 1: Get all 'rut' from 'Pertenece' where 'id_agr' matches
+    const perteneceResult = await pool.query('SELECT rut FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
+    const ruts = perteneceResult.rows.map(row => row.rut);
+
+    // Step 2: Get 'correo' for each 'rut' from 'sm_usuario'
+    const correos = [];
+    for (const rut of ruts) {
+      const usuarioResult = await pool.query('SELECT correo FROM "sm_usuario" WHERE rut = $1', [rut]);
+      if (usuarioResult.rows.length > 0) {
+        correos.push(usuarioResult.rows[0].correo);
+      }
+    }
+
+    // Step 3: Send email to each 'correo'
+    for (const correo of correos) {
+      console.log('enviando correo a:', correo);
+    }
+
+    console.log('Notificaciones enviadas exitosamente.');
+  } catch (error) {
+    console.error('Error al notificar a los miembros de la publicación:', error);
+  }
+}
 
 
   module.exports = {
@@ -442,5 +474,6 @@ async function getAgrupacionesPorNombre(nombre_agr) {
     rejectSolicitud,
     updateAgrupacion,
     insertTagsAgrupacion,
-    getAgrupacionesPorNombre
+    getAgrupacionesPorNombre,
+    notifyMiembroPublicacion
   };

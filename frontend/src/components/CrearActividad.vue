@@ -349,15 +349,11 @@ export default {
               body: JSON.stringify({ fecha_actividad }),
             });
 
-
-
-
             this.$router.push(`/api/grupo/${this.groupId}`);
             this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
           } else {
             console.error('Error en la respuesta:', response.status);
           }
-
 
         } catch (error) {
           console.error('Error al hacer fetch:', error);

@@ -2,9 +2,12 @@
 
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
+    rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre, notifyMiembroPublicacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
+
+const { getPublicacionById } = require("../services/publicacion.service.js");
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -405,6 +408,26 @@ async function VerGruposPorNombre(req, res) {
     }
 }
 
+async function notificarMiembrosPublicacion(req, res) {
+    try {
+        const id_agr = req.body.id_agr;
+        const id_pub = req.body.id_pub;
+        const agrupaciones = await getAgrupacionById(id_agr);
+        if (agrupaciones.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+        const publicaciones = await getPublicacionById(id_pub);
+        if (publicaciones.length === 0) {
+            return res.code(404).send('Publicación no encontrada');
+        }
+        const result = await notifyMiembroPublicacion(id_agr, id_pub);
+        res.code(200).send(result);
+    } catch (error) {
+        console.error('Error al notificar a los miembros de la publicación:', error);
+        res.code(500).send('Error al notificar a los miembros de la publicación');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -424,5 +447,6 @@ module.exports = {
     rechazarSolicitud,
     ingresarTagsAgrupacion,
     VerGruposPorNombre,
-    obtenerLider
+    obtenerLider,
+    notificarMiembrosPublicacion
 };

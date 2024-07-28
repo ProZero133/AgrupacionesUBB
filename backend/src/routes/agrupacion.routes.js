@@ -19,6 +19,6 @@ module.exports = function(fastify, options, done) {
   fastify.delete('/abandonaragrupacion/:id_agr/:rut', abandonarAgrupacion);
   fastify.put('/solicitaracreditacion/:id_agr/:rut', solicitarAcreditacion);
   fastify.post('/ingresartagsagrupacion', ingresarTagsAgrupacion);
-  fastify.get('/obtenerlider/:id_agr', obtenerLider);
+  fastify.get('/obtenerLider/:id_agr', obtenerLider);
   done();
 };

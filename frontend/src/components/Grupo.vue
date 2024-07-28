@@ -266,9 +266,9 @@
   </VLayoutItem>
 
   <!-- Botón de admin -->
-  <VLayoutItem model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
+  <VLayoutItem v-if="lider" model-value position="bottom" class="text-end pointer-events-none mb-n10" size="120">
     <div class="ma-9 pointer-events-initial">
-      <v-menu v-if="lider">
+      <v-menu>
         <template v-slot:activator="{ props: menu }">
           <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
@@ -310,6 +310,7 @@ export default {
   },
 
   data: () => ({
+    lider: false,
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
@@ -362,7 +363,6 @@ export default {
       { title: 'Solicitar Acreditación', path: 'dialogsolicitar' },
       { title: 'Eliminar Agrupación', path: 'dialogeliminar' },
     ],
-    lider: false,
 
     // Lista de elementos
     // Los que son actividades, tienen los siguientes campos:
@@ -403,8 +403,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
-          console.log("Datos filtrados: ", filtrada);
-
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -427,13 +425,14 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          const filtrada = data.filter((item) => item.rol_agr === 'Lider');
-          // Check if any item matches rutLider and update Lider value
-          filtrada.forEach((item) => {
-            if (item.rut === rutLider) {
-              thi.lider = true; // Change the Lider value
-            }
-          });
+          console.log('Data:', data);
+          if (data.rut === rutLider) {
+            this.lider = true;
+            console.log('Es líder');
+          }else{
+            this.lider = false;
+            console.log('No es líder');
+          }
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -899,12 +898,11 @@ export default {
   },
   mounted() {
     this.rut = this.getRut();
-    this.rol = this.getRol();
     this.lider = this.ObtenerLider();
+    this.rol = this.getRol();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
-    console.log(this.imageSrc);
   },
   computed: {
     progressStyle() {

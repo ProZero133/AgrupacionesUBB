@@ -188,7 +188,7 @@ export default {
             }
             try {
                 console.log('Buscando:', stringValue);
-                const response = await fetch(`http://localhost:3000/buscarTags/${stringValue}`);
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
                 console.log(data);
@@ -204,7 +204,7 @@ export default {
         },
         async obtenerPreferencias() {
             try {
-                const response = await fetch(`http://localhost:3000/obtenerPreferencias/${this.rut}`, {
+                const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -215,7 +215,7 @@ export default {
                 const data = await response.json();
                 this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
                 const tagsPromises = data.map(async (item) => {
-                    const tagResponse = await fetch(`http://localhost:3000/obtenerTagPorId/${item.id_tag}`, {
+                    const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json'
@@ -236,7 +236,7 @@ export default {
         async ConfirmarSeleccion() {
             try {
                 const idTags = this.selectedItems.map(item => item.id_tag); // Suponiendo que cada item tiene un campo id_tag
-                const response = await fetch(`http://localhost:3000/actualizarPreferencias/${this.rut}`, {
+                const response = await fetch(`${global.BACKEND_URL}/actualizarPreferencias/${this.rut}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -83,7 +83,7 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
         });
 
@@ -95,7 +95,7 @@ export default {
           const dataTransformada = [];
           for (const imagenes of data){
             try {
-              const responde = await fetch('http://localhost:3000/imagenagrupacion/'+imagenes.id_agr, {
+              const responde = await fetch(`${global.BACKEND_URL}/imagenagrupacion/`+imagenes.id_agr, {
                 method: 'GET',
               });
               //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -124,7 +124,7 @@ export default {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const rut = "20.487.563-4";
-        const response = await fetch(`http://localhost:3000/enviarsolicitud/${rut}/${id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${rut}/${id_agr}`, {
           method: 'POST',
         });
         if (response.ok) {

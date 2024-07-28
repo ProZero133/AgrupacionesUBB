@@ -228,7 +228,7 @@ export default {
 
     async PostearImagen() {
       try {
-        const response = await fetch('http://localhost:3000/imagen', {
+        const response = await fetch(`${global.BACKEND_URL}/imagen`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ export default {
     },
     async getVerificado() {
       try {
-        const response = await fetch(`http://localhost:3000/agrupaciones/${this.groupId}`);
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones/${this.groupId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.rows && data.rows.length > 0) {
@@ -266,6 +266,7 @@ export default {
     },
 
     async CreaActividad(nom_act, descripcion, imagen, tipo, cupos) {
+      const hoy = new Date().toISOString().substr(0, 10);
       //Validar todos los campos antes de insertar imagen
       const isValid = this.$refs.formulario.validate();
       if (!isValid) {
@@ -285,12 +286,12 @@ export default {
       }
       else {
         try {
-          const response = await fetch('http://localhost:3000/actividades', {
+          const response = await fetch(`${global.BACKEND_URL}/actividades`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos, fecha_creacion: hoy }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
@@ -299,7 +300,7 @@ export default {
             const id_act = data.id_act;
             const fecha_actividad = new Date(this.date).toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
             console.log("Fecha para la actividad: "+fecha_actividad);
-            const programarActividad = await fetch(`http://localhost:3000/programar/${id_act}/${this.groupId}`, {
+            const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

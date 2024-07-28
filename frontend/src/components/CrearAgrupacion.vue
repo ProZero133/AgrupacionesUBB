@@ -118,8 +118,31 @@ export default {
             }
             return null;
         },
-        async login() {
-            const response = await fetch('http://localhost:3000/login', {
+        async PostearImagen() {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/imagen`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ imagen: this.urlImagen }),
+                });
+                // Verifica si la respuesta es exitosa
+                if (response.ok) {
+                    // Convierte la respuesta en formato JSON
+                    const data = await response.json();
+                    console.log("Imagen subida");
+                    this.idImagen = data.id_imagen;
+                } else {
+                    console.error('Error en la respuesta:', response.status);
+                }
+            } catch (error) {
+                console.error('Error al hacer fetch:', error);
+            }
+        },
+
+    async login() {
+            const response = await fetch(`${global.BACKEND_URL}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,20 +150,19 @@ export default {
                 body: JSON.stringify({ email: this.email }),
             });
         },
+
         async CreaAgrupacion(nombre_agr, descripcion, tags) {
-            try {
-                const rut = this.rutUsuario;
-                const fecha_creacion = new Date();
-                const verificado= this.verificado;
-                console.log(rut)
-                const response = await fetch('http://localhost:3000/agrupaciones', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado }),
-                });
-                
+        try {
+            const rut = this.rutUsuario;
+            const fecha_creacion= new Date();
+            const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado}),
+        });
+
                 // Verifica si la respuesta es exitosa
                 if (response.ok) {
                     const data = await response.json();

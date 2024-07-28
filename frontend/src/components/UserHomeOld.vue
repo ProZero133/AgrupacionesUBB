@@ -194,7 +194,7 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
         });
 
@@ -213,7 +213,7 @@ export default {
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/VerActividadesGruposUsuario/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut}`, {
           method: 'GET',
         });
 
@@ -225,7 +225,7 @@ export default {
 
           for (const imagenes of this.actividades) {
             try {
-              const responde = await fetch('http://localhost:3000/imagen/' + imagenes.imagen, {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + imagenes.imagen, {
                 method: 'GET',
               });
               //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -260,7 +260,7 @@ export default {
       try {
         console.log('Rut:', this.rut);
         console.log('ID:', id);
-        const response = await fetch(`http://localhost:3000/participar/${id}/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

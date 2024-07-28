@@ -52,7 +52,7 @@ export default {
     async login() {
       this.isLoading = true;
       try {
-        const response = await fetch('http://localhost:3000/EmailLogin', {
+        const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

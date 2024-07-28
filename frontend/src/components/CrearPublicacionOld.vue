@@ -139,15 +139,17 @@ import { useRoute } from 'vue-router';
       async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
         console.log(imagen);
         
+        const today = new Date();
+
         console.log(nom_act, descripcion, imagen, tipo, id_agr);
         try {
           // Realiza una solicitud fetch a tu backend Fastify
-          const response = await fetch('http://localhost:3000/actividad', {
+          const response = await fetch(`${global.BACKEND_URL}/actividad`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr }),
+            body: JSON.stringify({ nom_act, descripcion, imagen, tipo, id_agr, fecha_creacion: today }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {

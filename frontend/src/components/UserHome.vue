@@ -11,16 +11,17 @@
 
       <!-- Actividades -->
     <v-tab-item value="actividades" v-if="tab === 'actividades'">
-      <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n10">
+      <v-container cols="12">
+        <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6">
         <v-card-title class="pasando">
           <span class="text-h4 textopasando">Qué está pasando?</span>
         </v-card-title>
       </v-col>
-      <v-container cols="12">
       <v-row align="start" no-gutters class="mt-6">
         <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
           <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
             <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+            <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{ formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
             <v-card-text>
 
             <v-row>
@@ -49,19 +50,31 @@
 
     <!-- Mis grupos -->
     <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
-      <v-col cols="12" class="flex-grow-0 flex-shrink-0">
-        <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-2 card-misgrupos"
-          v-on:click="iragGrupo(grupo.id_agr)">
+      <v-container cols="12">
+      <v-row align="start" no-gutters class="mt-6">
+      <v-col v-for="grupo in grupos" :key="grupo.id_agr" cols="12" md="6">
+        <v-card class="card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
           <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-          <v-card-text>
-            <p>{{ grupo.descripcion }}</p>
-            <p>RUT: {{ grupo.rut }}</p>
-            <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-            <p>Verificado: {{ grupo.verificado }}</p>
-            <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
+            <v-card-text>
+
+              <v-row>
+                <v-col cols="4">
+                  <v-img class="image" aspect-ratio="1" :src='grupo.imagen' />
+                </v-col>
+                <v-col cols="8">
+                  <p>{{ grupo.descripcion }}</p>
+                  <p>RUT: {{ grupo.rut }}</p>
+                  <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+                  <p>Verificado: {{ grupo.verificado }}</p>
+                  <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
+                </v-col>
+              </v-row>
+
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      </v-container>
     </v-tab-item>
 
     <v-dialog v-model="dialog">
@@ -125,11 +138,11 @@
 
 <style scoped>
 .publicadoen {
-  font-size: 12px;
-  color: #8d8d8d;
-  margin-left: 2.5%;
-  margin-top: 2%;
-  margin-bottom: -1%;
+  font-size: 10px;
+  color: #3f3f3f;
+  margin-left: 0px;
+  margin-top: -10px;
+  margin-bottom: -10px;
 }
 
 .pasando {
@@ -154,9 +167,9 @@
 
 .card-misgrupos {
   min-width: 200px;
-  width: 80vw;
-  margin-left: 10vw;
-  /* This centers the card within its container */
+  width: 95%;
+  margin: 0 auto;
+  border: 1px solid rgb(235, 235, 235) !important
 }
 
 .card-actividades {
@@ -169,11 +182,6 @@
   min-height: 250px;
 }
 
-.card-misgrupos {
-  max-width: 600px;
-  /* O el ancho máximo que prefieras para tus v-card */
-  border: 1px solid rgb(235, 235, 235) !important
-}
 </style>
 
 <script>
@@ -187,8 +195,8 @@ export default {
     grupos: [],
 
     actividades: [],
-    elementos: [],
     publicaciones: [],
+    elementos: [],
 
     urlImagen: addImage,
     idactActual: null,
@@ -241,6 +249,7 @@ export default {
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
+
     convertirImagen(data) {
       // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
@@ -255,18 +264,40 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
-    
+
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch('http://localhost:3000/agrupaciones', {
+        console.log('llamando a VerGrupos');
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
         });
+    
+        console.log("esta es la respuesta ", response);
+    
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.grupos = data;
+    
+          // Itera sobre cada grupo para obtener su imagen
+          for (const grupo of this.grupos) {
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + grupo.imagen, {
+                method: 'GET',
+              });
+              // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                grupo.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+            } catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -275,10 +306,33 @@ export default {
       }
     },
 
+    findInsertIndex(array, element) {
+    let low = 0;
+    let high = array.length;
+
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        if (new Date(array[mid].fecha_creacion) > new Date(element.fecha_creacion)) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+      return low;
+    },
+
+    // Function to insert elements from array1 into array2 in sorted order
+    anadirAElementos(array) {
+      array.forEach(element => {
+        const index = this.findInsertIndex(this.elementos, element);
+        this.elementos.splice(index, 0, element);
+      });
+    },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`http://localhost:3000/VerActividadesGruposUsuario/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
         });
 
@@ -286,13 +340,16 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
+          this.actividades = data;
+          console.log("this.actividades" + this.rut, this.actividades);
+          //console.log(data.success);
           if (data.success === false) {
             //console.log("No hay actividades");
           } else {
             this.actividades = data;
             for (const actis of this.actividades) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + actis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
                   method: 'GET',
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
@@ -312,7 +369,7 @@ export default {
           // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
           // Los campos de actividad se pasarán de la siguiente manera a elementos:
           // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-          this.elementos = this.actividades.map((elemento) => {
+          const elementitos = this.actividades.map((elemento) => {
             return {
               id: elemento.id_act,
               nombre: elemento.nom_act,
@@ -321,9 +378,13 @@ export default {
               imagen: elemento.imagen,
               id_agr: elemento.id_agr,
               tipo_elemento: 'Actividad',
+              fecha_creacion: elemento.fecha_creacion
             };
           });
-          }
+
+          this.anadirAElementos(elementitos);
+
+          }        
         
         this.VerPublicaciones();
 
@@ -337,7 +398,7 @@ export default {
 
     async VerPublicaciones() {
       try {
-        const response = await fetch(`http://localhost:3000/publicacionesgrupo/${32}`, {
+        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${32}`, {
           method: 'GET',
         });
     
@@ -349,7 +410,7 @@ export default {
             this.publicaciones = data;
             for (const publis of this.publicaciones) {
               try {
-                const responde = await fetch('http://localhost:3000/imagen/' + publis.imagen, {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
                 });
                 if (responde.ok) {
@@ -370,6 +431,7 @@ export default {
                 descripcion: publicacion.descripcion,
                 imagen: publicacion.imagen,
                 id_agr: publicacion.id_agr,
+                fecha_creacion: publicacion.fecha_publicacion,
               };
     
               if (publicacion.tipoPub === 'formulario') {
@@ -386,7 +448,10 @@ export default {
               return elemento;
             });
     
-            this.elementos = [...this.elementos, ...nuevosElementos];
+            // Merge the new elements into the existing array
+            this.anadirAElementos(nuevosElementos);
+            console.log("listoco");
+            // Sort the array by fecha_creacion date
           }
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -408,7 +473,9 @@ export default {
 
     async ParticiparActividad(id) {
       try {
-        const response = await fetch(`http://localhost:3000/participar/${id}/${this.rut}`, {
+        console.log('Rut:', this.rut);
+        console.log('ID:', id);
+        const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -426,7 +493,56 @@ export default {
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
-    }
+    },
+
+    formatearFecha(fecha) {
+      const date = new Date(fecha);
+      const now = new Date();
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      const diffInMs = now - date;
+      const diffInMinutes = Math.floor(diffInMs / 60000);
+      const diffInHours = Math.floor(diffInMs / 3600000);
+      
+      // Verificar si la fecha es hace menos de un minuto
+      if (diffInMinutes < 1) {
+        return "justo ahora";
+      }
+      
+      // Verificar si la fecha es hace menos de una hora
+      if (diffInMinutes < 60) {
+        return `hace ${diffInMinutes} minutos`;
+      }
+      
+      // Verificar si la fecha es de hoy
+      const isToday = date.getDate() === now.getDate() &&
+                      date.getMonth() === now.getMonth() &&
+                      date.getFullYear() === now.getFullYear();
+      
+      if (isToday) {
+        return `hoy a las ${hours}:${minutes}`;
+      }
+      
+      // Verificar si la fecha es de ayer
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+      
+      const isYesterday = date.getDate() === yesterday.getDate() &&
+                          date.getMonth() === yesterday.getMonth() &&
+                          date.getFullYear() === yesterday.getFullYear();
+      
+      if (isYesterday) {
+        return `ayer a las ${hours}:${minutes}`;
+      }
+      
+      return `el día ${day}/${month}/${year} a las ${hours}:${minutes}`;
+    },
+
   },
   mounted() {
     this.rut = this.getRut();

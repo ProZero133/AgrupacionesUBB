@@ -222,7 +222,7 @@ export default {
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -268,7 +268,7 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${this.rut}`, {
           method: 'GET',
         }); 
         // Verifica si la respuesta es exitosa

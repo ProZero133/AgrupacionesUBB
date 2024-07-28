@@ -58,7 +58,7 @@ export default {
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
               console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
@@ -123,8 +123,7 @@ export default {
     async solicitarUnirse(id_agr){
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const rut = "20.487.563-4";
-        const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${rut}/${id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${id_agr}`, {
           method: 'POST',
         });
         if (response.ok) {

@@ -243,7 +243,7 @@
   </v-container>
 
   <!-- Botón de Crear Actividad o Publicación -->
-  <VLayoutItem model-value position="bottom" class="text-end pointer-events-none" size="120">
+  <VLayoutItem v-if="rolA" model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
       <v-menu>
         <template v-slot:activator="{ props: menu }">
@@ -330,6 +330,7 @@ export default {
     selectedRole: '',
     rut: '',
     rol: '',
+    rolA: false,
 
     headers: [
       { text: 'Nombre', value: 'user_nombre' },
@@ -411,7 +412,58 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+    getRut() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
+              console.log('Token:', tokenParts[2]);
+              return tokenParts[2] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    getRol() {
+          const token = this.$cookies.get('token');
+          if (token) {
+            try {
+              const tokenParts = token.split('&');
+              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              return tokenParts[0] ;
+            } catch (error) {
+              console.error('Invalid token:', error);
+            }
+          }
+          return null;
+        },
+    async esMiembro(){
+      const rutMiembro = this.getRut(); // Ensure rutMiembro is properly scoped
+      try {
+        const url = `${global.BACKEND_URL}/obtenerRolUsuario/${rutMiembro}/${this.groupId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rol_agr === 'Miembro'|| data.rol_agr === 'Miembro Oficial'|| data.rol_agr === 'Lider') {
+            this.rolA = true;
+          }else{
+            this.rolA = false;
+          }
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al obtener el rol:', error);
+      }
+    },
     async ObtenerLider(){
       const rutLider = this.getRut(); // Ensure rutLider is properly scoped
       try {
@@ -425,13 +477,10 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Data:', data);
           if (data.rut === rutLider) {
             this.lider = true;
-            console.log('Es líder');
           }else{
             this.lider = false;
-            console.log('No es líder');
           }
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -455,10 +504,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          console.log ("Datos de la respuesta: ", data);
           this.selectedRole = data.rol_agr;
-          console.log("Rol seleccionado: ", this.selectedRole);
-
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -635,33 +681,6 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-    getRut() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
-              console.log('Token:', tokenParts[2]);
-              return tokenParts[2] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
-    getRol() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
-              return tokenParts[0] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
     // Función para ver publicaciones
     // muy similar a VerActividades, hace una llamada al backend para obtener las publicaciones con el id del grupo,
     // y las almacena en el array publicaciones. Luego, por cada publicación, se hace una llamada al backend para obtener la imagen.
@@ -898,6 +917,7 @@ export default {
   },
   mounted() {
     this.rut = this.getRut();
+    this.rolA = this.esMiembro();
     this.lider = this.ObtenerLider();
     this.rol = this.getRol();
     this.VerGrupos();

@@ -71,9 +71,10 @@
         items: [],
 
         allItems: [
-            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 0},
-            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 0},
-            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 0},
+            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 1},
+            { name: 'Home', icon: 'mdi-home', path: '/api/adminhome', tier: 2},
+            { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 1},
+            { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 1},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 0},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones', tier: 2},
             { name: 'Solicitar Acreditacion', icon: 'mdi-check', path: '/api/solicitar_acreditacion',tier: 1},
@@ -132,7 +133,6 @@
     created() {
         this.userNombre = this.getNombre();
         this.filterItemsByRole();
-        console.log(this.imageSrc);
     },
   }
     </script>

@@ -3,7 +3,7 @@
   <v-container cols="12"></v-container>
   <v-container cols="12">
     <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto"
-      src="https://t3.ftcdn.net/jpg/04/56/11/06/360_F_456110688_0RbzwTy8UVyZwtObuxr8lb3XRr28R24X.jpg"></v-img>
+    :src=datosGrupo.imagen></v-img>
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
@@ -208,7 +208,7 @@
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover/>
               </v-col>
               <v-col cols="7">
                 <p>{{ elemento.descripcion }}</p>
@@ -497,6 +497,22 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.datosGrupo = data;
+
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + this.datosGrupo.imagen, {
+                  method: 'GET',
+                });
+                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                this.datosGrupo.imagen = dataImagen;
+              } else {
+                console.error('Error al conseguir la imagen del grupo:', responde.status);
+              }
+            }
+            catch (error) {
+                console.error('Error al hacer fetch:', error);
+            }
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -596,7 +612,7 @@ export default {
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
               console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
@@ -830,10 +846,11 @@ export default {
       this.progress = 0;
     },
     EliminarGrupo() {
-      this.$router.push('/api/home');
       // Lógica para eliminar el grupo
+      console.log("rut", this.rut);
+      
       try {
-        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rut}`;
         const response = fetch(url, {
           method: 'DELETE',
         });
@@ -847,8 +864,8 @@ export default {
       }
 
       this.dialogeliminar = false;
+      this.$router.push('/api/home');
     },
-
 
   },
   mounted() {

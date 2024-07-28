@@ -12,7 +12,7 @@
       <!-- Actividades -->
     <v-tab-item value="actividades" v-if="tab === 'actividades'">
       <v-container cols="12">
-        <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6">
+        <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6 ml-n10">
         <v-card-title class="pasando">
           <span class="text-h4 textopasando">Qué está pasando?</span>
         </v-card-title>
@@ -26,7 +26,7 @@
 
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' />
+                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover/>
               </v-col>
               <v-col cols="7">
                 <p>{{ elemento.descripcion }}</p>
@@ -59,7 +59,7 @@
 
               <v-row>
                 <v-col cols="4">
-                  <v-img class="image" aspect-ratio="1" :src='grupo.imagen' />
+                  <v-img class="image" aspect-ratio="1" :src='grupo.imagen' cover/>
                 </v-col>
                 <v-col cols="8">
                   <p>{{ grupo.descripcion }}</p>
@@ -84,7 +84,7 @@
         <v-card-text>
           <v-row>
             <v-col cols="5">
-              <v-img class="image" aspect-ratio="1" :src="elemento.imagen" />
+              <v-img class="image" aspect-ratio="1" :src="elemento.imagen" cover/>
             </v-col>
             <v-col cols="7">
               <p>{{ elemento.descripcion }}</p>
@@ -391,7 +391,7 @@ export default {
 
     async VerPublicaciones() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${32}`, {
+        const response = await fetch(`${global.BACKEND_URL}/VerPublicacionesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
         });
     
@@ -496,25 +496,30 @@ export default {
       
       const diffInMs = now - date;
       const diffInMinutes = Math.floor(diffInMs / 60000);
-      const diffInHours = Math.floor(diffInMs / 3600000);
       
-      // Verificar si la fecha es hace menos de un minuto
-      if (diffInMinutes < 1) {
+      // Verificar si la fecha es hace menos de un minuto y es antes de ahora
+      if (diffInMinutes < 1 && date < now) {
         return "justo ahora";
       }
       
       // Verificar si la fecha es hace menos de una hora
-      if (diffInMinutes < 60) {
+      if (diffInMinutes < 60 && date < now) {
         return `hace ${diffInMinutes} minutos`;
       }
       
       // Verificar si la fecha es de hoy
-      const isToday = date.getDate() === now.getDate() &&
-                      date.getMonth() === now.getMonth() &&
-                      date.getFullYear() === now.getFullYear();
+      const isToday  =  date.getDate() === now.getDate() &&
+                        date.getMonth() === now.getMonth() &&
+                        date.getFullYear() === now.getFullYear();
+
+      const isTomorrow= date.getDate() === now.getDate()+ 1 &&
+                        date.getMonth() === now.getMonth() &&
+                        date.getFullYear() === now.getFullYear();
       
       if (isToday) {
         return `hoy a las ${hours}:${minutes}`;
+      } else if (isTomorrow) {
+        return `mañana a las ${hours}:${minutes}`;
       }
       
       // Verificar si la fecha es de ayer

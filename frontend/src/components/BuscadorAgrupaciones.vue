@@ -9,9 +9,11 @@
           <!-- Contenedor flex para el contenido, empujando v-card-actions al fondo -->
           <v-card-text class="d-flex flex-column flex-grow-1">
             <div class="flex-grow-1">
-              <img :src="grupo.imagen" alt="Miniatura" class="miniatura">
+              <v-img :src="grupo.imagen" alt="Miniatura" class="miniatura" max-height="200" cover></v-img>
               <p>{{ grupo.verificado }}</p>
+            <div class="mb-n12">
               <p>Tipo: {{ grupo.descripcion }}</p>
+            </div>
             </div>
           </v-card-text>
           <v-card-actions class="justify-end">
@@ -25,7 +27,7 @@
 
 <style scoped>
 .pagina {
-  margin-top: 30px;
+  margin-top: 60px;
   width: 90%;
 }
 
@@ -34,10 +36,11 @@
 }
 
 .card-grupos {
-  height: 400px;
   /* O la altura que prefieras para tus v-card */
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
+  border-radius: 10px;
+  margin-top: -40px;
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
 }

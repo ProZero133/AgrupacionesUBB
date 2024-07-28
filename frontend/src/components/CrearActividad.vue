@@ -2,9 +2,10 @@
 
   <v-container cols="12"></v-container>
   <v-container cols="12">
+
     <v-card class="mx-auto px-6 py-8" max-width="800">
       <v-form @submit.prevent="CreaActividad(nom_act, descripcion, imagen, tipo, cupos)" fast-fail class="form"
-        ref="formulario">
+        ref="formulario" v-model="formValid">
         <v-row>
           <v-spacer></v-spacer>
           <v-col cols="12" justify="center" class="title-card">
@@ -30,14 +31,28 @@
           <v-col cols="12" md="5">
 
             <v-col cols="12">
-              <v-file-input v-model="imagen" accept="image/png, image/jpeg, image/bmp" label="Imagen para la actividad"
-                clearable required variant="solo-filled" prepend-icon="" @change="onFileChange($event)"
+              <v-file-input
+                v-model="imagen"
+                accept="image/png, image/jpeg, image/bmp"
+                label="Imagen para la actividad"
+                clearable
+                required
+                variant="solo-filled"
+                prepend-icon=""
+                :rules="imgRules"
+                @change="onFileChange($event)"
                 @click:clear="urlImagen = defaultImageUrl">
               </v-file-input>
             </v-col>
 
             <v-col>
-              <v-img class="image" max-height="280px" aspect-ratio="1" :src='urlImagen' />
+              <v-img
+                class="image"
+                max-height="280px"
+                aspect-ratio="1"
+                :src='urlImagen'
+                :rules="imgRules"
+                />
             </v-col>
 
           </v-col>
@@ -86,7 +101,7 @@
             </v-col> -->
 
             <v-col cols="4">
-              <v-btn class="form-submit" type="submit" color="#2CA2DC">Crear actividad</v-btn>
+              <v-btn class="form-submit" type="submit" color="#2CA2DC" :disabled=!formValid>Crear actividad</v-btn>
             </v-col>
 
           </v-col>
@@ -102,6 +117,7 @@
 import addImage from '../assets/imagePlaceholder.png';
 import es from 'date-fns/locale/es';
 import { useRoute } from 'vue-router';
+
 export default {
   setup() {
     const route = useRoute();
@@ -115,8 +131,14 @@ export default {
 
   data: () => ({
     hoy: new Date().toISOString().substr(0, 10),
-    descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
-    nombreRules: [v => !!v || 'Nombre de la actividad requerido'],
+    descrules: [
+      v => !!v || 'Descripción requerida.',
+      v => v.length <= 500 || 'Máximo 500 caracteres.'
+    ],
+    nombreRules: [
+      v => !!v || 'Nombre de la actividad requerido.',
+      v => v.length <= 50 || 'Máximo 50 caracteres.'
+    ],
     cuposRules: [v => !!v || 'Cupos requeridos'],
     fechaRules: [v => !!v || 'Fecha requerida'],
     dateRules: [
@@ -131,7 +153,19 @@ export default {
             return `La fecha no puede ser antes que hoy.`
         },
     ],
+    imgRules: [
+      value => {
+        return (
+          !value ||
+          !value.length ||
+          value[0].size < 1000000 ||
+          'Tamaño máximo de imagen: 1MB.'
+        );
+      },
+      v => !!v || 'La imagen es requerida.'
+    ],
     dateErrors: [],
+    formValid: false,
 
 
     nom_act: '',
@@ -278,13 +312,20 @@ export default {
         this.$root.showSnackBar('error', 'Fecha no válida', 'Error de validación');
         return;
       }
-      await this.PostearImagen();
-      if (this.idImagen === '') {
+      if (this.urlImagen == this.defaultImageUrl || this.urlImagen == '') {
         console.error('Error al subir la imagen');
-        this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
+        this.$root.showSnackBar('error', 'Falta subir una imagen!', 'Error de subida');
+        return;
+      }
+      await this.PostearImagen();
+      if (this.idImagen === '' || !this.urlImagen) {
+        console.error('Error al subir la imagen');
+        this.$root.showSnackBar('error', 'La imagen no es válida', 'Error de subida');
         return;
       }
       else {
+        console.log('a ver esa imagen', this.idImagen);
+        console.log('a ver esa urlimagen', this.urlImagen);
         try {
           const response = await fetch(`${global.BACKEND_URL}/actividades`, {
             method: 'POST',

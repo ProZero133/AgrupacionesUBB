@@ -11,15 +11,52 @@
                         <p class="text-left">Por favor, introducir abajo los datos correspondientes a crear una
                             agrupacion.</p>
                     </v-col>
-                    <v-col cols="4">
-                        <v-text-field class="nombreAgrupa" v-model="nombre_agr" label="Nombre de la agrupación"
-                            clearable counter required></v-text-field>
-                    </v-col>
-                    <v-col cols="8">
-                        <v-text-field class="descripcion" v-model="descripcion" label="Descripción de la agrupación"
-                            clearable counter required></v-text-field>
-                    </v-col>
-                    <v-col cols="8">
+
+                    <v-col cols="12" md="7" class="nomdes">
+
+            <v-col cols="12">
+              <v-text-field v-model="nombre_agr" label="Nombre de la agrupación" clearable required
+                variant="solo-filled" :rules="nombreRules"></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-textarea class="descripcionAct" v-model="descripcion" label="Descripción de la agrupación" clearable
+                required variant="solo-filled" rows="10" no-resize :rules="descrules" counter>
+              </v-textarea>
+            </v-col>
+
+          </v-col>
+
+          <v-col cols="12" md="5">
+
+            <v-col cols="12">
+              <v-file-input
+                v-model="imagen"
+                accept="image/png, image/jpeg, image/bmp"
+                label="Imagen para la agrupación"
+                clearable
+                required
+                variant="solo-filled"
+                prepend-icon=""
+                :rules="imgRules"
+                @change="onFileChange($event)"
+                @click:clear="urlImagen = defaultImageUrl">
+              </v-file-input>
+            </v-col>
+
+            <v-col>
+              <v-img
+                class="image"
+                max-height="280px"
+                aspect-ratio="1"
+                :src='urlImagen'
+                :rules="imgRules"
+                />
+            </v-col>
+
+          </v-col>
+
+                    <v-col cols="12">
                         <v-card class="search-container">
                             <v-card-title>Añadir Tags a la Agrupación</v-card-title>
                             <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)"
@@ -56,20 +93,50 @@
 </template>
 
 <script>
+import addImage from '../assets/imagePlaceholder.png';
+import { useRoute } from 'vue-router';
 
 export default {
+    setup() {
+        const route = useRoute();
+    },
     name: 'CrearAgrupacion',
 
     data: () => ({
+        descrules: [
+      v => !!v || 'Descripción requerida.',
+      v => v.length <= 500 || 'Máximo 500 caracteres.'
+    ],
+    nombreRules: [
+      v => !!v || 'Nombre de la actividad requerido.',
+      v => v.length <= 50 || 'Máximo 50 caracteres.'
+    ],
+    imgRules: [
+      value => {
+        return (
+          !value ||
+          !value.length ||
+          value[0].size < 1000000 ||
+          'Tamaño máximo de imagen: 1MB.'
+        );
+      },
+      v => !!v || 'La imagen es requerida.'
+    ],
+
         searchQuery: '',
         searchResults: [],
         nombre_agr: '',
         descripcion: '',
         rutUsuario: '',
-        verificado: 'Noverificado',
+        grupoverificado: 'Noverificado',
         fecha_verificacion: null,
         tags: [],
         rol: '',
+
+        imagen: [],
+        defaultImageUrl: addImage,
+        urlImagen: addImage,
+        idImagen: '',
 
         dateErrors: {
             creacion: [],
@@ -92,6 +159,19 @@ export default {
         ],
     }),
     methods: {
+        onFileChange(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                this.urlImagen = this.defaultImageUrl;
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.urlImagen = reader.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
         getRut() {
             const token = this.$cookies.get('token');
             if (token) {
@@ -141,7 +221,7 @@ export default {
             }
         },
 
-    async login() {
+        async login() {
             const response = await fetch(`${global.BACKEND_URL}/login`, {
                 method: 'POST',
                 headers: {
@@ -151,17 +231,57 @@ export default {
             });
         },
 
-        async CreaAgrupacion(nombre_agr, descripcion, tags) {
-        try {
-            const rut = this.rutUsuario;
-            const fecha_creacion= new Date();
-            const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
+        async PostearImagen() {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/imagen`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado}),
-        });
+            body: JSON.stringify({ imagen: this.urlImagen }),
+            });
+            // Verifica si la respuesta es exitosa
+            if (response.ok) {
+            // Convierte la respuesta en formato JSON
+                const data = await response.json();
+                this.idImagen = data.id_imagen;
+            } else {
+                console.error('Error en la respuesta:', response.status);
+            }
+            } catch (error) {
+                console.error('Error al hacer fetch:', error);
+            }
+        },
+
+        async CreaAgrupacion(nombre_agr, descripcion, tags) {
+            const verificado = this.grupoverificado;
+            console.log("holaaa");
+            console.log(this.urlImagen);
+            
+            if (this.urlImagen == this.defaultImageUrl || this.urlImagen == '') {
+                console.error('Error al subir la imagen');
+                this.$root.showSnackBar('error', 'Falta subir una imagen!', 'Error de subida');
+                return;
+            }
+            await this.PostearImagen();
+            console.log(this.idImagen);
+            console.log(this.urlImagen);
+            if (this.idImagen === '' || !this.urlImagen) {
+                console.error('Error al subir la imagen');
+                this.$root.showSnackBar('error', 'La imagen no es válida', 'Error de subida');
+                return;
+            }
+
+            try {
+                const rut = this.rutUsuario;
+                const fecha_creacion= new Date();
+                const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, imagen: this.idImagen}),
+            });
 
                 // Verifica si la respuesta es exitosa
                 if (response.ok) {
@@ -176,6 +296,7 @@ export default {
                 console.error('Error al hacer fetch:', error);
             }
         },
+
         async fetchSearchResults(searchValue) {
             // Convertir searchValue a cadena explícitamente
             const stringValue = searchValue.trim();
@@ -224,3 +345,20 @@ export default {
 };
 
 </script>
+
+<style>
+.descripcionAct {
+  height: 20px !important;
+  margin-top: -20px;
+}
+
+.image {
+  margin-top: -20px;
+  margin-bottom: -20px;
+}
+
+.selected-items-container{
+    height: 200px;
+}
+
+</style>

@@ -199,6 +199,7 @@ async function eliminarAgrupacion(req, res) {
         }
         const usuarioEsLider = await getLider(id_agr);
         const lider = usuarioEsLider;
+        console.log("Usuario lider: ", usuarioEsLider);
         if (lider.rut !== rut) {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }

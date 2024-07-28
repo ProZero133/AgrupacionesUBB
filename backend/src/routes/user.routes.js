@@ -1,11 +1,15 @@
 
-const { ObtenerActividadesPorAgrupacion, ObtenerActividades, ObtenerActividadesPorGrupoUsuario, } = require('../controllers/actividad.controller');
+const { ObtenerActividadesPorAgrupacion, ObtenerActividades,
+  ObtenerActividadesPorGrupoUsuario, } = require('../controllers/actividad.controller');
 const { obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, ActualizarPreferenciasUsuario, 
   ObtenerTag, obtenerUsuarioServidor } = require('../controllers/user.controller');
 const { obtenerAgrupacionesDeUsuario } = require('../controllers/agrupacion.controller');
+const { obtenerPublicacionesPorGrupoUsuario } = require('../controllers/publicacion.controller');
 const { IsUser } = require('../middlewares/auth.middleware');
+
 module.exports = function(fastify, options, done) {
   fastify.get('/VerActividadesGruposUsuario/:rut', ObtenerActividadesPorGrupoUsuario);
+  fastify.get('/VerPublicacionesGruposUsuario/:rut', obtenerPublicacionesPorGrupoUsuario);
   fastify.post('/usuarioPorRut/:rut', obtenerUsuarioPorRut);
   fastify.get('/usuarioServidor/:rut', obtenerUsuarioServidor);
   fastify.get('/buscarTags/:tag', ObtenerTagsSimilares);

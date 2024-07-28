@@ -9,6 +9,5 @@ module.exports = function(fastify, options, done) {
     fastify.post('/publicaciones', crearPublicacion);
     fastify.put('/publicaciones/:id', actualizarPublicacion);
     fastify.delete('/publicaciones/:id', eliminarPublicacion);
-
     done();
 }

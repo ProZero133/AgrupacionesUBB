@@ -24,7 +24,6 @@ async function getPublicacionById(id) {
     }
 }
 
-
 async function getPublicacionesByAgrupacion(id_agr) {
     try{
         // Obtiene todas las publicaciones de una agrupacion

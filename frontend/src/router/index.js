@@ -83,6 +83,11 @@ const routes = [
          path: 'perfil',
           name: 'Perfil',
           component: () => import('@/views/PerfilUsuarioView.vue'), 
+        },
+        {
+          path: 'generarInformes',
+          name: 'Generar Informes',
+          component: () => import('@/views/GenerarInformesView.vue'),
         }
         
       ],

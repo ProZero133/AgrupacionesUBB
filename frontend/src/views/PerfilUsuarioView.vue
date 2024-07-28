@@ -4,5 +4,5 @@
 
 <script setup>
 
-import PerfilUsuario from '@/components/PerfilUsuarioProvisional.vue';
+import PerfilUsuario from '@/components/PerfilUsuario.vue';
 </script>

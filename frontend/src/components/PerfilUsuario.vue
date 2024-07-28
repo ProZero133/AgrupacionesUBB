@@ -129,7 +129,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[1] = tokenParts[1].replace('nombre=', '');
-              console.log('Token:', tokenParts[1]);
               return tokenParts[1] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -142,8 +141,7 @@ export default {
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
+              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -157,7 +155,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[3] = tokenParts[3].replace('email=', '');
-              console.log('Token:', tokenParts[3]);
               return tokenParts[3] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -171,7 +168,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[4] = tokenParts[4].replace('carrera=', '');
-              console.log('Token:', tokenParts[4]);
               return tokenParts[4] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -187,11 +183,9 @@ export default {
                 return;
             }
             try {
-                console.log('Buscando:', stringValue);
                 const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
-                console.log(data);
                 this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
             } catch (error) {
                 console.error('Error al buscar:', error);
@@ -244,7 +238,6 @@ export default {
                     body: JSON.stringify({ preferencias: idTags })
                 });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
-                console.log('Preferencias actualizadas');
                 this.obtenerPreferencias();
             } catch (error) {
                 console.error('Error al actualizar preferencias:', error);

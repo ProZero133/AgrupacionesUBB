@@ -268,13 +268,9 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        console.log('llamando a VerGrupos');
         const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
-        });
-    
-        console.log("esta es la respuesta ", response);
-    
+        }); 
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
@@ -341,10 +337,7 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.actividades = data;
-          console.log("this.actividades" + this.rut, this.actividades);
-          //console.log(data.success);
           if (data.success === false) {
-            //console.log("No hay actividades");
           } else {
             this.actividades = data;
             for (const actis of this.actividades) {
@@ -405,7 +398,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           if (data.success === false) {
-            //console.log("No hay publicaciones");
           } else {
             this.publicaciones = data;
             for (const publis of this.publicaciones) {
@@ -450,7 +442,6 @@ export default {
     
             // Merge the new elements into the existing array
             this.anadirAElementos(nuevosElementos);
-            console.log("listoco");
             // Sort the array by fecha_creacion date
           }
         } else {
@@ -473,8 +464,6 @@ export default {
 
     async ParticiparActividad(id) {
       try {
-        console.log('Rut:', this.rut);
-        console.log('ID:', id);
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {

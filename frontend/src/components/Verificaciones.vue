@@ -5,7 +5,14 @@
         Agrupaciones Pendientes
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="headers" :items="AgrupacionesPendientesObtenidas">
+        <v-data-table
+          :headers="headers"
+          :items="AgrupacionesPendientesObtenidas"
+          item-value="id_agr"
+        >
+          <template v-slot:item.fecha_creacion="{ item }">
+            {{ formatDate(item.fecha_creacion) }}
+          </template>
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
               <v-btn color="green" name="B_Aceptar" class="B_Aceptar" @click="AceptarAgrupacion(item.id_agr)">
@@ -34,7 +41,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue">
+          <v-btn color="blue" @click="RechazarAgrupacion(selectedId, motivoRechazo)">
             Enviar
           </v-btn>
           <v-btn color="red" @click="rechazarDialog = false">
@@ -73,32 +80,32 @@ export default {
   },
   methods: {
     getRut() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
-              return tokenParts[2] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
+      const token = this.$cookies.get('token');
+      if (token) {
+        try {
+          const tokenParts = token.split('&');
+          tokenParts[2] = tokenParts[2].replace('rut=', '');
+          console.log('Token:', tokenParts[2]);
+          return tokenParts[2];
+        } catch (error) {
+          console.error('Invalid token:', error);
+        }
+      }
+      return null;
+    },
     getRol() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
-              return tokenParts[0] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
+      const token = this.$cookies.get('token');
+      if (token) {
+        try {
+          const tokenParts = token.split('&');
+          tokenParts[0] = tokenParts[0].replace('rol=', '');
+          return tokenParts[0];
+        } catch (error) {
+          console.error('Invalid token:', error);
+        }
+      }
+      return null;
+    },
     async ObtenerAgrupacionesPendientes() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
@@ -144,7 +151,6 @@ export default {
       this.motivoRechazo = '';
       this.rechazarDialog = true;
     },
-
     async RechazarAgrupacion(id_agr, motivo) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/acreditaciones/${id_agr}`, {
@@ -161,6 +167,7 @@ export default {
         if (response.ok) {
           this.showSnackbar('Agrupación rechazada con éxito', 'success');
           this.ObtenerAgrupacionesPendientes();
+          this.rechazarDialog = false; // Cerrar el diálogo después de rechazar
         } else {
           console.error('Error en la respuesta:', response.status);
           this.showSnackbar('Error al rechazar la agrupación', 'error');
@@ -175,6 +182,10 @@ export default {
       this.snackbarColor = color;
       this.snackbar = true;
     },
+    formatDate(dateString) {
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    }
   },
   mounted() {
     this.getRut();

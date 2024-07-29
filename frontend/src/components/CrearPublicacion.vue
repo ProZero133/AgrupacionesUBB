@@ -391,6 +391,8 @@ async PostearImagen() {
         });
         // Espera a que todas las promesas de fetch se resuelvan
         await Promise.all(fetchPromises);
+
+        await this.notificarPublicacion(this.pubId);
         // Mostrar el snackbar después de que todas las solicitudes se hayan completado
         this.$root.showSnackBar('success', 'Votación creada con éxito!');
         this.$router.push(`/api/grupo/${this.groupId}`);
@@ -415,6 +417,8 @@ async PostearImagen() {
       // Verifica si la respuesta es exitosa
       if (response.ok) {
         // Convierte la respuesta en formato JSON
+        await this.notificarPublicacion(this.pubId);
+
         const data = await response.json();
         console.log("Formulario creado");
         console.log(data);
@@ -442,10 +446,36 @@ async PostearImagen() {
       if (response.ok) {
         // Convierte la respuesta en formato JSON
         const data = await response.json();
+        await this.notificarPublicacion(this.pubId);
+
         console.log("Post creado");
         console.log(data);
         this.$root.showSnackBar('success', 'Post creado con éxito!');
         this.$router.push(`/api/grupo/${this.groupId}`);
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
+    } catch (error) {
+      console.error('Error al hacer fetch:', error);
+    }
+  },
+
+  async notificarPublicacion(id_pub) {
+    try {
+      const response = await fetch(`${global.BACKEND_URL}/notificarMiembrosPublicacion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_pub }),
+      });
+
+      // Verifica si la respuesta es exitosa
+      if (response.ok) {
+        // Convierte la respuesta en formato JSON
+        const data = await response.json();
+        console.log("Notificación creada");
+        console.log(data);
       } else {
         console.error('Error en la respuesta:', response.status);
       }

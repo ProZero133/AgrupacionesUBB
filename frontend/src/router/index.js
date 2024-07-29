@@ -60,7 +60,7 @@ const routes = [
           component: () => import('@/views/LoginView.vue'),
         },
         {
-          path: 'grupo/:id', // Add the dynamic segment :id
+          path: 'grupo/:id/:pubid?', // Optional parameters :id and :pubid
           name: 'Grupo',
           component: () => import('@/views/GrupoView.vue'),
         },

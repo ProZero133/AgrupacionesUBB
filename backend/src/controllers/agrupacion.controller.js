@@ -2,9 +2,12 @@
 
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
-    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario, rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre } = require("../services/agrupacion.service.js");
+    getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
+    rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre, getPublicacionCorreos } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
+const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
+const { notifyPublicacion } = require("../services/mail.service.js");
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -405,6 +408,38 @@ async function VerGruposPorNombre(req, res) {
     }
 }
 
+async function notificarMiembrosPublicacion(req, res) {
+    try {
+        const id_pub = req.body.id_pub;
+
+        const publicacion = await obtenerPublicacionesPorId(id_pub);
+
+        if (publicacion.length === 0) {
+            return res.code(404).send('Publicación no encontrada');
+        }
+
+        const agrupacion = await getAgrupacionById(publicacion.id_agr);
+        console.log("Para esta agrupacion: ", agrupacion);
+
+        if (agrupacion.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+
+        const infoRequest = await getPublicacionCorreos(publicacion.id_agr, id_pub);
+        
+        publicacion.correos = infoRequest;
+        publicacion.nombre_agr = agrupacion.nombre_agr;
+
+        const result = await notifyPublicacion(publicacion);
+        console.log("Info total: ", publicacion);
+
+        res.code(200).send(publicacion);
+    } catch (error) {
+        console.error('Error al notificar a los miembros de la publicación:', error);
+        res.code(500).send('Error al notificar a los miembros de la publicación');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -424,5 +459,6 @@ module.exports = {
     rechazarSolicitud,
     ingresarTagsAgrupacion,
     VerGruposPorNombre,
-    obtenerLider
+    obtenerLider,
+    notificarMiembrosPublicacion
 };

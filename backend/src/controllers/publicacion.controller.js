@@ -6,7 +6,7 @@ const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
 const { getVotacionById } = require("../services/votacion.service");
 
-const { publicacionBodySchema} = require("../schema/publicacion.schema.js");
+const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
 /**
  * Obtiene todas las publicaciones
@@ -37,13 +37,90 @@ async function obtenerPublicaciones(req, res) {
 async function obtenerPublicacionesPorId(req, res) {
     try {
         // Obtiene el id de la publicacion
-        const id = req.params.id;
+        let id = null;
+
+        if (!req.params) {
+            if (!req) {
+                return res.code(400).send('No se ha especificado un id de publicación');
+            } else {
+                id = req;
+            }
+        } else {
+            id = req.params.id;
+        }
+       
 
         // Obtiene la publicacion por su id
-        const publicacion = await getPublicacionById(id);
+        const pub = await getPublicacionById(id);
+        const publicacion = pub.rows[0];
+        console.log(publicacion.id_pub);
 
-        // Retorna la publicacion
-        res.code(200).send(publicacion);
+        if (!publicacion) {
+            if (res) {
+                return res.code(404).send('Publicacion no encontrada');
+            } else {
+                return 'Publicacion no encontrada';
+            }
+        }
+
+        try {
+        const post = await getPostById(publicacion.id_pub);
+            if (post) {
+                publicacion.descripcion = post.cuerpo;
+                publicacion.tipoPub = 'post';
+            } else {
+                publicacion.descripcion = 'No hay descripción disponible';
+                publicacion.tipoPub = 'nulo';
+            }
+        } catch (error) {
+            console.error(`Error al obtener el post con id ${publicacion.id_pub}: `, error);
+            publicacion.descripcion = 'No hay descripción disponible';
+            publicacion.tipoPub = 'nulo';
+        }
+
+        if (publicacion.tipoPub === 'nulo') {
+            try {
+                const formulario = await getFormularioById(publicacion.id_pub);
+                if (formulario) {
+                    publicacion.descripcion = formulario.descripcion;
+                    publicacion.hipervinculo = formulario.hipervinculo;
+                    publicacion.tipoPub = 'formulario';
+                } else {
+                    publicacion.descripcion = 'No hay descripción disponible';
+                    publicacion.tipoPub = 'nulo';
+                }
+            } catch (error) {
+                console.error(`Error al obtener el formulario con id ${publicacion.id_pub}: `, error);
+                publicacion.descripcion = 'No hay descripción disponiblee';
+                publicacion.tipoPub = 'nulo';
+            }
+        }
+
+        if (publicacion.tipoPub === 'nulo') {
+            try {
+                const votacion = await getVotacionById(publicacion.id_pub);
+                if (votacion && votacion.opciones && votacion.opciones.length > 0) {
+                    publicacion.descripcion = votacion.descripcion;
+                    publicacion.tipoPub = 'votacion';
+                    publicacion.opciones = votacion.opciones;
+                } else {
+                    publicacion.descripcion = 'No hay descripción disponibleee';
+                    publicacion.tipoPub = 'nulo';
+                }
+            } catch (error) {
+                console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
+                publicacion.descripcion = 'No hay descripción disponibleeee';
+                publicacion.tipoPub = 'nulo';
+            }
+        }
+
+        // Retorna la publicacion procesada
+        if (res) {
+            return res.code(200).send(publicacion);
+        } else {
+            return publicacion;
+        }
+        
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la publicacion:', error);

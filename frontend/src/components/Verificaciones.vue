@@ -124,7 +124,7 @@ export default {
     async AceptarAgrupacion(id_agr) {
       try {
         const Agrupacion_a_Aceptar = this.AgrupacionesPendientesObtenidas.find(agrupacion => agrupacion.id_agr === id_agr);
-        const response = await fetch(`${global.BACKEND_URL}/acreditaciones/${Agrupacion_a_Aceptar.id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/aceptacionAcr/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export default {
     },
     async RechazarAgrupacion(id_agr, motivo) {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/acreditaciones/${id_agr}`, {
+        const response = await fetch(`${global.BACKEND_URL}/rechazoAcr/${id_agr}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

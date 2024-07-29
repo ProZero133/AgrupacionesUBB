@@ -1,6 +1,6 @@
 "use strict";
 
-const { getAgrupaciones, updateAgrupacionVerificado } = require("../services/agrupacion.service.js");
+const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificado } = require("../services/agrupacion.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
     try {
@@ -27,7 +27,7 @@ async function ObtenerAcreditaciones(req, reply) {
 }
 
 
-async function AcreditaciondeGrupo(req, reply) {
+async function AceptacionAcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
         const id = req.params.id_agr;
@@ -43,10 +43,26 @@ async function AcreditaciondeGrupo(req, reply) {
     }
 }
 
+async function RechazoAcreditaciondeGrupo(req, reply) {
+    try {
+        // se obtiene el id de la agrupacion
+        const id = req.params.id_agr;
+
+        // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Rechazado"
+        await updateAgrupacionNoVerificado(id);
+        
+        reply.code(200).send('Rechazo exitoso');
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al Rechazar: ', error);
+        reply.code(500).send('Error al Rechazar: ');
+    }
+}
 
 
 
 module.exports = {
     ObtenerAcreditaciones,
-    AcreditaciondeGrupo
+    AceptacionAcreditaciondeGrupo,
+    RechazoAcreditaciondeGrupo
 };

@@ -142,6 +142,30 @@ async function updateAgrupacionVerificado(id) {
   }
 }
 
+async function updateAgrupacionNoVerificado(id) {
+  try {
+
+    // Actualiza solo el atributo verificado
+    const update_Verificado = await pool.query(
+      `UPDATE "Agrupacion" 
+       SET verificado = $1, fecha_verificacion = CURRENT_TIMESTAMP 
+       WHERE id_agr = $2 
+       RETURNING *`, 
+      [
+        'Noverificado',
+        id
+      ]
+    );
+
+    // Retorna la agrupación actualizada
+    return update_Verificado.rows[0];
+  } catch (error) {
+    console.log('Error al actualizar la agrupación:', error);
+    throw error;
+  }
+}
+
+
   async function getUsuariosdeAgrupacion(id) {
     try {
       // Obtiene los usuarios de la agrupación con el id especificado
@@ -460,6 +484,7 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     getRolUsuario,
     updateRolUsuario,
     updateAgrupacionVerificado,
+    updateAgrupacionNoVerificado,
     getImage,
     createSolicitud,
     getSolicitudes,

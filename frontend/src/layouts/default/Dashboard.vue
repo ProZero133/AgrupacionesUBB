@@ -106,7 +106,7 @@
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              tokenParts[0] = tokenParts[0].replace('rol=', '').trim();
               return tokenParts[0] ;
             } catch (error) {
               console.error('Invalid token:', error);

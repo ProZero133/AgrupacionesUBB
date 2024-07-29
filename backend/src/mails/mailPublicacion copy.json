@@ -1,0 +1,87 @@
+{
+  "root": {
+    "type": "EmailLayout",
+    "data": {
+      "backdropColor": "#F5F5F5",
+      "canvasColor": "#FFFFFF",
+      "textColor": "#262626",
+      "fontFamily": "MODERN_SANS",
+      "childrenIds": [
+        "block-1722205930559",
+        "block-1722205944025",
+        "block-1722206160251",
+        "block-1722206275571"
+      ]
+    }
+  },
+  "block-1722205930559": {
+    "type": "Heading",
+    "data": {
+      "props": {
+        "text": "Saludos desde el grupo {{nombre_agr}}!",
+        "level": "h3"
+      },
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      }
+    }
+  },
+  "block-1722205944025": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontSize": 16,
+        "fontWeight": "normal",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "Acabamos de hacer una nueva publicación: {{encabezado}}."
+      }
+    }
+  },
+  "block-1722206160251": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontSize": 13,
+        "fontWeight": "normal",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "{{descripcion}}"
+      }
+    }
+  },
+  "block-1722206275571": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "Ir a la publicación",
+        "url": "https://www.usewaypoint.com"
+      }
+    }
+  }
+}

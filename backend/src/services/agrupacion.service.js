@@ -1,6 +1,7 @@
 const { pool } = require('../db.js');
 const {getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad} = require('../services/actividad.service.js');
 const { getUsuarioByRut } = require('../services/user.service.js');
+// const { enviarCorreo } = require('../services/mail.service.js');
 
 async function getAgrupaciones() {
    try{
@@ -426,7 +427,7 @@ async function getAgrupacionesPorNombre(nombre_agr) {
 // Finalmente, se envia un correo a cada uno de los correos obtenidos, notificandoles de la publicacion
 
 
-async function notifyMiembroPublicacion(id_agr, id_pub) {
+async function getPublicacionCorreos(id_agr, id_pub) {
   try {
     // Step 1: Get all 'rut' from 'Pertenece' where 'id_agr' matches
     const perteneceResult = await pool.query('SELECT rut FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
@@ -439,12 +440,9 @@ async function notifyMiembroPublicacion(id_agr, id_pub) {
       if (usuarioResult.rows.length > 0) {
         correos.push(usuarioResult.rows[0].correo);
       }
-    }
+    };
 
-    // Step 3: Send email to each 'correo'
-    for (const correo of correos) {
-      console.log('enviando correo a:', correo);
-    }
+    return correos;
 
     console.log('Notificaciones enviadas exitosamente.');
   } catch (error) {
@@ -475,5 +473,5 @@ async function notifyMiembroPublicacion(id_agr, id_pub) {
     updateAgrupacion,
     insertTagsAgrupacion,
     getAgrupacionesPorNombre,
-    notifyMiembroPublicacion
+    getPublicacionCorreos
   };

@@ -41,15 +41,19 @@ export default {
     data: () => ({
         rut: '',
         rol: '',
+        // nombre grupos usuario
         grupos: [],
-        resultadoGrupos: [],
         tipos: ['Actividades', 'Publicaciones', 'Encuestas', 'Formularios'],
+        // nombre grupos usuario seleccionados
         selectedGrupos: [],
         selectedTipos: [],
         actividades: [],
         publicaciones: [],
         encuestas: [],
         formularios: [],
+        // nombre y id grupos usuario
+        gruposConID: [],
+        resultadoGrupos: [],
     }),
     setup() {
         const router = useRouter();
@@ -94,6 +98,12 @@ export default {
 
                 if (response.ok) {
                     this.grupos = data.map(grupo => grupo.nombre_agr);
+                    // mapear los grupos con su id y nombre_agr
+                    this.gruposConID = data.map(grupo => ({
+                        id_agr: grupo.id_agr,
+                        nombre_agr: grupo.nombre_agr,
+                    }));
+
                 } else {
                     console.error('No se encontraron agrupupaciones:', response.status);
                 }
@@ -103,27 +113,15 @@ export default {
         },
         async obtenerGruposPorNombre() {
             try {
-                //Hacer fetch para obtener los grupos por nombre con un bucle for a la lista de grupos seleccionados
-                for (let i = 0; i < this.selectedGrupos.length; i++) {
-                    console.log("Buscando grupo: ", this.selectedGrupos[i]);
-                    const response = await fetch(`${global.BACKEND_URL}/agrupacionesNombre/${this.selectedGrupos[i]}`, {
-                        method: 'GET',
-                    });
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        //Añade los grupos obtenidos a un arreglo
-                        this.resultadoGrupos.push(data);
-                    } else {
-                        console.error('No se encontraron agrupupaciones:', response.status);
-                    }
-                }
+                //Para cada id_agr de gruposConID donde el nombre_agr de gruposConID este en selectedGrupos, obtener las actividades 
+                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.includes(grupo.nombre_agr));
                 //Obtiene las actividades de los grupos seleccionados si se selecciono la opcion de actividades
                 if (this.selectedTipos.includes('Actividades')) {
                     // Asegúrate de acceder al primer elemento del array anidado
-                    const grupos = this.resultadoGrupos[0];
+                    const grupos = this.resultadoGrupos;
                     // Hacer fetch para obtener las actividades de los grupos seleccionados con un bucle for a la lista de grupos seleccionados
                     for (let i = 0; i < grupos.length; i++) {
+                        //Recorre la lista de gruposConID 
                         const response = await fetch(`${global.BACKEND_URL}/actividadesgrupo/${grupos[i].id_agr}`, {
                             method: 'GET',
                         });
@@ -184,22 +182,54 @@ export default {
             }
         },
         generarExcelActividades() {
-            // Asegúrate de acceder al primer elemento del array anidado
-            const actividades = this.actividades[0];
+            // Asegúrate de que this.actividades sea un array
+            if (!Array.isArray(this.actividades)) {
+                console.error('actividades no es un array:', this.actividades);
+                return;
+            }
 
-            // Define las columnas que deseas incluir en el archivo Excel
-            const columnas = actividades.map(actividad => ({
-                'Nombre Actividad': actividad.nom_act,
-                'Descripción': actividad.descripcion,
-                'Tipo': actividad.tipo ? 'Tipo 1' : 'Tipo 2', // Ajusta según tu lógica
-                'ID Agrupación': actividad.id_agr,
-                // Agrega más columnas según sea necesario
-            }));
+            // Filtra los elementos que no son arrays de arrays
+            const actividades = this.actividades.filter(Array.isArray).flat();
 
-            // Genera la hoja de cálculo
-            const ws = XLSX.utils.json_to_sheet(columnas);
+            // Filtra los elementos que no son actividades válidas
+            const actividadesValidas = actividades.filter(actividad => actividad.success !== false);
+
+            if (actividadesValidas.length === 0) {
+                console.error('No se encontraron actividades válidas:', actividades);
+                return;
+            }
+
+            console.log("Actividades: ", actividadesValidas);
+
+            // Agrupa las actividades por id_agr
+            const actividadesPorAgrupacion = actividadesValidas.reduce((acc, actividad) => {
+                const idAgr = actividad.id_agr;
+                if (!acc[idAgr]) {
+                    acc[idAgr] = [];
+                }
+                acc[idAgr].push(actividad);
+                return acc;
+            }, {});
+
+            // Crea un nuevo libro de Excel
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Actividades');
+
+            // Genera una hoja de cálculo para cada grupo de actividades
+            Object.keys(actividadesPorAgrupacion).forEach(idAgr => {
+                const actividades = actividadesPorAgrupacion[idAgr];
+                const columnas = actividades.map(actividad => ({
+                    'Nombre Actividad': actividad.nom_act,
+                    'Descripción': actividad.descripcion,
+                    'Tipo': actividad.tipo ? 'Tipo 1' : 'Tipo 2', // Ajusta según tu lógica
+                    // Agrega más columnas según sea necesario
+                }));
+
+                // Genera la hoja de cálculo
+                const ws = XLSX.utils.json_to_sheet(columnas);
+                XLSX.utils.book_append_sheet(wb, ws, `Agrupación ${idAgr}`);
+            });
+
+            // Escribe el archivo Excel
             XLSX.writeFile(wb, 'actividades.xlsx');
         },
         async generarReporte() {

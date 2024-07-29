@@ -3,7 +3,8 @@
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
-    rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion, getAgrupacionesPorNombre, getPublicacionCorreos } = require("../services/agrupacion.service.js");
+    rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
+    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -15,9 +16,7 @@ async function VerGrupos(request, reply) {
         return reply.send({ success: false, message: 'No se encontraron agrupaciones' });
     }
     else {
-
         return reply.send(agrupaciones);
-
     }
 }
 
@@ -440,6 +439,33 @@ async function notificarMiembrosPublicacion(req, res) {
     }
 }
 
+async function ingresarPorCodigo(req, res) {
+    try {
+        const rut = req.params.rut;
+        const codigo = req.params.codigo;
+        console.log("rut: ", rut);
+        console.log("codigo: ", codigo);
+
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+
+        const result = await redeemCodigo(codigo, rut);
+        if (!result) {
+            return res.code(500).send('Error al ingresar el código');
+        }
+
+        console.log("result");
+        console.log(result);
+
+        res.code(200).send(result);
+    } catch (error) {
+        console.error('Error al ingresar el código:', error);
+        res.code(500).send('Error al ingresar el código');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -460,5 +486,6 @@ module.exports = {
     ingresarTagsAgrupacion,
     VerGruposPorNombre,
     obtenerLider,
-    notificarMiembrosPublicacion
+    notificarMiembrosPublicacion,
+    ingresarPorCodigo
 };

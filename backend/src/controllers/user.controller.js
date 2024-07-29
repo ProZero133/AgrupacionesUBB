@@ -1,7 +1,11 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
-const { getAgrupaciones } = require('../services/agrupacion.service');
-const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById, getUsuarioServidor } = require('../services/user.service');
+const { getAgrupaciones, createInvitacion } = require('../services/agrupacion.service');
+const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario,
+  updatePreferenciasUsuario, getTagById, getUsuarioServidor, getUsuarioByCorreo } = require('../services/user.service');
+const { inviteUsuario } = require("../services/mail.service.js");
+
 const { func } = require('joi');
+
 async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   // Llamar a la base de datos para verificar si el usuario existe
@@ -47,6 +51,26 @@ async function obtenerUsuarioPorRut(req, res) {
     res.code(500).send('Error al obtener el usuario');
   }
 }
+
+async function obtenerUsuarioPorCorreo(req, res) {
+  try {
+    const { correo } = req.body;
+
+    // Obtiene el usuario por su rut
+    const usuario = await getUsuarioByCorreo(correo);
+    if (usuario.length === 0) {
+      return res.send({ success: false, message: 'No se encontró el usuario' });
+    }
+
+    // Retorna el usuario
+    res.code(201).send(usuario);
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al obtener el usuario:', error);
+    res.code(500).send('Error al obtener el usuario');
+  }
+}
+
 async function ObtenerTagsSimilares(req, res) {
   try {
     const { tag } = req.params;
@@ -133,4 +157,61 @@ async function obtenerUsuarioServidor(req, res) {
     res.code(500).send('Error al obtener el usuario');
   }
 }
-module.exports = { EmailLogin, VerGrupos, obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, ActualizarPreferenciasUsuario, ObtenerTag, obtenerUsuarioServidor };
+
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+async function invitarUsuario(req, res) {
+  try {
+    console.log("reqparam");
+    console.log(req.body);
+    const invitacion = {
+      id_agr: req.body.id_agr,
+      nombre_agr: req.body.nombre_agr,
+      rol_agr: rol_agr = generateRandomString(6),
+      fecha_integracion: new Date().toISOString(),
+      rut: '11.111.111-1',
+      correo: req.body.mail
+    };
+
+    const usuario = await getUsuarioByCorreo(req.body.mail);
+    if (usuario.length === 0) {
+      return res.send({ success: false, message: 'No se encontró el usuario:' + req.params.id_agr });
+    }
+
+    console.log("usuario");
+
+    invitacion.nombre = usuario[0].nombre;
+
+    try {
+      const invitacrear = await createInvitacion(invitacion);
+    } catch (error) {
+      console.error('Error al crear la invitación:', error);
+    }
+
+    const invitar = await inviteUsuario(invitacion);
+
+  } catch(error){
+    console.error('Error al invitar al usuario:', error);
+    res.code(500).send('Error al invitar al usuario');
+  }
+}
+
+module.exports = {
+  EmailLogin,
+  VerGrupos,
+  obtenerUsuarioPorRut,
+  obtenerUsuarioPorCorreo,
+  ObtenerTagsSimilares,
+  ObtenerPreferenciasUsuario,
+  ActualizarPreferenciasUsuario,
+  ObtenerTag,
+  obtenerUsuarioServidor,
+  invitarUsuario,
+};

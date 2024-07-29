@@ -49,6 +49,20 @@ async function getUsuarioByRut(req){
     }
 }
 
+async function getUsuarioByCorreo(req){
+    try{
+        const correo = req;
+        console.log("correo");
+        console.log(correo);
+        const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [correo]);
+        return result.rows;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return { error: "Ocurrió un error al obtener el usuario por correo." };
+    }
+}
+
 // Registra un usuario en la plataforma
 async function registrarUsuario(rut, rol){
     try {
@@ -124,4 +138,16 @@ async function getTagById(id){
     }
 }
 
-module.exports = { obtenerUsuarios, registrarUsuario, obtenerUsuariosPlataforma, getUsuarioByRut, registrarUsuario, getTagsSimilares, getPreferenciasUsuario, updatePreferenciasUsuario, getTagById, getUsuarioServidor };
+module.exports = {
+    obtenerUsuarios,
+    registrarUsuario,
+    obtenerUsuariosPlataforma,
+    getUsuarioByRut,
+    getUsuarioByCorreo,
+    registrarUsuario,
+    getTagsSimilares,
+    getPreferenciasUsuario,
+    updatePreferenciasUsuario,
+    getTagById,
+    getUsuarioServidor
+};

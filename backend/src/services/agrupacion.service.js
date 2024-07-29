@@ -165,7 +165,6 @@ async function updateAgrupacionNoVerificado(id) {
   }
 }
 
-
   async function getUsuariosdeAgrupacion(id) {
     try {
       // Obtiene los usuarios de la agrupación con el id especificado
@@ -188,7 +187,6 @@ async function updateAgrupacionNoVerificado(id) {
       console.log('Error al obtener el rol del usuario:', error);
     }
   }
-
 
   async function updateRolUsuario(rut, id_agr, rol) {
     try {
@@ -229,6 +227,20 @@ async function updateAgrupacionNoVerificado(id) {
     }
     catch (error) {
       console.log('Error al crear la solicitud:', error);
+    }
+  }
+
+  async function createInvitacion(invitacion) {
+    try {
+      // Crea una nueva solicitud
+    console.log("aqui invitacion");
+    console.log(invitacion);
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', 
+      [invitacion.rut, invitacion.id_agr, invitacion.fecha_integracion, invitacion.rol_agr]);
+    return response.rows[0];
+    }
+    catch (error) {
+      console.log('Error al crear la invitacion:', error);
     }
   }
 
@@ -469,10 +481,42 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     return correos;
 
     console.log('Notificaciones enviadas exitosamente.');
-  } catch (error) {
-    console.error('Error al notificar a los miembros de la publicación:', error);
+    } catch (error) {
+      console.error('Error al notificar a los miembros de la publicación:', error);
+    }
   }
-}
+
+  //redeemCodigo es un método que toma un código de invitación y un rut
+  //Primero, se busca en la tabla "Pertenece" si existe un elemento cuyo 'rol_agr' sea igual al código de invitación y 'rut' sea igual a '11.111.111-1'
+  //SI no existe, se retorna un mensaje de error
+  //Si existe, se actualiza esa tabla con los siguientes valores:
+  //rut: rut, fecha_integracion: hoy,  rol_agr: 'Miembro'
+  //Finalmente, se retorna un mensaje de éxito
+
+  async function redeemCodigo(codigo, rut) {
+    try {
+      // Step 1: Get 'rol_agr' from 'Pertenece' where 'rol_agr' matches 'codigo' and 'rut' matches '11.111.111-1'
+      const perteneceResult = await pool.query('SELECT * FROM "Pertenece" WHERE rol_agr = $1 AND rut = $2', [codigo, '11.111.111-1']);
+      if (perteneceResult.rows.length === 0) {
+        return 'Código de invitación no válido';
+      }
+
+      // Step 2: Update 'Pertenece' with 'rut', 'fecha_integracion' and 'rol_agr'
+      const response = await pool.query('UPDATE "Pertenece" SET rut = $1, fecha_integracion = CURRENT_TIMESTAMP, rol_agr = $2 WHERE rol_agr = $3 AND rut = $4 RETURNING *', [rut, 'Miembro', codigo, '11.111.111-1']);
+      
+      console.log("response");
+      console.log(response.rows[0]);
+      
+      return {
+        "mensaje": 'Código de invitación canjeado con éxito',
+        "response": response.rows[0],
+        "id_agr": response.rows[0].id_agr
+        };
+
+    } catch (error) {
+      console.error('Error al canjear el código de invitación:', error);
+    }
+  }
 
 
   module.exports = {
@@ -498,5 +542,7 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     updateAgrupacion,
     insertTagsAgrupacion,
     getAgrupacionesPorNombre,
-    getPublicacionCorreos
+    getPublicacionCorreos,
+    createInvitacion,
+    redeemCodigo
   };

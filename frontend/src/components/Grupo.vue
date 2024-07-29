@@ -219,6 +219,24 @@
                 </v-card-actions>
               </v-card>
           </v-dialog>
+          <v-dialog v-model="dialogabandonar" max-width="500px" min-width="400px">
+            <v-card text="Abandonar agrupación">
+              <v-card-title class="acred">¿Estas seguro de abandonar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
+              <v-card-text>
+                <!-- Confirmar si esta seguro de abandonar su grupo -->
+                <v-row>
+                  Perderas todos los privilegios dentro de la agrupación
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="dialogabandonar = false">Cancelar</v-btn>
+                <v-btn width="250px" color="primary" text @mousedown="startHoldAbandonar" @mouseup="cancelHold" @mouseleave="cancelHold"
+                  @touchstart="startHoldAbandonar" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+                  depressed>Aceptar</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
 
     <!-- ACTIVIDADES Y PUBLICACIONES -->
     <v-row align="start" no-gutters class="mt-6">
@@ -276,9 +294,13 @@
           </v-tooltip>
         </template>
         <v-list class="tultipCrear">
-          <v-list-item v-for="(item, index) in items" :key="index"
+          <v-list-item v-for="(item, index) in itemsFiltroRol" :key="index"
             v-on:click="this.$router.push(item.path + `${groupId}`)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="abandonarItem"
+            v-on:click="this.dialogabandonar = true">
+            <v-list-item-title>Abandonar agrupación</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -330,12 +352,13 @@ export default {
   data: () => ({
     lider: false,
     adminOlider: false,
-
+    rolEnAgrupacion: '',
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
     dialogeliminar: false,
     dialoginvitar: false,
+    dialogabandonar: false,
     
     pressTimer: null,
     pressTime: 0,
@@ -366,7 +389,7 @@ export default {
       fecha_verificacion: null,
       id_agr: null,
       imagen: null,
-      nombre_agr: 'h',
+      nombre_agr: '',
       rut: null,
       verificado: null,
     },
@@ -376,6 +399,12 @@ export default {
     items: [
       { title: 'Crear Actividad', path: '/api/crear_actividad/' },
       { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
+      { title: 'Abandonar Agrupación', path: '/api/abandonaragrupacion/' },
+    ],
+    itemsSegunRol: [
+      { title: 'Crear Actividad', path: '/api/crear_actividad/', roles: ['Lider', 'Miembro oficial'] },
+      { title: 'Crear Publicación', path: '/api/crear_publicacion/', roles: ['Lider', 'Miembro oficial'] },
+      { title: 'Abandonar Agrupación', path: 'dialogabandonar', roles: ['Lider', 'Miembro oficial', 'Miembro'] },
     ],
 
     modItems: [
@@ -519,6 +548,7 @@ export default {
           const data = await response.json();
           if (data.rol_agr === 'Miembro'|| data.rol_agr === 'Miembro Oficial'|| data.rol_agr === 'Lider') {
             this.rolA = true;
+            this.rolEnAgrupacion = data.rol_agr;
           }else{
             this.rolA = false;
           }
@@ -615,15 +645,18 @@ export default {
 
     async EliminarMiembro(rut) {
       try {
-        const url = `${global.BACKEND_URL}/abandonaragrupacion/${this.groupId}/${rut}`;
+        const miembroRut = rut || this.rut;
+        const url = `${global.BACKEND_URL}/abandonaragrupacion/${this.groupId}/${miembroRut}`;
         const response = await fetch(url, {
           method: 'DELETE',
         });
         this.ObtenerUsuariosDeAgrupacion();
         if (response.ok) {
           console.log("Usuario eliminado correctamente.");
+          this.$router.push('/api/home');
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.$router.push('/api/home');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -958,7 +991,21 @@ export default {
         this.pressTime += 10;
         this.progress = (this.pressTime / 2000) * 100;
         if (this.pressTime >= 2000) {
+          console.log("Eliminando grupo");
           this.EliminarGrupo();
+          this.cancelHold();
+        }
+      }, 10);
+    },
+    startHoldAbandonar() {
+      this.pressTime = 0;
+      this.progress = 0;
+      this.pressTimer = setInterval(() => {
+        this.pressTime += 10;
+        this.progress = (this.pressTime / 2000) * 100;
+        if (this.pressTime >= 2000) {
+          console.log("Eliminando miembro");
+          this.EliminarMiembro(this.rut);
           this.cancelHold();
         }
       }, 10);
@@ -994,6 +1041,7 @@ export default {
   mounted() {
     this.rut = this.getRut();
     this.rolA = this.esMiembro();
+    console.log("rolA", this.rolA);
     this.lider = this.ObtenerLider();
     this.rol = this.getRol();
     this.adminOlider=this.esAdminOLider();
@@ -1006,6 +1054,12 @@ export default {
       return {
         background: `linear-gradient(to right, red ${this.progress}%, white ${this.progress}%)`
       };
+    },
+    itemsFiltroRol() {
+      return this.itemsSegunRol.filter(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title !== 'Abandonar Agrupación');
+    },
+    abandonarItem() {
+     return this.itemsSegunRol.find(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title === 'Abandonar Agrupación');
     },
   },
 }

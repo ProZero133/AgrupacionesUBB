@@ -4,7 +4,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
-    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo } = require("../services/agrupacion.service.js");
+    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -482,6 +482,24 @@ async function ingresarPorCodigo(req, res) {
     }
 }
 
+async function VerGruposNoInscritos(req, res) {
+    try {
+        const rut = req.params.rut;
+        const usuario = await getUsuarioByRut(rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const agrupacionesNoInscritas = await getAgrupacionesNoInscritas(rut);
+        if (agrupacionesNoInscritas.length === 0) {
+            return res.code(404).send('No se encontraron agrupaciones');
+        }
+        res.code(200).send(agrupacionesNoInscritas);
+    } catch (error) {
+        console.error('Error al obtener las agrupaciones no inscritas:', error);
+        res.code(500).send('Error al obtener las agrupaciones no inscritas');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -504,5 +522,6 @@ module.exports = {
     obtenerLider,
     notificarMiembrosPublicacion,
     ingresarPorCodigo,
-    unirseAgrupacion
+    unirseAgrupacion,
+    VerGruposNoInscritos
 };

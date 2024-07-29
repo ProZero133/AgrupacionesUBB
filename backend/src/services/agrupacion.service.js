@@ -518,6 +518,15 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     }
   }
 
+  async function getAgrupacionesNoInscritas(rut) {
+    try {
+      // Obtiene las agrupaciones que no están inscritas por el usuario con el rut especificado
+      const agrupaciones = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr NOT IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
+      return agrupaciones.rows;
+    } catch (error) {
+      console.log('Error al obtener las agrupaciones no inscritas:', error);
+    }
+  }
 
   module.exports = {
     getAgrupaciones,
@@ -544,5 +553,6 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     getAgrupacionesPorNombre,
     getPublicacionCorreos,
     createInvitacion,
-    redeemCodigo
+    redeemCodigo,
+    getAgrupacionesNoInscritas
   };

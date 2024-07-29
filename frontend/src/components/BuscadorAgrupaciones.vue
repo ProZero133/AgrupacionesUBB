@@ -108,7 +108,7 @@ export default {
       }
     },
 
-    getRut() {
+     getRut() {
           const token = this.$cookies.get('token');
           if (token) {
             try {
@@ -122,7 +122,7 @@ export default {
           }
           return null;
         },
-    getRol() {
+     getRol() {
           const token = this.$cookies.get('token');
           if (token) {
             try {
@@ -138,7 +138,7 @@ export default {
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+        const response = await fetch(`${global.BACKEND_URL}/agrupacionesnoinscritas/${this.rut}`, {
           method: 'GET',
         });
 
@@ -193,7 +193,7 @@ export default {
 
   },
   mounted() {
-    this.rut = this.getRut();
+     this.rut = this.getRut();
     this.rol = this.getRol();
     this.VerGrupos();
   }

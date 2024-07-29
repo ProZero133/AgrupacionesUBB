@@ -3,7 +3,7 @@ const fastify = require('../config/configFastify.js');
 const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion, 
   obtenerImagenAgrupacion, unirseAgrupacion, solicitudesAgrupacion, aceptarSolicitud, 
   eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion,
-  obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo } = require('../controllers/agrupacion.controller.js');
+  obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos } = require('../controllers/agrupacion.controller.js');
 
 module.exports = function(fastify, options, done) {
     
@@ -25,5 +25,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/obtenerRolUsuario/:rut/:id_agr', ObtenerRolUsuario);
   fastify.post('/notificarMiembrosPublicacion', notificarMiembrosPublicacion);
   fastify.post('/ingresarPorCodigo/:rut/:codigo', ingresarPorCodigo);
+  fastify.get('/agrupacionesnoinscritas/:rut', VerGruposNoInscritos);
   done();
 };

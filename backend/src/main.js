@@ -56,7 +56,7 @@ const url = config.URL;
   });
 
 fastify.listen({
-    port: 3000,
+    port: 1616,
     host: '0.0.0.0',
 }, (err) => {
     if (err) {

@@ -15,7 +15,7 @@ export default defineConfig({
   ],
   define: {
     'process.env': {},
-    'global.BACKEND_URL': JSON.stringify('http://localhost:3000')
+    'global.BACKEND_URL': JSON.stringify('http://localhost:1501')
   },
   resolve: {
     alias: {
@@ -23,7 +23,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    host:'0.0.0.0',
+    port: 443,
   },
   /* remove the need to specify .vue files https://vitejs.dev/config/#resolve-extensions
   resolve: {

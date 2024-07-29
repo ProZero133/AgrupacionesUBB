@@ -8,7 +8,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
-const { notifyPublicacion } = require("../services/mail.service.js");
+const { notifyPublicacion, integrateUsuario } = require("../services/mail.service.js");
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -126,10 +126,26 @@ async function unirseAgrupacion(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
+
+        const lider = await getUsuarioByRut(agrupacion.rut);
+        if (usuario.length === 0) {
+            return res.code(404).send('Lider no encontrado');
+        }
+
         const result = await createSolicitud(rut, id_agr);
         if (!result) {
             return res.code(500).send('Error al enviar solicitud');
         }
+
+        const mailDetails = {
+            rut: usuario[0].rut,
+            nombre: usuario[0].nombre,
+            lider_correo: lider[0].correo,
+            nombre_agr: agrupacion.nombre_agr
+        };
+
+        const invitar = await integrateUsuario(mailDetails);
+
         res.code(201).send(result);
     } catch (error) {
         console.error('Error al enviar solicitud:', error);
@@ -487,5 +503,6 @@ module.exports = {
     VerGruposPorNombre,
     obtenerLider,
     notificarMiembrosPublicacion,
-    ingresarPorCodigo
+    ingresarPorCodigo,
+    unirseAgrupacion
 };

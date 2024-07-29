@@ -112,7 +112,73 @@ async function inviteUsuario(invitacion) {
     return results;
 }
 
+async function inviteUsuario(invitacion) {
+
+    console.log("invitacion");
+    console.log(invitacion);
+
+    const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
+    const replacements = {
+        nombre: invitacion.nombre,
+        nombre_agr: invitacion.nombre_agr,
+        codigo: invitacion.rol_agr
+    };
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaubb@gmail.com>',
+        to: invitacion.correo,
+        subject: `Invitación a ${invitacion.nombre_agr}`,
+        html: htmlBody
+    };
+
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${invitacion.correo}`, info: info });
+    } catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
+    }
+
+    console.log("results");
+    console.log(results);
+    return results;
+}
+
+async function integrateUsuario(mailDetails) {
+
+    const templatePath = path.join(__dirname, '../mails/solicitudCorreo.html');
+    const replacements = {
+        nombre: mailDetails.nombre,
+        agrupacion_nombre: mailDetails.nombre_agr,
+        rut: mailDetails.rut,
+    };
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaubb@gmail.com>',
+        to: mailDetails.lider_correo,
+        subject: `Solicitud de unirse a ${mailDetails.nombre_agr}`,
+        html: htmlBody
+    };
+
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.lider_correo}`, info: info });
+    } catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
+    }
+
+    console.log("results");
+    console.log(results);
+    return results;
+}
+
 module.exports = {
     notifyPublicacion,
-    inviteUsuario
+    inviteUsuario,
+    integrateUsuario
 };

@@ -40,7 +40,7 @@ async function obtenerUsuariosPlataforma(){
 async function getUsuarioByRut(req){
     try{
         const rut = req;
-        const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
+        const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
         return result.rows;
     }
     catch(error){

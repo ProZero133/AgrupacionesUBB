@@ -108,7 +108,6 @@ export default {
       }
     },
 
-
     getRut() {
           const token = this.$cookies.get('token');
           if (token) {

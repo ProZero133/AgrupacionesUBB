@@ -4,6 +4,7 @@
     <v-row>
       <v-col cols="2" class="flex-grow-0 flex-shrink-0"></v-col>
       <v-col cols="7" class="flex-grow-0 flex-shrink-0">
+      <v-btn class="mt-n6" @click="dialogIngresar = true" type="submit" color="#2CA2DC">UNIRSE POR CÓDIGO</v-btn>
         <v-card v-for="grupo in grupos" :key="grupo.id_agr" class="mb-15 card-grupos" border="10px">
           <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
           <!-- Contenedor flex para el contenido, empujando v-card-actions al fondo -->
@@ -22,6 +23,28 @@
         </v-card>
       </v-col>
     </v-row>
+
+
+    <v-dialog v-model="dialogIngresar" max-width="500px" min-width="400px">
+      <v-card text="Ingresar por código de invitación enviado por correo">
+        <v-card-title class="acred ml-3">Introduce el código:
+        </v-card-title>
+
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field v-model="codigo" label="Código" required></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="ingresarPorCodigo">Entrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-col>
 </template>
 
@@ -40,7 +63,7 @@
   width: 100%;
   margin: 0 auto;
   border-radius: 10px;
-  margin-top: -40px;
+  margin-top: 30px;
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important
 }
@@ -54,8 +77,38 @@ export default {
     grupos: [],
     rol: '',
     rut: '',
+    codigo: '',
+    dialogIngresar: false,
   }),
   methods: {
+    // El método entrarPorCódigo recibe de input el código de invitación
+    // Envía un fetch al backend /ingresarPorCodigo con el código de invitación y el rut del usuario
+
+    async ingresarPorCodigo() {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo/${this.rut}/${this.codigo}`, {
+          method: 'POST',
+        });
+
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log('Respuesta:', data);
+
+          this.$root.showSnackBar('success', "Bienvenido al grupo!", 'Código canjeado con éxito.');
+          this.$router.push('/api/grupo/' + data.id_agr);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+
     getRut() {
           const token = this.$cookies.get('token');
           if (token) {

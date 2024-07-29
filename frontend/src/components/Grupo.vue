@@ -162,6 +162,26 @@
               </v-card>
             </v-dialog>
 
+            <v-dialog v-model="dialoginvitar" max-width="500px" min-width="400px">
+              <v-card text="Invitar usuarios por correo">
+                <v-card-title class="acred ml-3">Introduce el correo del invitado:
+                </v-card-title>
+
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field v-model="mailInvitado" label="Correo del invitado" required></v-text-field>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="InvitarUsuario()">Invitar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
             <v-dialog v-model="dialogsolicitar" max-width="500px" min-width="400px">
               <v-card text="Solicitar acreditación">
                 <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr
@@ -310,10 +330,13 @@ export default {
   data: () => ({
     lider: false,
     adminOlider: false,
+
     dialogmiembros: false,
     dialogeditar: false,
     dialogsolicitar: false,
     dialogeliminar: false,
+    dialoginvitar: false,
+    
     pressTimer: null,
     pressTime: 0,
     progress: 0,
@@ -360,6 +383,7 @@ export default {
       { title: 'Editar Grupo', path: 'dialogeditar', tier: 0 },
       { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0 },
       { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1 },
+      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1 },
     ],
 
     // Lista de elementos
@@ -370,10 +394,38 @@ export default {
     actividades: [],
     publicaciones: [],
     elementos: [],
+
+    mailInvitado: '',
     
   }),
   methods: {
     mergeProps,
+
+    // EL método invitarUsuario invita a un usuario
+    // para ello, se toma el correoInvitado puesto en el campo, y se hace un fetch tipo push a "invitarUsuario"
+    // El push contiene en su body a this.correoInvitado como "mail", y this.datosGrupo.id_agr como "id_agr"
+
+    async InvitarUsuario() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/invitarUsuario`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ mail: this.mailInvitado, id_agr: this.datosGrupo.id_agr, nombre_agr: this.datosGrupo.nombre_agr }),
+        });
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+        // Convierte la respuesta en formato JSON
+          console.log('Invitación enviada');
+          this.$root.showSnackBar('', 'Usuario invitado con éxito!');
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
 
     modalMaker(modal) {
       if (modal === 'dialogmiembros') {
@@ -385,21 +437,24 @@ export default {
         this.dialogsolicitar = true;
       } else if (modal === 'dialogeliminar') {
         this.dialogeliminar = true;
+      } else if (modal === 'dialoginvitar') {
+        this.dialoginvitar = true;
       }
     },
+
     filterItemsByRole() {
-          const role = this.getRol();
-          this.items = this.allItems.filter(item => {
-                switch (role) {
-                    case 'Admin':
-                        return item.tier !== 0;
-                    case 'Estudiante':
-                        return item.tier === 0 || item.tier=== 1;
-                    default:
-                        return item.tier === 0;
-                }
-            }).map(({ name, icon, path }) => ({ name, icon, path }));
-          },
+      const role = this.getRol();
+      this.items = this.allItems.filter(item => {
+        switch (role) {
+          case 'Admin':
+            return item.tier !== 0;
+          case 'Estudiante':
+            return item.tier === 0 || item.tier=== 1;
+          default:
+            return item.tier === 0;
+        }
+      }).map(({ name, icon, path }) => ({ name, icon, path }));
+    },
 
     async ObtenerUsuariosDeAgrupacion() {
       try {

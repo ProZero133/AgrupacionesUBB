@@ -77,7 +77,7 @@
             { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 1},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 0},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones', tier: 2},
-            { name: 'Generar Informes', icon: 'mdi-file-document', path: '/api/generarInformes', tier: 2},
+            { name: 'Generar Informes', icon: 'mdi-file-document', path: '/api/generarInformes', tier: 1},
             { name: 'Logout', icon: 'mdi-login', path: '/api/login', tier: 0}, 
         ],
 
@@ -106,7 +106,7 @@
           if (token) {
             try {
               const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
+              tokenParts[0] = tokenParts[0].replace('rol=', '').trim();
               return tokenParts[0] ;
             } catch (error) {
               console.error('Invalid token:', error);

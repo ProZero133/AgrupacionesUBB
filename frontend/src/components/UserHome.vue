@@ -83,7 +83,7 @@
     <v-container>
       <v-row>
         <v-col v-for="elemento in ActividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-          <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
+          <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id_act)">
             <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
             <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
               formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
@@ -157,6 +157,41 @@
     </v-card>
 
   </v-dialog>
+
+  <v-dialog v-model="dialogActividades">
+    <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id" class="mb-15 card-actividades"
+      border="10px">
+      <v-card-title class="headline">{{ actividad.nombre }}</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="5">
+            <v-img class="image" aspect-ratio="1" :src="actividad.imagen" cover />
+          </v-col>
+          <v-col cols="7">
+            <p>{{ actividad.descripcion }}</p>
+          </v-col>
+
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+
+        <v-row v-if="actividad.tipo_elemento === 'Actividad'">
+          <v-col cols="6">
+            <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="green darken-1" text @click="ParticiparActividad(actividad.id_act)">Participar</v-btn>
+          </v-col>
+        </v-row>
+
+      </v-card-actions>
+
+    </v-card>
+
+  </v-dialog>
+
+
 </template>
 
 <style scoped>
@@ -214,6 +249,7 @@ export default {
   name: 'UserHome',
   data: () => ({
     dialog: false,
+    dialogActividades: false,
     grupos: [],
     actividades: [],
     publicaciones: [],
@@ -234,7 +270,10 @@ export default {
   computed: {
     elementoFiltrado() {
       return this.elementos.filter(elemento => elemento.id === this.idactActual);
-    }
+    },
+    actividadFiltrada() {
+      return this.ActividadesParticipa.filter(actividad => actividad.id_act === this.idactActual);
+    },
   },
   methods: {
     getRut() {
@@ -463,6 +502,11 @@ export default {
     seleccionar(id) {
       this.idactActual = id;
       this.dialog = true;
+    },
+    seleccionarActividad(id) {
+      console.log("Actividad seleccionada", id);
+      this.idactActual = id;
+      this.dialogActividades = true;
     },
     async ParticiparActividad(id) {
       try {

@@ -249,7 +249,7 @@ export default {
     actividades: [],
     publicaciones: [],
     elementos: [],
-    ActividadesParticipa: [],
+    actividadesParticipa: [],
     urlImagen: addImage,
     idactActual: null,
     rut: '',
@@ -629,7 +629,7 @@ export default {
             // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
             // Los campos de actividad se pasarán de la siguiente manera a elementos:
             // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-            const elementitos = this.ActividadesParticipa.map((elemento) => {
+            this.actividadesParticipa = this.ActividadesParticipa.map((elemento) => {
               return {
                 id: elemento.id_act,
                 nombre: elemento.nom_act,
@@ -641,8 +641,7 @@ export default {
                 fecha_creacion: elemento.fecha_creacion
               };
             });
-            this.anadirAElementos(elementitos);
-          
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }

@@ -170,20 +170,16 @@
           <v-col cols="7">
             <p>{{ actividad.descripcion }}</p>
           </v-col>
-
+          <v-col cols="12">
+            <v-btn width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+                    @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+                    depressed>Abandonar actividad</v-btn>
+        </v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
+        
         <v-spacer></v-spacer>
-
-        <v-row v-if="actividad.tipo_elemento === 'Actividad'">
-          <v-col cols="6">
-            <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
-          </v-col>
-          <v-col cols="6">
-            <v-btn color="green darken-1" text @click="ParticiparActividad(actividad.id_act)">Participar</v-btn>
-          </v-col>
-        </v-row>
 
       </v-card-actions>
 
@@ -270,6 +266,11 @@ export default {
   computed: {
     elementoFiltrado() {
       return this.elementos.filter(elemento => elemento.id === this.idactActual);
+    },
+    progressStyle() {
+      return {
+        background: `linear-gradient(to right, red ${this.progress}%, white ${this.progress}%)`
+      };
     },
     actividadFiltrada() {
       return this.ActividadesParticipa.filter(actividad => actividad.id_act === this.idactActual);
@@ -504,7 +505,6 @@ export default {
       this.dialog = true;
     },
     seleccionarActividad(id) {
-      console.log("Actividad seleccionada", id);
       this.idactActual = id;
       this.dialogActividades = true;
     },
@@ -589,12 +589,10 @@ export default {
             'Content-Type': 'application/json',
           },
         });
-        console.log("Respuesta", response);
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log("Actividades en las que participa", data);
           this.ActividadesParticipa = data;
 
           for (const actis of this.ActividadesParticipa) {
@@ -637,7 +635,45 @@ export default {
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
-    }
+    },
+    async abandonarActividad() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/abandonaractividad/${this.idactActual}/${this.rut}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          this.dialogActividades = false;
+          this.$root.showSnackBar('succes', 'Has abandonado una actividad', 'Operacion exitosa');
+          this.VerActividadesParticipando(this.rut);
+        } else {
+          console.error(data.message);
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    startHold() {
+      this.pressTime = 0;
+      this.progress = 0;
+      this.pressTimer = setInterval(() => {
+        this.pressTime += 10;
+        this.progress = (this.pressTime / 2000) * 100;
+        if (this.pressTime >= 2000) {
+          this.abandonarActividad();
+          this.cancelHold();
+        }
+      }, 10);
+    },
+    cancelHold() {
+      clearInterval(this.pressTimer);
+      this.progress = 0;
+    },
   },
   mounted() {
     this.rut = this.getRut();

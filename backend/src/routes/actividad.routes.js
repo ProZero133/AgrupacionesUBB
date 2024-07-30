@@ -1,6 +1,7 @@
 const fastify = require('../config/configFastify.js');
 
-const {ObtenerActividadesPorAgrupacion, ObtenerActividadPorID, ObtenerActividades, crearActividad, updateActividad, eliminarActividad, programarActividad, participarActividad, obtenerActividadesParticipante} = require('../controllers/actividad.controller.js');
+const {ObtenerActividadesPorAgrupacion, ObtenerActividadPorID, ObtenerActividades, crearActividad, updateActividad, 
+  eliminarActividad, programarActividad, participarActividad, obtenerActividadesParticipante, abandonarActividad} = require('../controllers/actividad.controller.js');
 
 
 module.exports = function(fastify, options, done) {
@@ -14,6 +15,7 @@ module.exports = function(fastify, options, done) {
   fastify.put('/actividades/:id', updateActividad);
   fastify.delete('/actividades/:id_act/:rut', eliminarActividad);
   fastify.get('/actividadesparticipante/:rut', obtenerActividadesParticipante);
+  fastify.post('/abandonaractividad/:id_act/:rut', abandonarActividad);
 
   done();
 };

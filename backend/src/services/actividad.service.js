@@ -1,3 +1,4 @@
+const { func } = require('joi');
 const { pool } = require('../db.js');
 
 async function getActividades() {
@@ -161,6 +162,16 @@ async function getActividadesByGrupoUsuario(rut) {
     }
 }
 
+async function getActividadesParticipante(rut) {
+    try{
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr IN (SELECT id_agr FROM "Participa" WHERE rut = $1)', [rut]);
+        return actividades.rows;
+    }
+    catch (error) {
+        console.log('Error al obtener las actividades de un participante:', error);
+    }
+}
+
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -174,5 +185,6 @@ module.exports = {
     setParticipanteActividad,
     setProgramacionActividad,
     getFechaActividad,
-    getActividadesByGrupoUsuario
+    getActividadesByGrupoUsuario,
+    getActividadesParticipante
 };

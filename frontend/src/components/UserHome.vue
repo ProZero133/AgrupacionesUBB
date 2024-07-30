@@ -3,13 +3,14 @@
   <v-toolbar color="primary">
       <template v-slot:extension>
         <v-tabs v-model="tab" align-tabs="title">
-          <v-tab prepend-icon="mdi-bell-ring" value="actividades">Actividades</v-tab>
+          <v-tab prepend-icon="mdi-home" value="actividades">Página de Inicio</v-tab>
           <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
+          <v-tab prepend-icon="mdi-calendar-month" value="misActividades" @click="VerSolicitudes">Actividades</v-tab>
         </v-tabs>
       </template>
     </v-toolbar>
 
-      <!-- Actividades -->
+      <!-- Pagina Principal -->
     <v-tab-item value="actividades" v-if="tab === 'actividades'">
       <v-container cols="12">
         <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6 ml-n10">
@@ -76,6 +77,7 @@
       </v-row>
       </v-container>
     </v-tab-item>
+
 
     <v-dialog v-model="dialog">
       <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id"
@@ -193,11 +195,9 @@ export default {
   data: () => ({
     dialog: false,
     grupos: [],
-
     actividades: [],
     publicaciones: [],
     elementos: [],
-
     urlImagen: addImage,
     idactActual: null,
     rut: '',
@@ -206,7 +206,6 @@ export default {
   }),
   setup() {
     const router = useRouter();
-
     return {
       router,
     };
@@ -249,11 +248,9 @@ export default {
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
-
     convertirImagen(data) {
       // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
-
       if (!dataArray || dataArray.length === 0) {
         return '';
       }
@@ -264,7 +261,6 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
-
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -301,11 +297,9 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
     findInsertIndex(array, element) {
     let low = 0;
     let high = array.length;
-
     while (low < high) {
         const mid = Math.floor((low + high) / 2);
         if (new Date(array[mid].fecha_creacion) > new Date(element.fecha_creacion)) {
@@ -316,7 +310,6 @@ export default {
     }
       return low;
     },
-
     // Function to insert elements from array1 into array2 in sorted order
     anadirAElementos(array) {
       array.forEach(element => {
@@ -324,14 +317,12 @@ export default {
         this.elementos.splice(index, 0, element);
       });
     },
-
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
         });
-
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
@@ -352,13 +343,11 @@ export default {
                 } else {
                   console.error('Error en la respuesta:', responde.status);
                 }
-
               }
               catch (error) {
                 console.error('Error al hacer fetch:', error);
               }
             }
-
           // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
           // Los campos de actividad se pasarán de la siguiente manera a elementos:
           // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
@@ -374,13 +363,10 @@ export default {
               fecha_creacion: elemento.fecha_creacion
             };
           });
-
           this.anadirAElementos(elementitos);
-
           }        
         
         this.VerPublicaciones();
-
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -388,7 +374,6 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
     async VerPublicaciones() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/VerPublicacionesGruposUsuario/${this.rut.trim()}`, {
@@ -451,17 +436,13 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
-
     iragGrupo(id) {
       this.$router.push(`/api/grupo/${id}`);
     },
-
     seleccionar(id) {
       this.idactActual = id;
       this.dialog = true;
     },
-
     async ParticiparActividad(id) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
@@ -483,7 +464,6 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
     formatearFecha(fecha) {
       const date = new Date(fecha);
       const now = new Date();
@@ -511,7 +491,6 @@ export default {
       const isToday  =  date.getDate() === now.getDate() &&
                         date.getMonth() === now.getMonth() &&
                         date.getFullYear() === now.getFullYear();
-
       const isTomorrow= date.getDate() === now.getDate()+ 1 &&
                         date.getMonth() === now.getMonth() &&
                         date.getFullYear() === now.getFullYear();
@@ -536,7 +515,6 @@ export default {
       
       return `el día ${day}/${month}/${year} a las ${hours}:${minutes}`;
     },
-
   },
   mounted() {
     this.rut = this.getRut();
@@ -545,6 +523,4 @@ export default {
     this.VerActividades();
   }
 }
-
-
 </script>

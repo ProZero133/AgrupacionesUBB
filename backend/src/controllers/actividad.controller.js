@@ -1,6 +1,6 @@
 
 const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
-    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getParticipantesActividad } = require('../services/actividad.service');
+    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getParticipantesActividad, getActividadesParticipante } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -177,30 +177,17 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
     }
 }
 
-async function ObtenerCuposRestantes(req, res) {
+async function obtenerActividadesParticipante(req, res) {
     try {
-        // Obtiene el id de la actividad
-        const id_act = req.params.id_act;
-
-        // Obtiene la actividad
-        const actividad = await getActividadById(id_act);
-
-        // Obtiene los participantes de la actividad
-        const participantes = await getParticipantesActividad(id_act);
-        //Cantidad participantes
-        const cantidadParticipantes = participantes.length;
-        // Obtiene el cupo de la actividad
-        const cupo = actividad.cupos;
-
-        // Calcula los cupos restantes
-        const cuposRestantes = cupo - cantidadParticipantes;
-        // Retorna los cupos restantes y la id_act como un json
-        res.status(200).send({ cuposRestantes, id_act });
-
+        const { rut } = req.params;
+        const actividades = await getActividadesParticipante(rut);
+        if (actividades.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron actividades' });
+        }
+        return res.send(actividades);
     } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al obtener los cupos restantes:', error);
-        res.status(500).send('Error al obtener los cupos restantes');
+        console.error('Error al obtener las actividades del usuario:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener las actividades del usuario' });
     }
 }
 
@@ -214,5 +201,5 @@ module.exports = {
     programarActividad,
     participarActividad,
     ObtenerActividadesPorGrupoUsuario,
-    ObtenerCuposRestantes
+    obtenerActividadesParticipante
 };

@@ -1,7 +1,7 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 const { getAgrupaciones, createInvitacion } = require('../services/agrupacion.service');
 const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario,
-  updatePreferenciasUsuario, getTagById, getUsuarioServidor, getUsuarioByCorreo } = require('../services/user.service');
+  updatePreferenciasUsuario, getTagById, getUsuarioServidor, getUsuarioByCorreo, deletePreferenciaUsuario } = require('../services/user.service');
 const { inviteUsuario } = require("../services/mail.service.js");
 
 const { func } = require('joi');
@@ -203,6 +203,24 @@ async function invitarUsuario(req, res) {
   }
 }
 
+async function EliminarPreferenciaUsuario(req, res){
+  try{
+    const rut = req.params.rut;
+    const id = req.params.id;
+    // Elimina la preferencia del usuario
+    const result = await deletePreferenciaUsuario(rut, id);
+    if(result.success){
+      return res.send({ success: true, message: 'Preferencia eliminada correctamente' });
+    }
+    // Retorna un mensaje de error
+    res.send({ success: false, message: 'No se pudo eliminar la preferencia' });
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al eliminar la preferencia del usuario:', error);
+    res.code(500).send('Error al eliminar la preferencia del usuario');
+  }
+}
+
 module.exports = {
   EmailLogin,
   VerGrupos,
@@ -214,4 +232,5 @@ module.exports = {
   ObtenerTag,
   obtenerUsuarioServidor,
   invitarUsuario,
+  EliminarPreferenciaUsuario
 };

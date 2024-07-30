@@ -1,108 +1,85 @@
 <template>
-    <v-container class="contenedorPrincipal">
-        <v-container class="contenedor-datosUsuario">
-            <v-card class="card-usuario">
-                <v-row>
-                    <!-- Columna de información del usuario -->
-                    <v-col cols="8">
-                        <v-card-title>
-                            <div class="nombre-usuario">{{ userName }}</div>
-                            <div>{{ rut }}</div>
-                            <div>{{ correo }}</div>
-                            <div>{{ carrera }}</div>
-                        </v-card-title>
-                        <v-card class="preferencias" flat> <!-- Añade flat para menos énfasis si deseas -->
-                            <v-card-title class="preferencias-titulo">Preferencias</v-card-title>
-                            <v-card-text class="preferencias-contenido">
-                                <div class="res-preferencias" v-for="result in preferencias" :key="result.id">
-                                    {{ result.nombre_tag }} <!-- Ajusta esta línea según la estructura de tus datos -->
-                                </div>
-                            </v-card-text>
-                        </v-card>
-                    </v-col>
+    <v-card class="card-usuario pa-4">
+        <v-row>
+            <!-- Columna de información del usuario -->
+            <v-col cols="12" md="6" class="user-info">
+                <v-card-title class="pa-0">
+                    <div class="nombre-usuario">{{ userName }}</div>
+                    <div>{{ rut }}</div>
+                    <div>{{ correo }}</div>
+                    <div>{{ carrera }}</div>
+                </v-card-title>
+                <v-card class="preferencias pa-3" flat>
+                    <v-card-title class="preferencias-titulo pa-0">Preferencias</v-card-title>
+                    <v-card-text class="preferencias-contenido pa-0">
+                        <v-chip-group>
+                            <v-chip v-for="result in preferencias" :key="result.id" class="res-preferencias"
+                                color="primary" text-color="white" outlined @click="eliminarPreferencia(result)">
+                                {{ result.nombre_tag }}
+                            </v-chip>
+                        </v-chip-group>
+                    </v-card-text>
+                </v-card>
+            </v-col>
 
-                    <!-- Columna de búsqueda y resultados, ahora dentro de un v-card adicional -->
-                    <v-col cols="4">
-                        <v-card class="search-container">
-                            <v-card-title>Añadir Tags a las preferencias</v-card-title>
-                            <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)"
-                                append-icon="mdi-magnify" label="Buscar..." single-line hide-details>
-                            </v-text-field>
-                            <v-card-text>
-                                <!-- Aquí se mostrarán los resultados de la búsqueda -->
-                                <div class="results-container" v-for="item in searchResults" :key="item.id"
-                                    @click="selectItem(item)">
-                                    {{ item.nombre_tag }}
-                                </div>
-                            </v-card-text>
-                        </v-card>
-                        <v-card class="selected-items-container">
-                            <v-card-title>Tags seleccionados</v-card-title>
-                            <v-card-text>
-                                <div class="selected-item" v-for="item in selectedItems" :key="item.id">
-                                    {{ item.nombre_tag }}
-                                </div>
-                            </v-card-text>
-                        </v-card>
-                        <v-btn color="primary" class="mt-3" @click="ConfirmarSeleccion">Confirmar Selección</v-btn>
-                    </v-col>
-                </v-row>
-            </v-card>
-        </v-container>
-    </v-container>
+            <!-- Columna de búsqueda y resultados -->
+            <v-col cols="12" md="6">
+                <v-card class="search-container pa-3 mb-3">
+                    <v-card-title class="pa-0">Añadir Tags a las preferencias</v-card-title>
+                    <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)"
+                        append-icon="mdi-magnify" label="Buscar..." single-line hide-details></v-text-field>
+                    <v-card-text class="pa-0">
+                        <v-chip-group>
+                            <v-chip v-for="item in searchResults" :key="item.id" @click="selectItem(item)"
+                                class="result-item" color="primary" text-color="white" outlined>
+                                {{ item.nombre_tag }}
+                            </v-chip>
+                        </v-chip-group>
+                    </v-card-text>
+                </v-card>
+                <v-card class="selected-items-container pa-3 mb-3">
+                    <v-card-title class="pa-0">Tags seleccionados</v-card-title>
+                    <v-card-text class="pa-0">
+                        <v-chip-group>
+                            <v-chip v-for="item in selectedItems" :key="item.id" class="selected-item" color="primary"
+                                text-color="white">
+                                {{ item.nombre_tag }}
+                            </v-chip>
+                        </v-chip-group>
+                    </v-card-text>
+                </v-card>
+                <v-btn color="primary" class="mt-2" @click="ConfirmarSeleccion">Confirmar Selección</v-btn>
+            </v-col>
+        </v-row>
+    </v-card>
 </template>
 
 <style scoped>
-.contenedorPrincipal {
-    display: flex;
-    margin-top: 10vh;
+.card-usuario {
+    margin-top: 15vh;
+    max-width: 80vw;
+    min-width: 395px;
+ 
 }
 
-.preferencias {
-    display: flex;
-    margin-top: 24vh;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    width: 20vw;
-    height: 40vh;
-
-}
-.preferencias-titulo {
-  margin-bottom: 0; /* Elimina el margen inferior del título */
-}
-.preferencias-contenido {
-  margin-top: 2vh; /* Ajusta este valor según sea necesario para reducir el espacio */
-}
 .nombre-usuario {
     font-weight: bold;
-    font-size: 1.2em;
-    /* Ajusta el tamaño de la fuente según necesites */
 }
 
-.card-usuario {
-    display: flex;
-    margin-left: 10vw;
-    border: 2px solid rgb(0, 0, 0);
-    border-radius: 4px;
-    height: 80vh;
-    width: 110vh;
+.user-info {
+    margin-bottom: 20px;
 }
 
-.search-container {
-    width: 35vw;
-    height: 40vh;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    /* Cambia el color del borde según prefieras */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Sombra ligera para resaltar */
-    padding: 10px;
-    /* Espaciado interno para no pegar el contenido al borde */
+.pa-4 {
+    padding: 16px !important;
 }
 
-.results-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    /* Espacio entre elementos */
+.mb-3 {
+    margin-bottom: 16px !important;
+}
+
+.mt-2 {
+    margin-top: 8px !important;
 }
 </style>
 
@@ -124,56 +101,56 @@ export default {
     }),
     methods: {
         getNombre() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[1] = tokenParts[1].replace('nombre=', '');
-              return tokenParts[1] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[1] = tokenParts[1].replace('nombre=', '');
+                    return tokenParts[1];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
         getRut() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
-              return tokenParts[2] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
+                    return tokenParts[2];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
         getCorreo() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[3] = tokenParts[3].replace('email=', '');
-              return tokenParts[3] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[3] = tokenParts[3].replace('email=', '');
+                    return tokenParts[3];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
         getCarrera() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[4] = tokenParts[4].replace('carrera=', '');
-              return tokenParts[4] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[4] = tokenParts[4].replace('carrera=', '');
+                    return tokenParts[4];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
         async fetchSearchResults(searchValue) {
             // Convertir searchValue a cadena explícitamente
@@ -242,6 +219,20 @@ export default {
             } catch (error) {
                 console.error('Error al actualizar preferencias:', error);
             }
+        },
+        async eliminarPreferencia(item) {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/eliminarPreferencia/${this.rut}/${item.id_tag}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Error en la respuesta de la red');
+                this.obtenerPreferencias();
+            } catch (error) {
+                console.error('Error al eliminar preferencia:', error);
+            }
         }
 
     },
@@ -252,7 +243,7 @@ export default {
         this.carrera = this.getCarrera();
         this.obtenerPreferencias();
     },
-    
+
 }
 
 

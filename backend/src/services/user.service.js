@@ -138,6 +138,17 @@ async function getTagById(id){
     }
 }
 
+async function deletePreferenciaUsuario(rut, id){
+    try{
+        const result = await pool.query(`DELETE FROM "Posee_3" WHERE rut = $1 AND id_tag = $2;`, [rut, id]);
+        return result;
+    }
+    catch(error){
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
 module.exports = {
     obtenerUsuarios,
     registrarUsuario,
@@ -149,5 +160,6 @@ module.exports = {
     getPreferenciasUsuario,
     updatePreferenciasUsuario,
     getTagById,
-    getUsuarioServidor
+    getUsuarioServidor,
+    deletePreferenciaUsuario
 };

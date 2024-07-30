@@ -164,7 +164,7 @@ async function getActividadesByGrupoUsuario(rut) {
 
 async function getActividadesParticipante(rut) {
     try{
-        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr IN (SELECT id_agr FROM "Participa" WHERE rut = $1)', [rut]);
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1)', [rut]);
         return actividades.rows;
     }
     catch (error) {

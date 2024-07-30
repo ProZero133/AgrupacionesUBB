@@ -1,6 +1,6 @@
 
 const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
-    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario } = require('../services/actividad.service');
+    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getParticipantesActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -151,11 +151,7 @@ async function participarActividad(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
-
         // Programa la actividad
-        console.log("Participando en la actividad");
-        console.log(id_act);
-        console.log(rut);
         const actividad = await setParticipanteActividad(id_act, rut);
 
         // operacion exitosa
@@ -181,6 +177,33 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
     }
 }
 
+async function ObtenerCuposRestantes(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+
+        // Obtiene la actividad
+        const actividad = await getActividadById(id_act);
+
+        // Obtiene los participantes de la actividad
+        const participantes = await getParticipantesActividad(id_act);
+        //Cantidad participantes
+        const cantidadParticipantes = participantes.length;
+        // Obtiene el cupo de la actividad
+        const cupo = actividad.cupos;
+
+        // Calcula los cupos restantes
+        const cuposRestantes = cupo - cantidadParticipantes;
+        // Retorna los cupos restantes y la id_act como un json
+        res.status(200).send({ cuposRestantes, id_act });
+
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al obtener los cupos restantes:', error);
+        res.status(500).send('Error al obtener los cupos restantes');
+    }
+}
+
 module.exports = {
     ObtenerActividades,
     ObtenerActividadPorID,
@@ -190,5 +213,6 @@ module.exports = {
     ObtenerActividadesPorAgrupacion,
     programarActividad,
     participarActividad,
-    ObtenerActividadesPorGrupoUsuario
+    ObtenerActividadesPorGrupoUsuario,
+    ObtenerCuposRestantes
 };

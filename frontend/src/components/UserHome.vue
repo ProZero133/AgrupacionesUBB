@@ -79,6 +79,7 @@
       </v-row>
     </v-container>
   </v-tab-item>
+
   <v-tab-item value="misActividades" v-if="tab === 'misActividades'">
     <v-container>
       <v-row>
@@ -100,7 +101,6 @@
       </v-row>
     </v-container>
   </v-tab-item>
-
 
   <v-dialog v-model="dialog">
     <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id" class="mb-15 card-actividades"
@@ -153,10 +153,9 @@
         </v-row>
 
       </v-card-actions>
-
     </v-card>
-
   </v-dialog>
+
 </template>
 
 <style scoped>
@@ -207,9 +206,11 @@
 </style>
 
 <script>
+
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
 import VueCookies from 'vue-cookies';
+
 export default {
   name: 'UserHome',
   data: () => ({
@@ -231,11 +232,13 @@ export default {
       router,
     };
   },
+
   computed: {
     elementoFiltrado() {
       return this.elementos.filter(elemento => elemento.id === this.idactActual);
     }
   },
+
   methods: {
     getRut() {
       const token = this.$cookies.get('token');
@@ -250,6 +253,7 @@ export default {
       }
       return null;
     },
+
     getRol() {
       const token = this.$cookies.get('token');
       if (token) {
@@ -263,12 +267,14 @@ export default {
       }
       return null;
     },
+
     grupoOrigenActividad(id_agr) {
       // Find the grupo that matches the id_agr
       const grupo = this.grupos.find(grupo => grupo.id_agr === id_agr);
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
+
     convertirImagen(data) {
       // Convertir el Proxy a un Array real si es necesario
       const dataArray = Array.isArray(data) ? data : Array.from(data);
@@ -282,6 +288,7 @@ export default {
       }
       return `data:image/jpeg;base64,${window.btoa(binary)}`;
     },
+
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -318,6 +325,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     findInsertIndex(array, element) {
       let low = 0;
       let high = array.length;
@@ -331,6 +339,7 @@ export default {
       }
       return low;
     },
+
     // Function to insert elements from array1 into array2 in sorted order
     anadirAElementos(array) {
       array.forEach(element => {
@@ -338,6 +347,7 @@ export default {
         this.elementos.splice(index, 0, element);
       });
     },
+
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -395,6 +405,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async VerPublicaciones() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/VerPublicacionesGruposUsuario/${this.rut.trim()}`, {
@@ -457,13 +468,16 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     iragGrupo(id) {
       this.$router.push(`/api/grupo/${id}`);
     },
+
     seleccionar(id) {
       this.idactActual = id;
       this.dialog = true;
     },
+
     async ParticiparActividad(id) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
@@ -485,6 +499,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     formatearFecha(fecha) {
       const date = new Date(fecha);
       const now = new Date();
@@ -536,6 +551,7 @@ export default {
 
       return `el día ${day}/${month}/${year} a las ${hours}:${minutes}`;
     },
+
     async VerActividadesParticipando(rut) {
       try {
         // Realiza un fetch a la ruta actividadesparticipante
@@ -559,6 +575,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     }
+
   },
   mounted() {
     this.rut = this.getRut();

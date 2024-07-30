@@ -208,8 +208,9 @@ export default {
               console.error('Invalid token:', error);
             }
           }
-          return null;
-        },    
+      return null;
+    },
+
     validateDate() {
       this.dateErrors = [];
       for (let rule of this.dateRules) {

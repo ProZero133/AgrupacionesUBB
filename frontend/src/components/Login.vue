@@ -4,7 +4,7 @@
     <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
-    <v-form v-if="showLoginByRut" class="form-loginrut" @submit.prevent="loginWithRut">
+    <v-form v-if="showLoginByRut" class="form-loginrut">
       <v-label>Iniciar sesión con credenciales institucionales</v-label>
       <v-text-field class="tfCredenciales" v-model="username" label="Rut" required></v-text-field>
       <v-text-field class="tfCredenciales" v-model="password" label="Contraseña" type="password"

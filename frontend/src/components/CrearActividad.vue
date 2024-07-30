@@ -286,11 +286,8 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/agrupaciones/${this.groupId}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.rows && data.rows.length > 0) {
-            this.verificado = data.rows[0].verificado;
-          } else {
-            console.error('No se encontraron filas en la respuesta');
-          }
+            this.verificado = data.verificado;
+            console.log('Verificado:', this.verificado);
         } else {
           console.error('Error en la respuesta:', response.status);
         }

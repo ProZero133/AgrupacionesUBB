@@ -172,6 +172,20 @@ async function getActividadesParticipante(rut) {
     }
 }
 
+async function deleteParticipanteActividad(id_act, rut) {
+    try {
+        // Elimina el participante de la actividad
+        const response = await pool.query('DELETE FROM "Participa" WHERE id_act = $1 AND rut = $2', [id_act, rut]);
+        // Retorna un mensaje de éxito como json
+        return { success: true, message: 'Participante eliminado de la actividad' };
+
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al eliminar la participacion de la actividad:', error);
+        throw error;
+    }
+}
+
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -186,5 +200,6 @@ module.exports = {
     setProgramacionActividad,
     getFechaActividad,
     getActividadesByGrupoUsuario,
-    getActividadesParticipante
+    getActividadesParticipante,
+    deleteParticipanteActividad
 };

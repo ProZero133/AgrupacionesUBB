@@ -1,6 +1,7 @@
 
 const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
-    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getParticipantesActividad, getActividadesParticipante } = require('../services/actividad.service');
+    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario,
+     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -191,6 +192,23 @@ async function obtenerActividadesParticipante(req, res) {
     }
 }
 
+async function abandonarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+        // Programa la actividad
+        const actividad = await deleteParticipanteActividad(id_act, rut);
+
+        // Retorna la actividad programada
+        res.code(200).send(actividad);
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.code(500).send('Error al programar la actividad');
+    }
+}
+
 module.exports = {
     ObtenerActividades,
     ObtenerActividadPorID,
@@ -201,5 +219,6 @@ module.exports = {
     programarActividad,
     participarActividad,
     ObtenerActividadesPorGrupoUsuario,
-    obtenerActividadesParticipante
+    obtenerActividadesParticipante,
+    abandonarActividad
 };

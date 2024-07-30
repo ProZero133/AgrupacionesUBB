@@ -1,6 +1,9 @@
 "use strict";
 
 const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificado } = require("../services/agrupacion.service.js");
+const { getAgrupacionById } = require("../services/agrupacion.service.js");
+const { getUsuarioByRut } = require("../services/user.service.js");
+const { notifyRechazo } = require("../services/mail.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
     try {
@@ -31,9 +34,32 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
         const id = req.params.id_agr;
+        const verificado = req.body.verificado;
+
+        //Primero, se busca la agrupacion con el id especificado, para obtener su rut
+
+        const agrupa = await getAgrupacionById(id);
+        console.log("agrupa", agrupa);
+        const usuario = await getUsuarioByRut(agrupa.rut);
+        console.log("usuario", usuario);
+
+        const notificacion = {
+            correo: usuario[0].correo,
+            agrupacion: agrupa.nombre_agr,
+            verificado: verificado
+        };
+
+        //Se notifica al usuario que su acreditación fue rechazada
+        const notifica = await notifyRechazo(notificacion);
+
+        try {
+            const notificado = await updateAgrupacionVerificado(id);
+        } catch (error) {
+            console.error(`No se pudo verificar la agrupacion.`, error);
+        }
 
         // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Verificado"
-        await updateAgrupacionVerificado(id);
+        
         
         reply.code(200).send('Acreditación exitosa');
     } catch (error) {
@@ -47,10 +73,32 @@ async function RechazoAcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
         const id = req.params.id_agr;
+        const verificado = req.body.verificado;
+        const motivo = req.body.motivo;
 
-        // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Rechazado"
-        await updateAgrupacionNoVerificado(id);
-        
+        //Primero, se busca la agrupacion con el id especificado, para obtener su rut
+
+        const agrupa = await getAgrupacionById(id);
+        console.log("agrupa", agrupa);
+        const usuario = await getUsuarioByRut(agrupa.rut);
+        console.log("usuario", usuario);
+
+        const notificacion = {
+            correo: usuario[0].correo,
+            agrupacion: agrupa.nombre_agr,
+            motivo: motivo,
+            verificado: verificado
+        };
+
+        //Se notifica al usuario que su acreditación fue rechazada
+        const notifica = await notifyRechazo(notificacion);
+
+        try {
+            const notificado = await updateAgrupacionNoVerificado(id);
+        } catch (error) {
+            console.error(`No se pudo no verificar la agrupacion.`, error);
+        }
+
         reply.code(200).send('Rechazo exitoso');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir

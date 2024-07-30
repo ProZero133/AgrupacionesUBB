@@ -182,6 +182,7 @@ export default {
           method: 'POST',
         });
         if (response.ok) {
+          this.$root.showSnackBar('error', 'Solicitud enviada!', 'Los loderadores revisarán tu solicitud.');
           const data = await response.json();
         } else {
           console.error('Error en la respuesta:', response.status);

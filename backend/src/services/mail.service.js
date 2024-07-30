@@ -169,7 +169,50 @@ async function integrateUsuario(mailDetails) {
         let info = await transporter.sendMail(mailOptions);
         results.push({ success: true, message: `Correo enviado a ${mailDetails.lider_correo}`, info: info });
     } catch (error) {
-        results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
+    }
+
+    console.log("results");
+    console.log(results);
+    return results;
+}
+
+async function notifyRechazo(mailDetails) {
+
+    let templatePath;
+    let sujeto;
+    let replacements;
+
+    if (mailDetails.verificado == 'Verificado'){
+        templatePath = path.join(__dirname, '../mails/aprueboCorreo.html');
+        replacements = {
+            agrupacion: mailDetails.agrupacion,
+        };
+        sujeto = 'Aprobación de acreditación de agrupación ' + mailDetails.agrupacion;
+    } else {
+        templatePath = path.join(__dirname, '../mails/rechazoCorreo.html');
+        replacements = {
+            agrupacion: mailDetails.agrupacion,
+            motivo: mailDetails.motivo,
+        };
+        sujeto = 'Rechazo de acreditación de agrupación ' + mailDetails.agrupacion;
+    }
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaubb@gmail.com>',
+        to: mailDetails.correo,
+        subject: sujeto,
+        html: htmlBody
+    };
+
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.correo}`, info: info });
+    } catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
     }
 
     console.log("results");
@@ -180,5 +223,6 @@ async function integrateUsuario(mailDetails) {
 module.exports = {
     notifyPublicacion,
     inviteUsuario,
-    integrateUsuario
+    integrateUsuario,
+    notifyRechazo
 };

@@ -72,7 +72,7 @@
                         </v-card>
                         <v-card class="selected-items-container">
                             <v-card-title>Tags seleccionados</v-card-title>
-                            <v-card-text>
+                            <v-card-text class="selected-item" v-for="item in selectedItems" :key="item.id">
                                 <div class="selected-item" v-for="item in selectedItems" :key="item.id">
                                     {{ item.nombre_tag }}
                                 </div>
@@ -287,8 +287,10 @@ export default {
                 // Verifica si la respuesta es exitosa
                 if (response.ok) {
                     const data = await response.json();
+                    this.$root.showSnackBar('success', 'Agrupación creada con éxito!');
+                    this.$router.push(`/api/grupo/${data.id_agr}`);
                     // Llama a la función para registrar los tags
-                    this.tags.forEach(tag => this.RegistrarTag(tag, data.id_agr));
+                    this.tags.forEach(tag => this.RegistrarTag(tag.id_tag, data.id_agr));
                 } else {
                     const error = await response.json();
                     console.error('Error en la respuesta:', error);
@@ -306,7 +308,7 @@ export default {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:3000/buscarTags/${stringValue}`);
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
                 this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
@@ -319,15 +321,17 @@ export default {
             this.tags.push(item); // Añade el item a la lista de seleccionados
             this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
         },
-        async RegistrarTag(nombre_tag, id_agr) {
+        async RegistrarTag(id_tag, id_agr) {
             try {
-                const { id_tag } = nombre_tag;
-                const response = await fetch('http://localhost:3000/ingresartagsagrupacion', {
+                console.log("id_tag", id_tag);
+                console.log("id_agr", id_agr);
+
+                const response = await fetch(`${global.BACKEND_URL}/ingresartagsagrupacion`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ id_tag, id_agr }),
+                    body: JSON.stringify({ id_tag: id_tag, id_agr: id_agr }),
                 });
                 if (response.ok) {
                     const data = await response.json();
@@ -351,6 +355,7 @@ export default {
 .descripcionAct {
   height: 20px !important;
   margin-top: -20px;
+  margin-bottom: 230px;
 }
 
 .image {

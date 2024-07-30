@@ -135,7 +135,7 @@ export default {
         });
 
         if (response.ok) {
-          this.showSnackbar('Agrupación aceptada con éxito', 'success');
+          this.showSnackbar('Agrupación aceptada con éxito', 'Se le notificará al lider por correo.');
           this.ObtenerAgrupacionesPendientes();
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -165,7 +165,7 @@ export default {
         });
 
         if (response.ok) {
-          this.showSnackbar('Agrupación rechazada con éxito', 'success');
+          this.showSnackbar('Agrupación rechazada con éxito', 'Se le notificará al lider por correo.');
           this.ObtenerAgrupacionesPendientes();
           this.rechazarDialog = false; // Cerrar el diálogo después de rechazar
         } else {

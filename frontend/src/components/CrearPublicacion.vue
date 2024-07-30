@@ -15,7 +15,7 @@
           <v-col cols="7">
             <v-select
             label="Tipo de publicación"
-            :items="['Post', 'Votación', 'Formulario']"
+            :items="['Post', 'Formulario']"
             v-model="tipo"
             class="ml-3 mb-n9 mr-3"
             ></v-select>
@@ -55,7 +55,7 @@
             <v-col cols="12">
               <v-file-input v-model="imagen" accept="image/png, image/jpeg, image/bmp" label="Imagen para la publicación"
                 clearable required variant="solo-filled" prepend-icon="" @change="onFileChange($event)"
-                @click:clear="urlImagen = defaultImageUrl">
+                @click:clear="urlImagen = defaultImageUrl" :rules="imgRules">
               </v-file-input>
             </v-col>
 
@@ -147,6 +147,17 @@ export default {
   data: () => ({
     namerules: [v => v.length <= 50 || 'Máximo 50 carácteres.'],
     descrules: [v => v.length <= 500 || 'Máximo 500 carácteres.'],
+    imgRules: [
+      value => {
+        return (
+          !value ||
+          !value.length ||
+          value[0].size < 1000000 ||
+          'Tamaño máximo de imagen: 1MB.'
+        );
+      },
+      v => !!v || 'La imagen es requerida.'
+    ],
     nom_pub: '',
     descripcion: '',
     imagen: [],
@@ -199,7 +210,7 @@ export default {
       this.CreaPublicacion();
     },
     disabledForm() {
-      if (this.tipo === 'Votación' && (this.opciones.length < 2 || this.opciones.includes('') || this.opciones.length > 13 || this.subiendo)) {
+      if ((this.tipo === 'Votación' && (this.opciones.length < 2 || this.opciones.includes('') || this.opciones.length > 13)) || this.subiendo) {
         return true;
       } else {
         return false;
@@ -287,14 +298,19 @@ async PostearImagen() {
 
     const today = new Date().toISOString();
 
-    await this.PostearImagen();
-    if (//this.idImagen === ''
-    false
-    ) {
-      console.error('Error al subir la imagen');
-      this.$root.showSnackBar('error', 'Imagen ya existe', 'Error de subida');
-      return;
-    }
+    if (this.urlImagen == this.defaultImageUrl || this.urlImagen == '') {
+        this.subiendo = false;
+        console.error('Error al subir la imagen');
+        this.$root.showSnackBar('error', 'Falta subir una imagen!', 'Error de subida');
+        return;
+      }
+      await this.PostearImagen();
+      if (this.idImagen === '' || !this.urlImagen) {
+        this.subiendo = false;
+        console.error('Error al subir la imagen');
+        this.$root.showSnackBar('error', 'La imagen no es válida', 'Error de subida');
+        return;
+      }
     else {
       console.log("todo bien!");
       console.log(this.idImagen);
@@ -339,10 +355,12 @@ async PostearImagen() {
             // Luego de eso, aca hay que poner el codigo para subir las opciones de la votación. Pendiente.
             } else {
               this.subiendo = false;
+              this.$root.showSnackBar('error', 'No se pudo subir la publicación', 'Error de subida');
               console.error('Error en la respuesta:', response.status);
               console.log(response)
             }
       } catch (error) {
+        this.subiendo = false;
         console.error('Error al hacer fetch:', error);
       }
     }

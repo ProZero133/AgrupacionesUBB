@@ -219,6 +219,7 @@
                 </v-card-actions>
               </v-card>
           </v-dialog>
+
           <v-dialog v-model="dialogabandonar" max-width="500px" min-width="400px">
             <v-card text="Abandonar agrupación">
               <v-card-title class="acred">¿Estas seguro de abandonar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
@@ -238,11 +239,71 @@
             </v-card>
           </v-dialog>
 
+          <v-dialog v-model="dialogPub">
+            <v-card min-width="380" v-for="elemento in elementoFiltrado()" :key="elemento.id" class="mb-15 card-actividades" border="10px">
+              <v-card-title class="headline">{{ elemento.nombre }}</v-card-title>
+              <v-card-text>
+                <v-row>
+
+                  <v-col cols="5">
+                    <v-img class="image" aspect-ratio="1" :src="elemento.imagen" cover />
+                  </v-col>
+
+                  <v-col cols="7">
+                    <p>{{ elemento.descripcion }}</p>
+                  </v-col>
+
+                  <v-col v-if="elemento.tipo_elemento === 'votación'" cols="12">
+
+                    <v-row>
+                      <v-radio-group v-model="elemento.opcionPreferida">
+                        <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
+                          :value="opcion.id_opcion">
+                        </v-radio>
+                      </v-radio-group>
+                    </v-row>
+
+                    <v-row>
+                      <v-btn color="primary"
+                        @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+                    </v-row>
+
+                  </v-col>
+
+                </v-row>
+              </v-card-text>
+            <v-card-actions>
+        <v-spacer></v-spacer>
+
+        <v-row v-if="elemento.tipo_elemento === 'actividad'">
+          <v-col cols="6">
+            <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row v-if="elemento.tipo_elemento === 'formulario'">
+          <v-col v-if="elemento.hipervinculo" cols="12">
+            <v-btn class="text-link" :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
+              target="_blank" rel="noopener noreferrer" color="primary">
+              Contestar formulario
+            </v-btn>
+          </v-col>
+        </v-row>
+
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
     <!-- ACTIVIDADES Y PUBLICACIONES -->
     <v-row align="start" no-gutters class="mt-6">
       <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-        <v-card class="card-actividades">
+        <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
           <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+            <v-card-subtitle class="publicadoen">Publicado {{
+              formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
           <v-card-text>
             <v-row>
               <v-col cols="5">
@@ -294,14 +355,17 @@
           </v-tooltip>
         </template>
         <v-list class="tultipCrear">
+          
           <v-list-item v-for="(item, index) in itemsFiltroRol" :key="index"
             v-on:click="this.$router.push(item.path + `${groupId}`)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
+
           <v-list-item v-if="abandonarItem"
             v-on:click="this.dialogabandonar = true">
             <v-list-item-title>Abandonar agrupación</v-list-item-title>
           </v-list-item>
+          
         </v-list>
       </v-menu>
     </div>
@@ -359,6 +423,7 @@ export default {
     dialogeliminar: false,
     dialoginvitar: false,
     dialogabandonar: false,
+    dialogPub: false,
     
     pressTimer: null,
     pressTime: 0,
@@ -376,6 +441,8 @@ export default {
     rut: '',
     rol: '',
     rolA: false,
+
+    idactActual: null,
 
     headers: [
       { text: 'Nombre', value: 'user_nombre' },
@@ -430,9 +497,38 @@ export default {
   methods: {
     mergeProps,
 
-    // EL método invitarUsuario invita a un usuario
-    // para ello, se toma el correoInvitado puesto en el campo, y se hace un fetch tipo push a "invitarUsuario"
-    // El push contiene en su body a this.correoInvitado como "mail", y this.datosGrupo.id_agr como "id_agr"
+    seleccionar(id) {
+      this.idactActual = id;
+      this.dialogPub = true;
+    },
+
+    async ParticiparActividad(id) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          this.dialogPub = false;
+          this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+        } else {
+          console.error(data.message);
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    elementoFiltrado() {
+      let coso = this.elementos.filter(elemento => elemento.id === this.idactActual);
+      console.log(coso);
+      return coso;
+    },
 
     async InvitarUsuario() {
       try {
@@ -556,9 +652,11 @@ export default {
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
+        this.$root.showSnackBar('error', 'Seguro que eres parte de este grupo?', 'Error de carga de datos');
         console.error('Error al obtener el rol:', error);
       }
     },
+
     async ObtenerLider(){
       const rutLider = this.getRut(); // Ensure rutLider is properly scoped
       try {
@@ -665,7 +763,7 @@ export default {
 
     selectItem(item) {
       this.selectedItems.push(item); // Añade el item a la lista de seleccionados
-      //          this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+      //this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
     },
 
     async VerGrupos() {
@@ -701,6 +799,7 @@ export default {
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
+        this.$root.showSnackBar('error', 'Este grupo no existe!', 'Error de datos');
         console.error('Error al hacer fetch:', error);
       }
     },
@@ -829,7 +928,8 @@ export default {
                 descripcion: publicacion.descripcion,
                 imagen: publicacion.imagen,
                 id_agr: publicacion.id_agr,
-                tipo_elemento: publicacion.tipoPub
+                tipo_elemento: publicacion.tipoPub,
+                fecha_creacion: publicacion.fecha_publicacion,
               };
     
               if (publicacion.tipoPub === 'formulario') {
@@ -1037,6 +1137,58 @@ export default {
       this.$router.push('/api/home');
     },
 
+    formatearFecha(fecha) {
+      const date = new Date(fecha);
+      const now = new Date();
+
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+
+      const diffInMs = now - date;
+      const diffInMinutes = Math.floor(diffInMs / 60000);
+
+      // Verificar si la fecha es hace menos de un minuto y es antes de ahora
+      if (diffInMinutes < 1 && date < now) {
+        return "justo ahora";
+      }
+
+      // Verificar si la fecha es hace menos de una hora
+      if (diffInMinutes < 60 && date < now) {
+        return `hace ${diffInMinutes} minutos`;
+      }
+
+      // Verificar si la fecha es de hoy
+      const isToday = date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear();
+      const isTomorrow = date.getDate() === now.getDate() + 1 &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear();
+
+      if (isToday) {
+        return `hoy a las ${hours}:${minutes}`;
+      } else if (isTomorrow) {
+        return `mañana a las ${hours}:${minutes}`;
+      }
+
+      // Verificar si la fecha es de ayer
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+
+      const isYesterday = date.getDate() === yesterday.getDate() &&
+        date.getMonth() === yesterday.getMonth() &&
+        date.getFullYear() === yesterday.getFullYear();
+
+      if (isYesterday) {
+        return `ayer a las ${hours}:${minutes}`;
+      }
+
+      return `el día ${day}/${month}/${year} a las ${hours}:${minutes}`;
+    },
+
   },
   mounted() {
     this.rut = this.getRut();
@@ -1115,5 +1267,13 @@ export default {
 .botoneliminar {
   position: relative;
   overflow: hidden;
+}
+
+.publicadoen {
+  font-size: 10px;
+  color: #3f3f3f;
+  margin-left: 0px;
+  margin-top: -10px;
+  margin-bottom: -10px;
 }
 </style>

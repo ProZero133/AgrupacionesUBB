@@ -1,6 +1,6 @@
 
 const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
-    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getActividadesParticipante } = require('../services/actividad.service');
+    setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario, getParticipantesActividad, getActividadesParticipante } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -151,11 +151,7 @@ async function participarActividad(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
-
         // Programa la actividad
-        console.log("Participando en la actividad");
-        console.log(id_act);
-        console.log(rut);
         const actividad = await setParticipanteActividad(id_act, rut);
 
         // operacion exitosa

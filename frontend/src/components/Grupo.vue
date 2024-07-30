@@ -403,7 +403,7 @@ export default {
     ],
     itemsSegunRol: [
       { title: 'Crear Actividad', path: '/api/crear_actividad/', roles: ['Lider', 'Miembro oficial'] },
-      { title: 'Crear Publicación', path: '/api/crear_publicacion/', roles: ['Lider', 'Miembro oficial'] },
+      { title: 'Crear Publicación', path: '/api/crear_publicacion/', roles: ['Lider'] },
       { title: 'Abandonar Agrupación', path: 'dialogabandonar', roles: ['Lider', 'Miembro oficial', 'Miembro'] },
     ],
 

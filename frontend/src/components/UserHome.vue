@@ -3,13 +3,14 @@
   <v-toolbar color="primary">
       <template v-slot:extension>
         <v-tabs v-model="tab" align-tabs="title">
-          <v-tab prepend-icon="mdi-bell-ring" value="actividades">Actividades</v-tab>
+          <v-tab prepend-icon="mdi-home" value="actividades">Página de Inicio</v-tab>
           <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
+          <v-tab prepend-icon="mdi-calendar-month" value="misActividades" @click="VerSolicitudes">Actividades</v-tab>
         </v-tabs>
       </template>
     </v-toolbar>
 
-      <!-- Actividades -->
+      <!-- Pagina Principal -->
     <v-tab-item value="actividades" v-if="tab === 'actividades'">
       <v-container cols="12">
         <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6 ml-n10">
@@ -76,6 +77,7 @@
       </v-row>
       </v-container>
     </v-tab-item>
+
 
     <v-dialog v-model="dialog">
       <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id"
@@ -195,6 +197,7 @@ export default {
     grupos: [],
 
     actividades: [],
+    actividadesP: [],
     publicaciones: [],
     elementos: [],
 
@@ -248,6 +251,68 @@ export default {
       const grupo = this.grupos.find(grupo => grupo.id_agr === id_agr);
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
+    },
+
+    async VerActividadesParticipante(){
+      try{
+        const rut = this.getRut();
+        const response = await fetch(`${global.BACKEND_URL}/actividadesparticipante/${rut}`, {
+          method: 'GET',
+        });
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          this.actividades = data;
+          if (data.success === false) {
+          } else {
+            this.actividades = data;
+            for (const actis of this.actividades) {
+              try {
+                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
+                  method: 'GET',
+                });
+                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+                if (responde.ok) {
+                  const dataImagen = await responde.text();
+                  actis.imagen = dataImagen;
+                } else {
+                  console.error('Error en la respuesta:', responde.status);
+                }
+
+              }
+              catch (error) {
+                console.error('Error al hacer fetch:', error);
+              }
+            }
+
+          // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+          // Los campos de actividad se pasarán de la siguiente manera a elementos:
+          // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+          const elementitos = this.actividades.map((elemento) => {
+            return {
+              id: elemento.id_act,
+              nombre: elemento.nom_act,
+              descripcion: elemento.descripcion,
+              tipo: elemento.tipo,
+              imagen: elemento.imagen,
+              id_agr: elemento.id_agr,
+              tipo_elemento: 'Actividad',
+              fecha_creacion: elemento.fecha_creacion
+            };
+          });
+
+          this.anadirAElementos(elementitos);
+
+          }        
+        
+        this.VerPublicaciones();
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
     },
 
     convertirImagen(data) {
@@ -543,6 +608,7 @@ export default {
     this.rol = this.getRol();
     this.VerGrupos();
     this.VerActividades();
+    this.VerActividadesParticipante();
   }
 }
 

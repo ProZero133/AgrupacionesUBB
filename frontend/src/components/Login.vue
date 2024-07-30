@@ -4,7 +4,7 @@
     <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
-    <v-form v-if="showLoginByRut" class="form-loginrut">
+    <v-form v-if="showLoginByRut" class="form-loginrut" @submit.prevent="loginWithRut">
       <v-label>Iniciar sesión con credenciales institucionales</v-label>
       <v-text-field class="tfCredenciales" v-model="username" label="Rut" required></v-text-field>
       <v-text-field class="tfCredenciales" v-model="password" label="Contraseña" type="password"
@@ -12,11 +12,12 @@
       <v-btn type="submit" color="primary">Iniciar sesión</v-btn>
     </v-form>
 
-    <v-form v-else class="form-logincorreo">
+    <v-form v-else class="form-logincorreo" @submit.prevent="login">
       <v-label>Iniciar sesión con Correo institucional</v-label>
       <v-text-field class="tfCorreo" v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
+    
     <v-dialog v-model="dialog" persistent max-width="290">
     <v-card>
       <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
@@ -50,6 +51,7 @@ export default {
   },
   methods: {
     async login() {
+      console.log("geda");
       this.isLoading = true;
       try {
         const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
@@ -75,6 +77,7 @@ export default {
       }
     },
     async verifyCode() {
+      console.log("gede");
       if (this.verificationCode === this.serverCode) {
         try {
         const nombre = this.userData.nombre;

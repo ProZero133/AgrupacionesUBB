@@ -71,7 +71,8 @@ export default {
       rechazarDialog: false,
       selectedId: null,
       headers: [
-        { text: 'Nombre', value: 'nombre_agr' },
+        { text: 'Nombre_Agrupacion', value: 'nombre_agr' },
+        { text: 'Nombre_Alumno', value: 'nombre' },
         { text: 'RUT', value: 'rut' },
         { text: 'Fecha de Creación', value: 'fecha_creacion' },
         { text: 'Acciones', value: 'action', sortable: false },
@@ -114,6 +115,9 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.AgrupacionesPendientesObtenidas = data;
+          
+          console.log('Agrupaciones pendientes:', this.AgrupacionesPendientesObtenidas);
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }

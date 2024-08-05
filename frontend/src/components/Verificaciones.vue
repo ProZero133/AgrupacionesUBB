@@ -74,6 +74,7 @@ export default {
         { text: 'Nombre_Agrupacion', value: 'nombre_agr' },
         { text: 'Nombre_Alumno', value: 'nombre' },
         { text: 'RUT', value: 'rut' },
+        { text: 'Correo', value: 'correo' },
         { text: 'Fecha de Creación', value: 'fecha_creacion' },
         { text: 'Acciones', value: 'action', sortable: false },
       ],

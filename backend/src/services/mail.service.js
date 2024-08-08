@@ -79,10 +79,6 @@ async function notifyPublicacion(publicacion) {
 }
 
 async function inviteUsuario(invitacion) {
-
-    console.log("invitacion");
-    console.log(invitacion);
-
     const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
     const replacements = {
         nombre: invitacion.nombre,
@@ -107,16 +103,11 @@ async function inviteUsuario(invitacion) {
         results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
     }
 
-    console.log("results");
-    console.log(results);
     return results;
 }
 
 async function inviteUsuario(invitacion) {
 
-    console.log("invitacion");
-    console.log(invitacion);
-
     const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
     const replacements = {
         nombre: invitacion.nombre,
@@ -140,9 +131,6 @@ async function inviteUsuario(invitacion) {
     } catch (error) {
         results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
     }
-
-    console.log("results");
-    console.log(results);
     return results;
 }
 
@@ -171,9 +159,6 @@ async function integrateUsuario(mailDetails) {
     } catch (error) {
         results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
     }
-
-    console.log("results");
-    console.log(results);
     return results;
 }
 
@@ -215,8 +200,6 @@ async function notifyRechazo(mailDetails) {
         results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
     }
 
-    console.log("results");
-    console.log(results);
     return results;
 }
 

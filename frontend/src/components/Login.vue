@@ -51,7 +51,6 @@ export default {
   },
   methods: {
     async login() {
-      console.log("geda");
       this.isLoading = true;
       try {
         const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
@@ -77,7 +76,6 @@ export default {
       }
     },
     async verifyCode() {
-      console.log("gede");
       if (this.verificationCode === this.serverCode) {
         try {
         const nombre = this.userData.nombre;

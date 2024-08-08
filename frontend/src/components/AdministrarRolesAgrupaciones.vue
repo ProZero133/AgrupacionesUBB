@@ -62,7 +62,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -92,8 +91,6 @@ export default {
             'Content-Type': 'application/json',
           },
         });
-
-        console.log(response);
 
         if (response.ok) {
           const data = await response.json();

@@ -526,7 +526,6 @@ export default {
 
     elementoFiltrado() {
       let coso = this.elementos.filter(elemento => elemento.id === this.idactActual);
-      console.log(coso);
       return coso;
     },
 
@@ -542,7 +541,6 @@ export default {
         // Verifica si la respuesta es exitosa
         if (response.ok) {
         // Convierte la respuesta en formato JSON
-          console.log('Invitación enviada');
           this.$root.showSnackBar('', 'Usuario invitado con éxito!');
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -556,7 +554,6 @@ export default {
       if (modal === 'dialogmiembros') {
         this.dialogmiembros = true;
       } else if (modal === 'dialogeditar') {
-        console.log('dialogeditar se hace true');
         this.dialogeditar = true;
       } else if (modal === 'dialogsolicitar') {
         this.dialogsolicitar = true;
@@ -687,17 +684,13 @@ export default {
       this.rut = this.getRut();
       await this.ObtenerLider();
       if (this.rol === 'Admin' || this.lider === true){
-        console.log("Es admin o lider");
         return this.adminOlider = true;
       } else {
-        console.log("No es admin ni lider");
         return this.adminOlider = false;
       }
     },
 
     async ObtenerRolUsr(rut) {
-      console.log("Rut seleccionado: ", rut);
-
       try {
         const url = `${global.BACKEND_URL}/obtencionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
@@ -995,7 +988,6 @@ export default {
           method: 'POST',
         });
         if (response.ok) {
-          console.log('Solicitud rechazada');
           this.VerSolicitudes();
         } else {
           console.log('Error al rechazar la solicitud');
@@ -1006,10 +998,8 @@ export default {
     },
     handleOptionClick(title, rut) {
       if (title === 'aceptar') {
-        console.log('aceptar');
         this.aceptarSolicitud(rut);
       } else if (title === 'rechazar') {
-        console.log('rechazar');
         this.rechazarSolicitud(rut);
       }
     },
@@ -1056,7 +1046,6 @@ export default {
         });
 
         if (response.ok) {
-          console.log('Grupo actualizado');
           this.VerGrupos();
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -1091,7 +1080,6 @@ export default {
         this.pressTime += 10;
         this.progress = (this.pressTime / 2000) * 100;
         if (this.pressTime >= 2000) {
-          console.log("Eliminando grupo");
           this.EliminarGrupo();
           this.cancelHold();
         }
@@ -1116,9 +1104,6 @@ export default {
       this.progress = 0;
     },
     EliminarGrupo() {
-      // Lógica para eliminar el grupo
-      console.log("rut", this.rut);
-      
       try {
         const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rut}`;
         const response = fetch(url, {
@@ -1193,7 +1178,6 @@ export default {
   mounted() {
     this.rut = this.getRut();
     this.rolA = this.esMiembro();
-    console.log("rolA", this.rolA);
     this.lider = this.ObtenerLider();
     this.rol = this.getRol();
     this.adminOlider=this.esAdminOLider();

@@ -229,7 +229,6 @@ async function eliminarAgrupacion(req, res) {
         }
         const usuarioEsLider = await getLider(id_agr);
         const lider = usuarioEsLider;
-        console.log("Usuario lider: ", usuarioEsLider);
         if (lider.rut !== rut) {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }
@@ -334,7 +333,6 @@ async function abandonarAgrupacion(req, res) {
         if (!result) {
             return res.code(500).send('Error al abandonar la agrupación');
         }
-        console.log("Resultado: ");
 
         res.code(200).send('Agrupación abandonada');
     } catch (error) {
@@ -434,8 +432,6 @@ async function notificarMiembrosPublicacion(req, res) {
         }
 
         const agrupacion = await getAgrupacionById(publicacion.id_agr);
-        console.log("Para esta agrupacion: ", agrupacion);
-
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
@@ -446,7 +442,6 @@ async function notificarMiembrosPublicacion(req, res) {
         publicacion.nombre_agr = agrupacion.nombre_agr;
 
         const result = await notifyPublicacion(publicacion);
-        console.log("Info total: ", publicacion);
 
         res.code(200).send(publicacion);
     } catch (error) {
@@ -459,8 +454,6 @@ async function ingresarPorCodigo(req, res) {
     try {
         const rut = req.params.rut;
         const codigo = req.params.codigo;
-        console.log("rut: ", rut);
-        console.log("codigo: ", codigo);
 
         const usuario = await getUsuarioByRut(rut);
         if (usuario.length === 0) {
@@ -471,9 +464,6 @@ async function ingresarPorCodigo(req, res) {
         if (!result) {
             return res.code(500).send('Error al ingresar el código');
         }
-
-        console.log("result");
-        console.log(result);
 
         res.code(200).send(result);
     } catch (error) {

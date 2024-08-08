@@ -52,8 +52,6 @@ async function getUsuarioByRut(req){
 async function getUsuarioByCorreo(req){
     try{
         const correo = req;
-        console.log("correo");
-        console.log(correo);
         const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [correo]);
         return result.rows;
     }

@@ -211,7 +211,6 @@ export default {
                 if (response.ok) {
                     // Convierte la respuesta en formato JSON
                     const data = await response.json();
-                    console.log("Imagen subida");
                     this.idImagen = data.id_imagen;
                 } else {
                     console.error('Error en la respuesta:', response.status);
@@ -256,17 +255,12 @@ export default {
 
         async CreaAgrupacion(nombre_agr, descripcion, tags) {
             const verificado = this.grupoverificado;
-            console.log("holaaa");
-            console.log(this.urlImagen);
-            
             if (this.urlImagen == this.defaultImageUrl || this.urlImagen == '') {
                 console.error('Error al subir la imagen');
                 this.$root.showSnackBar('error', 'Falta subir una imagen!', 'Error de subida');
                 return;
             }
             await this.PostearImagen();
-            console.log(this.idImagen);
-            console.log(this.urlImagen);
             if (this.idImagen === '' || !this.urlImagen) {
                 console.error('Error al subir la imagen');
                 this.$root.showSnackBar('error', 'La imagen no es válida', 'Error de subida');
@@ -323,9 +317,6 @@ export default {
         },
         async RegistrarTag(id_tag, id_agr) {
             try {
-                console.log("id_tag", id_tag);
-                console.log("id_agr", id_agr);
-
                 const response = await fetch(`${global.BACKEND_URL}/ingresartagsagrupacion`, {
                     method: 'POST',
                     headers: {

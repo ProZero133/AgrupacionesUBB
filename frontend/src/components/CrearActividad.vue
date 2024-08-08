@@ -189,7 +189,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -288,7 +287,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
             this.verificado = data.verificado;
-            console.log('Verificado:', this.verificado);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -322,8 +320,6 @@ export default {
         return;
       }
       else {
-        console.log('a ver esa imagen', this.idImagen);
-        console.log('a ver esa urlimagen', this.urlImagen);
         try {
           const response = await fetch(`${global.BACKEND_URL}/actividades`, {
             method: 'POST',
@@ -338,7 +334,6 @@ export default {
             const data = await response.json();
             const id_act = data.id_act;
             const fecha_actividad = new Date(this.date).toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
-            console.log("Fecha para la actividad: "+fecha_actividad);
             const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {

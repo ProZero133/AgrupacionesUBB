@@ -95,7 +95,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log('Respuesta:', data);
 
           this.$root.showSnackBar('success', "Bienvenido al grupo!", 'Código canjeado con éxito.');
           this.$router.push('/api/grupo/' + data.id_agr);
@@ -114,7 +113,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);

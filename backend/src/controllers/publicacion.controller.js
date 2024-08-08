@@ -53,7 +53,6 @@ async function obtenerPublicacionesPorId(req, res) {
         // Obtiene la publicacion por su id
         const pub = await getPublicacionById(id);
         const publicacion = pub.rows[0];
-        console.log(publicacion.id_pub);
 
         if (!publicacion) {
             if (res) {

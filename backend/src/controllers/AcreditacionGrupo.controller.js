@@ -12,15 +12,6 @@ async function ObtenerAcreditaciones(req, reply) {
 
         // Obtiene todas las acreditaciones en donde el atributo "verificado" sea igual "Pendiente"
         const agrupacionesPendientes = agrupacionesCompletas.filter(Agrupacion => Agrupacion.verificado === 'Pendiente');
-        
-
-        // Descomentar una de estas para debuggear
-        // Muestra las agrupaciones completas
-            //console.log(agrupacionesCompletas);
-        // Muestra las arupaciones pendientes
-            //console.log(agrupacionesPendientes);
-
-        // Retorna las acreditaciones
         reply.code(200).send(agrupacionesPendientes);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
@@ -37,12 +28,8 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
         const verificado = req.body.verificado;
 
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
-
         const agrupa = await getAgrupacionById(id);
-        console.log("agrupa", agrupa);
         const usuario = await getUsuarioByRut(agrupa.rut);
-        console.log("usuario", usuario);
-
         const notificacion = {
             correo: usuario[0].correo,
             agrupacion: agrupa.nombre_agr,
@@ -79,10 +66,7 @@ async function RechazoAcreditaciondeGrupo(req, reply) {
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
 
         const agrupa = await getAgrupacionById(id);
-        console.log("agrupa", agrupa);
         const usuario = await getUsuarioByRut(agrupa.rut);
-        console.log("usuario", usuario);
-
         const notificacion = {
             correo: usuario[0].correo,
             agrupacion: agrupa.nombre_agr,

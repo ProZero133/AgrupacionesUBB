@@ -4,7 +4,6 @@ async function getImagenes() {
     try{
         // Obtiene todas las actividades
         const imagenes = await pool.query('SELECT * FROM "Imagenes"');
-        console.log(imagenes.rows);
         // Retorna las actividades
         return imagenes.rows;
     }

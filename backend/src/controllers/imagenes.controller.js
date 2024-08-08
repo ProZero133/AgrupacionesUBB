@@ -36,8 +36,6 @@ async function crearImagen(req, res) {
             return res.code(400).send(error.message);
         }
 
-        console.log("La validacion salio bien");
-
         // Crea una nueva publicacion
         const newimagen = await createImagen(value);
 

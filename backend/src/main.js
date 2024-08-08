@@ -28,7 +28,6 @@ const url = config.URL;
     const { token } = request.query;
     try {
       const decoded = fastify.jwt.verify(token);
-      console.log('Token decodificado:', decoded);
       // Extrae el rol del usuario del objeto
       const rol = decoded.rol; // Asegúrate de usar 'rol_u' para coincidir con tu estructura de datos
   

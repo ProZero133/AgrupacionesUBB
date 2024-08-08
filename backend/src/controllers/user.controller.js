@@ -12,12 +12,8 @@ async function EmailLogin(request, reply) {
   const result = await validarUsuario(email);
   const usuario = result.user[0];
   if (result.success) {
-    console.log('Usuario encontrado, enviando correo de verificación...');
-    console.log(`Rol: ${usuario.rol_u}`);
-    console.log(`Email: ${usuario.correo}`);
     asignarToken(request.server, usuario, reply);
   } else {
-    console.log('Usuario no encontrado, no se enviará correo de verificación');
     reply.send({ success: false, message: 'Usuario no encontrado' });
   }
 }
@@ -169,8 +165,6 @@ function generateRandomString(length) {
 
 async function invitarUsuario(req, res) {
   try {
-    console.log("reqparam");
-    console.log(req.body);
     const invitacion = {
       id_agr: req.body.id_agr,
       nombre_agr: req.body.nombre_agr,
@@ -184,9 +178,6 @@ async function invitarUsuario(req, res) {
     if (usuario.length === 0) {
       return res.send({ success: false, message: 'No se encontró el usuario:' + req.params.id_agr });
     }
-
-    console.log("usuario");
-
     invitacion.nombre = usuario[0].nombre;
 
     try {

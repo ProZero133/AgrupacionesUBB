@@ -60,7 +60,6 @@ async function crearActividad(req, reply) {
             reply.code(400).send(error.details.map(detail => detail.message));
             return;
         }
-        console.log("Validacion exitosa, Creando actividad");
 
         // Crea una nueva actividad
         const actividad = await createActividad(body);

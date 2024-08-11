@@ -176,9 +176,6 @@ import addImage from '../assets/imagePlaceholder51.png';
       },
 
       async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
-        console.log(imagen);
-        
-        console.log(nom_act, descripcion, imagen, tipo, id_agr);
         try {
           const today = new Date();
           // Realiza una solicitud fetch a tu backend Fastify
@@ -193,7 +190,6 @@ import addImage from '../assets/imagePlaceholder51.png';
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             const data = await response.json();
-            console.log(data);
           } else {
             console.error('Error en la respuesta:', response.status);
           }

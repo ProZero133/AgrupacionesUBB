@@ -26,8 +26,6 @@ async function createOpcion(opcionData) {
             throw new Error('La votación con el ID especificado no existe');
         }
         //Arma la consulta SQL para insertar una opcion
-        console.log("weas insertadas");
-        console.log(opcionData);
         const newOpcion = await pool.query('INSERT INTO "Opcion" (nombre, respuestas, id_votacion) VALUES ($1, $2, $3) RETURNING *', [opcionData.nombre, 0, opcionData.id_votacion]);
         return newOpcion.rows[0];
 

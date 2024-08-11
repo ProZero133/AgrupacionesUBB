@@ -94,8 +94,6 @@ export default {
             idAgrupacion: item.id_agr,
           }));
 
-          console.log('Items:', this.items);
-
           for (const img of this.items) {
             try {
               const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, {

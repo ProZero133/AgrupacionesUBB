@@ -63,7 +63,6 @@
       }),
       methods: {
         async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
-          console.log(nom_act, descripcion, imagen, tipo, id_agr);
           const today = new Date();
           try {
             // Realiza una solicitud fetch a tu backend Fastify
@@ -78,7 +77,6 @@
             if (response.ok) {
               // Convierte la respuesta en formato JSON
               const data = await response.json();
-              console.log(data);
             } else {
               console.error('Error en la respuesta:', response.status);
             }

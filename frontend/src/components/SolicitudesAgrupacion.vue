@@ -66,7 +66,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -95,7 +94,6 @@ export default {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(data);
                     this.solicitudes = data;
                 } else {
                     console.log('Error al obtener las solicitudes');
@@ -111,7 +109,6 @@ export default {
                     method: 'POST',
                 });
                 if (response.ok) {
-                    console.log('Solicitud aceptada');
                     this.VerSolicitudes();
                 } else {
                     console.log('Error al aceptar la solicitud');

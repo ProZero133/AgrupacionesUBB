@@ -83,7 +83,7 @@
   <v-tab-item value="misActividades" v-if="tab === 'misActividades'">
     <v-container>
       <v-row>
-        <v-col v-for="elemento in ActividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+        <v-col v-for="elemento in actividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
           <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id_act)">
             <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
             <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{

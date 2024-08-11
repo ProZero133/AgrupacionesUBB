@@ -79,10 +79,6 @@ async function notifyPublicacion(publicacion) {
 }
 
 async function inviteUsuario(invitacion) {
-
-    console.log("invitacion");
-    console.log(invitacion);
-
     const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
     const replacements = {
         nombre: invitacion.nombre,
@@ -107,16 +103,11 @@ async function inviteUsuario(invitacion) {
         results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
     }
 
-    console.log("results");
-    console.log(results);
     return results;
 }
 
 async function inviteUsuario(invitacion) {
 
-    console.log("invitacion");
-    console.log(invitacion);
-
     const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
     const replacements = {
         nombre: invitacion.nombre,
@@ -140,9 +131,6 @@ async function inviteUsuario(invitacion) {
     } catch (error) {
         results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
     }
-
-    console.log("results");
-    console.log(results);
     return results;
 }
 
@@ -171,9 +159,6 @@ async function integrateUsuario(mailDetails) {
     } catch (error) {
         results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
     }
-
-    console.log("results");
-    console.log(results);
     return results;
 }
 
@@ -215,14 +200,69 @@ async function notifyRechazo(mailDetails) {
         results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
     }
 
-    console.log("results");
-    console.log(results);
     return results;
 }
+
+async function createNotificacion(rut, titulo, descripcion) {
+    const query = 'INSERT INTO "Notificacion" (rut, titulo, descripcion) VALUES ($1, $2, $3) RETURNING *';
+    const values = [rut, titulo, descripcion];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Error al crear notificacion:', error);
+        throw error;
+    }
+}
+
+async function getNotificacionesUsuario(rut) {
+    const query = 'SELECT * FROM "Notificacion" WHERE rut = $1';
+    const values = [rut];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows;
+    } catch (error) {
+        console.error('Error al obtener notificaciones del usuario:', error);
+        throw error;
+    }
+}
+
+async function deleteNotificacionesUsuario(rut) {
+    const query = 'DELETE FROM "Notificacion" WHERE rut = $1 RETURNING *';
+    const values = [rut];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows;
+    } catch (error) {
+        console.error('Error al eliminar notificaciones del usuario:', error);
+        throw error;
+    }
+}
+
+async function deleteNotificacion(id_noti) {
+    const query = 'DELETE FROM "Notificacion" WHERE id_noti = $1 RETURNING *';
+    const values = [id_noti];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows;
+    }
+    catch (error) {
+        console.error('Error al eliminar notificacion:', error);
+        throw error;
+    }
+}
+
 
 module.exports = {
     notifyPublicacion,
     inviteUsuario,
     integrateUsuario,
-    notifyRechazo
+    notifyRechazo,
+    createNotificacion,
+    getNotificacionesUsuario,
+    deleteNotificacionesUsuario
 };

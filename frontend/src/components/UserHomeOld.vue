@@ -258,8 +258,6 @@ export default {
     },
     async ParticiparActividad(id) {
       try {
-        console.log('Rut:', this.rut);
-        console.log('ID:', id);
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {

@@ -35,7 +35,6 @@ async function getAgrupaciones() {
       const fechaActual = new Date();
       const visible = true;
         // Inserta una nueva agrupacion en la base de datos
-        console.log("rut ingresado: ",agrupacion.rut);
         const newAgrupacion = await pool.query(
             'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible, imagen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
             [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible, agrupacion.imagen]
@@ -190,15 +189,8 @@ async function updateAgrupacionNoVerificado(id) {
 
   async function updateRolUsuario(rut, id_agr, rol) {
     try {
-
-      console.log("rut update: ",rut);
-      console.log("id_agr update: ",id_agr);
-      console.log("rol update: ",rol);
-
       // Actualiza el rol del usuario con el rut y id_agr especificados
       const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1 WHERE rut = $2 AND id_agr = $3 RETURNING *', [rol, rut, id_agr]);
-      console.log("response updateRolUsuario: ",response.rows[0]);
-
       return response.rows[0];
     } catch (error) {
       console.log('Error al actualizar el rol del usuario:', error);
@@ -233,8 +225,6 @@ async function updateAgrupacionNoVerificado(id) {
   async function createInvitacion(invitacion) {
     try {
       // Crea una nueva solicitud
-    console.log("aqui invitacion");
-    console.log(invitacion);
     const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', 
       [invitacion.rut, invitacion.id_agr, invitacion.fecha_integracion, invitacion.rol_agr]);
     return response.rows[0];
@@ -479,8 +469,6 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     };
 
     return correos;
-
-    console.log('Notificaciones enviadas exitosamente.');
     } catch (error) {
       console.error('Error al notificar a los miembros de la publicación:', error);
     }
@@ -503,9 +491,6 @@ async function getPublicacionCorreos(id_agr, id_pub) {
 
       // Step 2: Update 'Pertenece' with 'rut', 'fecha_integracion' and 'rol_agr'
       const response = await pool.query('UPDATE "Pertenece" SET rut = $1, fecha_integracion = CURRENT_TIMESTAMP, rol_agr = $2 WHERE rol_agr = $3 AND rut = $4 RETURNING *', [rut, 'Miembro', codigo, '11.111.111-1']);
-      
-      console.log("response");
-      console.log(response.rows[0]);
       
       return {
         "mensaje": 'Código de invitación canjeado con éxito',

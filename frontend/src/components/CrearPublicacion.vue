@@ -183,7 +183,6 @@ export default {
             try {
               const tokenParts = token.split('&');
               tokenParts[2] = tokenParts[2].replace('rut=', '');
-              console.log('Token:', tokenParts[2]);
               return tokenParts[2] ;
             } catch (error) {
               console.error('Invalid token:', error);
@@ -242,7 +241,6 @@ export default {
 
     onFileChange(e) {
       const file = e.target.files[0];
-      console.log(file) 
       if (!file) {
         this.urlImagen = this.defaultImageUrl;
         return;
@@ -252,9 +250,6 @@ export default {
         this.urlImagen = reader.result;
       };
       reader.readAsDataURL(file);
-
-      console.log("file");
-      console.log(this.urlImagen);
     },
 
     fileToBase64(file) {
@@ -284,7 +279,6 @@ async PostearImagen() {
     if (response.ok) {
       // Convierte la respuesta en formato JSON
       const data = await response.json();
-      console.log("Imagen subida");
       this.idImagen = data.id_imagen;
     } else {
       console.error('Error en la respuesta:', response.status);
@@ -312,17 +306,7 @@ async PostearImagen() {
         return;
       }
     else {
-      console.log("todo bien!");
-      console.log(this.idImagen);
       try {
-          console.log("json");
-          console.log(JSON.stringify({
-            encabezado: this.nom_pub,
-            imagen: this.idImagen,
-            id_agr: this.groupId,
-            rut: '20.999.554-9',
-            fecha_publicacion: today
-          }));
           const response = await fetch(`${global.BACKEND_URL}/publicaciones`, {
             method: 'POST',
             headers: {
@@ -332,15 +316,13 @@ async PostearImagen() {
               encabezado: this.nom_pub,
               imagen: this.idImagen,
               id_agr: this.groupId,
-              rut: '20.999.554-9',
+              rut: this.rut,
               fecha_publicacion: today}),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             this.pubId = await response.json();
-            console.log("Publicación base creada");
-            console.log(this.pubId);
 
             // Si tipoReal es 'Votación', se ejecuta crearVotacion. Si es 'Post', se ejecuta crearPost. Si es 'Formulario', se ejecuta crearFormulario. Si es otro valor, se muestra un mensaje de error.
             if (this.tipoReal === 'Votación') {
@@ -357,7 +339,6 @@ async PostearImagen() {
               this.subiendo = false;
               this.$root.showSnackBar('error', 'No se pudo subir la publicación', 'Error de subida');
               console.error('Error en la respuesta:', response.status);
-              console.log(response)
             }
       } catch (error) {
         this.subiendo = false;
@@ -380,8 +361,6 @@ async PostearImagen() {
       if (response.ok) {
         // Convierte la respuesta en formato JSON
         const data = await response.json();
-        console.log("Votación creada");
-        console.log(data);
   
         // Envío de las opciones
         const fetchPromises = this.opciones.map(async (opcion) => {
@@ -398,8 +377,6 @@ async PostearImagen() {
             if (response.ok) {
               // Convierte la respuesta en formato JSON
               const data = await response.json();
-              console.log("Opción creada");
-              console.log(data);
             } else {
               console.error('Error en la respuesta:', response.status);
             }
@@ -438,8 +415,6 @@ async PostearImagen() {
         await this.notificarPublicacion(this.pubId);
 
         const data = await response.json();
-        console.log("Formulario creado");
-        console.log(data);
         this.$root.showSnackBar('success', 'Formulario creado con éxito!');
         this.$router.push(`/api/grupo/${this.groupId}`);
       } else {
@@ -465,9 +440,6 @@ async PostearImagen() {
         // Convierte la respuesta en formato JSON
         const data = await response.json();
         await this.notificarPublicacion(this.pubId);
-
-        console.log("Post creado");
-        console.log(data);
         this.$root.showSnackBar('success', 'Post creado con éxito!');
         this.$router.push(`/api/grupo/${this.groupId}`);
       } else {
@@ -492,8 +464,6 @@ async PostearImagen() {
       if (response.ok) {
         // Convierte la respuesta en formato JSON
         const data = await response.json();
-        console.log("Notificación creada");
-        console.log(data);
       } else {
         console.error('Error en la respuesta:', response.status);
       }

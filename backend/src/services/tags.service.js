@@ -4,7 +4,6 @@ async function getTags() {
     try{
         // Obtiene todas las etiquetas
         const tags = await pool.query('SELECT * FROM "Tags"');
-        console.log(tags.rows);
         // Retorna las etiquetas
         return tags.rows;
     }

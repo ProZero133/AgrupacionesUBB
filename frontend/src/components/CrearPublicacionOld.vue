@@ -136,12 +136,8 @@ import { useRoute } from 'vue-router';
         this.createImage(file);
       },
 
-      async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {
-        console.log(imagen);
-        
+      async CreaActividad(nom_act, descripcion, imagen, tipo, id_agr) {  
         const today = new Date();
-
-        console.log(nom_act, descripcion, imagen, tipo, id_agr);
         try {
           // Realiza una solicitud fetch a tu backend Fastify
           const response = await fetch(`${global.BACKEND_URL}/actividad`, {
@@ -155,7 +151,6 @@ import { useRoute } from 'vue-router';
           if (response.ok) {
             // Convierte la respuesta en formato JSON
             const data = await response.json();
-            console.log(data);
           } else {
             console.error('Error en la respuesta:', response.status);
           }

@@ -5,7 +5,6 @@ async function getActividades() {
     try{
         // Obtiene todas las actividades
         const actividades = await pool.query('SELECT * FROM "Actividad"');
-        console.log(actividades.rows);
         // Retorna las actividades
         return actividades.rows;
     }

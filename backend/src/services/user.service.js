@@ -2,7 +2,7 @@ const {pool} = require('../db.js');
 
 
 // Obtiene todos los usuarios del servidor de la universidad
-async function obtenerUsuarios() {
+async function getUsuarios() {
     try {
         const result = await pool.query(`
             SELECT * FROM sm_usuario;
@@ -148,7 +148,7 @@ async function deletePreferenciaUsuario(rut, id){
 }
 
 module.exports = {
-    obtenerUsuarios,
+    getUsuarios,
     registrarUsuario,
     obtenerUsuariosPlataforma,
     getUsuarioByRut,

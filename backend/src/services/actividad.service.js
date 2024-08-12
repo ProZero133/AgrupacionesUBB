@@ -2,13 +2,37 @@ const { func } = require('joi');
 const { pool } = require('../db.js');
 
 async function getActividades() {
-    try{
+    try {
         // Obtiene todas las actividades
         const actividades = await pool.query('SELECT * FROM "Actividad"');
         // Retorna las actividades
         return actividades.rows;
     }
     catch (error) {
+        console.log('Error al obtener las actividades:', error);
+    }
+}
+async function getActividadesByAgrupacionActivas(id_agr) {
+    try {
+        // Obtiene los id_act de las actividades que aún no han ocurrido
+        const programas = await pool.query(`
+            SELECT id_act FROM "Programa" WHERE fecha_actividad > now()
+        `);
+
+        const id_acts = programas.rows.map(row => row.id_act);
+
+        if (id_acts.length === 0) {
+            return [];
+        }
+
+        // Obtiene los detalles de las actividades usando los id_act obtenidos
+        const actividades = await pool.query(`
+            SELECT * FROM "Actividad" WHERE id_agr = $1 AND id_act = ANY($2::uuid[])
+        `, [id_agr, id_acts]);
+
+        // Retorna las actividades
+        return actividades.rows;
+    } catch (error) {
         console.log('Error al obtener las actividades:', error);
     }
 }
@@ -28,7 +52,7 @@ async function getActividadById(id) {
 }
 
 async function getActividadesByAgrupacion(id_agr) {
-    try{
+    try {
         // Obtiene todas las actividades de una agrupacion
         const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
         // Retorna las actividades
@@ -40,7 +64,7 @@ async function getActividadesByAgrupacion(id_agr) {
 }
 
 async function getFechasActividades(id_agr) {
-    try{
+    try {
         const fechasActividades = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_agr = $1', [id_agr]);
         return fechasActividades.rows;
     }
@@ -50,7 +74,7 @@ async function getFechasActividades(id_agr) {
 }
 
 async function getFechaActividad(id_act) {
-    try{
+    try {
         const fechaActividad = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_act = $1', [id_act]);
         return fechaActividad.rows[0];
     }
@@ -60,7 +84,7 @@ async function getFechaActividad(id_act) {
 }
 
 async function getParticipantesActividad(id_act) {
-    try{
+    try {
         const participantes = await pool.query('SELECT * FROM "Participa" WHERE id_act = $1', [id_act]);
         return participantes.rows;
     }
@@ -70,7 +94,7 @@ async function getParticipantesActividad(id_act) {
 }
 
 async function setParticipanteActividad(id_act, rut) {
-    try{
+    try {
         const response = await pool.query('INSERT INTO "Participa" (rut, id_act) VALUES ($1, $2) RETURNING *', [rut, id_act]);
         return response.rows[0];
     }
@@ -80,7 +104,7 @@ async function setParticipanteActividad(id_act, rut) {
 }
 
 async function setProgramacionActividad(id_agr, id_act, fecha_actividad) {
-    try{
+    try {
         const response = await pool.query('INSERT INTO "Programa" (id_agr, id_act, fecha_actividad) VALUES ($1, $2, $3) RETURNING *', [id_agr, id_act, fecha_actividad]);
         return response.rows[0];
     }
@@ -131,13 +155,13 @@ async function deleteActividad(id) {
     try {
         //Validar que la actividad no tenga mas de un participante
         const participantes = await getParticipantesActividad(id);
-        if(participantes.length > 1){
+        if (participantes.length > 1) {
             return 'No es posible eliminar una actividad con mas de un participante';
         }
         //Validar que la actividad aun no ocurra
         const fechasActividades = await getFechaActividad(id);
         const fechaActual = new Date();
-        if(fechaActual > fechasActividades.fecha_actividad){
+        if (fechaActual > fechasActividades.fecha_actividad) {
             return 'No es posible eliminar una actividad que ya ocurrio';
         }
 
@@ -152,21 +176,59 @@ async function deleteActividad(id) {
 }
 
 async function getActividadesByGrupoUsuario(rut) {
-    try{
-        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
-        return actividades.rows;
-    }
-    catch (error) {
+    try {
+        // Obtiene todas las actividades del grupo del usuario
+        const actividades = await pool.query(`
+            SELECT * FROM "Actividad" 
+            WHERE id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
+        `, [rut]);
+
+        if (actividades.rows.length === 0) {
+            return [];
+        }
+
+        // Obtiene los id_act de las actividades que aún no han ocurrido
+        const programas = await pool.query(`
+            SELECT id_act FROM "Programa" WHERE fecha_actividad > now()
+        `);
+
+        const id_actsFuturas = programas.rows.map(row => row.id_act);
+
+        // Filtra las actividades que aún no han ocurrido
+        const actividadesFuturas = actividades.rows.filter(actividad => id_actsFuturas.includes(actividad.id_act));
+
+        // Retorna las actividades futuras
+        return actividadesFuturas;
+    } catch (error) {
         console.log('Error al obtener las actividades de un grupo de usuario:', error);
     }
 }
 
 async function getActividadesParticipante(rut) {
-    try{
-        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1)', [rut]);
-        return actividades.rows;
-    }
-    catch (error) {
+    try {
+        // Obtiene todas las actividades del participante
+        const actividades = await pool.query(`
+            SELECT * FROM "Actividad" 
+            WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1)
+        `, [rut]);
+
+        if (actividades.rows.length === 0) {
+            return [];
+        }
+
+        // Obtiene los id_act de las actividades que aún no han ocurrido
+        const programas = await pool.query(`
+            SELECT id_act FROM "Programa" WHERE fecha_actividad > now()
+        `);
+
+        const id_actsFuturas = programas.rows.map(row => row.id_act);
+
+        // Filtra las actividades que aún no han ocurrido
+        const actividadesFuturas = actividades.rows.filter(actividad => id_actsFuturas.includes(actividad.id_act));
+
+        // Retorna las actividades futuras
+        return actividadesFuturas;
+    } catch (error) {
         console.log('Error al obtener las actividades de un participante:', error);
     }
 }
@@ -200,5 +262,6 @@ module.exports = {
     getFechaActividad,
     getActividadesByGrupoUsuario,
     getActividadesParticipante,
-    deleteParticipanteActividad
+    deleteParticipanteActividad,
+    getActividadesByAgrupacionActivas
 };

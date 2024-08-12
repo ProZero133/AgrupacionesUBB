@@ -60,7 +60,7 @@
           <v-col cols="12" md="7" class="botcosos">
 
             <v-col>
-                <v-text-field v-model="date" label="Fecha para la actividad" type="date" required :min="hoy"
+                <v-text-field v-model="date" label="Fecha para la actividad" type="datetime-local" required :min="hoy"
                 :rules="dateRules" :error-messages="dateErrors" @change="validateDate"></v-text-field>
             </v-col>
 
@@ -117,6 +117,8 @@
 import addImage from '../assets/imagePlaceholder.png';
 import es from 'date-fns/locale/es';
 import { useRoute } from 'vue-router';
+import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export default {
   setup() {
@@ -127,10 +129,11 @@ export default {
       groupId,
     };
   },
+  
   name: 'HelloWorld',
 
   data: () => ({
-    hoy: new Date().toISOString().substr(0, 10),
+    hoy: new Date().toISOString().slice(0, 16),
     descrules: [
       v => !!v || 'Descripción requerida.',
       v => v.length <= 500 || 'Máximo 500 caracteres.'
@@ -149,8 +152,8 @@ export default {
         value => {
             const inputDate = new Date(value);
             const today = new Date();
-            if (inputDate.setHours(0, 0, 0, 0) >= today.setHours(0, 0, 0, 0)) return true
-            return `La fecha no puede ser antes que hoy.`
+            if (inputDate>= today) return true
+            return `La fecha no puede ser antes que la actual.`
         },
     ],
     imgRules: [
@@ -296,7 +299,8 @@ export default {
     },
 
     async CreaActividad(nom_act, descripcion, imagen, tipo, cupos) {
-      const hoy = new Date().toISOString().substr(0, 10);
+      const fecha = new Date();
+      const hoy = formatInTimeZone(fecha, 'America/Santiago', 'yyyy-MM-dd HH:mm:ss.SSS');
       //Validar todos los campos antes de insertar imagen
       const isValid = this.$refs.formulario.validate();
       if (!isValid) {
@@ -333,7 +337,8 @@ export default {
             // Convierte la respuesta en formato JSON
             const data = await response.json();
             const id_act = data.id_act;
-            const fecha_actividad = new Date(this.date).toISOString().split('T')[0]; // Convierte la fecha al formato YYYY-MM-DD
+            const fecha_actividad = this.date; // Convierte la fecha al formato YYYY-MM-DD
+            console.log("Fecha actividad: "+fecha_actividad);
             const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {

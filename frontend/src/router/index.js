@@ -89,12 +89,6 @@ const routes = [
           name: 'Generar Informes',
           component: () => import('@/views/GenerarInformesView.vue'),
         },
-        {
-          path: 'actividadesParticipante/:rut',
-          name: 'Actividades',
-          component: () => import('@/views/ActividadesParticipanteView.vue'),
-        }
-        
       ],
     },
     {

@@ -206,10 +206,29 @@ async function getActividadesByGrupoUsuario(rut) {
 
 async function getActividadesParticipante(rut) {
     try {
-        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1)', [rut]);
-        return actividades.rows;
-    }
-    catch (error) {
+        // Obtiene todas las actividades del participante
+        const actividades = await pool.query(`
+            SELECT * FROM "Actividad" 
+            WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1)
+        `, [rut]);
+
+        if (actividades.rows.length === 0) {
+            return [];
+        }
+
+        // Obtiene los id_act de las actividades que aún no han ocurrido
+        const programas = await pool.query(`
+            SELECT id_act FROM "Programa" WHERE fecha_actividad > now()
+        `);
+
+        const id_actsFuturas = programas.rows.map(row => row.id_act);
+
+        // Filtra las actividades que aún no han ocurrido
+        const actividadesFuturas = actividades.rows.filter(actividad => id_actsFuturas.includes(actividad.id_act));
+
+        // Retorna las actividades futuras
+        return actividadesFuturas;
+    } catch (error) {
         console.log('Error al obtener las actividades de un participante:', error);
     }
 }

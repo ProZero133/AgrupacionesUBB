@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificado } = require("../services/agrupacion.service.js");
 const { getAgrupacionById } = require("../services/agrupacion.service.js");
-const { getUsuarioByRut } = require("../services/user.service.js");
+const { getUsuarioByRut, obtenerUsuarios } = require("../services/user.service.js");
 const { notifyRechazo } = require("../services/mail.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
@@ -10,8 +10,19 @@ async function ObtenerAcreditaciones(req, reply) {
         // Obtiene todas las agrupaciones
         const agrupacionesCompletas = await getAgrupaciones();
 
+        // Obtiene todos los usuarios
+        const usuarios = await obtenerUsuarios();
+
+        // combina las agrupaciones con los usuarios
+        const Agrupaciones_y_Usuarios = agrupacionesCompletas.map(Agrupacion => {
+            const usuario = usuarios.find(usuario => usuario.rut === Agrupacion.rut);
+            return { ...Agrupacion, ...usuario };
+        });
+
+
         // Obtiene todas las acreditaciones en donde el atributo "verificado" sea igual "Pendiente"
-        const agrupacionesPendientes = agrupacionesCompletas.filter(Agrupacion => Agrupacion.verificado === 'Pendiente');
+        const agrupacionesPendientes = Agrupaciones_y_Usuarios.filter(Agrupacion => Agrupacion.verificado === 'Pendiente');
+        
         reply.code(200).send(agrupacionesPendientes);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir

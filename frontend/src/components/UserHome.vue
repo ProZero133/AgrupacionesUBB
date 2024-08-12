@@ -84,7 +84,7 @@
     <v-container>
       <v-row>
         <v-col v-for="elemento in actividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-          <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id_act)">
+          <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id)">
             <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
             <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
               formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
@@ -139,7 +139,7 @@
             <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
           </v-col>
           <v-col cols="6">
-            <v-btn color="green darken-1" text @click="ParticiparActividad(actividad.id_act)">Participar</v-btn>
+            <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
           </v-col>
         </v-row>
 
@@ -168,11 +168,11 @@
           <v-col cols="7">
             <p>{{ actividad.descripcion }}</p>
           </v-col>
-          <v-col cols="12">
-            <v-btn width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+          
+            <v-btn class="BotonAbandonar" width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
                     @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
                     depressed>Abandonar actividad</v-btn>
-        </v-col>
+        
         </v-row>
       </v-card-text>
       <v-card-actions>
@@ -231,6 +231,10 @@
   /* This centers the card within its container */
   border: 2px solid rgb(207, 207, 207) !important;
   min-height: 250px;
+}
+
+.BotonAbandonar{
+  margin-left: 55vw;
 }
 </style>
 

@@ -1,14 +1,15 @@
-const { ObtenUsuarios } = require('../services/user.service');
+const { getUsuarios } = require('../services/user.service');
 
 async function ObtenerUsuarios(request, reply) {
-    try {
-        const result = await ObtenUsuarios();
-        reply
-        .header('Content-Type', 'application/json')
-        .send(result.rows);
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        reply.status(500).send('Error interno del servidor');
+    const resultUsuarios = await getUsuarios();
+    if (resultUsuarios.length === 0) {
+        return reply.send({ success: false, message: 'No se encontraron usuarios' });
     }
+    else {
+        return reply.send(resultUsuarios);
     }
+}
+
+
+
 module.exports = { ObtenerUsuarios };

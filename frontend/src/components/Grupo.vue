@@ -394,6 +394,28 @@
     </div>
   </VLayoutItem>
 
+  <VLayoutItem v-if="adminOlider" model-value position="top" class="text-end pointer-events-none mb-n10" size="120">
+    <div class="ma-9 pointer-events-initial">
+      <v-menu>
+        <template v-slot:activator="{ props: menu }">
+          <v-tooltip location="start">
+            <template v-slot:activator="{ props: tooltip }">
+              <v-btn icon="mdi-cog" size="large" color="gray" v-bind="mergeProps(menu, tooltip)">
+              </v-btn>
+            </template>
+            <span>Apariencia</span>
+          </v-tooltip>
+        </template>
+        <v-list class="tultipApariencia">
+          <v-list-item v-for="(item, index) in aparienciaItems" :key="index"
+            v-on:click="this.$router.push(item.path + `${groupId}`)">
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+  </VLayoutItem>
+
 </template>
 
 <script>
@@ -480,6 +502,12 @@ export default {
       { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0 },
       { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1 },
       { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1 },
+    ],
+
+    aparienciaItems: [
+      { title: 'Cambiar Fondo', roles: ['Lider'] },
+      { title: 'Cambiar Fondo descripción', roles: ['Lider'] },
+      { title: 'Cambiar Bordes actividades', roles: ['Lider'] },
     ],
 
     // Lista de elementos

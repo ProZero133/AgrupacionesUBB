@@ -20,7 +20,7 @@
       </v-col>
       <v-row align="start" no-gutters class="mt-6">
         <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-          <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
+          <v-card rounded="xl" elevation="12" class="card-actividades" v-on:click="seleccionar(elemento.id)">
             <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
             <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
               formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>

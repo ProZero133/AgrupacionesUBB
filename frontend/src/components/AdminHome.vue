@@ -89,7 +89,7 @@
         </v-list>
         <div v-else>
           <v-alert text>
-            No hay grupos disponibles para este usuario.
+            Este usuario no pertenece a ninguna Agrupación.
           </v-alert>
         </div>
       </v-card-text>

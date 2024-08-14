@@ -1,7 +1,7 @@
 
-const { getActividades, getActividadesByAgrupacion, getActividadById, createActividad,
+const { getActividades, getActyAgr, getActividadesByAgrupacion, getActividadById, createActividad,
     setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario,
-     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad } = require('../services/actividad.service');
+     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad, setAprobacionActividad } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -12,6 +12,17 @@ async function ObtenerActividades(req, res) {
     }
     else{
         return res.send(respuesta);
+    }
+}
+
+async function ObtenerActividadyAgrupacion(req, res) {
+    const actividades = await getActyAgr();
+
+    if (actividades.length === 0) {
+        return res.send({ success: false, message: 'No se encontraron actividades' });
+    }
+    else{
+        return res.send(actividades);
     }
 }
 
@@ -208,8 +219,26 @@ async function abandonarActividad(req, res) {
     }
 }
 
+async function AceptacionActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        // Programa la actividad
+        const actividad = await setAprobacionActividad(id_act);
+        // Retorna la actividad programada
+        console.log(actividad);
+        res.code(200).send(actividad);
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al programar la actividad:', error);
+        res.code(500).send('Error al programar la actividad');
+    }
+}
+
+
 module.exports = {
     ObtenerActividades,
+    ObtenerActividadyAgrupacion,
     ObtenerActividadPorID,
     crearActividad,
     updateActividad,
@@ -219,5 +248,6 @@ module.exports = {
     participarActividad,
     ObtenerActividadesPorGrupoUsuario,
     obtenerActividadesParticipante,
-    abandonarActividad
+    abandonarActividad,
+    AceptacionActividad
 };

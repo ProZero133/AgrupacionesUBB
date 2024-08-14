@@ -1,12 +1,13 @@
 const fastify = require('../config/configFastify.js');
 
-const {ObtenerActividadesPorAgrupacion, ObtenerActividadPorID, ObtenerActividades, crearActividad, updateActividad, 
+const {ObtenerActividadesPorAgrupacion, ObtenerActividadyAgrupacion, ObtenerActividadPorID, ObtenerActividades, crearActividad, updateActividad, 
   eliminarActividad, programarActividad, participarActividad, obtenerActividadesParticipante, abandonarActividad} = require('../controllers/actividad.controller.js');
 
 
 module.exports = function(fastify, options, done) {
     
   fastify.get('/actividades', ObtenerActividades);
+  fastify.get('/ActAgr', ObtenerActividadyAgrupacion);
   fastify.get('/actividades/:id', ObtenerActividadPorID);
   fastify.get('/actividadesgrupo/:id', ObtenerActividadesPorAgrupacion);
   fastify.post('/programar/:id_act/:id_agr', programarActividad);

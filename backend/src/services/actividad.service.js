@@ -12,6 +12,40 @@ async function getActividades() {
         console.log('Error al obtener las actividades:', error);
     }
 }
+
+async function getActyAgr() {
+    try {
+        // Obtiene todas las actividades
+        const actividades = await pool.query('SELECT * FROM "Actividad"');
+        const programa = await pool.query('SELECT * FROM "Programa"');
+        const agrupaciones = await pool.query('SELECT * FROM "Agrupacion"');
+
+        // une las tablas
+        const actyAgr = actividades.rows.map(act => {
+            const agr = agrupaciones.rows.find(agr => agr.id_agr === act.id_agr);
+            const prog = programa.rows.find(prog => prog.id_act === act.id_act);
+            return {
+                id_act: act.id_act,
+                nom_act: act.nom_act,
+                descripcion: act.descripcion,
+                imagen: act.imagen,
+                tipo: act.tipo,
+                Aprobado: act.Aprobado,
+                id_agr: act.id_agr,
+                cupos: act.cupos,
+                fecha_creacion: act.fecha_creacion,
+                fecha_actividad: prog.fecha_actividad,
+                nombre_agr: agr.nombre_agr
+            }
+        });
+        // Retorna todos los datos
+        return actyAgr;
+    }
+    catch (error) {
+        console.log('Error al obtener las actividades:', error);
+    }
+}
+
 async function getActividadesByAgrupacionActivas(id_agr) {
     try {
         // Obtiene los id_act de las actividades que aún no han ocurrido
@@ -110,6 +144,16 @@ async function setProgramacionActividad(id_agr, id_act, fecha_actividad) {
     }
     catch (error) {
         console.log('Error al programar una actividad:', error);
+    }
+}
+
+async function setAprobacionActividad(id_act) {
+    try {
+        const response = await pool.query('UPDATE "Actividad" SET Aprobado = true WHERE id_act = $1 RETURNING *', [id_act]);
+        return response.rows[0];
+    }
+    catch (error) {
+        console.log('Error al aprobar una actividad:', error);
     }
 }
 
@@ -251,6 +295,7 @@ async function deleteParticipanteActividad(id_act, rut) {
 module.exports = {
     getActividades,
     getActividadById,
+    getActyAgr,
     createActividad,
     updateActividad,
     deleteActividad,
@@ -263,5 +308,7 @@ module.exports = {
     getActividadesByGrupoUsuario,
     getActividadesParticipante,
     deleteParticipanteActividad,
-    getActividadesByAgrupacionActivas
+    getActividadesByAgrupacionActivas,
+    setAprobacionActividad
+    
 };

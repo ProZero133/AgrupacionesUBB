@@ -14,7 +14,8 @@
       <v-row>
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
-            <v-text-field v-model="searchQueryAgrupaciones" prepend-icon="mdi-magnify" hide-details single-line placeholder="Buscar Agrupacion"></v-text-field>
+            <v-text-field v-model="searchQueryAgrupaciones" prepend-icon="mdi-magnify" hide-details single-line
+              placeholder="Buscar Agrupacion"></v-text-field>
           </v-toolbar>
         </v-container>
 
@@ -22,7 +23,8 @@
 
         <v-col cols="12" md="6" lg="3" v-for="(item, index) in filteredItemsAgrupaciones" :key="index">
           <v-card class="gruposCard" max-width="400">
-            <v-img class="align-end text-white" height="200" :src="item.img" cover gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
+            <v-img class="align-end text-white" height="200" :src="item.img" cover
+              gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
               <v-card-title>{{ item.title }}</v-card-title>
             </v-img>
 
@@ -50,21 +52,41 @@
       <v-row>
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
-            <v-text-field v-model="searchQueryUsuarios" prepend-icon="mdi-magnify" hide-details single-line placeholder="Buscar Usuario"></v-text-field>
+            <v-text-field v-model="searchQueryUsuarios" prepend-icon="mdi-magnify" hide-details single-line
+              placeholder="Buscar Usuario"></v-text-field>
           </v-toolbar>
         </v-container>
 
         <v-divider></v-divider>
-        
+
         <v-virtual-scroll :items="filteredItemsUsuarios" item-height="73">
           <template v-slot:default="{ item }">
-            <v-list-item :key="item.rutUsuario" :subtitle="item.carreraUsuario + ' - ' + item.correoUsuario" :title="item.nombreUsuario">
-              <template v-slot:prepend>
-                <!-- <v-icon class="bg-primary">mdi-account</v-icon> -->
+            <v-list-item :key="item.rutUsuario" :subtitle= "item.rutUsuario + ' - ' + item.correoUsuario"
+              :title="item.carreraUsuario+ ' - ' +item.nombreUsuario">
+              
+              <template v-slot:append>
+                <v-btn icon="mdi-account-group" size="small" variant="tonal" @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
               </template>
+
             </v-list-item>
           </template>
         </v-virtual-scroll>
+        
+        <template>
+        <v-dialog v-model="dialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">Use Google's location service?</v-card-title>
+            <v-card-text>Let Google help apps determine location. This means sending anonymous location data to
+              Google, even when no apps are running.</v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="dialog = false">Disagree</v-btn>
+              <v-btn color="green darken-1" text @click="dialog = false">Agree</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>      
+        </template>
+      
       </v-row>
     </v-container>
   </v-tab-item>
@@ -100,7 +122,10 @@ export default {
       }
       const search = this.searchQueryUsuarios.toLowerCase();
       return this.itemsUsuarios.filter(item =>
-        item.nombreUsuario.toLowerCase().includes(search)
+        item.nombreUsuario.toLowerCase().includes(search) +
+        item.rutUsuario.toLowerCase().includes(search) +
+        item.correoUsuario.toLowerCase().includes(search) +
+        item.carreraUsuario.toLowerCase().includes(search)
       );
     }
   },
@@ -190,6 +215,11 @@ export default {
     ir_a_la_agrupacion(idAgrupacion) {
       this.$router.push(`/api/grupo/${idAgrupacion}`);
     },
+
+    ir_a_grupos_usuario(rutUsuario) {
+      this.$router.push(`/api/obtenerGruposUsuario/${rutUsuario}`);
+    },
+
   },
   created() {
     this.rut = this.getRut();

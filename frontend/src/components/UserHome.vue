@@ -2,7 +2,7 @@
   <v-container cols="12"></v-container>
   <v-toolbar color="primary">
     <template v-slot:extension>
-      <v-tabs v-model="tab" align-tabs="title">
+      <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
         <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
         <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Actividades</v-tab>

@@ -639,7 +639,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.rol_agr === 'Miembro'|| data.rol_agr === 'Miembro Oficial'|| data.rol_agr === 'Lider') {
+          if (data.rol_agr === 'Miembro'|| data.rol_agr === 'Miembro Oficial'|| data.rol_agr === 'Lider' ) {
             this.rolA = true;
             this.rolEnAgrupacion = data.rol_agr;
           }else{

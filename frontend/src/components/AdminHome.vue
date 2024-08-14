@@ -61,35 +61,41 @@
 
         <v-virtual-scroll :items="filteredItemsUsuarios" item-height="73">
           <template v-slot:default="{ item }">
-            <v-list-item :key="item.rutUsuario" :subtitle= "item.rutUsuario + ' - ' + item.correoUsuario"
-              :title="item.carreraUsuario+ ' - ' +item.nombreUsuario">
-              
+            <v-list-item :key="item.rutUsuario" :subtitle="item.rutUsuario + ' - ' + item.correoUsuario"
+              :title="item.carreraUsuario + ' - ' + item.nombreUsuario">
               <template v-slot:append>
-                <v-btn icon="mdi-account-group" size="small" variant="tonal" @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
+                <v-btn icon="mdi-account-group" size="small" variant="tonal"
+                  @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
               </template>
-
             </v-list-item>
           </template>
         </v-virtual-scroll>
-        
-        <template>
-        <v-dialog v-model="dialog" max-width="290">
-          <v-card>
-            <v-card-title class="headline">Use Google's location service?</v-card-title>
-            <v-card-text>Let Google help apps determine location. This means sending anonymous location data to
-              Google, even when no apps are running.</v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="dialog = false">Disagree</v-btn>
-              <v-btn color="green darken-1" text @click="dialog = false">Agree</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>      
-        </template>
-      
       </v-row>
     </v-container>
   </v-tab-item>
+
+  <!-- Dialogo para mostrar los grupos del usuario -->
+  <v-dialog v-model="dialog" max-width="500">
+    <v-card>
+      <v-card-title class="headline">Grupos del Usuario</v-card-title>
+      <v-card-text>
+        <v-list>
+          <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_la_agrupacion(grupo.id_agr)">
+            <v-list-item-content>
+              
+              <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
+              <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
+              <v-divider></v-divider>
+
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="#9" text @click="dialog = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -103,6 +109,8 @@ export default {
       searchQueryUsuarios: '',
       rol: '',
       rut: '',
+      dialog: false, // Controla el diálogo
+      gruposUsuario: [], // Almacena los grupos del usuario seleccionado
     };
   },
   computed: {
@@ -111,20 +119,17 @@ export default {
         return this.itemsAgr;
       }
       const search = this.searchQueryAgrupaciones.toLowerCase();
-      return this.itemsAgr.filter(item =>
-        item.title.toLowerCase().includes(search)
-      );
+      return this.itemsAgr.filter(item => item.title.toLowerCase().includes(search));
     },
-
     filteredItemsUsuarios() {
       if (!this.searchQueryUsuarios) {
         return this.itemsUsuarios;
       }
       const search = this.searchQueryUsuarios.toLowerCase();
       return this.itemsUsuarios.filter(item =>
-        item.nombreUsuario.toLowerCase().includes(search) +
-        item.rutUsuario.toLowerCase().includes(search) +
-        item.correoUsuario.toLowerCase().includes(search) +
+        item.nombreUsuario.toLowerCase().includes(search) ||
+        item.rutUsuario.toLowerCase().includes(search) ||
+        item.correoUsuario.toLowerCase().includes(search) ||
         item.carreraUsuario.toLowerCase().includes(search)
       );
     }
@@ -171,9 +176,7 @@ export default {
 
           for (const img of this.itemsAgr) {
             try {
-              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, {
-                method: 'GET',
-              });
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, { method: 'GET' });
               if (responde.ok) {
                 const dataImagen = await responde.text();
                 img.img = dataImagen;
@@ -184,7 +187,6 @@ export default {
               console.error('Error al hacer fetch:', error);
             }
           }
-
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -192,7 +194,6 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-
     async BuscarUsuarios() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/usuarios`);
@@ -212,12 +213,24 @@ export default {
       }
     },
 
-    ir_a_la_agrupacion(idAgrupacion) {
-      this.$router.push(`/api/grupo/${idAgrupacion}`);
+    async ir_a_grupos_usuario(rutUsuario) {
+      this.dialog = true; // Abre el diálogo
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rutUsuario}`);
+        if (response.ok) {
+          const data = await response.json();
+          this.gruposUsuario = data; // Carga los grupos del usuario
+          console.log(this.gruposUsuario);
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
     },
 
-    ir_a_grupos_usuario(rutUsuario) {
-      this.$router.push(`/api/obtenerGruposUsuario/${rutUsuario}`);
+    ir_a_la_agrupacion(idAgrupacion) {
+      this.$router.push(`/api/grupo/${idAgrupacion}`);
     },
 
   },

@@ -79,23 +79,26 @@
     <v-card>
       <v-card-title class="headline">Grupos del Usuario</v-card-title>
       <v-card-text>
-        <v-list>
+        <v-list v-if="gruposUsuario.length">
           <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_la_agrupacion(grupo.id_agr)">
             <v-list-item-content>
-              
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
-              <v-divider></v-divider>
-
             </v-list-item-content>
           </v-list-item>
         </v-list>
+        <div v-else>
+          <v-alert text>
+            No hay grupos disponibles para este usuario.
+          </v-alert>
+        </div>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="justify-end">
         <v-btn color="#9" text @click="dialog = false">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+
 </template>
 
 <script>
@@ -204,7 +207,7 @@ export default {
             rutUsuario: item.rut,
             correoUsuario: item.correo,
             carreraUsuario: item.carrera,
-          }));
+          })).filter(item => item.rutUsuario !== '11.111.111-1'); // quita a John Doe de la lista
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -222,6 +225,7 @@ export default {
           this.gruposUsuario = data; // Carga los grupos del usuario
           console.log(this.gruposUsuario);
         } else {
+          this.gruposUsuario = [];
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
@@ -231,6 +235,11 @@ export default {
 
     ir_a_la_agrupacion(idAgrupacion) {
       this.$router.push(`/api/grupo/${idAgrupacion}`);
+    },
+
+    CerrarDialog() {
+      this.dialog = false; // Cierra el diálogo
+      gruposUsuario = []
     },
 
   },

@@ -35,7 +35,8 @@ async function getActyAgr() {
                 cupos: act.cupos,
                 fecha_creacion: act.fecha_creacion,
                 fecha_actividad: prog.fecha_actividad,
-                nombre_agr: agr.nombre_agr
+                nombre_agr: agr.nombre_agr,
+                aprobado: act.aprobado
             }
         });
         // Retorna todos los datos

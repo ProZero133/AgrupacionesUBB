@@ -96,7 +96,7 @@
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
           <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index"
-            @click="AbrirDialogAgrupacion(grupo.id_agr)">
+            @click="AbrirDialogAgrupacion(grupo.rutUsuario)">
             <v-list-item-content>
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
@@ -217,20 +217,21 @@ export default {
     },
     async BuscarUsuarios() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/usuarios`);
-        if (response.ok) {
-          const data = await response.json();
-          this.itemsUsuarios = data.map(item => ({
-            nombreUsuario: item.nombre,
-            rutUsuario: item.rut,
-            correoUsuario: item.correo,
-            carreraUsuario: item.carrera,
-          }));
-        } else {
-          console.error('Error en la respuesta:', response.status);
-        }
+      const response = await fetch(`${global.BACKEND_URL}/usuarios`);
+      if (response.ok) {
+        const data = await response.json();
+        this.itemsUsuarios = data.map(item => ({
+        nombreUsuario: item.nombre,
+        rutUsuario: item.rut,
+        correoUsuario: item.correo,
+        carreraUsuario: item.carrera,
+        })).filter(item => item.rutUsuario !== '11.111.111-1'); // Cambia el rut al usuario que no quieres que se muestre
+        
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
       } catch (error) {
-        console.error('Error al hacer fetch:', error);
+      console.error('Error al hacer fetch:', error);
       }
     },
     AbrirDialogAgrupacion(id) {
@@ -242,7 +243,7 @@ export default {
     },
     async ir_a_grupos_usuario(rut) {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/grupos_usuario/${rut}`);
+        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`);
         if (response.ok) {
           const data = await response.json();
           this.gruposUsuario = data.map(item => ({
@@ -250,6 +251,7 @@ export default {
             verificado: item.verificado,
             id_agr: item.id_agr,
           }));
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }

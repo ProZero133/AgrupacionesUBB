@@ -109,9 +109,9 @@ export default {
       selectedId: null,
       AgrupacionPendiente: [
         { title: 'Nombre Agrupacion', value: 'nombre_agr', sortable: true },
-        { title: 'Nombre Alumno', value: 'nombre', sortable: true },
-        { title: 'RUT', value: 'rut', sortable: true },
-        { title: 'Correo', value: 'correo', sortable: true },
+        { title: 'Líder de Agrupacion', value: 'nombre', sortable: true },
+        { title: 'RUT líder', value: 'rut', sortable: true },
+        { title: 'Correo líder', value: 'correo', sortable: true },
         { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true },
         { value: 'action', sortable: false },
       ],

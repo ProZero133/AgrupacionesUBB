@@ -467,9 +467,9 @@ export default {
     idactActual: null,
 
     headers: [
-      { text: 'Nombre', value: 'user_nombre' },
-      { text: 'Rut', value: 'rut' },
-      { text: 'Rol Agrupación', value: 'action', sortable: false },
+      { title: 'Nombre', value: 'user_nombre', sortable: true },
+      { title: 'Rut', value: 'rut', sortable: true },
+      { value: 'action', sortable: false },
     ],
 
     datosGrupo: {

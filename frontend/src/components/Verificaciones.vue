@@ -2,8 +2,15 @@
   <v-toolbar color="primary">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
-        <v-tab prepend-icon="mdi-account-group" value="agrupaciones">Agrupaciones</v-tab>
-        <v-tab prepend-icon="mdi-account-multiple" value="actividadesPendientes">Actividades</v-tab>
+
+        <v-tab prepend-icon="mdi-account-group" value="agrupaciones">
+          Agrupaciones
+          <v-badge color="red" :content="AgrupacionesPendientesObtenidas.length" inline></v-badge>
+        </v-tab>
+        <v-tab prepend-icon="mdi-account-multiple" value="actividadesPendientes">
+          Actividades
+          <v-badge color="red" :content="ActividadesPendientesObtenidas.length" inline></v-badge>
+        </v-tab>
       </v-tabs>
     </template>
   </v-toolbar>
@@ -21,8 +28,7 @@
           </template>
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
-              <v-btn icon color="blue" name="B_Aceptar" class="B_Aceptar"
-                @click="AceptarAgrupacion(item.id_agr)">
+              <v-btn icon color="blue" name="B_Aceptar" class="B_Aceptar" @click="AceptarAgrupacion(item.id_agr)">
                 <v-icon>mdi-checkbox-marked-circle</v-icon>
               </v-btn>
               <v-btn icon color="red" name="B_Rechazar" class="B_Rechazar" @click="openRechazarDialog(item.id_agr)">
@@ -76,10 +82,12 @@
           </template>
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
-              <v-btn icon color="blue" name="B_Aceptar" class="B_Aceptar_Actividad" @click="AceptarActividad(item.id_act)">
+              <v-btn icon color="blue" name="B_Aceptar" class="B_Aceptar_Actividad"
+                @click="AceptarActividad(item.id_act)">
                 <v-icon>mdi-calendar-check</v-icon>
               </v-btn>
-              <v-btn icon color="red" name="B_Rechazar" class="B_Rechazar_Actividad" @click="openRechazarDialog(item.id_act)">
+              <v-btn icon color="red" name="B_Rechazar" class="B_Rechazar_Actividad"
+                @click="openRechazarDialog(item.id_act)">
                 <v-icon>mdi-calendar-remove</v-icon>
               </v-btn>
             </div>
@@ -117,11 +125,11 @@ export default {
       ],
 
       ActividadPendiente: [
-        { title: 'Nombre de Agrupacion', value: 'nombre_agr', sortable: true  },
-        { title: 'Nombre de Actividad', value: 'nom_act', sortable: true  },
-        { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true  },
-        { title: 'Fecha de Actividad', value: 'fecha_actividad', sortable: true  },
-        { title: 'Cupos Totales', value: 'cupos', sortable: true  },
+        { title: 'Nombre de Agrupacion', value: 'nombre_agr', sortable: true },
+        { title: 'Nombre de Actividad', value: 'nom_act', sortable: true },
+        { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true },
+        { title: 'Fecha de Actividad', value: 'fecha_actividad', sortable: true },
+        { title: 'Cupos Totales', value: 'cupos', sortable: true },
         { value: 'action', sortable: false },
       ]
 
@@ -246,7 +254,7 @@ export default {
       }
     },
 
-    async AceptarActividad(id_act){
+    async AceptarActividad(id_act) {
       try {
         const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
         const response = await fetch(`${global.BACKEND_URL}/aceptacionAct/${Actividad_a_Aceptar.id_act}`, {

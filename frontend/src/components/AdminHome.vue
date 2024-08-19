@@ -225,8 +225,7 @@ export default {
         rutUsuario: item.rut,
         correoUsuario: item.correo,
         carreraUsuario: item.carrera,
-        })).filter(item => item.rutUsuario !== '11.111.111-1'); // Cambia el rut al usuario que no quieres que se muestre
-        
+        })).filter(item => item.rutUsuario !== '11.111.111-1'); // Pone el rut que no quieras que se muestre, en este caso, Jhon
       } else {
         console.error('Error en la respuesta:', response.status);
       }

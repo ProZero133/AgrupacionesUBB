@@ -22,26 +22,23 @@
         <v-divider></v-divider>
 
         <v-col cols="12" md="6" lg="3" v-for="(item, index) in filteredItemsAgrupaciones" :key="index">
-          <v-card class="gruposCard" max-width="400">
+          <v-card class="gruposCard" max-width="400" @click="AbrirDialogAgrupacion(item.idAgrupacion)">
             <v-img class="align-end text-white" height="200" :src="item.img" cover
               gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
               <v-card-title>{{ item.title }}</v-card-title>
             </v-img>
 
             <v-card-subtitle class="pt-4">
-              {{ item.subtitle }}
+              Estado grupo: {{ item.verificado }}
             </v-card-subtitle>
 
-            <v-card-text>
-              <div>{{ item.description1 }}</div>
-              <div>{{ item.description2 }}</div>
+            <v-card-text class="text-justify">
+              {{ item.descripcion.length > 180 ? item.descripcion.slice(0, 180) + '...' : item.descripcion }}
             </v-card-text>
 
-            <v-card-actions>
-              <v-btn color="blue" @click="ir_a_la_agrupacion(item.idAgrupacion)" text>Ir a la agrupacion</v-btn>
-            </v-card-actions>
           </v-card>
         </v-col>
+
       </v-row>
     </v-container>
   </v-tab-item>
@@ -74,13 +71,32 @@
     </v-container>
   </v-tab-item>
 
+  <!-- Dialogo para mostrar los detalles de la agrupación -->
+  <v-dialog v-model="dialogAgrupacion" class="dialogAgrupacion">
+    <v-card>
+      <v-card-title class="headline">{{ selectedAgrupacion.title }}</v-card-title>
+      <v-card-text>
+        <v-img :src="selectedAgrupacion.img" height="300" cover></v-img>
+        <v-divider></v-divider>
+        <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.verificado }}</p>
+        <p><br><strong>Descripción:</strong></p>
+        <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn color="blue" text @click="ir_a_agrupacion(selectedAgrupacion.idAgrupacion)">Ir a Agrupacion</v-btn>
+        <v-btn color="red" text @click="dialogAgrupacion = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <!-- Dialogo para mostrar los grupos del usuario -->
-  <v-dialog v-model="dialog" max-width="500">
+  <v-dialog v-model="dialogUsuario" max-width="500">
     <v-card>
       <v-card-title class="headline">Grupos del Usuario</v-card-title>
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
-          <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_la_agrupacion(grupo.id_agr)">
+          <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index"
+            @click="AbrirDialogAgrupacion(grupo.rutUsuario)">
             <v-list-item-content>
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
@@ -94,7 +110,7 @@
         </div>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="#9" text @click="dialog = false">Cerrar</v-btn>
+        <v-btn color="#9" text @click="dialogUsuario = false">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -112,8 +128,10 @@ export default {
       searchQueryUsuarios: '',
       rol: '',
       rut: '',
-      dialog: false, // Controla el diálogo
+      dialogUsuario: false, // Controla el diálogo para usuarios
+      dialogAgrupacion: false, // Controla el diálogo para agrupaciones
       gruposUsuario: [], // Almacena los grupos del usuario seleccionado
+      selectedAgrupacion: {}, // Almacena los detalles de la agrupación seleccionada
     };
   },
   computed: {
@@ -171,8 +189,8 @@ export default {
           const data = await response.json();
           this.itemsAgr = data.map(item => ({
             title: item.nombre_agr,
-            subtitle: item.verificado,
-            description1: item.descripcion,
+            verificado: item.verificado,
+            descripcion: item.descripcion,
             img: item.imagen,
             idAgrupacion: item.id_agr,
           }));
@@ -199,58 +217,62 @@ export default {
     },
     async BuscarUsuarios() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/usuarios`);
-        if (response.ok) {
-          const data = await response.json();
-          this.itemsUsuarios = data.map(item => ({
-            nombreUsuario: item.nombre,
-            rutUsuario: item.rut,
-            correoUsuario: item.correo,
-            carreraUsuario: item.carrera,
-          })).filter(item => item.rutUsuario !== '11.111.111-1'); // quita a John Doe de la lista
-        } else {
-          console.error('Error en la respuesta:', response.status);
-        }
+      const response = await fetch(`${global.BACKEND_URL}/usuarios`);
+      if (response.ok) {
+        const data = await response.json();
+        this.itemsUsuarios = data.map(item => ({
+        nombreUsuario: item.nombre,
+        rutUsuario: item.rut,
+        correoUsuario: item.correo,
+        carreraUsuario: item.carrera,
+        })).filter(item => item.rutUsuario !== '11.111.111-1'); // Pone el rut que no quieras que se muestre, en este caso, Jhon
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
       } catch (error) {
-        console.error('Error al hacer fetch:', error);
+      console.error('Error al hacer fetch:', error);
       }
     },
-
-    async ir_a_grupos_usuario(rutUsuario) {
-      this.dialog = true; // Abre el diálogo
+    AbrirDialogAgrupacion(id) {
+      const agrupacion = this.itemsAgr.find(item => item.idAgrupacion === id);
+      if (agrupacion) {
+        this.selectedAgrupacion = agrupacion;
+        this.dialogAgrupacion = true; // Abre el diálogo con los detalles
+      }
+    },
+    async ir_a_grupos_usuario(rut) {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rutUsuario}`);
+        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`);
         if (response.ok) {
           const data = await response.json();
-          this.gruposUsuario = data; // Carga los grupos del usuario
-          console.log(this.gruposUsuario);
+          this.gruposUsuario = data.map(item => ({
+            nombre_agr: item.nombre_agr,
+            verificado: item.verificado,
+            id_agr: item.id_agr,
+          }));
+
         } else {
-          this.gruposUsuario = [];
           console.error('Error en la respuesta:', response.status);
         }
+        this.dialogUsuario = true;
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
     },
 
-    ir_a_la_agrupacion(idAgrupacion) {
+    ir_a_agrupacion(idAgrupacion) {
       this.$router.push(`/api/grupo/${idAgrupacion}`);
     },
-
-    CerrarDialog() {
-      this.dialog = false; // Cierra el diálogo
-      gruposUsuario = []
-    },
-
   },
-  created() {
-    this.rut = this.getRut();
-    this.rol = this.getRol();
+  mounted() {
     this.fetchItems();
     this.BuscarUsuarios();
+    this.rut = this.getRut();
+    this.rol = this.getRol();
   },
 };
 </script>
+
 
 <style scoped>
 .search-bar {
@@ -265,5 +287,7 @@ export default {
 .gruposCard {
   min-height: 360px;
   max-height: 360px;
+  margin: 1%;
 }
+
 </style>

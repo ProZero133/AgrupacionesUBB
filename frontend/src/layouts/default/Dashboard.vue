@@ -17,14 +17,16 @@
           <v-spacer></v-spacer>
   
           <template v-if="$vuetify.display.mdAndUp">
-            <span class="mt-2">{{ userNombre }}</span>
+            <v-list-item-content class="text-right">
+              <v-list-item-title class="mt-2">{{ userNombre }}</v-list-item-title>
+              <v-list-item-subtitle >{{ getRol() }}</v-list-item-subtitle>
+            </v-list-item-content>
             
             <v-btn icon>
               <v-icon class="mt-2">mdi-account</v-icon>
             </v-btn>
 
             <v-img :src="imageSrc" max-height="50" class="mt-2"></v-img>
-
           </template>
       </v-app-bar>
   

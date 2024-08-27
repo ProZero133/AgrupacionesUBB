@@ -63,7 +63,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Respuesta del servidor:', data.codigo);
+          //console.log('Respuesta del servidor:', data.codigo);
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;
           this.dialog = true;

@@ -117,6 +117,7 @@ export default {
       selectedId: null,
       AgrupacionPendiente: [
         { title: 'Nombre Agrupacion', value: 'nombre_agr', sortable: true },
+        { title: 'Cantidad de Integrantes', value: 'integrantes', sortable: true },
         { title: 'Líder de Agrupacion', value: 'nombre', sortable: true },
         { title: 'RUT líder', value: 'rut', sortable: true },
         { title: 'Correo líder', value: 'correo', sortable: true },
@@ -165,17 +166,37 @@ export default {
     },
     async ObtenerAgrupacionesPendientes() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
-          method: 'GET',
+      const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
+        method: 'GET',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        this.AgrupacionesPendientesObtenidas = data;
+        await this.ObtenerIntegrantesAgrupaciones(); // Call the method to fetch the number of users for each group
+      } else {
+        console.error('Error en la respuesta:', response.status);
+      }
+
+      } catch (error) {
+      console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async ObtenerIntegrantesAgrupaciones() {
+      try {
+      for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
+        const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
+        method: 'GET',
         });
         if (response.ok) {
-          const data = await response.json();
-          this.AgrupacionesPendientesObtenidas = data;
+        const data = await response.json();
+        agrupacion.integrantes = data.length; 
         } else {
-          console.error('Error en la respuesta:', response.status);
+        console.error('Error en la respuesta:', response.status);
         }
+      }
       } catch (error) {
-        console.error('Error al hacer fetch:', error);
+      console.error('Error al hacer fetch:', error);
       }
     },
 
@@ -187,7 +208,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.ActividadesPendientesObtenidas = data.filter(item => item.tipo === true && item.aprobado === false);
-          console.log(this.ActividadesPendientesObtenidas);
 
         } else {
           console.error('Error en la respuesta:', response.status);

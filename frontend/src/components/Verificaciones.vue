@@ -172,7 +172,7 @@ export default {
       if (response.ok) {
         const data = await response.json();
         this.AgrupacionesPendientesObtenidas = data;
-        await this.ObtenerIntegrantesAgrupaciones(); // Call the method to fetch the number of users for each group
+        await this.ObtenerIntegrantesAgrupaciones(); 
       } else {
         console.error('Error en la respuesta:', response.status);
       }

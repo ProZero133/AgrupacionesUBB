@@ -51,10 +51,12 @@
   <v-tab-item value="usuariosSistema" v-if="tab === 'usuariosSistema'">
     <v-container>
       <v-row>
+        <v-container> </v-container>
+
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
             <v-text-field v-model="searchQueryUsuarios" prepend-icon="mdi-magnify" hide-details single-line
-              placeholder="Buscar Usuario"></v-text-field>
+              placeholder="Nombre, Rut, Carrera o Correo electronico del usuario"></v-text-field>
           </v-toolbar>
         </v-container>
 
@@ -63,7 +65,7 @@
         <v-virtual-scroll :items="filteredItemsUsuarios" item-height="73">
           <template v-slot:default="{ item }">
             <v-list-item :key="item.rutUsuario" :subtitle="item.rutUsuario + ' - ' + item.correoUsuario"
-              :title="item.carreraUsuario + ' - ' + item.nombreUsuario">
+              :title="item.carreraUsuario + ' - ' + item.nombreUsuario" v-if="searchQueryUsuarios !== ''">
               <template v-slot:append>
                 <v-btn icon="mdi-account-group" size="small" variant="tonal"
                   @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
@@ -84,7 +86,7 @@
         <v-divider></v-divider>
         <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.verificado }}</p>
         <p><strong>Cantidad de Integrantes:</strong> {{ selectedAgrupacion.integrantes || 0 }}</p>
-        <p><br><strong>Descripción:</strong></p>
+        <p><strong>Descripción:</strong></p>
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
       </v-card-text>
       <v-card-actions class="justify-end">

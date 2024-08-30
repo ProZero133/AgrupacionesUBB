@@ -338,6 +338,7 @@ async function validateEliminarGrupo(id_agr) {
       for (let i = 0; i < fechasActividades.length; i++) {
         if(fechaActual > fechasActividades[i].fecha){
           //Soft delete por ya haber organizado actividades
+          console.log('Fecha actual mayor a la fecha de la actividad');
           const agrupacion = await softDeleteAgrupacion(id_agr);
           if(agrupacion.length === 0){
             return 'Error al eliminar la agrupación';
@@ -353,6 +354,7 @@ async function validateEliminarGrupo(id_agr) {
         const participantes = await getParticipantesActividad(actividades[i].id_act);
         if(participantes.length > 1){
           //Soft delete por tener actividades con mas de un participante
+          console.log('Actividad con mas de un participante');
           const agrupacion = await softDeleteAgrupacion(id_agr);
           if(agrupacion.length === 0){
             return 'Error al eliminar la agrupación';
@@ -362,6 +364,7 @@ async function validateEliminarGrupo(id_agr) {
       }
     }
     //Eliminar la agrupacion si no tiene actividades o tiene actividades con un solo participante
+    console.log('Eliminando agrupacion, no tiene actividades o tiene actividades con un solo participante');
     const agrupacion = await deleteAgrupacion(id_agr);
 
     return 'Agrupacion eliminada';
@@ -375,18 +378,21 @@ async function getAgrupacionesDeUsuario(rut) {
   try {
     // Obtiene las agrupaciones del usuario con el rut especificado
     const agrupaciones = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1', [rut]);
-    //Listado de agrupaciones del usuario
+    // Listado de agrupaciones del usuario
     let agrupacionesUsuario = [];
     for (let i = 0; i < agrupaciones.rows.length; i++) {
-      const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [agrupaciones.rows[i].id_agr]);
-      if (agrupacion.rows.length === 0) {
-        return 'No se encontraron agrupaciones';
+      const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1 AND visible = TRUE', [agrupaciones.rows[i].id_agr]);
+      if (agrupacion.rows.length > 0) {
+        agrupacionesUsuario.push(agrupacion.rows[0]);
       }
-      agrupacionesUsuario.push(agrupacion.rows[0]);
+    }
+    if (agrupacionesUsuario.length === 0) {
+      return 'No se encontraron agrupaciones visibles';
     }
     return agrupacionesUsuario;
   } catch (error) {
     console.log('Error al obtener las agrupaciones del usuario:', error);
+    throw error;
   }
 }
 

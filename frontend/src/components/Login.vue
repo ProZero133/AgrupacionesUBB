@@ -1,7 +1,7 @@
 <template>
   <v-container class="container-loginrut">
 
-    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
+    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom" disabled></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
     <v-form v-if="showLoginByRut" class="form-loginrut">
@@ -44,7 +44,7 @@ export default {
       password: '',
       serverCode: '',
       verificationCode: '',
-      showLoginByRut: true, // Estado del slider, inicialmente muestra el formulario por RUT
+      showLoginByRut: false,
       tokenValue: this.$cookies.get('token'),
       userData: {},
     };

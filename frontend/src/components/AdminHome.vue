@@ -27,11 +27,15 @@
               gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
               <v-card-title>{{ item.title }}</v-card-title>
             </v-img>
-
             <v-card-subtitle class="pt-4">
-              Estado grupo: {{ item.verificado }}
+              <div class="d-flex justify-space-between">
+                <div>Estado grupo: {{ item.verificado }}</div>
+                <div>
+                  <v-icon small>mdi-account-multiple</v-icon>
+                  {{ item.integrantes || 0 }}
+                </div>
+              </div>
             </v-card-subtitle>
-
             <v-card-text class="text-justify">
               {{ item.descripcion.length > 180 ? item.descripcion.slice(0, 180) + '...' : item.descripcion }}
             </v-card-text>
@@ -47,10 +51,12 @@
   <v-tab-item value="usuariosSistema" v-if="tab === 'usuariosSistema'">
     <v-container>
       <v-row>
+        <v-container> </v-container>
+
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
             <v-text-field v-model="searchQueryUsuarios" prepend-icon="mdi-magnify" hide-details single-line
-              placeholder="Buscar Usuario"></v-text-field>
+              placeholder="Nombre, Rut, Carrera o Correo electronico del usuario"></v-text-field>
           </v-toolbar>
         </v-container>
 
@@ -59,7 +65,7 @@
         <v-virtual-scroll :items="filteredItemsUsuarios" item-height="73">
           <template v-slot:default="{ item }">
             <v-list-item :key="item.rutUsuario" :subtitle="item.rutUsuario + ' - ' + item.correoUsuario"
-              :title="item.carreraUsuario + ' - ' + item.nombreUsuario">
+              :title="item.carreraUsuario + ' - ' + item.nombreUsuario" v-if="searchQueryUsuarios !== ''">
               <template v-slot:append>
                 <v-btn icon="mdi-account-group" size="small" variant="tonal"
                   @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
@@ -79,7 +85,8 @@
         <v-img :src="selectedAgrupacion.img" height="300" cover></v-img>
         <v-divider></v-divider>
         <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.verificado }}</p>
-        <p><br><strong>Descripción:</strong></p>
+        <p><strong>Cantidad de Integrantes:</strong> {{ selectedAgrupacion.integrantes || 0 }}</p>
+        <p><strong>Descripción:</strong></p>
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
       </v-card-text>
       <v-card-actions class="justify-end">
@@ -182,18 +189,29 @@ export default {
       }
       return null;
     },
+
     async fetchItems() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/agrupaciones`);
         if (response.ok) {
           const data = await response.json();
+
+          console.log('Agrupaciones:', data);
+
           this.itemsAgr = data.map(item => ({
             title: item.nombre_agr,
             verificado: item.verificado,
             descripcion: item.descripcion,
             img: item.imagen,
             idAgrupacion: item.id_agr,
+            integrantes: item.integrantes,
           }));
+          
+          await this.ObtenerIntegrantesAgrupaciones();
+
+          console.log('Agrupaciones con integrantes:', this.data);
+
+
 
           for (const img of this.itemsAgr) {
             try {
@@ -215,22 +233,47 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
+    async ObtenerIntegrantesAgrupaciones() {
+
+      console.log('entra en ObtenerIntegrantesAgrupaciones');
+
+      try {
+        for (const agrupacion of this.itemsAgr) {
+          const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.idAgrupacion}`, {
+            method: 'GET',
+          });
+          if (response.ok) {
+            const data = await response.json();
+            agrupacion.integrantes = data.length;
+
+            console.log('Integrantes:', agrupacion.integrantes);
+
+          } else {
+            console.error('Error en la respuesta:', response.status);
+          }
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
     async BuscarUsuarios() {
       try {
-      const response = await fetch(`${global.BACKEND_URL}/usuarios`);
-      if (response.ok) {
-        const data = await response.json();
-        this.itemsUsuarios = data.map(item => ({
-        nombreUsuario: item.nombre,
-        rutUsuario: item.rut,
-        correoUsuario: item.correo,
-        carreraUsuario: item.carrera,
-        })).filter(item => item.rutUsuario !== '11.111.111-1'); // Pone el rut que no quieras que se muestre, en este caso, Jhon
-      } else {
-        console.error('Error en la respuesta:', response.status);
-      }
+        const response = await fetch(`${global.BACKEND_URL}/usuarios`);
+        if (response.ok) {
+          const data = await response.json();
+          this.itemsUsuarios = data.map(item => ({
+            nombreUsuario: item.nombre,
+            rutUsuario: item.rut,
+            correoUsuario: item.correo,
+            carreraUsuario: item.carrera,
+          })).filter(item => item.rutUsuario !== '11.111.111-1'); // Pone el rut que no quieras que se muestre, en este caso, Jhon
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
       } catch (error) {
-      console.error('Error al hacer fetch:', error);
+        console.error('Error al hacer fetch:', error);
       }
     },
     AbrirDialogAgrupacion(id) {
@@ -289,5 +332,4 @@ export default {
   max-height: 360px;
   margin: 1%;
 }
-
 </style>

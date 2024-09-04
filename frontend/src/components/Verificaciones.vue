@@ -5,11 +5,11 @@
 
         <v-tab prepend-icon="mdi-account-group" value="agrupaciones">
           Agrupaciones
-          <v-badge color="red" :content="AgrupacionesPendientesObtenidas.length" inline></v-badge>
+          <v-badge color="white" :content="AgrupacionesPendientesObtenidas.length" inline></v-badge>
         </v-tab>
         <v-tab prepend-icon="mdi-account-multiple" value="actividadesPendientes">
           Actividades
-          <v-badge color="red" :content="ActividadesPendientesObtenidas.length" inline></v-badge>
+          <v-badge color="white" :content="ActividadesPendientesObtenidas.length" inline></v-badge>
         </v-tab>
       </v-tabs>
     </template>

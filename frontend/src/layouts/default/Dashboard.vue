@@ -73,8 +73,8 @@
         items: [],
 
         allItems: [
-            { name: 'Home', icon: 'mdi-home', path: '/api/home', tier: 1},
-            { name: 'Home', icon: 'mdi-home', path: '/api/adminhome', tier: 2},
+            { name: 'Inicio', icon: 'mdi-home', path: '/api/home', tier: 1},
+            { name: 'Inicio', icon: 'mdi-home', path: '/api/adminhome', tier: 2},
             { name: 'Perfil', icon: 'mdi-account-search', path: '/api/perfil', tier: 1},
             { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 1},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 0},

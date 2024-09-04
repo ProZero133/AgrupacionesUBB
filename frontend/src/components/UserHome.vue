@@ -5,7 +5,7 @@
       <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
         <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
-        <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Actividades</v-tab>
+        <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Mis Actividades</v-tab>
       </v-tabs>
     </template>
   </v-toolbar>

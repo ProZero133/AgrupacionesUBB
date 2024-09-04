@@ -331,5 +331,6 @@ export default {
   min-height: 360px;
   max-height: 360px;
   margin: 1%;
+  box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.2);
 }
 </style>

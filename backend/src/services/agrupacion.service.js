@@ -338,7 +338,6 @@ async function validateEliminarGrupo(id_agr) {
       for (let i = 0; i < fechasActividades.length; i++) {
         if(fechaActual > fechasActividades[i].fecha){
           //Soft delete por ya haber organizado actividades
-          console.log('Fecha actual mayor a la fecha de la actividad');
           const agrupacion = await softDeleteAgrupacion(id_agr);
           if(agrupacion.length === 0){
             return 'Error al eliminar la agrupación';
@@ -354,7 +353,6 @@ async function validateEliminarGrupo(id_agr) {
         const participantes = await getParticipantesActividad(actividades[i].id_act);
         if(participantes.length > 1){
           //Soft delete por tener actividades con mas de un participante
-          console.log('Actividad con mas de un participante');
           const agrupacion = await softDeleteAgrupacion(id_agr);
           if(agrupacion.length === 0){
             return 'Error al eliminar la agrupación';
@@ -364,7 +362,6 @@ async function validateEliminarGrupo(id_agr) {
       }
     }
     //Eliminar la agrupacion si no tiene actividades o tiene actividades con un solo participante
-    console.log('Eliminando agrupacion, no tiene actividades o tiene actividades con un solo participante');
     const agrupacion = await deleteAgrupacion(id_agr);
 
     return 'Agrupacion eliminada';
@@ -519,6 +516,16 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     }
   }
 
+  async function getTagsAgrupacion(id_agr) {
+    try {
+      // Obtiene los tags de la agrupación con el id especificado
+      const tags = await pool.query('SELECT * FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
+      return tags.rows;
+    } catch (error) {
+      console.log('Error al obtener los tags de la agrupación:', error);
+    }
+  }
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
@@ -545,5 +552,6 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     getPublicacionCorreos,
     createInvitacion,
     redeemCodigo,
-    getAgrupacionesNoInscritas
+    getAgrupacionesNoInscritas,
+    getTagsAgrupacion
   };

@@ -42,7 +42,7 @@
                     <v-card-text class="pa-0">
                         <v-chip-group>
                             <v-chip v-for="item in selectedItems" :key="item.id" class="selected-item" color="primary"
-                                text-color="white">
+                                text-color="white" @click="eliminarTag(item)">
                                 {{ item.nombre_tag }}
                             </v-chip>
                         </v-chip-group>
@@ -172,6 +172,9 @@ export default {
         selectItem(item) {
             this.selectedItems.push(item); // Añade el item a la lista de seleccionados
             this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+        },
+        async eliminarTag(item) {
+            this.selectedItems = this.selectedItems.filter(tag => tag.id !== item.id);
         },
         async obtenerPreferencias() {
             try {

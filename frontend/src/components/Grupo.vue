@@ -15,7 +15,7 @@
               <v-card>
                 <v-toolbar color="primary">
                   <template v-slot:extension>
-                    <v-tabs v-model="tab" align-tabs="title">
+                    <v-tabs v-model="tab" align-tabs="title" grow>
                       <v-tab prepend-icon="mdi-account" value="miembros">Miembros</v-tab>
                       <v-tab prepend-icon="mdi-account-plus" value="solicitudes"
                         @click="VerSolicitudes">Solicitudes</v-tab>

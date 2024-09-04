@@ -64,18 +64,22 @@
                             </v-text-field>
                             <v-card-text>
                                 <!-- Aquí se mostrarán los resultados de la búsqueda -->
-                                <div class="results-container" v-for="item in searchResults" :key="item.id"
+                                <v-chip-group>
+                                <v-chip class="results-container" v-for="item in searchResults" :key="item.id"
                                     @click="selectItem(item)">
                                     {{ item.nombre_tag }}
-                                </div>
+                                </v-chip>
+                                </v-chip-group>
                             </v-card-text>
                         </v-card>
                         <v-card class="selected-items-container">
                             <v-card-title>Tags seleccionados</v-card-title>
-                            <v-card-text class="selected-item" v-for="item in selectedItems" :key="item.id">
-                                <div class="selected-item" v-for="item in selectedItems" :key="item.id">
+                            <v-card-text class="selected-item" v-for="item in tags" :key="item.id">
+                                <v-chip-group>
+                                <v-chip class="selected-item" v-for="item in tags" :key="item.id" @click="eliminarTag(item)">
                                     {{ item.nombre_tag }}
-                                </div>
+                                </v-chip>
+                                </v-chip-group>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -198,6 +202,9 @@ export default {
             }
             return null;
         },
+        async eliminarTag(item) {
+            this.tags = this.tags.filter(tag => tag.id !== item.id);
+        },
         async PostearImagen() {
             try {
                 const response = await fetch(`${global.BACKEND_URL}/imagen`, {
@@ -219,17 +226,6 @@ export default {
                 console.error('Error al hacer fetch:', error);
             }
         },
-
-        async login() {
-            const response = await fetch(`${global.BACKEND_URL}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: this.email }),
-            });
-        },
-
         
         async PostearImagen() {
             try {

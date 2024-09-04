@@ -5,7 +5,7 @@
       <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
         <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
-        <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Actividades</v-tab>
+        <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
       </v-tabs>
     </template>
   </v-toolbar>
@@ -66,10 +66,8 @@
                 </v-col>
                 <v-col cols="8">
                   <p>{{ grupo.descripcion }}</p>
-                  <p>RUT: {{ grupo.rut }}</p>
+                  <p>Liderado por: {{ grupo.rut }}</p>
                   <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-                  <p>Verificado: {{ grupo.verificado }}</p>
-                  <p v-if="grupo.verificado">Fecha de verificación: {{ grupo.fecha_verificacion }}</p>
                 </v-col>
               </v-row>
 

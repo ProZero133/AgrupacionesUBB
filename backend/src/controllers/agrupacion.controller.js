@@ -4,7 +4,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
-    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas } = require("../services/agrupacion.service.js");
+    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -490,6 +490,20 @@ async function VerGruposNoInscritos(req, res) {
     }
 }
 
+async function ObtenerTagsAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const tags = await getTagsAgrupacion(id_agr);
+        if (tags.length === 0) {
+            return res.code(404).send('No se encontraron tags');
+        }
+        res.code(200).send(tags);
+    } catch (error) {
+        console.error('Error al obtener los tags de la agrupación:', error);
+        res.code(500).send('Error al obtener los tags de la agrupación');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -513,5 +527,6 @@ module.exports = {
     notificarMiembrosPublicacion,
     ingresarPorCodigo,
     unirseAgrupacion,
-    VerGruposNoInscritos
+    VerGruposNoInscritos,
+    ObtenerTagsAgrupacion
 };

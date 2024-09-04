@@ -182,7 +182,7 @@
 
     <v-dialog v-model="dialogsolicitar" max-width="500px" min-width="400px">
       <v-card text="Solicitar acreditación">
-        <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr}}?</v-card-title>
+        <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
         <v-card-text>
           <!-- Confirmar si esta seguro de solicitar la acreditacion de su grupo -->
           <v-row>
@@ -199,19 +199,21 @@
     </v-dialog>
 
     <v-dialog v-model="dialogeliminar" max-width="500px" min-width="400px">
-      <v-card text="Eliminar agrupación">
-        <v-card-title class="acred">¿Estas seguro de eliminar el grupo <br><b>"{{ datosGrupo.nombre_agr }}"</b></br>?</v-card-title>
+      <v-card>
+        <v-card-text class="acred" style="font-size: larger;">
+          <br>Estas seguro de eliminar el grupo <br><b>{{ datosGrupo.nombre_agr }}</b></br></br>
+        </v-card-text>
 
-        <v-card-text class="text-center" style="color: red; font-weight: bold;">
-          La agrupacion sera eliminada de forma permanente
+        <v-card-text class="text-center" style="color: #d42b08; font-weight: bold; font-size: smaller;">
+          La agrupación será eliminada de forma PERMANENTE, mantenga el botón de aceptar para confirmar
         </v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="dialogeliminar = false">Cancelar</v-btn>
-          <v-btn width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold"
-            @mouseleave="cancelHold" @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold"
-            :style="progressStyle" depressed>Aceptar</v-btn>
+          <v-btn width="auto" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+            @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+            depressed>Aceptar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -1267,7 +1269,6 @@ export default {
 
 .acred {
   white-space: pre-wrap;
-  min-width: 500px;
   text-align: center;
 }
 

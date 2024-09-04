@@ -12,6 +12,8 @@
   <v-tab-item value="agrupaciones" v-if="tab === 'agrupaciones'">
     <v-container>
       <v-row>
+
+        <!-- BARRA DE BUSQUEDA, searchQueryAgrupaciones es la lista en al que se filtran los datos en tiempo real. -->
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
             <v-text-field v-model="searchQueryAgrupaciones" prepend-icon="mdi-magnify" hide-details single-line

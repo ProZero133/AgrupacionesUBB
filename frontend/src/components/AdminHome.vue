@@ -33,7 +33,7 @@
               <div class="d-flex justify-space-between">
                 <div>Estado grupo: {{ item.verificado }}</div>
                 <div>
-                  <v-icon small>mdi-account-multiple</v-icon>
+                  <v-icon small :color="item.integrantes === 0 ? 'red' : 'primary'">mdi-account-multiple</v-icon>
                   {{ item.integrantes || 0 }}
                 </div>
               </div>
@@ -198,8 +198,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
 
-          console.log('Agrupaciones:', data);
-
           this.itemsAgr = data.map(item => ({
             title: item.nombre_agr,
             verificado: item.verificado,
@@ -210,10 +208,6 @@ export default {
           }));
           
           await this.ObtenerIntegrantesAgrupaciones();
-
-          console.log('Agrupaciones con integrantes:', this.data);
-
-
 
           for (const img of this.itemsAgr) {
             try {

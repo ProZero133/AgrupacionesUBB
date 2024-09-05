@@ -22,9 +22,10 @@
         </v-toolbar>
         <v-card-text>
 
+          <!-- tab miembros -->
           <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
-            <v-data-table :headers="headers" :items="MiembrosdeAgr">
+            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr">
               <template v-slot:item.action="{ item }">
 
                 <div class="d-flex justify-end">
@@ -91,35 +92,78 @@
                       </v-card>
                     </template>
                   </v-dialog>
-
                 </div>
               </template>
             </v-data-table>
 
           </v-tab-item>
 
+          <!-- tab solicitudes -->
           <v-tab-item value="solicitudes" v-if="tab === 'solicitudes'">
 
-            <v-list>
-              <v-list-item v-for="(solicitud, index) in solicitudes" :key="index">
-                <v-menu :location="location" offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props">
-                      {{ solicitud.rut }}
-                    </v-btn>
-                  </template>
+            <v-data-table :headers="headersSolicitudes" :items="solicitudes">
+              <template v-slot:item.action="{ item }">
+                <div class="d-flex justify-end">
 
-                  <v-list>
-                    <v-list-item v-for="(item, index) in opciones" :key="index">
-                      <v-btn @click="handleOptionClick(item.title, solicitud.rut)">
-                        {{ item.title }}
-                      </v-btn>
-                    </v-list-item>
-                  </v-list>
+                  <!-- Dialog Aceptar -->
+                  <v-dialog width="auto" scrollable>
+                    <template v-slot:activator="{ props: activatorProps }">
+                      <v-btn color="green" prepend-icon="mdi-check" variant="outlined" v-bind="activatorProps"></v-btn>
+                    </template>
 
-                </v-menu>
-              </v-list-item>
-            </v-list>
+                    <template v-slot:default="{ isActive }">
+                      <v-card prepend-icon="mdi-check" title="Aceptar Solicitud">
+                        <v-divider class="mt-3"></v-divider>
+
+                        <v-card-text class="px-4" style="height: 150px">
+                          <p>¿Está seguro que desea aceptar esta solicitud?</p>
+
+                          <v-row class="justify-end" style="margin-top: 10%">
+                            <v-col>
+                              <v-btn color="blue"
+                                @click="aceptarSolicitud(item.rut), isActive.value = false, dialog = false;">Aceptar</v-btn>
+                            </v-col>
+                            <v-col cols="4">
+                              <v-btn color="red" @click="isActive.value = false">Cancelar</v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+
+                      </v-card>
+                    </template>
+                  </v-dialog>
+
+                  <!-- Dialog rechazar -->
+                  <v-dialog width="auto" scrollable>
+                    <template v-slot:activator="{ props: activatorProps }">
+                      <v-btn color="red" prepend-icon="mdi-close" variant="outlined" v-bind="activatorProps"></v-btn>
+                    </template>
+
+                    <template v-slot:default="{ isActive }">
+                      <v-card prepend-icon="mdi-close" title="Rechazar Solicitud">
+                        <v-divider class="mt-3"></v-divider>
+
+                        <v-card-text class="px-4" style="height: 150px">
+                          <p>¿Está seguro que desea rechazar esta solicitud?</p>
+
+                          <v-row class="justify-end" style="margin-top: 10%">
+                            <v-col cols="6">
+                              <v-btn color="red"
+                                @click="rechazarSolicitud(item.rut), isActive.value = false, dialog = false;">Rechazar</v-btn>
+                            </v-col>
+                            <v-col cols="4">
+                              <v-btn color="blue" @click="isActive.value = false">Cancelar</v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+
+                      </v-card>
+                    </template>
+                  </v-dialog>
+
+                </div>
+              </template>
+            </v-data-table>
           </v-tab-item>
         </v-card-text>
 
@@ -461,8 +505,14 @@ export default {
 
     idactActual: null,
 
-    headers: [
+    headersMiembros: [
       { title: 'Nombre', value: 'user_nombre', sortable: true },
+      { title: 'Rut', value: 'rut', sortable: true },
+      { value: 'action', sortable: false },
+    ],
+
+    headersSolicitudes: [
+      { title: 'Nombre', value: 'nombre', sortable: true },
       { title: 'Rut', value: 'rut', sortable: true },
       { value: 'action', sortable: false },
     ],
@@ -975,15 +1025,26 @@ export default {
         const response = await fetch(url, {
           method: 'GET',
         });
+
+        const dataResponse = await response.json();
+
         if (response.ok || response.status === 404) {
-          const data = await response.json();
-          this.solicitudes = data;
+          const solicitudes = [];
+          for (const solicitud of dataResponse) {
+            const rutUsuario = solicitud.rut;
+            const urlUsuarioServidor = `${global.BACKEND_URL}/usuarioServidor/${rutUsuario}`;
+            const respuestaUsuarioServidor = await fetch(urlUsuarioServidor, {
+              method: 'GET',
+            });
+            const dataUsuarioServidor = await respuestaUsuarioServidor.json();
+            solicitudes.push(dataUsuarioServidor);
+          }
+          this.solicitudes = solicitudes;
+
         } else {
-          console.log('Error al obtener las solicitudes');
           this.solicitudes = [];
         }
       } catch (error) {
-        console.log('Error al obtener las solicitudes');
         this.solicitudes = [];
       }
     },
@@ -995,7 +1056,6 @@ export default {
           method: 'POST',
         });
         if (response.ok) {
-          console.log('Solicitud aceptada');
           this.VerSolicitudes();
           this.ObtenerUsuariosDeAgrupacion();
         } else {
@@ -1057,7 +1117,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
-        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`; // quite el rut porque no se llamaba y tiraba error
         const response = await fetch(url, {
           method: 'PUT',
           headers: {

@@ -12,6 +12,8 @@
   <v-tab-item value="agrupaciones" v-if="tab === 'agrupaciones'">
     <v-container>
       <v-row>
+
+        <!-- BARRA DE BUSQUEDA, searchQueryAgrupaciones es la lista en al que se filtran los datos en tiempo real. -->
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
             <v-text-field v-model="searchQueryAgrupaciones" prepend-icon="mdi-magnify" hide-details single-line
@@ -31,7 +33,7 @@
               <div class="d-flex justify-space-between">
                 <div>Estado grupo: {{ item.verificado }}</div>
                 <div>
-                  <v-icon small>mdi-account-multiple</v-icon>
+                  <v-icon small :color="item.integrantes === 0 ? 'red' : 'primary'">mdi-account-multiple</v-icon>
                   {{ item.integrantes || 0 }}
                 </div>
               </div>
@@ -196,8 +198,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
 
-          console.log('Agrupaciones:', data);
-
           this.itemsAgr = data.map(item => ({
             title: item.nombre_agr,
             verificado: item.verificado,
@@ -208,10 +208,6 @@ export default {
           }));
           
           await this.ObtenerIntegrantesAgrupaciones();
-
-          console.log('Agrupaciones con integrantes:', this.data);
-
-
 
           for (const img of this.itemsAgr) {
             try {

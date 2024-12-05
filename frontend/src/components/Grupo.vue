@@ -445,7 +445,6 @@ export default {
     pressTimer: null,
     pressTime: 0,
     progress: 0,
-    rutactual: '20.487.563-4',
     imagengrupo: [],
     idImagen: '',
     location: 'end',
@@ -1057,7 +1056,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
-        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}/${this.rut}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
@@ -1082,8 +1081,7 @@ export default {
 
     async SolicitarAcreditaciondeGrupo() {
       try {
-        this.rutactual = this.getRut();
-        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rutactual}`;
+        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rut}`;
         const response = await fetch(url, {
           method: 'PUT',
         });

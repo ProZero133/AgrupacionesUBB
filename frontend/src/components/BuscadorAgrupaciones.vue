@@ -71,6 +71,8 @@
 </style>
 
 <script>
+import { tr } from 'vuetify/lib/locale/index.mjs';
+
 export default {
   name: 'BuscadorAgrupaciones',
   data: () => ({
@@ -133,12 +135,33 @@ export default {
           }
           return null;
         },
+    async VerTagsGrupo(id_agr) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${id_agr}`, {
+          method: 'GET',
+        });
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          console.log(data);
+          return data;
+        } else {
+          console.error('No se encontraron Tags para la agrupación', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
     async VerGrupos() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/agrupacionesnoinscritas/${this.rut}`, {
           method: 'GET',
         });
+        // Para cada grupo, obtener VerTagsGrupo
+        
 
         // Verifica si la respuesta es exitosa
         if (response.ok) {
@@ -156,6 +179,7 @@ export default {
                 const dataImagen = await responde.text();
                 imagenes.imagen = dataImagen;
                 dataTransformada.push(imagenes);
+                this.VerTagsGrupo(imagenes.id_agr)
               } else {
                 console.error('Error en la respuesta:', responde.status);
               }

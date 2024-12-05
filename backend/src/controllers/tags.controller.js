@@ -8,17 +8,20 @@ async function obtenerTags(req, res) {
         const tags = await getTags();
         res.send(tags);
     } catch (error) {
-        res.code(500).send(error.message);
+        res.status(400).send(error.message);
     }
 }
 
 async function obtenerTagPorId(req, res) {
     try {
-        const id = req.params.id;
+
+        const id = req;
         const tag = await getTagById(id);
-        res.send(tag);
-    } catch (error) {
-        res.code(500).send(error.message);
+        return tag
+    }
+    catch (error) {
+        console.error("Error al obtener el tag:", error);
+       res.code(500).send(error.message);
     }
 }
 

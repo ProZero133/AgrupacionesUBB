@@ -35,6 +35,14 @@
             <v-card-text class="text-justify">
               {{ item.descripcion.length > 180 ? item.descripcion.slice(0, 180) + '...' : item.descripcion }}
             </v-card-text>
+            <v-card-text class="TagsGrupo">
+              <v-chip-group>
+              <v-chip v-for="tag in item.tags" :key="tag.id_tag" class="res-tags" color="primary"
+                text-color="white" outlined>
+                {{ tag.nombre_tag }}
+              </v-chip>
+            </v-chip-group>
+            </v-card-text>
             <v-card-actions class="justify-end" style="position: absolute; bottom: 0; right: 0;">
               <v-btn color="primary" text @click="solicitarUnirse(item.idAgrupacion)">Solicitar unirse</v-btn>
             </v-card-actions>
@@ -76,6 +84,7 @@ export default {
   data() {
     return {
       itemsAgr: [],
+      preferencias: [],
       tab: 'agrupaciones',
       searchQueryAgrupaciones: '',
       rol: '',
@@ -86,11 +95,35 @@ export default {
   },
   computed: {
     filteredItemsAgrupaciones() {
+      const preferenciasNombres = this.preferencias.map(tag => tag.nombre_tag);
+      
       if (!this.searchQueryAgrupaciones) {
-        return this.itemsAgr;
+        return this.itemsAgr.sort((a, b) => {
+          const aHasPreference = a.tags && a.tags.some(tag => {
+            const hasPreference = preferenciasNombres.includes(tag.nombre_tag);
+            return hasPreference;
+          });
+          const bHasPreference = b.tags && b.tags.some(tag => {
+            const hasPreference = preferenciasNombres.includes(tag.nombre_tag);
+            return hasPreference;
+          });
+          return (bHasPreference === true ? 1 : 0) - (aHasPreference === true ? 1 : 0);
+        });
       }
       const search = this.searchQueryAgrupaciones.toLowerCase();
-      return this.itemsAgr.filter(item => item.title.toLowerCase().includes(search));
+      return this.itemsAgr
+        .filter(item => item.title.toLowerCase().includes(search))
+        .sort((a, b) => {
+          const aHasPreference = a.tags && a.tags.some(tag => {
+            const hasPreference = preferenciasNombres.includes(tag.nombre_tag);
+            return hasPreference;
+          });
+          const bHasPreference = b.tags && b.tags.some(tag => {
+            const hasPreference = preferenciasNombres.includes(tag.nombre_tag);
+            return hasPreference;
+          });
+          return (bHasPreference === true ? 1 : 0) - (aHasPreference === true ? 1 : 0);
+        });
     },
   },
   methods: {
@@ -117,32 +150,32 @@ export default {
       }
     },
 
-     getRut() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
-              return tokenParts[2] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
-     getRol() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
-              return tokenParts[0] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
-            }
-          }
-          return null;
-        },
+    getRut() {
+      const token = this.$cookies.get('token');
+      if (token) {
+        try {
+          const tokenParts = token.split('&');
+          tokenParts[2] = tokenParts[2].replace('rut=', '').trim();
+          return tokenParts[2];
+        } catch (error) {
+          console.error('Invalid token:', error);
+        }
+      }
+      return null;
+    },
+    getRol() {
+      const token = this.$cookies.get('token');
+      if (token) {
+        try {
+          const tokenParts = token.split('&');
+          tokenParts[0] = tokenParts[0].replace('rol=', '');
+          return tokenParts[0];
+        } catch (error) {
+          console.error('Invalid token:', error);
+        }
+      }
+      return null;
+    },
     async VerTagsGrupo(id_agr) {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
@@ -153,7 +186,6 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          console.log(data);
           return data;
         } else {
           console.error('No se encontraron Tags para la agrupación', response.status);
@@ -164,28 +196,24 @@ export default {
     },
     async fetchItems() {
       try {
-
-        console.log('rut', this.rut);
-        console.log('rol', this.rol);
-
         const response = await fetch(`${global.BACKEND_URL}/agrupacionesnoinscritas/${this.rut}`, {
           method: 'GET',
         });
         // Para cada grupo, obtener VerTagsGrupo
-        
-
-        console.log("respoonse", response);
-        
         if (response.ok) {
           const data = await response.json();
 
-          this.itemsAgr = data.map(item => ({
-            title: item.nombre_agr,
-            verificado: item.verificado,
-            descripcion: item.descripcion,
-            img: item.imagen,
-            idAgrupacion: item.id_agr,
-            integrantes: item.integrantes,
+          this.itemsAgr = await Promise.all(data.map(async item => {
+            const tags = await this.VerTagsGrupo(item.id_agr);
+            return {
+              title: item.nombre_agr,
+              verificado: item.verificado,
+              descripcion: item.descripcion,
+              img: item.imagen,
+              idAgrupacion: item.id_agr,
+              integrantes: item.integrantes,
+              tags: tags, // Almacena los tags en cada agrupación
+            };
           }));
 
           for (const img of this.itemsAgr) {
@@ -194,8 +222,6 @@ export default {
               if (responde.ok) {
                 const dataImagen = await responde.text();
                 img.img = dataImagen;
-                dataTransformada.push(imagenes);
-                this.VerTagsGrupo(imagenes.id_agr)
               } else {
                 console.error('Error en la respuesta:', responde.status);
               }
@@ -231,7 +257,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${idAgrupacion}`, {
           method: 'POST',
         });
-        
+
         if (response.ok) {
           this.$root.showSnackBar('ok', 'Solicitud enviada!', 'Los moderadores revisarán tu solicitud.');
           const data = await response.json();
@@ -241,14 +267,47 @@ export default {
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
-    }
+    },
+    async obtenerPreferencias() {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error en la respuesta de la red');
+                const data = await response.json();
+                this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
+                const tagsPromises = data.map(async (item) => {
+                    const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
+                    const tagData = await tagResponse.json();
+                    return tagData[0]; // Asume que siempre hay al menos un elemento y toma el primero
+                });
+                const tags = await Promise.all(tagsPromises);
+
+                this.preferencias = tags; // Asigna el resultado a preferencias
+
+            } catch (error) {
+                console.error('Error al obtener preferencias:', error);
+            }
+        },
 
   },
   mounted() {
-    
+
     this.rut = this.getRut();
     this.rol = this.getRol();
     this.fetchItems();
+    this.obtenerPreferencias();
   },
 };
 </script>

@@ -193,7 +193,7 @@ export default {
               const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, { method: 'GET' });
               if (responde.ok) {
                 const dataImagen = await responde.text();
-                imagenes.imagen = dataImagen;
+                img.img = dataImagen;
                 dataTransformada.push(imagenes);
                 this.VerTagsGrupo(imagenes.id_agr)
               } else {

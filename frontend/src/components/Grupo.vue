@@ -189,12 +189,38 @@
           <v-row>
             <v-col cols="12">
               <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
-                label="Imagen para la actividad" clearable required variant="solo-filled" prepend-icon=""
+                label="Imagen de la agrupación" clearable required variant="solo-filled" prepend-icon=""
                 @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl">
               </v-file-input>
             </v-col>
           </v-row>
+          <v-row>
+            <v-card class="search-container pa-3 mb-3">
+              <v-card-title class="pa-0">Añadir Tags a las preferencias</v-card-title>
+              <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)" append-icon="mdi-magnify"
+                label="Buscar..." single-line hide-details></v-text-field>
+              <v-card-text class="pa-0">
+                <v-chip-group>
+                  <v-chip v-for="item in searchResults" :key="item.id" @click="selectItem(item)" class="result-item"
+                    color="primary" text-color="white" outlined>
+                    {{ item.nombre_tag }}
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-row>
+          <v-row>
+            <v-card-text class="pa-0">
+              <v-chip-group>
+                <v-chip v-for="tag in preferencias" :key="tag.id_tag" @click="eliminarTag(tag)" class="selected-item" color="primary"
+                  text-color="white" outlined>
+                  {{ tag.nombre_tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-card-text>
+          </v-row>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="dialogeditar = false">Cancelar</v-btn>
@@ -461,7 +487,7 @@
 import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
 import { mergeProps } from 'vue';
-import { fa } from 'vuetify/lib/locale/index.mjs';
+import { da, fa } from 'vuetify/lib/locale/index.mjs';
 
 export default {
   setup() {
@@ -498,6 +524,10 @@ export default {
     solicitudes: [],
     MiembrosdeAgr: [],
     selectedRole: '',
+    preferencias: [],
+    preferenciasActuales: [],
+    searchResults: [],
+    selectedItems: [],
     rut: '',
     rol: '',
     rolA: false,
@@ -1116,6 +1146,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
+        const tagsGrupo = this.selectedItems;
         const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`; // quite el rut porque no se llamaba y tiraba error
         const response = await fetch(url, {
           method: 'PUT',
@@ -1128,6 +1159,25 @@ export default {
           }),
         });
 
+        // Inserta los tags seleccionados en la agrupación en el body del fetch
+        for (const tag of tagsGrupo) {
+          const responseTag = await fetch(`${global.BACKEND_URL}/ingresartagsagrupacion`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id_agr: this.groupId,
+              id_tag: tag.id_tag,
+            }),
+          });
+          if (!responseTag.ok) throw new Error('Error al agregar tag a la agrupación');
+        }
+       
+
+    
+        
+
         if (response.ok) {
           this.VerGrupos();
         } else {
@@ -1137,6 +1187,55 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
 
+    },
+    async obtenerTagsGrupo() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${this.groupId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
+        const tagsPromises = data.map(async (item) => {
+          const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
+          const tagData = await tagResponse.json();
+          return tagData[0]; // Asume que siempre hay al menos un elemento y toma el primero
+        });
+        const tags = await Promise.all(tagsPromises);
+        this.preferencias = tags; // Asigna el resultado a preferencias
+        this.preferenciasActuales = tags; // Asigna el resultado a preferenciasActuales
+
+      } catch (error) {
+        console.error('Error al obtener preferencias:', error);
+      }
+    },
+    async fetchSearchResults(searchValue) {
+      // Convertir searchValue a cadena explícitamente
+      const stringValue = searchValue.trim();
+      if (stringValue === '') {
+        this.searchResults = [];
+        return;
+      }
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
+      } catch (error) {
+        console.error('Error al buscar:', error);
+        this.searchResults = [];
+      }
     },
 
     async SolicitarAcreditaciondeGrupo() {
@@ -1203,7 +1302,25 @@ export default {
       this.dialogeliminar = false;
       this.$router.push('/api/home');
     },
-
+    async eliminarTag(item) {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/eliminarTagAgrupacion/${this.groupId}/${item.id_tag}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Error en la respuesta de la red');
+                this.obtenerTagsGrupo();
+            } catch (error) {
+                console.error('Error al eliminar preferencia:', error);
+            }
+        },
+    selectItem(item) {
+            this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+            this.preferencias.push(item); // Añade el item a `preferencias`
+            this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+        },
     formatearFecha(fecha) {
       const date = new Date(fecha);
       const now = new Date();
@@ -1266,6 +1383,7 @@ export default {
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
+    this.obtenerTagsGrupo();
   },
   computed: {
     progressStyle() {
@@ -1341,5 +1459,28 @@ export default {
   margin-left: 0px;
   margin-top: -10px;
   margin-bottom: -10px;
+}
+
+.search-container {
+  height: 25vh;
+  /* Ajusta el tamaño del contenedor de búsqueda */
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.selected-items-container {
+  /* Ajusta el tamaño del contenedor de items seleccionados */
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.result-item {
+  /* Estilos personalizados para los chips de resultados */
+  margin: 5px;
+}
+
+.selected-item {
+  /* Estilos personalizados para los chips de items seleccionados */
+  margin: 5px;
 }
 </style>

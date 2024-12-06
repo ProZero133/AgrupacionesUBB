@@ -4,7 +4,8 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
-    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion } = require("../services/agrupacion.service.js");
+    getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
+    deleteTagAgrupacion, updateAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -69,7 +70,7 @@ async function editarAgrupacion(req, res) {
         if (agrupacionactual.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
-        const agrupa = agrupacionactual.rows[0];
+        const agrupa = agrupacionactual
         const verificado = agrupa.verificado;
         const fecha_verificacion = agrupa.fecha_verificacion;
         const rut = agrupa.rut;
@@ -511,6 +512,33 @@ async function ObtenerTagsAgrupacion(req, res) {
     }
 }
 
+async function eliminarTagAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const id_tag = req.params.id_tag;
+
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
+
+        const tag = await obtenerTagPorId(id_tag);
+        if (tag.rows.length === 0) {
+            return res.code(404).send('Tag no encontrado');
+        }
+
+        const result = await deleteTagAgrupacion(id_agr, id_tag);
+        if (!result) {
+            return res.code(500).send('Error al eliminar el tag');
+        }
+
+        res.code(200).send('Tag eliminado');
+    } catch (error) {
+        console.error('Error al eliminar el tag:', error);
+        res.code(500).send('Error al eliminar el tag');
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -535,5 +563,6 @@ module.exports = {
     ingresarPorCodigo,
     unirseAgrupacion,
     VerGruposNoInscritos,
-    ObtenerTagsAgrupacion
+    ObtenerTagsAgrupacion,
+    eliminarTagAgrupacion
 };

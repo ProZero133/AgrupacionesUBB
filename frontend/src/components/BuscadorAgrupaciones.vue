@@ -302,6 +302,23 @@ export default {
         },
 
   },
+  async fetchSearchResults(searchValue) {
+            // Convertir searchValue a cadena explícitamente
+            const stringValue = searchValue.trim();
+            if (stringValue === '') {
+                this.searchResults = [];
+                return;
+            }
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+                if (!response.ok) throw new Error('Error en la respuesta de la red');
+                const data = await response.json();
+                this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
+            } catch (error) {
+                console.error('Error al buscar:', error);
+                this.searchResults = [];
+            }
+        },
   mounted() {
 
     this.rut = this.getRut();

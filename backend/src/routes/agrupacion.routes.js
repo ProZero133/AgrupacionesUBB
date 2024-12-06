@@ -3,7 +3,9 @@ const fastify = require('../config/configFastify.js');
 const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion, 
   obtenerImagenAgrupacion, unirseAgrupacion, solicitudesAgrupacion, aceptarSolicitud, 
   eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion,
-  obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion } = require('../controllers/agrupacion.controller.js');
+  obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion,
+  eliminarTagAgrupacion } = require('../controllers/agrupacion.controller.js');
+const { eliminarTag } = require('../controllers/tags.controller.js');
 
 module.exports = function(fastify, options, done) {
     
@@ -27,5 +29,6 @@ module.exports = function(fastify, options, done) {
   fastify.post('/ingresarPorCodigo/:rut/:codigo', ingresarPorCodigo);
   fastify.get('/agrupacionesnoinscritas/:rut', VerGruposNoInscritos);
   fastify.get('/obtenerTagsAgrupacion/:id_agr', ObtenerTagsAgrupacion);
+  fastify.delete('/eliminarTagAgrupacion/:id_agr/:id_tag', eliminarTagAgrupacion);
   done();
 };

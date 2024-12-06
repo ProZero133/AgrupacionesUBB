@@ -1,7 +1,7 @@
 
 const { getActividades, getActyAgr, getActividadesByAgrupacion, getActividadById, createActividad,
     setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario,
-     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad, setAprobacionActividad } = require('../services/actividad.service');
+     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad, setAprobacionActividad, getActividadesPublicas } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -235,6 +235,19 @@ async function AceptacionActividad(req, res) {
     }
 }
 
+async function ObtenerActividadesPublicas(req, res) {
+    try {
+        const actividades = await getActividadesPublicas();
+        if (actividades.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron actividades' });
+        }
+        return res.send(actividades);
+    } catch (error) {
+        console.error('Error al obtener las actividades publicas:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener las actividades publicas' });
+    }
+}
+
 
 module.exports = {
     ObtenerActividades,
@@ -249,5 +262,6 @@ module.exports = {
     ObtenerActividadesPorGrupoUsuario,
     obtenerActividadesParticipante,
     abandonarActividad,
-    AceptacionActividad
+    AceptacionActividad,
+    ObtenerActividadesPublicas
 };

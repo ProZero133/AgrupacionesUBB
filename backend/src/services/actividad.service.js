@@ -34,7 +34,7 @@ async function getActyAgr() {
                 id_agr: act.id_agr,
                 cupos: act.cupos,
                 fecha_creacion: act.fecha_creacion,
-                fecha_actividad: prog.fecha_actividad,
+                fecha_actividad: prog ? prog.fecha_actividad : null,
                 nombre_agr: agr.nombre_agr,
                 aprobado: act.aprobado
             }
@@ -198,21 +198,28 @@ async function updateActividad(id, actividadData) {
 
 async function deleteActividad(id) {
     try {
-        //Validar que la actividad no tenga mas de un participante
-        const participantes = await getParticipantesActividad(id);
-        if (participantes.length > 1) {
-            return 'No es posible eliminar una actividad con mas de un participante';
-        }
         //Validar que la actividad aun no ocurra
         const fechasActividades = await getFechaActividad(id);
         const fechaActual = new Date();
+        
         if (fechaActual > fechasActividades.fecha_actividad) {
             return 'No es posible eliminar una actividad que ya ocurrio';
         }
-
-
         // Elimina la actividad con el id especificado de la base de datos
         const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al eliminar la actividad:', error);
+        throw error;
+    }
+}
+
+async function deleteActividadPublica(id) {
+    try {
+        // Elimina la actividad con el id especificado de la base de datos
+        const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la actividad:', error);
@@ -292,6 +299,25 @@ async function deleteParticipanteActividad(id_act, rut) {
     }
 }
 
+async function deletePrograma(id_act) {
+    try {
+        // Elimina el programa de la actividad
+        const fechaPrograma = await pool.query('SELECT * FROM "Programa" WHERE id_act = $1', [id_act]);
+
+        await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id_act]);
+        
+        // Retorna un mensaje de éxito como json
+        return { success: true, message: 'Programa eliminado de la actividad', fechaPrograma};
+
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al eliminar el programa de la actividad:', error);
+        throw error;
+    }
+}
+
+
+
 async function getActividadesPublicas() {
     try {
         // Obtiene todas las actividades públicas donde la columna "tipo" es igual a True, la columna "aprobado" es igual a True y fecha_actividad es mayor a la fecha actual
@@ -311,6 +337,7 @@ module.exports = {
     createActividad,
     updateActividad,
     deleteActividad,
+    deleteActividadPublica,
     getActividadesByAgrupacion,
     getFechasActividades,
     getParticipantesActividad,
@@ -322,6 +349,7 @@ module.exports = {
     deleteParticipanteActividad,
     getActividadesByAgrupacionActivas,
     setAprobacionActividad,
+    deletePrograma,
     getActividadesPublicas
     
 };

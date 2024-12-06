@@ -3,7 +3,7 @@ const { pool } = require('../db.js');
 
 async function getActividades() {
     try {
-        // Obtiene todas las actividades
+        // Obtiene todas las actividades donde la columna "tipo" es igual a False
         const actividades = await pool.query('SELECT * FROM "Actividad"');
         // Retorna las actividades
         return actividades.rows;
@@ -229,10 +229,10 @@ async function deleteActividadPublica(id) {
 
 async function getActividadesByGrupoUsuario(rut) {
     try {
-        // Obtiene todas las actividades del grupo del usuario
+        // Obtiene todas las actividades del grupo del usuario donde la columna "tipo" es igual a False
         const actividades = await pool.query(`
             SELECT * FROM "Actividad" 
-            WHERE id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
+            WHERE tipo = false AND id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
         `, [rut]);
 
         if (actividades.rows.length === 0) {
@@ -318,6 +318,17 @@ async function deletePrograma(id_act) {
 
 
 
+async function getActividadesPublicas() {
+    try {
+        // Obtiene todas las actividades públicas donde la columna "tipo" es igual a True, la columna "aprobado" es igual a True y fecha_actividad es mayor a la fecha actual
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE tipo = true AND aprobado = true AND id_act IN (SELECT id_act FROM "Programa" WHERE fecha_actividad > now())');
+        // Retorna las actividades
+        return actividades.rows;
+    } catch (error) {
+        console.log('Error al obtener las actividades públicas:', error);
+    }
+}
+
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -338,6 +349,7 @@ module.exports = {
     deleteParticipanteActividad,
     getActividadesByAgrupacionActivas,
     setAprobacionActividad,
-    deletePrograma
-
+    deletePrograma,
+    getActividadesPublicas
+    
 };

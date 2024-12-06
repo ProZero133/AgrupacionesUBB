@@ -397,7 +397,22 @@ export default {
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
+          // Obtener actividades publicas
+          const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
+            method: 'GET',
+          });
+          const dataPublicas = await actividadesPublicas.json();
+          console.log(dataPublicas);
           const data = await response.json();
+          // Eliminar actividad publica si ya esta su id en data
+          dataPublicas.forEach((actiPublica) => {
+            const index = data.findIndex((acti) => acti.id_act === actiPublica.id_act);
+            if (index !== -1) {
+              data.splice(index, 1);
+            }
+          });
+          // añadir las actividades publicas a las actividades en data
+          data.push(...dataPublicas);
           this.actividades = data;
           if (data.success === false) {
           } else {

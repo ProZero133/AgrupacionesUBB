@@ -1,7 +1,7 @@
 
 const { getActividades, getActyAgr, getActividadesByAgrupacion, getActividadById, createActividad,
     setProgramacionActividad, setParticipanteActividad, deleteActividad, getActividadesByGrupoUsuario,
-     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad, setAprobacionActividad } = require('../services/actividad.service');
+     getParticipantesActividad, getActividadesParticipante, deleteParticipanteActividad, setAprobacionActividad, deletePrograma, deleteActividadPublica } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const {getLider} = require('../services/agrupacion.service.js');
 
@@ -112,6 +112,23 @@ async function updateActividad(req, res) {
     }
 }
 
+async function ObtenerCreadorActividad(req, res) {
+    try {
+        const id_act = req.params.id_act;
+        const creador = await getParticipantesActividad(id_act);
+
+        if (creador.length === 0) {
+            return res.send({ success: false, message: 'No se encontro el creador de la actividad' });
+        }
+        return res.send(creador);
+
+    } catch (error) {
+        console.error('Error al obtener el creador de la actividad:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener el creador de la actividad' });
+    }
+}
+
+
 async function eliminarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
@@ -137,6 +154,50 @@ async function eliminarActividad(req, res) {
     }
 }
 
+
+async function eliminarActividadPublica(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        const rut = req.params.rut;
+        
+        const actividad = await getActividadById(id_act);
+        
+        if (actividad.length === 0) {
+            return res.send({ success: false, message: 'No se encontro la actividad' });
+        }
+        
+        // Elimina participa
+        await deleteParticipanteActividad(id_act, rut);
+        // Elimina programa
+        await deletePrograma(id_act);
+        // Elimina la actividad
+        await deleteActividadPublica(id_act);
+
+        // Retorna un mensaje de éxito
+        res.status(200).send('Actividad eliminada');
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al eliminar la actividad:', error);
+        res.status(500).send('Error al eliminar la actividad');
+    }
+}
+
+async function rechazarActividad(req, res) {
+    try {
+        // Obtiene el id de la actividad
+        const id_act = req.params.id_act;
+        await deleteActividad(id_act);
+
+        res.status(200).send('Actividad eliminada');
+
+    } catch (error) {
+        console.error('Error al eliminar la actividad:', error);
+        res.status(500).send('Error al eliminar la actividad');
+    }
+}
+
+
 async function programarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
@@ -147,10 +208,11 @@ async function programarActividad(req, res) {
         const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         const lider = await getLider(id_agr);
         const rut=lider.rut;
-        const insertarLiderEnParticipantes = await setParticipanteActividad(id_act, rut);
+        await setParticipanteActividad(id_act, rut);
 
         // Retorna la actividad programada
         res.code(200).send(actividad);
+
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al programar la actividad:', error);
@@ -162,8 +224,9 @@ async function participarActividad(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
+
         // Programa la actividad
-        const actividad = await setParticipanteActividad(id_act, rut);
+        await setParticipanteActividad(id_act, rut);
 
         // operacion exitosa
         res.code(200).send({ success: true, message: 'Participacion exitosa' });
@@ -235,19 +298,21 @@ async function AceptacionActividad(req, res) {
     }
 }
 
-
 module.exports = {
     ObtenerActividades,
     ObtenerActividadyAgrupacion,
     ObtenerActividadPorID,
     crearActividad,
     updateActividad,
+    ObtenerCreadorActividad,
     eliminarActividad,
+    rechazarActividad,
     ObtenerActividadesPorAgrupacion,
     programarActividad,
     participarActividad,
     ObtenerActividadesPorGrupoUsuario,
     obtenerActividadesParticipante,
     abandonarActividad,
-    AceptacionActividad
+    AceptacionActividad,
+    eliminarActividadPublica
 };

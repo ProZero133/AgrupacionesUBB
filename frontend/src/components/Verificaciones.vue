@@ -87,7 +87,7 @@
                 <v-icon>mdi-calendar-check</v-icon>
               </v-btn>
               <v-btn icon color="red" name="B_Rechazar" class="B_Rechazar_Actividad"
-                @click="openRechazarDialog(item.id_act)">
+                @click="RechazarActividad(item.id_act)">
                 <v-icon>mdi-calendar-remove</v-icon>
               </v-btn>
             </div>
@@ -166,37 +166,37 @@ export default {
     },
     async ObtenerAgrupacionesPendientes() {
       try {
-      const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
-        method: 'GET',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        this.AgrupacionesPendientesObtenidas = data;
-        await this.ObtenerIntegrantesAgrupaciones(); 
-      } else {
-        console.error('Error en la respuesta:', response.status);
-      }
+        const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.AgrupacionesPendientesObtenidas = data;
+          await this.ObtenerIntegrantesAgrupaciones();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
 
       } catch (error) {
-      console.error('Error al hacer fetch:', error);
+        console.error('Error al hacer fetch:', error);
       }
     },
 
     async ObtenerIntegrantesAgrupaciones() {
       try {
-      for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
-        const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
-        method: 'GET',
-        });
-        if (response.ok) {
-        const data = await response.json();
-        agrupacion.integrantes = data.length; 
-        } else {
-        console.error('Error en la respuesta:', response.status);
+        for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
+          const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
+            method: 'GET',
+          });
+          if (response.ok) {
+            const data = await response.json();
+            agrupacion.integrantes = data.length;
+          } else {
+            console.error('Error en la respuesta:', response.status);
+          }
         }
-      }
       } catch (error) {
-      console.error('Error al hacer fetch:', error);
+        console.error('Error al hacer fetch:', error);
       }
     },
 
@@ -300,16 +300,74 @@ export default {
       }
     },
 
+    async CreadorActividad(id_act) {
+      const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
+      console.log(Actividad_a_Aceptar);
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerCreador/${Actividad_a_Aceptar.id_act}`, {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const creadorActData = await response.json();
+          console.log("creadorActData: ", creadorActData);
+          return creadorActData; // Devuelve los datos del creador
+        } else {
+          console.error('Error en la respuesta:', response.status);
+          return null; // Devuelve null en caso de error
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+        return null; // Devuelve null en caso de error
+      }
+    },
+
+    async RechazarActividad(id_act) {
+      this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
+
+      console.log("id_act: ", id_act);
+
+      const creadorActData = await this.CreadorActividad(id_act);
+      console.log("creadorActData: ", creadorActData);
+      console.log("creadorActData.id_act: ", creadorActData[0].id_act);
+      console.log("creadorActData.rut: ", creadorActData[0].rut);
+
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${creadorActData[0].id_act}/${creadorActData[0].rut}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+          }),
+        });
+
+        if (response.ok) {
+          this.showSnackbar('Actividad rechazada con éxito', 'Se le notificará al lider por correo.');
+          this.ObtenerActividadesPendientes();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+          this.showSnackbar('Error al rechazar la actividad', 'error');
+        }
+
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+        this.showSnackbar('Error al rechazar la actividad', 'error');
+      }
+    },
+
+
     showSnackbar(message, color) {
       this.snackbarText = message;
       this.snackbarColor = color;
       this.snackbar = true;
     },
+
     formatDate(dateString) {
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
       return new Date(dateString).toLocaleDateString('es-ES', options);
     }
   },
+
   mounted() {
     this.getRut();
     this.getRol();

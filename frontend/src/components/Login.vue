@@ -60,15 +60,15 @@ export default {
           },
           body: JSON.stringify({ email: this.email }),
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          //console.log('Respuesta del servidor:', data.codigo);
+        const data = await response.json();
+        if (response.ok && data.success ) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;
           this.dialog = true;
         } else {
           this.isLoading = false; // Desactiva la pantalla de carga si hay un error
+          //Snackbar de error
+          this.$root.showSnackBar('error', 'No se pudo enviar el codigo al correo', 'Operación fallida');
         }
       } catch (error) {
         console.error('Error en el login:', error);
@@ -95,6 +95,7 @@ export default {
           console.error('Error en la verificación del código:', error);
         }
       } else {
+        this.$root.showSnackBar('error', 'Codigo incorrecto', 'Operación fallida');
         console.error('El código ingresado no coincide');
       }
     }

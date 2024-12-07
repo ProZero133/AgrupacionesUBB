@@ -1,6 +1,7 @@
 <template>
 
-  <v-container cols="12"></v-container>
+  <v-container cols="12">
+  </v-container>
   <v-container cols="12">
     <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto" :src=datosGrupo.imagen></v-img>
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
@@ -190,7 +191,7 @@
             <v-col cols="12">
               <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
                 label="Imagen de la agrupación" clearable required variant="solo-filled" prepend-icon=""
-                @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl">
+                @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl" disabled>
               </v-file-input>
             </v-col>
           </v-row>
@@ -346,7 +347,7 @@
 
           <v-row v-if="elemento.tipo_elemento === 'actividad'">
             <v-col cols="6">
-              <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
+              <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
             <v-col cols="6">
               <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
@@ -451,7 +452,7 @@
           </v-tooltip>
         </template>
         <v-list class="tultipCrear">
-          <v-list-item v-for="(item, index) in modItems" :key="index" v-on:click="modalMaker(item.path)">
+          <v-list-item v-for="(item, index) in modItems" :key="index" :disabled="item.title === 'Solicitar Acreditación' && (datosGrupo.verificado === 'Pendiente' || datosGrupo.verificado === 'Verificado')" v-on:click="modalMaker(item.path)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -473,21 +474,20 @@
         </template>
         <v-list class="tultipApariencia">
           <v-list-item v-for="(item, index) in aparienciaItems" :key="index"
-            v-on:click="this.$router.push(item.path + `${groupId}`)">
+            v-on:click="this.$router.push(item.path + `${groupId}`)" disabled>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
     </div>
   </VLayoutItem>
-
 </template>
 
 <script>
 import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
 import { mergeProps } from 'vue';
-import { da, fa } from 'vuetify/lib/locale/index.mjs';
+import { da, fa, fi, ro } from 'vuetify/lib/locale/index.mjs';
 
 export default {
   setup() {
@@ -528,6 +528,10 @@ export default {
     preferenciasActuales: [],
     searchResults: [],
     selectedItems: [],
+    snackbar: false,
+    snackbarMessage: '',
+    snackbarColor: '',
+    snackbarTimeout: 3000,
     rut: '',
     rol: '',
     rolA: false,
@@ -571,11 +575,11 @@ export default {
     ],
 
     modItems: [
-      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1 },
-      { title: 'Editar Grupo', path: 'dialogeditar', tier: 0 },
-      { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0 },
-      { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1 },
-      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1 },
+      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1, disabled: false },
+      { title: 'Editar Grupo', path: 'dialogeditar', tier: 0, disabled: false },
+      { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0, disabled: false },
+      { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1, disabled: false },
+      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1, disabled: false },
     ],
 
     aparienciaItems: [
@@ -616,7 +620,7 @@ export default {
         const data = await response.json();
         if (response.ok) {
           this.dialogPub = false;
-          this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+          this.$root.showSnackBar('success', 'Te has unido a una actividad', 'Operacion exitosa');
         } else {
           console.error(data.message);
           console.error('Error en la respuesta:', response.status);
@@ -828,9 +832,10 @@ export default {
         });
 
         if (response.ok) {
-          console.log("Rol actualizado correctamente.");
+          this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -846,7 +851,7 @@ export default {
         });
         this.ObtenerUsuariosDeAgrupacion();
         if (response.ok) {
-          console.log("Usuario eliminado correctamente.");
+          this.$root.showSnackBar('success', 'Usuario eliminado correctamente', 'Operación exitosa');
           this.$router.push('/api/home');
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -934,9 +939,7 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          //console.log(data.success);
           if (data.success === false) {
-            //console.log("No hay actividades");
           } else {
             this.actividades = data;
             for (const actis of this.actividades) {
@@ -998,7 +1001,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           if (data.success === false) {
-            //console.log("No hay publicaciones");
           } else {
             this.publicaciones = data;
             for (const publis of this.publicaciones) {
@@ -1087,8 +1089,9 @@ export default {
         if (response.ok) {
           this.VerSolicitudes();
           this.ObtenerUsuariosDeAgrupacion();
+          this.$root.showSnackBar('success', 'Solicitud aceptada correctamente', 'Operación exitosa');
         } else {
-          console.log('Error al aceptar la solicitud');
+          this.$root.showSnackBar('error', 'Error al aceptar la solicitud', 'Operación fallida');
         }
       } catch (error) {
         console.log('Error al aceptar la solicitud');
@@ -1102,8 +1105,9 @@ export default {
         });
         if (response.ok) {
           this.VerSolicitudes();
+          this.$root.showSnackBar('success', 'Solicitud rechazada correctamente', 'Operación exitosa');
         } else {
-          console.log('Error al rechazar la solicitud');
+          this.$root.showSnackBar('error', 'Error al rechazar la solicitud', 'Operación fallida');
         }
       } catch (error) {
         console.log('Error al rechazar la solicitud');
@@ -1175,16 +1179,23 @@ export default {
         }
        
 
-    
-        
-
-        if (response.ok) {
+    if (response.ok) {
           this.VerGrupos();
+          this.snackbarMessage = 'Grupo editado correctamente';
+          this.snackbarOperationMessage = 'Operación exitosa';
+          this.snackbarColor = 'success';
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.snackbarMessage = 'Error al editar el grupo';
+          this.snackbarOperationMessage = 'Operación fallida';
+          this.snackbarColor = 'error';
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      }
+      finally {
+        this.$root.showSnackBar(this.snackbarColor, this.snackbarMessage, this.snackbarOperationMessage);
+        this.dialogeditar = false;
       }
 
     },
@@ -1245,12 +1256,24 @@ export default {
           method: 'PUT',
         });
         if (response.ok) {
-          console.log('Solicitud enviada');
+          this.snackbarMessage = 'Solicitud enviada correctamente';
+          this.snackbarOperationMessage = 'Operación exitosa';
+          this.snackbarColor = 'success';
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.snackbarMessage = 'Error al enviar la solicitud';
+          this.snackbarOperationMessage = 'Operación fallida';
+          this.snackbarColor = 'error';
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+        this.snackbarMessage = 'Error al enviar la solicitud';
+        this.snackbarOperationMessage = 'Operación fallida';
+        this.snackbarColor = 'error';
+      }
+      finally {
+        this.dialogsolicitar = false;
+        this.$root.showSnackBar(this.snackbarColor, this.snackbarMessage, this.snackbarOperationMessage);
       }
     },
 
@@ -1273,9 +1296,9 @@ export default {
         this.pressTime += 10;
         this.progress = (this.pressTime / 2000) * 100;
         if (this.pressTime >= 2000) {
-          console.log("Eliminando miembro");
           this.EliminarMiembro(this.rut);
           this.cancelHold();
+          this.$root.showSnackBar('success', 'Has abandonado el grupo', 'Operación exitosa');
         }
       }, 10);
     },
@@ -1291,7 +1314,7 @@ export default {
           method: 'DELETE',
         });
         if (response.ok) {
-          console.log('Grupo eliminado');
+          this.$root.showSnackBar('success', 'Grupo eliminado correctamente', 'Operación exitosa');
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1482,5 +1505,12 @@ export default {
 .selected-item {
   /* Estilos personalizados para los chips de items seleccionados */
   margin: 5px;
+}
+.snackbar {
+  /* Estilos personalizados para el snackbar */
+  width: 40vw;
+  height: 50vh;
+  /* Ajusta snack a la parte superior de la pantalla */
+  top: 10vh;
 }
 </style>

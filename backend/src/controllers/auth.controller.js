@@ -37,7 +37,7 @@ async function EmailLogin(request, reply) {
   if (result.success) {
     asignarToken(request.server, usuario, codigo, reply);
     //Envia el mismo codigo al frontend
-    reply.code(200).send({codigo,result});
+    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result });
   } else {
     console.log('Usuario no encontrado, no se enviará correo de verificación');
     reply.send({ success: false, message: 'Usuario no encontrado' });

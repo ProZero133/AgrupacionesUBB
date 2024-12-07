@@ -88,8 +88,16 @@ async function getActividadById(id) {
 
 async function getActividadesByAgrupacion(id_agr) {
     try {
-        // Obtiene todas las actividades de una agrupacion
+        // Obtiene todas las actividades de una agrupacion, si la actividad es publica, solo se muestra si esta aprobada
         const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+        // Recorrer actividades y quitar las que sean publicas y no esten aprobadas
+        for (let i = 0; i < actividades.rows.length; i++) {
+            if (actividades.rows[i].tipo === true && actividades.rows[i].aprobado === false) {
+                actividades.rows.splice(i, 1);
+                i--;
+            }
+        }
+        
         // Retorna las actividades
         return actividades.rows;
     }

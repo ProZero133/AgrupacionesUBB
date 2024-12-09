@@ -6,7 +6,6 @@ module.exports = function (fastify, opts, done) {
     fastify.get('/post', obtenerPosts);
     fastify.get('/post/:id', obtenerPostPorId);
     fastify.post('/post', crearPost);
-    fastify.put('/post/:id', actualizarPost);
     fastify.delete('/post/:id', eliminarPost);
     
     done();

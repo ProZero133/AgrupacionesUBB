@@ -29,7 +29,7 @@ async function getTagById(id) {
 async function createTag(tagData) {
     try {
         const newTag = await pool.query(
-            'INSERT INTO "Tags"(nombre, rut) VALUES($1, $2) RETURNING *',
+            'INSERT INTO "Tags"(nombre_tag, rut) VALUES($1, $2) RETURNING *',
             [tagData.nombre_tag, tagData.rut]
         );
         // Retorna la nueva etiqueta insertada
@@ -72,10 +72,27 @@ async function deleteTag(id) {
     }
 }
 
+async function getTagByNombre(nombre_tag) {
+    try {
+        // Obtiene el tag por su nombre
+        const tags = await pool.query('SELECT * FROM "Tags" WHERE nombre_tag = $1', [nombre_tag]);
+        if (tags.rows.length === 0) {
+            return null; // No se encontró el tag
+        }
+
+        // Retorna el tag
+        return tags.rows[0];
+    } catch (error) {
+        // Maneja cualquier error que pueda ocurrir
+        console.error('Error al obtener el tag:', error);
+    }
+}
+
 module.exports = {
     getTags,
     getTagById,
     createTag,
     updateTag,
-    deleteTag
+    deleteTag,
+    getTagByNombre
 };

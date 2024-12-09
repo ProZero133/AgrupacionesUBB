@@ -52,20 +52,6 @@ async function createPost(postData) {
     }
 }
 
-async function updatePost(id, postData) {
-    try {
-        // Arma la consulta SQL para actualizar un post
-        const query = 'UPDATE "Post" SET encabezado = $1 WHERE id_pub = $2 RETURNING *';
-        // Actualiza el post con el id especificado en la base de datos
-        const updatedPost = await pool.query(query, [postData.cuerpo, id]);
-        // Retorna el post actualizado
-        return updatedPost.rows[0];
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al actualizar el post:', error);
-        throw error;
-    }
-}
 
 async function deletePost(id) {
     try {
@@ -87,6 +73,5 @@ module.exports = {
     getPosts,
     getPostById,
     createPost,
-    updatePost,
     deletePost
 };

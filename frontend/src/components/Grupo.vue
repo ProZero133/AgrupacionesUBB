@@ -316,7 +316,7 @@
             <v-col cols="auto">
               {{ elemento.nombre }}
             </v-col>
-            <v-col cols="auto">
+            <v-col cols="auto" v-if="permisoEliminar">
               <v-btn icon @click="eliminarElemento(elemento)">
                 <v-icon>mdi-trash-can-outline</v-icon>
               </v-btn>
@@ -524,6 +524,7 @@ export default {
     dialoginvitar: false,
     dialogabandonar: false,
     dialogPub: false,
+    permisoEliminar: false,
 
     pressTimer: null,
     pressTime: 0,
@@ -600,6 +601,8 @@ export default {
       { title: 'Cambiar Fondo descripción', roles: ['Lider'] },
       { title: 'Cambiar Bordes actividades', roles: ['Lider'] },
     ],
+
+    rolesPermitidosEliminar: ['Lider', 'Administrador'],
 
     // Lista de elementos
     // Los que son actividades, tienen los siguientes campos:
@@ -1471,6 +1474,17 @@ export default {
       this.dialogPub = false;
       this.VerActividades();
     },
+     async puedeEliminarElemento(){
+      await this.esMiembro();
+      const rolPlataforma = this.rol
+      const rolAgrupacion = this.rolEnAgrupacion
+      if(rolPlataforma === 'Admin' || rolAgrupacion === 'Lider'){
+        this.permisoEliminar = true
+      }
+      else{
+        this.permisoEliminar = false
+      }
+    }
 
   },
   mounted() {
@@ -1483,6 +1497,7 @@ export default {
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
     this.obtenerTagsGrupo();
+    this.puedeEliminarElemento()
   },
   computed: {
     progressStyle() {

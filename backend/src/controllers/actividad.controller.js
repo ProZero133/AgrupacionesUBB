@@ -117,6 +117,7 @@ async function updateActividad(req, res) {
 
         // Actualiza la actividad
         const actividad = await actividadService.updateActividad(id, value);
+        // UPDATE ACTIVIDAD SOLAMENTE CAMBIARA LA TABLA PROGRAMA YA Q SOLO CAMBIARA LA FECHA DE LA ACTIVIDAD
 
         // Retorna la actividad actualizada
         res.status(200).json(actividad);

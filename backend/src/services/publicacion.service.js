@@ -78,7 +78,7 @@ async function updatePublicacion(id, publicacionData) {
 async function deletePublicacion(id) {
     try {
         // Construye la consulta SQL para eliminar la publicacion
-        const consulta = 'DELETE FROM "Publicacion" WHERE id = $1 RETURNING *';
+        const consulta = 'DELETE FROM "Publicacion" WHERE id_pub = $1 RETURNING *';
         const valor = [id];
         
         // Ejecuta la consulta SQL y elimina la publicacion

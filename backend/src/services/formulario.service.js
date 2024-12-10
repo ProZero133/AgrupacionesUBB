@@ -84,9 +84,9 @@ async function updateFormulario(id, formularioData) {
 async function deleteFormulario(id) {
     try {
         // Crea la consulta SQL para eliminar el formulario
-        const sql = 'DELETE FROM "Formulario" WHERE id = $1';
-        // Elimina el formulario de la base de datos
+        const sql = 'DELETE FROM "Formulario" WHERE id_pub = $1';
         await pool.query(sql, [id]);
+        // Elimina el formulario de la base de datos
         //Retorna mensaje de exito
         return 'Formulario eliminado correctamente';
     } catch (error) {

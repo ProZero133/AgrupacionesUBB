@@ -275,7 +275,6 @@ async function eliminarPublicacion(req, res) {
     try {
         // Obtiene el id de la publicacion
         const id = req.params.id;
-
         // Elimina la publicacion
         await deletePublicacion(id);
 

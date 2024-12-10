@@ -88,8 +88,16 @@ async function getActividadById(id) {
 
 async function getActividadesByAgrupacion(id_agr) {
     try {
-        // Obtiene todas las actividades de una agrupacion
+        // Obtiene todas las actividades de una agrupacion, si la actividad es publica, solo se muestra si esta aprobada
         const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+        // Recorrer actividades y quitar las que sean publicas y no esten aprobadas
+        for (let i = 0; i < actividades.rows.length; i++) {
+            if (actividades.rows[i].tipo === true && actividades.rows[i].aprobado === false) {
+                actividades.rows.splice(i, 1);
+                i--;
+            }
+        }
+        
         // Retorna las actividades
         return actividades.rows;
     }
@@ -205,11 +213,31 @@ async function deleteActividad(id) {
         if (fechaActual > fechasActividades.fecha_actividad) {
             return 'No es posible eliminar una actividad que ya ocurrio';
         }
-        // Elimina la actividad con el id especificado de la base de datos
+        const cantidadParticipantes = await getParticipantesActividad(id);
+        if (cantidadParticipantes.length > 1) {
+            await softDeleteActividad(id);
+        }
+        else {
+        const del = await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id]);
+        const delProg = await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id]);
         const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+        }
 
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
+        console.error('Error al eliminar la actividad:', error);
+        throw error;
+    }
+}
+async function softDeleteActividad(id) {
+    try {
+        // Elimina la actividad con el id especificado de la base de datos
+        const response = await pool.query('UPDATE "Actividad" SET visible = false WHERE id_act = $1', [id]);
+        if (response.rowCount === 0) {
+            return 'No se encontro la actividad';
+        }
+        return 'Actividad eliminada';
+    } catch (error) {
         console.error('Error al eliminar la actividad:', error);
         throw error;
     }
@@ -350,6 +378,7 @@ module.exports = {
     getActividadesByAgrupacionActivas,
     setAprobacionActividad,
     deletePrograma,
-    getActividadesPublicas
+    getActividadesPublicas,
+    softDeleteActividad
     
 };

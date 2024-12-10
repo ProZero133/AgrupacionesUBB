@@ -26,8 +26,9 @@
             <v-col cols="12" md="6">
                 <v-card class="search-container pa-3 mb-3">
                     <v-card-title class="pa-0">Añadir Tags a las preferencias</v-card-title>
-                    <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)"
-                        append-icon="mdi-magnify" label="Buscar..." single-line hide-details></v-text-field>
+                    <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)" append-icon="mdi-plus"
+                        append-icon-class="blue-background" @click:append="dialoTag = true" label="Buscar..."
+                        single-line hide-details></v-text-field>
                     <v-card-text class="pa-0">
                         <v-chip-group>
                             <v-chip v-for="item in searchResults" :key="item.id" @click="selectItem(item)"
@@ -52,6 +53,19 @@
             </v-col>
         </v-row>
     </v-card>
+    <v-dialog v-model="dialoTag" max-width="290">
+        <v-card>
+            <v-card-title class="headline">Crear nuevo Tag</v-card-title>
+            <v-card-text>
+                <v-text-field v-model="tag" label="Nombre del tag"></v-text-field>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="dialoTag = false">Cancelar</v-btn>
+                <v-btn color="blue darken-1" text @click="crearTag(tag)">Añadir</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <style scoped>
@@ -59,7 +73,7 @@
     margin-top: 15vh;
     max-width: 80vw;
     min-width: 395px;
- 
+
 }
 
 .nombre-usuario {
@@ -81,10 +95,24 @@
 .mt-2 {
     margin-top: 8px !important;
 }
+
+.blue-background {
+    background-color: blue;
+    border-radius: 50%;
+    /* Para que el fondo sea redondo */
+    padding: 5px;
+    /* Espaciado dentro del fondo */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    /* Cambiar el color del ícono a blanco */
+}
 </style>
 
 <script>
 import { useRouter } from 'vue-router';
+import { no } from 'vuetify/lib/locale/index.mjs';
 
 export default {
     name: 'PerfilUsuario',
@@ -97,6 +125,7 @@ export default {
         rut: '',
         correo: '',
         carrera: '',
+        dialoTag: false,
 
     }),
     methods: {
@@ -235,6 +264,38 @@ export default {
                 this.obtenerPreferencias();
             } catch (error) {
                 console.error('Error al eliminar preferencia:', error);
+            }
+        },
+        async crearTag(nombre_tag) {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/tags`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre_tag, rut: this.rut })
+                });
+                if (response.ok) {
+                    const nuevoTag = await fetch(`${global.BACKEND_URL}/buscarTags/${nombre_tag}`);
+                    if (!nuevoTag.ok) throw new Error('Error en la respuesta de la red');
+                    const data = await nuevoTag.json();
+                    await fetch(`${global.BACKEND_URL}/actualizarPreferencias/${this.rut}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ preferencias: [data[0].id_tag] })
+                    });
+                    this.obtenerPreferencias();
+                    console.log(response);
+                    this.dialoTag = false;
+                    this.fetchSearchResults(this.searchQuery);
+                } else {
+                    console.log(response);
+                    throw new Error('Error en la respuesta de la red');
+                }
+            } catch (error) {
+                console.error('Error al crear tag:', error);
             }
         }
 

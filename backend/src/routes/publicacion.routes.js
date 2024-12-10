@@ -7,7 +7,6 @@ module.exports = function(fastify, options, done) {
     fastify.get('/publicaciones/:id', obtenerPublicacionesPorId);
     fastify.get('/publicacionesgrupo/:id', obtenerPublicacionesPorGrupo);
     fastify.post('/publicaciones', crearPublicacion);
-    fastify.put('/publicaciones/:id', actualizarPublicacion);
     fastify.delete('/publicaciones/:id', eliminarPublicacion);
     done();
 }

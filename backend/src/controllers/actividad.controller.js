@@ -154,7 +154,7 @@ async function eliminarActividad(req, res) {
         if (actividad.length === 0) {
             return res.send({ success: false, message: 'No se encontro la actividad' });
         }
-        const lider = await getLider(actividad[0].id_agr);
+        const lider = await getLider(actividad.rows[0].id_agr);
         if (rut !== lider.rut) {
             return res.send({ success: false, message: 'No eres el lider de la agrupacion' });
         }

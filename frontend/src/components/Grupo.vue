@@ -1,6 +1,7 @@
 <template>
 
-  <v-container cols="12"></v-container>
+  <v-container cols="12">
+  </v-container>
   <v-container cols="12">
     <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto" :src=datosGrupo.imagen></v-img>
     <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
@@ -189,12 +190,38 @@
           <v-row>
             <v-col cols="12">
               <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
-                label="Imagen para la actividad" clearable required variant="solo-filled" prepend-icon=""
-                @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl">
+                label="Imagen de la agrupación" clearable required variant="solo-filled" prepend-icon=""
+                @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl" disabled>
               </v-file-input>
             </v-col>
           </v-row>
+          <v-row>
+            <v-card class="search-container pa-3 mb-3">
+              <v-card-title class="pa-0">Añadir Tags a las preferencias</v-card-title>
+              <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)" append-icon="mdi-magnify"
+                label="Buscar..." single-line hide-details></v-text-field>
+              <v-card-text class="pa-0">
+                <v-chip-group>
+                  <v-chip v-for="item in searchResults" :key="item.id" @click="selectItem(item)" class="result-item"
+                    color="primary" text-color="white" outlined>
+                    {{ item.nombre_tag }}
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-row>
+          <v-row>
+            <v-card-text class="pa-0">
+              <v-chip-group>
+                <v-chip v-for="tag in preferencias" :key="tag.id_tag" @click="eliminarTag(tag)" class="selected-item"
+                  color="primary" text-color="white" outlined>
+                  {{ tag.nombre_tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-card-text>
+          </v-row>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="dialogeditar = false">Cancelar</v-btn>
@@ -284,7 +311,18 @@
     <v-dialog v-model="dialogPub">
       <v-card min-width="380" v-for="elemento in elementoFiltrado()" :key="elemento.id" class="mb-15 card-actividades"
         border="10px">
-        <v-card-title class="headline">{{ elemento.nombre }}</v-card-title>
+        <v-card-title class="headline">
+          <v-row align="center" justify="space-between" style="width: 100%;">
+            <v-col cols="auto">
+              {{ elemento.nombre }}
+            </v-col>
+            <v-col cols="auto" v-if="permisoEliminar">
+              <v-btn icon @click="eliminarElemento(elemento)">
+                <v-icon>mdi-trash-can-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-title>
         <v-card-text>
           <v-row>
 
@@ -320,7 +358,7 @@
 
           <v-row v-if="elemento.tipo_elemento === 'actividad'">
             <v-col cols="6">
-              <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
+              <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
             <v-col cols="6">
               <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
@@ -425,7 +463,9 @@
           </v-tooltip>
         </template>
         <v-list class="tultipCrear">
-          <v-list-item v-for="(item, index) in modItems" :key="index" v-on:click="modalMaker(item.path)">
+          <v-list-item v-for="(item, index) in modItems" :key="index"
+            :disabled="item.title === 'Solicitar Acreditación' && (datosGrupo.verificado === 'Pendiente' || datosGrupo.verificado === 'Verificado')"
+            v-on:click="modalMaker(item.path)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -447,21 +487,20 @@
         </template>
         <v-list class="tultipApariencia">
           <v-list-item v-for="(item, index) in aparienciaItems" :key="index"
-            v-on:click="this.$router.push(item.path + `${groupId}`)">
+            v-on:click="this.$router.push(item.path + `${groupId}`)" disabled>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
     </div>
   </VLayoutItem>
-
 </template>
 
 <script>
 import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
 import { mergeProps } from 'vue';
-import { fa } from 'vuetify/lib/locale/index.mjs';
+import { da, fa, fi, ro } from 'vuetify/lib/locale/index.mjs';
 
 export default {
   setup() {
@@ -485,6 +524,7 @@ export default {
     dialoginvitar: false,
     dialogabandonar: false,
     dialogPub: false,
+    permisoEliminar: false,
 
     pressTimer: null,
     pressTime: 0,
@@ -498,6 +538,14 @@ export default {
     solicitudes: [],
     MiembrosdeAgr: [],
     selectedRole: '',
+    preferencias: [],
+    preferenciasActuales: [],
+    searchResults: [],
+    selectedItems: [],
+    snackbar: false,
+    snackbarMessage: '',
+    snackbarColor: '',
+    snackbarTimeout: 3000,
     rut: '',
     rol: '',
     rolA: false,
@@ -541,11 +589,11 @@ export default {
     ],
 
     modItems: [
-      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1 },
-      { title: 'Editar Grupo', path: 'dialogeditar', tier: 0 },
-      { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0 },
-      { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1 },
-      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1 },
+      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1, disabled: false },
+      { title: 'Editar Grupo', path: 'dialogeditar', tier: 0, disabled: false },
+      { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0, disabled: false },
+      { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1, disabled: false },
+      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1, disabled: false },
     ],
 
     aparienciaItems: [
@@ -553,6 +601,8 @@ export default {
       { title: 'Cambiar Fondo descripción', roles: ['Lider'] },
       { title: 'Cambiar Bordes actividades', roles: ['Lider'] },
     ],
+
+    rolesPermitidosEliminar: ['Lider', 'Administrador'],
 
     // Lista de elementos
     // Los que son actividades, tienen los siguientes campos:
@@ -586,7 +636,7 @@ export default {
         const data = await response.json();
         if (response.ok) {
           this.dialogPub = false;
-          this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+          this.$root.showSnackBar('success', 'Te has unido a una actividad', 'Operacion exitosa');
         } else {
           console.error(data.message);
           console.error('Error en la respuesta:', response.status);
@@ -798,9 +848,10 @@ export default {
         });
 
         if (response.ok) {
-          console.log("Rol actualizado correctamente.");
+          this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -816,7 +867,7 @@ export default {
         });
         this.ObtenerUsuariosDeAgrupacion();
         if (response.ok) {
-          console.log("Usuario eliminado correctamente.");
+          this.$root.showSnackBar('success', 'Usuario eliminado correctamente', 'Operación exitosa');
           this.$router.push('/api/home');
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -904,9 +955,7 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          //console.log(data.success);
           if (data.success === false) {
-            //console.log("No hay actividades");
           } else {
             this.actividades = data;
             for (const actis of this.actividades) {
@@ -968,7 +1017,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           if (data.success === false) {
-            //console.log("No hay publicaciones");
           } else {
             this.publicaciones = data;
             for (const publis of this.publicaciones) {
@@ -1057,8 +1105,9 @@ export default {
         if (response.ok) {
           this.VerSolicitudes();
           this.ObtenerUsuariosDeAgrupacion();
+          this.$root.showSnackBar('success', 'Solicitud aceptada correctamente', 'Operación exitosa');
         } else {
-          console.log('Error al aceptar la solicitud');
+          this.$root.showSnackBar('error', 'Error al aceptar la solicitud', 'Operación fallida');
         }
       } catch (error) {
         console.log('Error al aceptar la solicitud');
@@ -1072,8 +1121,9 @@ export default {
         });
         if (response.ok) {
           this.VerSolicitudes();
+          this.$root.showSnackBar('success', 'Solicitud rechazada correctamente', 'Operación exitosa');
         } else {
-          console.log('Error al rechazar la solicitud');
+          this.$root.showSnackBar('error', 'Error al rechazar la solicitud', 'Operación fallida');
         }
       } catch (error) {
         console.log('Error al rechazar la solicitud');
@@ -1116,6 +1166,7 @@ export default {
         const nombre = nombre_agr;
         const descripciongrupo = descripcion;
         const imagen = imagengrupo;
+        const tagsGrupo = this.selectedItems;
         const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`; // quite el rut porque no se llamaba y tiraba error
         const response = await fetch(url, {
           method: 'PUT',
@@ -1128,15 +1179,90 @@ export default {
           }),
         });
 
+        // Inserta los tags seleccionados en la agrupación en el body del fetch
+        for (const tag of tagsGrupo) {
+          const responseTag = await fetch(`${global.BACKEND_URL}/ingresartagsagrupacion`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id_agr: this.groupId,
+              id_tag: tag.id_tag,
+            }),
+          });
+          if (!responseTag.ok) throw new Error('Error al agregar tag a la agrupación');
+        }
+
+
         if (response.ok) {
           this.VerGrupos();
+          this.snackbarMessage = 'Grupo editado correctamente';
+          this.snackbarOperationMessage = 'Operación exitosa';
+          this.snackbarColor = 'success';
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.snackbarMessage = 'Error al editar el grupo';
+          this.snackbarOperationMessage = 'Operación fallida';
+          this.snackbarColor = 'error';
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
+      finally {
+        this.$root.showSnackBar(this.snackbarColor, this.snackbarMessage, this.snackbarOperationMessage);
+        this.dialogeditar = false;
+      }
 
+    },
+    async obtenerTagsGrupo() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${this.groupId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
+        const tagsPromises = data.map(async (item) => {
+          const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
+          const tagData = await tagResponse.json();
+          return tagData[0]; // Asume que siempre hay al menos un elemento y toma el primero
+        });
+        const tags = await Promise.all(tagsPromises);
+        this.preferencias = tags; // Asigna el resultado a preferencias
+        this.preferenciasActuales = tags; // Asigna el resultado a preferenciasActuales
+
+      } catch (error) {
+        console.error('Error al obtener preferencias:', error);
+      }
+    },
+    async fetchSearchResults(searchValue) {
+      // Convertir searchValue a cadena explícitamente
+      const stringValue = searchValue.trim();
+      if (stringValue === '') {
+        this.searchResults = [];
+        return;
+      }
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
+      } catch (error) {
+        console.error('Error al buscar:', error);
+        this.searchResults = [];
+      }
     },
 
     async SolicitarAcreditaciondeGrupo() {
@@ -1146,12 +1272,24 @@ export default {
           method: 'PUT',
         });
         if (response.ok) {
-          console.log('Solicitud enviada');
+          this.snackbarMessage = 'Solicitud enviada correctamente';
+          this.snackbarOperationMessage = 'Operación exitosa';
+          this.snackbarColor = 'success';
         } else {
           console.error('Error en la respuesta:', response.status);
+          this.snackbarMessage = 'Error al enviar la solicitud';
+          this.snackbarOperationMessage = 'Operación fallida';
+          this.snackbarColor = 'error';
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+        this.snackbarMessage = 'Error al enviar la solicitud';
+        this.snackbarOperationMessage = 'Operación fallida';
+        this.snackbarColor = 'error';
+      }
+      finally {
+        this.dialogsolicitar = false;
+        this.$root.showSnackBar(this.snackbarColor, this.snackbarMessage, this.snackbarOperationMessage);
       }
     },
 
@@ -1174,9 +1312,9 @@ export default {
         this.pressTime += 10;
         this.progress = (this.pressTime / 2000) * 100;
         if (this.pressTime >= 2000) {
-          console.log("Eliminando miembro");
           this.EliminarMiembro(this.rut);
           this.cancelHold();
+          this.$root.showSnackBar('success', 'Has abandonado el grupo', 'Operación exitosa');
         }
       }, 10);
     },
@@ -1192,7 +1330,7 @@ export default {
           method: 'DELETE',
         });
         if (response.ok) {
-          console.log('Grupo eliminado');
+          this.$root.showSnackBar('success', 'Grupo eliminado correctamente', 'Operación exitosa');
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1203,7 +1341,25 @@ export default {
       this.dialogeliminar = false;
       this.$router.push('/api/home');
     },
-
+    async eliminarTag(item) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/eliminarTagAgrupacion/${this.groupId}/${item.id_tag}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        this.obtenerTagsGrupo();
+      } catch (error) {
+        console.error('Error al eliminar preferencia:', error);
+      }
+    },
+    selectItem(item) {
+      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+      this.preferencias.push(item); // Añade el item a `preferencias`
+      this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
     formatearFecha(fecha) {
       const date = new Date(fecha);
       const now = new Date();
@@ -1255,6 +1411,80 @@ export default {
 
       return `el día ${day}/${month}/${year} a las ${hours}:${minutes}`;
     },
+    async eliminarElemento(elemento) {
+      if (elemento.tipo_elemento === 'actividad') {
+        try{
+          const url = `${global.BACKEND_URL}/actividades/${elemento.id}/${this.rut}`;
+          const response = await fetch(url, {
+            method: 'DELETE',
+          });
+          if (response.ok) {
+            this.$root.showSnackBar('success', 'Actividad eliminada correctamente', 'Operación exitosa');
+          } else {
+            this.$root.showSnackBar('error', 'Error al eliminar la actividad', 'Operación fallida');
+            console.error('Error en la respuesta:', response.status);
+          }
+        } catch (error) {
+          console.error('Error al hacer fetch:', error);
+        }
+      } else{
+        if (elemento.tipo_elemento === 'publicacion') {
+          try{
+            const post = await fetch(`${global.BACKEND_URL}/post/${elemento.id}`, {
+              method: 'DELETE',
+            });
+            if(!post.ok) throw new Error('Error al eliminar la publicación');
+            
+            const url = `${global.BACKEND_URL}/publicaciones/${elemento.id}`;
+            const response = await fetch(url, {
+              method: 'DELETE',
+            });
+            if (response.ok) {
+              this.$root.showSnackBar('success', 'Publicación eliminada correctamente', 'Operación exitosa');
+              this.dialogPub = false;
+              this.VerActividades();
+            } else {
+              this.$root.showSnackBar('error', 'Error al eliminar la publicación', 'Operación fallida');
+              console.error('Error en la respuesta:', response.status);
+            }
+          } catch (error) {
+            console.error('Error al hacer fetch:', error);
+          }
+          this.dialogPub = false;
+        }
+        else{
+          const url = `${global.BACKEND_URL}/formulario/${elemento.id}`;
+          const response = await fetch(url, {
+            method: 'DELETE',
+          });
+          if (response.ok) {
+            this.dialogPub = false;
+            this.VerActividades();
+            this.$root.showSnackBar('success', 'Formulario eliminado correctamente', 'Operación exitosa');
+          } else {
+            this.$root.showSnackBar('error', 'Error al eliminar el formulario', 'Operación fallida');
+            console.error('Error en la respuesta:', response.status);
+          }
+          const publi = await fetch(`${global.BACKEND_URL}/publicaciones/${elemento.id}`, {
+            method: 'DELETE',
+          }); 
+        }
+      }
+      // Cerrar dialog
+      this.dialogPub = false;
+      this.VerActividades();
+    },
+     async puedeEliminarElemento(){
+      await this.esMiembro();
+      const rolPlataforma = this.rol
+      const rolAgrupacion = this.rolEnAgrupacion
+      if(rolPlataforma === 'Admin' || rolAgrupacion === 'Lider'){
+        this.permisoEliminar = true
+      }
+      else{
+        this.permisoEliminar = false
+      }
+    }
 
   },
   mounted() {
@@ -1266,6 +1496,8 @@ export default {
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
+    this.obtenerTagsGrupo();
+    this.puedeEliminarElemento()
   },
   computed: {
     progressStyle() {
@@ -1341,5 +1573,36 @@ export default {
   margin-left: 0px;
   margin-top: -10px;
   margin-bottom: -10px;
+}
+
+.search-container {
+  height: 25vh;
+  /* Ajusta el tamaño del contenedor de búsqueda */
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.selected-items-container {
+  /* Ajusta el tamaño del contenedor de items seleccionados */
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.result-item {
+  /* Estilos personalizados para los chips de resultados */
+  margin: 5px;
+}
+
+.selected-item {
+  /* Estilos personalizados para los chips de items seleccionados */
+  margin: 5px;
+}
+
+.snackbar {
+  /* Estilos personalizados para el snackbar */
+  width: 40vw;
+  height: 50vh;
+  /* Ajusta snack a la parte superior de la pantalla */
+  top: 10vh;
 }
 </style>

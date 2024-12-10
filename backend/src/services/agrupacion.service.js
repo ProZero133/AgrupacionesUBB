@@ -526,6 +526,16 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     }
   }
 
+  async function deleteTagAgrupacion(id_agr, id_tag) {
+    try {
+      // Elimina el tag de la agrupación
+      const response = await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1 AND id_tag = $2 RETURNING *', [id_agr, id_tag]);
+      return 'Tag eliminado de la agrupación';
+    } catch (error) {
+      console.log('Error al eliminar el tag de la agrupación:', error);
+    }
+  }
+
   module.exports = {
     getAgrupaciones,
     getAgrupacionById,
@@ -553,5 +563,6 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     createInvitacion,
     redeemCodigo,
     getAgrupacionesNoInscritas,
-    getTagsAgrupacion
+    getTagsAgrupacion,
+    deleteTagAgrupacion
   };

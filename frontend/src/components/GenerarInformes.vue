@@ -1,5 +1,30 @@
 <template>
     <v-container class="contenedorPrincipal" grid-list-xs>
+        <v-btn v-if="selectedGrupo" @click="menu = !menu" color="primary" text>
+                {{ selectedGrupo.nombre_agr }}
+            </v-btn>
+            <v-menu v-model="menu" :close-on-content-click="false" offset-y>
+                <v-list >
+                    <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="selectGrupo(grupo)">
+                        <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+        <v-data-table v-model:expanded="expanded" :headers="dessertHeaders" :items="desserts" item-value="name"
+            show-expand>
+            <template v-slot:top>
+                <v-toolbar flat>
+                    <v-toolbar-title>Historial</v-toolbar-title>
+                </v-toolbar>
+            </template>
+            <template v-slot:expanded-row="{ columns, item }">
+                <tr>
+                    <td :colspan="columns.length">
+                        More info about {{ item.name }}
+                    </td>
+                </tr>
+            </template>
+        </v-data-table>
 
         <v-card>
             <v-card-title class="ContenedorTitulo">
@@ -41,19 +66,10 @@ export default {
     data: () => ({
         rut: '',
         rol: '',
-        // nombre grupos usuario
-        grupos: [],
-        tipos: ['Actividades', 'Publicaciones', 'Encuestas', 'Formularios'],
-        // nombre grupos usuario seleccionados
+        gruposUsuario: [],
         selectedGrupos: [],
-        selectedTipos: [],
-        actividades: [],
-        publicaciones: [],
-        votaciones: [],
-        formularios: [],
-        // nombre y id grupos usuario
-        gruposConID: [],
-        resultadoGrupos: [],
+        selectedGrupo: null,
+        menu: false,
     }),
     setup() {
         const router = useRouter();
@@ -96,216 +112,21 @@ export default {
                 });
                 const data = await response.json();
 
-                if (response.ok) {
-                    this.grupos = data.map(grupo => grupo.nombre_agr);
-                    // mapear los grupos con su id y nombre_agr
-                    this.gruposConID = data.map(grupo => ({
-                        id_agr: grupo.id_agr,
-                        nombre_agr: grupo.nombre_agr,
-                    }));
-
+                if (response.status === 200) {
+                    this.gruposUsuario = data;
+                    this.selectedGrupo = this.gruposUsuario[0];
+                    console.log('Grupo seleccionado:', this.selectedGrupo);
                 } else {
                     console.error('No se encontraron agrupupaciones:', response.status);
+
                 }
             } catch (error) {
                 console.error('Error al hacer fetch:', error);
             }
         },
-        async obtenerGruposPorNombre() {
-            try {
-                //Para cada id_agr de gruposConID donde el nombre_agr de gruposConID este en selectedGrupos, obtener las actividades 
-                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.includes(grupo.nombre_agr));
-                //Obtiene las actividades de los grupos seleccionados si se selecciono la opcion de actividades
-                if (this.selectedTipos.includes('Actividades')) {
-                    // Asegúrate de acceder al primer elemento del array anidado
-                    const grupos = this.resultadoGrupos;
-                    // Hacer fetch para obtener las actividades de los grupos seleccionados con un bucle for a la lista de grupos seleccionados
-                    for (let i = 0; i < grupos.length; i++) {
-                        //Recorre la lista de gruposConID 
-                        const response = await fetch(`${global.BACKEND_URL}/actividadesgrupo/${grupos[i].id_agr}`, {
-                            method: 'GET',
-                        });
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            // Añade las actividades obtenidas a un arreglo
-                            this.actividades.push(data);
-                        } else {
-                            console.error('No se encontraron actividades:', response.status);
-                        }
-                    }
-                }
-                //Obtiene las publicaciones de los grupos seleccionados si se selecciono la opcion de publicaciones
-                if (this.selectedTipos.includes('Publicaciones') || this.selectedTipos.includes('Votaciones') || this.selectedTipos.includes('Formularios')) {
-                    const grupos = this.resultadoGrupos;
-                    // Hacer fetch para obtener las publicaciones de los grupos seleccionados con un bucle for a la lista de grupos seleccionados
-                    for (let i = 0; i < grupos.length; i++) {
-                        const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${grupos[i].id_agr}`, {
-                            method: 'GET',
-                        });
-                        const data = await response.json();
-                        if (response.ok) {
-                            //Recorre cada elemento de data y separa si tipoPub = post, tipoPub = formulario, tipoPub = votacion
-                            for (let j = 0; j < data.length; j++) {
-                                if (data[j].tipoPub === 'post') {
-                                    this.publicaciones.push(data[j]);
-                                } else if (data[j].tipoPub === 'votacion') {
-                                    this.votaciones.push(data[j]);
-                                } else if (data[j].tipoPub === 'formulario') {
-                                    this.formularios.push(data[j]);
-                                }
-
-                            }
-
-                        }
-
-                    }
-                }
-
-
-
-
-            } catch (error) {
-                console.error('Error al hacer fetch:', error);
-            }
-        },
-        generarExcelActividades() {
-            // Asegúrate de que this.actividades sea un array
-            if (Array.isArray(this.actividades)) {
-                // Filtra los elementos que no son arrays de arrays
-                const actividades = this.actividades.filter(Array.isArray).flat();
-
-                // Filtra los elementos que no son actividades válidas
-                const actividadesValidas = actividades.filter(actividad => actividad.success !== false);
-
-                // Agrupa las actividades por nombre_agr
-                const actividadesPorAgrupacion = actividadesValidas.reduce((acc, actividad) => {
-                    const grupo = this.gruposConID.find(grupo => grupo.id_agr === actividad.id_agr);
-                    const nombreAgr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    if (!acc[nombreAgr]) {
-                        acc[nombreAgr] = [];
-                    }
-                    acc[nombreAgr].push(actividad);
-                    return acc;
-                }, {});
-
-                // Agrupa los posts por nombre_agr
-                const postsPorAgrupacion = this.publicaciones.reduce((acc, post) => {
-                    const grupo = this.gruposConID.find(grupo => grupo.id_agr === post.id_agr);
-                    const nombreAgr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    if (!acc[nombreAgr]) {
-                        acc[nombreAgr] = [];
-                    }
-                    acc[nombreAgr].push(post);
-                    return acc;
-                }, {});
-
-                // Agrupa los formularios por nombre_agr
-                const formulariosPorAgrupacion = this.formularios.reduce((acc, formulario) => {
-                    const grupo = this.gruposConID.find(grupo => grupo.id_agr === formulario.id_agr);
-                    const nombreAgr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    if (!acc[nombreAgr]) {
-                        acc[nombreAgr] = [];
-                    }
-                    acc[nombreAgr].push(formulario);
-                    return acc;
-                }, {});
-
-                // Agrupa las votaciones por nombre_agr
-                const votacionesPorAgrupacion = this.votaciones.reduce((acc, votacion) => {
-                    const grupo = this.gruposConID.find(grupo => grupo.id_agr === votacion.id_agr);
-                    const nombreAgr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    if (!acc[nombreAgr]) {
-                        acc[nombreAgr] = [];
-                    }
-                    acc[nombreAgr].push(votacion);
-                    return acc;
-                }, {});
-
-                // Crea un nuevo libro de Excel
-                const wb = XLSX.utils.book_new();
-
-
-
-                // Genera una hoja de cálculo para cada grupo de actividades
-                Object.keys(actividadesPorAgrupacion).forEach(nombreAgr => {
-                    const actividades = actividadesPorAgrupacion[nombreAgr];
-                    const columnas = actividades.map(actividad => ({
-                        'Nombre Actividad': actividad.nom_act,
-                        'Descripción': actividad.descripcion,
-                        'Tipo': actividad.tipo ? 'Tipo 1' : 'Tipo 2', // Ajusta según tu lógica
-                        // Agrega más columnas según sea necesario
-                    }));
-
-                    // Genera la hoja de cálculo
-                    const ws = XLSX.utils.json_to_sheet(columnas);
-                    XLSX.utils.book_append_sheet(wb, ws, `Actividades ${nombreAgr}`);
-                });
-
-                // Genera una hoja de cálculo para cada grupo de posts
-                Object.keys(postsPorAgrupacion).forEach(nombreAgr => {
-                    const posts = postsPorAgrupacion[nombreAgr];
-                    const columnas = posts.map(post => ({
-                        'Encabezado': post.encabezado,
-                        'Descripción': post.descripcion,
-                        'Fecha Publicación': post.fecha_publicacion,
-                        'RUT': post.rut,
-                        // Agrega más columnas según sea necesario
-                    }));
-
-                    // Genera la hoja de cálculo
-                    const ws = XLSX.utils.json_to_sheet(columnas);
-                    XLSX.utils.book_append_sheet(wb, ws, `Posts ${nombreAgr}`);
-                });
-
-                // Genera una hoja de cálculo para cada grupo de formularios
-                Object.keys(formulariosPorAgrupacion).forEach(nombreAgr => {
-                    const formularios = formulariosPorAgrupacion[nombreAgr];
-                    const columnas = formularios.map(formulario => ({
-                        'Encabezado': formulario.encabezado,
-                        'Descripción': formulario.descripcion,
-                        'Fecha Publicación': formulario.fecha_publicacion,
-                        'Hipervínculo': formulario.hipervinculo,
-                        'RUT': formulario.rut,
-                        // Agrega más columnas según sea necesario
-                    }));
-
-                    // Genera la hoja de cálculo
-                    const ws = XLSX.utils.json_to_sheet(columnas);
-                    XLSX.utils.book_append_sheet(wb, ws, `Formularios ${nombreAgr}`);
-                });
-
-                // Genera una hoja de cálculo para cada grupo de votaciones
-                Object.keys(votacionesPorAgrupacion).forEach(nombreAgr => {
-                    const votaciones = votacionesPorAgrupacion[nombreAgr];
-                    const columnas = votaciones.map(votacion => ({
-                        'Encabezado': votacion.encabezado,
-                        'Descripción': votacion.descripcion,
-                        'Fecha Publicación': votacion.fecha_publicacion,
-                        'RUT': votacion.rut,
-                        'Opciones': votacion.opciones.map(opcion => `${opcion.nombre} (${opcion.respuestas} respuestas)`).join(', '),
-                        // Agrega más columnas según sea necesario
-                    }));
-
-                    // Genera la hoja de cálculo
-                    const ws = XLSX.utils.json_to_sheet(columnas);
-                    XLSX.utils.book_append_sheet(wb, ws, `Votaciones ${nombreAgr}`);
-                });
-
-                // Escribe el archivo Excel
-                XLSX.writeFile(wb, 'actividades_posts_formularios_votaciones.xlsx');
-            }
-        },
-        async generarReporte() {
-            await this.obtenerGruposPorNombre(); // Espera a que la función asíncrona se complete
-            this.generarExcelActividades();
-            this.resultadoGrupos = [];
-            this.selectedGrupos = [];
-            this.selectedTipos = [];
-            this.actividades = [];
-            this.publicaciones = [];
-            this.encuestas = [];
-            this.formularios = [];
+        selectGrupo(grupo) {
+            this.selectedGrupo = grupo;
+            this.menu = false;
         },
 
 

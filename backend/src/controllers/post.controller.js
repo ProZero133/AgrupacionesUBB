@@ -81,30 +81,6 @@ async function crearPost(req, res) {
  * @param {Object} res - Objeto de respuesta
  */
 
-async function actualizarPost(req, res) {
-    try {
-        // Obtiene el id del post
-        const { id } = req.params;
-
-        // Valida el cuerpo de la petición
-        const { error } = postBodySchema.validate(req.body);
-
-        if (error) {
-            return res.code(400).send(error.details[0].message);
-        }
-
-        // Actualiza el post por su id
-        const post = await updatePost(id, req.body);
-
-        // Retorna el post actualizado
-        res.code(200).send(post);
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al actualizar el post:', error);
-        res.code(500).send('Error al actualizar el post');
-    }
-}
-
 /**
  * Elimina un post por su id
  * @param {Object} req - Objeto de petición
@@ -133,6 +109,5 @@ module.exports = {
     obtenerPosts,
     obtenerPostPorId,
     crearPost,
-    actualizarPost,
     eliminarPost
 };

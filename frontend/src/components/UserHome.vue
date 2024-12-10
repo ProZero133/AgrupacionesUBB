@@ -402,7 +402,6 @@ export default {
             method: 'GET',
           });
           const dataPublicas = await actividadesPublicas.json();
-          console.log(dataPublicas);
           const data = await response.json();
           // Eliminar actividad publica si ya esta su id en data
           dataPublicas.forEach((actiPublica) => {

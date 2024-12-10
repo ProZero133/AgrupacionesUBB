@@ -61,6 +61,10 @@ export default {
           body: JSON.stringify({ email: this.email }),
         });
         const data = await response.json();
+        
+        // BORRAR
+        // console.log(data);
+        
         if (response.ok && data.success ) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;

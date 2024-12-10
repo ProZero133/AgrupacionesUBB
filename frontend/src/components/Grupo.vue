@@ -836,6 +836,7 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
+        // Si el rol_agr es 'Lider', debe cambiar el rol del usuario actual a 'Miembro'
         const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'PUT',
@@ -846,13 +847,28 @@ export default {
             rol_agr
           }),
         });
-
         if (response.ok) {
           this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
         } else {
           console.error('Error en la respuesta:', response.status);
           this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
         }
+        if (rol_agr === 'Lider') {
+            rol_agr = 'Miembro';
+            const rutActual = this.getRut();
+            const rolMiembro = 'Miembro';
+            const cambiarLider = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rutActual}`;
+            const responseNuevoLider = await fetch(cambiarLider, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                rol_agr
+              }),
+            });
+
+          }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
@@ -1413,7 +1429,7 @@ export default {
     },
     async eliminarElemento(elemento) {
       if (elemento.tipo_elemento === 'actividad') {
-        try{
+        try {
           const url = `${global.BACKEND_URL}/actividades/${elemento.id}/${this.rut}`;
           const response = await fetch(url, {
             method: 'DELETE',
@@ -1427,14 +1443,14 @@ export default {
         } catch (error) {
           console.error('Error al hacer fetch:', error);
         }
-      } else{
+      } else {
         if (elemento.tipo_elemento === 'publicacion') {
-          try{
+          try {
             const post = await fetch(`${global.BACKEND_URL}/post/${elemento.id}`, {
               method: 'DELETE',
             });
-            if(!post.ok) throw new Error('Error al eliminar la publicación');
-            
+            if (!post.ok) throw new Error('Error al eliminar la publicación');
+
             const url = `${global.BACKEND_URL}/publicaciones/${elemento.id}`;
             const response = await fetch(url, {
               method: 'DELETE',
@@ -1452,7 +1468,7 @@ export default {
           }
           this.dialogPub = false;
         }
-        else{
+        else {
           const url = `${global.BACKEND_URL}/formulario/${elemento.id}`;
           const response = await fetch(url, {
             method: 'DELETE',
@@ -1467,21 +1483,21 @@ export default {
           }
           const publi = await fetch(`${global.BACKEND_URL}/publicaciones/${elemento.id}`, {
             method: 'DELETE',
-          }); 
+          });
         }
       }
       // Cerrar dialog
       this.dialogPub = false;
       this.VerActividades();
     },
-     async puedeEliminarElemento(){
+    async puedeEliminarElemento() {
       await this.esMiembro();
       const rolPlataforma = this.rol
       const rolAgrupacion = this.rolEnAgrupacion
-      if(rolPlataforma === 'Admin' || rolAgrupacion === 'Lider'){
+      if (rolPlataforma === 'Admin' || rolAgrupacion === 'Lider') {
         this.permisoEliminar = true
       }
-      else{
+      else {
         this.permisoEliminar = false
       }
     }

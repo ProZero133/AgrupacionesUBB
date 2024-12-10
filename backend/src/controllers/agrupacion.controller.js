@@ -282,7 +282,6 @@ async function CambiarRoldeUsuario(req, res) {
         const rut = req.params.rut;
         const rol = req.body.rol_agr;
 
-
         const usuario = await getUsuarioByRut(rut);
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');

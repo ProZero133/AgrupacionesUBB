@@ -262,7 +262,16 @@ async function getActividadesByGrupoUsuario(rut) {
             SELECT * FROM "Actividad" 
             WHERE tipo = false AND id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
         `, [rut]);
+        // Elimina las actividades que tengan visible en false
+    
+        for (let i = 0; i < actividades.rows.length; i++) {
+            if (actividades.rows[i].visible === false) {
+                actividades.rows.splice(i, 1);
+                i--;
+            }
+        }
 
+           
         if (actividades.rows.length === 0) {
             return [];
         }
@@ -276,7 +285,6 @@ async function getActividadesByGrupoUsuario(rut) {
 
         // Filtra las actividades que aún no han ocurrido
         const actividadesFuturas = actividades.rows.filter(actividad => id_actsFuturas.includes(actividad.id_act));
-
         // Retorna las actividades futuras
         return actividadesFuturas;
     } catch (error) {
@@ -349,7 +357,7 @@ async function deletePrograma(id_act) {
 async function getActividadesPublicas() {
     try {
         // Obtiene todas las actividades públicas donde la columna "tipo" es igual a True, la columna "aprobado" es igual a True y fecha_actividad es mayor a la fecha actual
-        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE tipo = true AND aprobado = true AND id_act IN (SELECT id_act FROM "Programa" WHERE fecha_actividad > now())');
+        const actividades = await pool.query('SELECT * FROM "Actividad" WHERE tipo = true AND visible = true AND aprobado = true AND id_act IN (SELECT id_act FROM "Programa" WHERE fecha_actividad > now())');
         // Retorna las actividades
         return actividades.rows;
     } catch (error) {

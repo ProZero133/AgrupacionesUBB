@@ -394,67 +394,75 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
         });
-        // Verifica si la respuesta es exitosa
-        if (response.ok) {
-          // Convierte la respuesta en formato JSON
-          // Obtener actividades publicas
-          const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
-            method: 'GET',
-          });
-          const dataPublicas = await actividadesPublicas.json();
-          const data = await response.json();
-          // Eliminar actividad publica si ya esta su id en data
-          dataPublicas.forEach((actiPublica) => {
-            const index = data.findIndex((acti) => acti.id_act === actiPublica.id_act);
-            if (index !== -1) {
-              data.splice(index, 1);
-            }
-          });
-          // añadir las actividades publicas a las actividades en data
-          data.push(...dataPublicas);
-          this.actividades = data;
-          if (data.success === false) {
-          } else {
-            this.actividades = data;
-            for (const actis of this.actividades) {
-              try {
-                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
-                  method: 'GET',
-                });
-                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
-                if (responde.ok) {
-                  const dataImagen = await responde.text();
-                  actis.imagen = dataImagen;
-                } else {
-                  console.error('Error en la respuesta:', responde.status);
-                }
-              }
-              catch (error) {
-                console.error('Error al hacer fetch:', error);
-              }
-            }
-            // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
-            // Los campos de actividad se pasarán de la siguiente manera a elementos:
-            // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-            const elementitos = this.actividades.map((elemento) => {
-              return {
-                id: elemento.id_act,
-                nombre: elemento.nom_act,
-                descripcion: elemento.descripcion,
-                tipo: elemento.tipo,
-                imagen: elemento.imagen,
-                id_agr: elemento.id_agr,
-                tipo_elemento: 'Actividad',
-                fecha_creacion: elemento.fecha_creacion
-              };
-            });
-            this.anadirAElementos(elementitos);
-          }
+        const data = await response.json();
+        console.log('Actividades obtenidas:', data);
 
-          this.VerPublicaciones();
-        } else {
-          console.error('Error en la respuesta:', response.status);
+        // Obtener actividades publicas
+        const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
+          method: 'GET',
+        });
+        const dataPublicas = await actividadesPublicas.json();
+        console.log('Actividades públicas obtenidas:', dataPublicas);
+
+        // Asegúrate de que data y dataPublicas sean arrays
+        if (!Array.isArray(data.actividades)) {
+          console.error('Error: data.actividades no es un array');
+          data.actividades = [];
         }
+        if (!Array.isArray(dataPublicas)) {
+          console.error('Error: dataPublicas no es un array');
+          return;
+        }
+
+        // Eliminar actividad publica si ya esta su id en data.actividades
+        if (response.ok && actividadesPublicas.ok && data.actividades.length > 0 && dataPublicas.length > 0) {
+          dataPublicas.forEach((actiPublica) => {
+            const index = data.actividades.findIndex((acti) => acti.id_act === actiPublica.id_act);
+            if (index !== -1) {
+              data.actividades.splice(index, 1);
+            }
+          });
+        }
+
+        // Añadir las actividades publicas a las actividades en data.actividades
+        data.actividades.push(...dataPublicas);
+        this.actividades = data.actividades;
+
+        for (const actis of this.actividades) {
+          try {
+            const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
+              method: 'GET',
+            });
+            // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+            if (responde.ok) {
+              const dataImagen = await responde.text();
+              actis.imagen = dataImagen;
+            } else {
+              console.error('Error en la respuesta:', responde.status);
+            }
+          } catch (error) {
+            console.error('Error al hacer fetch:', error);
+          }
+        }
+
+        // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+        // Los campos de actividad se pasarán de la siguiente manera a elementos:
+        // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+        const elementitos = this.actividades.map((elemento) => {
+          return {
+            id: elemento.id_act,
+            nombre: elemento.nom_act,
+            descripcion: elemento.descripcion,
+            tipo: elemento.tipo,
+            imagen: elemento.imagen,
+            id_agr: elemento.id_agr,
+            tipo_elemento: 'Actividad',
+            fecha_creacion: elemento.fecha_creacion,
+          };
+        });
+        this.anadirAElementos(elementitos);
+
+        this.VerPublicaciones();
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }

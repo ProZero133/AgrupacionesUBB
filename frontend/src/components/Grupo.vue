@@ -664,7 +664,9 @@ export default {
         if (response.ok) {
           // Convierte la respuesta en formato JSON
           this.$root.showSnackBar('', 'Usuario invitado con éxito!');
+          this.dialoginvitar = false;
         } else {
+          this.dialoginvitar = false;
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
@@ -904,6 +906,7 @@ export default {
         }
 
 
+        this.dialogmiembros = false;
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }

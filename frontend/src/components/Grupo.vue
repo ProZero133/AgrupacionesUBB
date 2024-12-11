@@ -776,10 +776,11 @@ export default {
       }
     },
 
+
     async ObtenerLider() {
-      const rutLider = this.getRut(); // Ensure rutLider is properly scoped
+      const rutLider = this.getRut();
       try {
-        const url = `${global.BACKEND_URL}/obtenerLider/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/LiderArray/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -788,12 +789,14 @@ export default {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          if (data.rut === rutLider) {
+          const datosLiderAgrupacion = await response.json();
+          if (datosLiderAgrupacion.rut === rutLider) {
             this.lider = true;
           } else {
             this.lider = false;
           }
+          return datosLiderAgrupacion;
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -801,6 +804,7 @@ export default {
         console.error('Error al obtener el líder:', error);
       }
     },
+
     async esAdminOLider() {
       this.rol = this.getRol();
       this.rut = this.getRut();
@@ -823,8 +827,11 @@ export default {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          this.selectedRole = data.rol_agr;
+          const datosUsuarioSeleccionado = await response.json();
+          this.selectedRole = datosUsuarioSeleccionado.rol_agr;
+
+          return datosUsuarioSeleccionado;
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -837,38 +844,66 @@ export default {
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
         // Si el rol_agr es 'Lider', debe cambiar el rol del usuario actual a 'Miembro'
-        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            rol_agr
-          }),
-        });
-        if (response.ok) {
-          this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
-        } else {
-          console.error('Error en la respuesta:', response.status);
-          this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
-        }
+        const datosLiderAgrupacion = await this.ObtenerLider();
+        const datosUsuarioSeleccionado = await this.ObtenerRolUsr(rut);
+
         if (rol_agr === 'Lider') {
-            rol_agr = 'Miembro';
-            const rutActual = this.getRut();
-            const rolMiembro = 'Miembro';
-            const cambiarLider = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rutActual}`;
+
+          if (datosLiderAgrupacion.rut != datosUsuarioSeleccionado.rut) {
+            const cambiarLider = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${datosLiderAgrupacion[0].rut}`;
             const responseNuevoLider = await fetch(cambiarLider, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                rol_agr
+                rol_agr: "Miembro"
               }),
             });
-
           }
+          const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
+          const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              rol_agr
+            }),
+          });
+          if (response.ok) {
+            this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
+          } else {
+            console.error('Error en la respuesta:', response.status);
+            this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
+          }
+        }
+
+        if (rol_agr === 'Miembro Oficial' || rol_agr === 'Miembro') {
+          if (datosLiderAgrupacion.length != 1) {
+            console.error('Una agrupacion no puede quedar sin Lider');
+            this.$root.showSnackBar('error', 'Una agrupacion no puede quedar sin Lider', 'Operación fallida');
+            return;
+          }
+          const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
+          const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              rol_agr
+            }),
+          });
+          if (response.ok) {
+            this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
+          } else {
+            console.error('Error en la respuesta:', response.status);
+            this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
+          }
+        }
+
+
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }

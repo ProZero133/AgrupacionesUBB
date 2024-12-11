@@ -223,7 +223,13 @@ async function programarActividad(req, res) {
         // Programa la actividad
         const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         const lider = await getLider(id_agr);
+
+        console.log("lider: ", lider);
+
         const rut = lider.rut;
+
+        console.log("rut: ", rut);
+        
         await setParticipanteActividad(id_act, rut);
 
         // Retorna la actividad programada

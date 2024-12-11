@@ -1,56 +1,56 @@
 const { pool } = require('../db.js');
-const {getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad} = require('../services/actividad.service.js');
+const { getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad } = require('../services/actividad.service.js');
 const { getUsuarioByRut } = require('../services/user.service.js');
 // const { enviarCorreo } = require('../services/mail.service.js');
 
 async function getAgrupaciones() {
-   try{
+  try {
     // Obtiene todas las agrupaciones
     const agrupaciones = await pool.query('SELECT * FROM "Agrupacion"');
     // Retorna las agrupaciones
     return agrupaciones.rows;
-   }
-    catch (error) {
-      console.log('Error al obtener las agrupaciones:', error);
+  }
+  catch (error) {
+    console.log('Error al obtener las agrupaciones:', error);
   }
 }
 
-  async function getAgrupacionById(id) {
-    try {
-      // Obtiene la agrupacion con el id especificado
-      const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [id]);
+async function getAgrupacionById(id) {
+  try {
+    // Obtiene la agrupacion con el id especificado
+    const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1', [id]);
 
-      // Retorna la agrupacion
-      return agrupacion.rows[0];
+    // Retorna la agrupacion
+    return agrupacion.rows[0];
 
-    } catch (error) {
-      // Maneja cualquier error que pueda ocurrir
-      console.error('Error al obtener la agrupación:', error);
-      throw error;
-    }
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al obtener la agrupación:', error);
+    throw error;
   }
+}
 
-  async function createAgrupacion(agrupacion) {
-    try {
-      const fechaActual = new Date();
-      const visible = true;
-        // Inserta una nueva agrupacion en la base de datos
-        const newAgrupacion = await pool.query(
-            'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible, imagen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible, agrupacion.imagen]
-        );
-        //Insertar lider de la agrupacion
-        const lider = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [agrupacion.rut, newAgrupacion.rows[0].id_agr, fechaActual, 'Lider']);
-        if (lider.rows.length === 0) {
-          throw new Error('Error al insertar el lider');
-      }
-        // Retorna la nueva agrupacion insertada
-        return newAgrupacion.rows[0];
-    } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al insertar la agrupación:', error);
-        throw error;
+async function createAgrupacion(agrupacion) {
+  try {
+    const fechaActual = new Date();
+    const visible = true;
+    // Inserta una nueva agrupacion en la base de datos
+    const newAgrupacion = await pool.query(
+      'INSERT INTO "Agrupacion" (nombre_agr, descripcion, rut, fecha_creacion, verificado, fecha_verificacion, visible, imagen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, fechaActual, agrupacion.verificado, agrupacion.fecha_verificacion, visible, agrupacion.imagen]
+    );
+    //Insertar lider de la agrupacion
+    const lider = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [agrupacion.rut, newAgrupacion.rows[0].id_agr, fechaActual, 'Lider']);
+    if (lider.rows.length === 0) {
+      throw new Error('Error al insertar el lider');
     }
+    // Retorna la nueva agrupacion insertada
+    return newAgrupacion.rows[0];
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al insertar la agrupación:', error);
+    throw error;
+  }
 }
 
 /* wachito, esto no funciona y me taime asi que voy a hacer uno unica y explusivamente para el verificado
@@ -126,7 +126,7 @@ async function updateAgrupacionVerificado(id) {
       `UPDATE "Agrupacion" 
        SET verificado = $1, fecha_verificacion = CURRENT_TIMESTAMP 
        WHERE id_agr = $2 
-       RETURNING *`, 
+       RETURNING *`,
       [
         'Verificado',
         id
@@ -149,7 +149,7 @@ async function updateAgrupacionNoVerificado(id) {
       `UPDATE "Agrupacion" 
        SET verificado = $1, fecha_verificacion = CURRENT_TIMESTAMP 
        WHERE id_agr = $2 
-       RETURNING *`, 
+       RETURNING *`,
       [
         'Noverificado',
         id
@@ -164,103 +164,102 @@ async function updateAgrupacionNoVerificado(id) {
   }
 }
 
-  async function getUsuariosdeAgrupacion(id) {
-    try {
-      // Obtiene los usuarios de la agrupación con el id especificado
-      // "sm_usuario" -> tabla de usuarios simulados
-      // "usuario" -> tabla de usuarios reales
-      const usuarios = await pool.query('SELECT   u.rut AS user_rut,   u.nombre AS user_nombre,   a.id_agr AS agrupacion_id,   a.nombre_agr AS agrupacion_nombre, p.* FROM "Pertenece" p JOIN "sm_usuario" u ON u.rut = p.rut JOIN "Agrupacion" a ON a.id_agr = p.id_agr WHERE p.id_agr = $1;', [id]);      
-      
-      return usuarios.rows;
-    } catch (error) {
-      console.log('Error al obtener los usuarios de la agrupación:', error);
-    }
-  }
+async function getUsuariosdeAgrupacion(id) {
+  try {
+    // Obtiene los usuarios de la agrupación con el id especificado
+    // "sm_usuario" -> tabla de usuarios simulados
+    // "usuario" -> tabla de usuarios reales
+    const usuarios = await pool.query('SELECT   u.rut AS user_rut,   u.nombre AS user_nombre,   a.id_agr AS agrupacion_id,   a.nombre_agr AS agrupacion_nombre, p.* FROM "Pertenece" p JOIN "sm_usuario" u ON u.rut = p.rut JOIN "Agrupacion" a ON a.id_agr = p.id_agr WHERE p.id_agr = $1;', [id]);
 
-  async function getRolUsuario(rut, id_agr) {
-    try {
-      // Obtiene el rol del usuario con el rut y id_agr especificados
-      const rol = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
-      return rol.rows[0];
-    } catch (error) {
-      console.log('Error al obtener el rol del usuario:', error);
-    }
+    return usuarios.rows;
+  } catch (error) {
+    console.log('Error al obtener los usuarios de la agrupación:', error);
   }
+}
 
-  async function updateRolUsuario(rut, id_agr, rol) {
-    try {
-      // Actualiza el rol del usuario con el rut y id_agr especificados
-      const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1 WHERE rut = $2 AND id_agr = $3 RETURNING *', [rol, rut, id_agr]);
-      return response.rows[0];
-    } catch (error) {
-      console.log('Error al actualizar el rol del usuario:', error);
-    }
+async function getRolUsuario(rut, id_agr) {
+  try {
+    // Obtiene el rol del usuario con el rut y id_agr especificados
+    const rol = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
+    return rol.rows[0];
+  } catch (error) {
+    console.log('Error al obtener el rol del usuario:', error);
   }
+}
 
-  async function getImage(id) {
-    try {
-      // Obtiene la imagen con el id especificado
-      const imagen = await pool.query('SELECT * FROM "Imagenes" WHERE id_imagen = $1', [id]);
-      const imageData = imagen.rows[0].imagen;
-      return imageData;
-    } catch (error) {
-      // Maneja cualquier error que pueda ocurrir
-      console.error('Error al obtener la imagen:', error);
-      throw error;
-    }
+async function updateRolUsuario(rut, id_agr, rol) {
+  try {
+    // Actualiza el rol del usuario con el rut y id_agr especificados
+    const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1 WHERE rut = $2 AND id_agr = $3 RETURNING *', [rol, rut, id_agr]);
+    return response.rows[0];
+  } catch (error) {
+    console.log('Error al actualizar el rol del usuario:', error);
   }
+}
 
-  async function createSolicitud(rut, id_agr) {
-    try {
-      // Crea una nueva solicitud
+async function getImage(id) {
+  try {
+    // Obtiene la imagen con el id especificado
+    const imagen = await pool.query('SELECT * FROM "Imagenes" WHERE id_imagen = $1', [id]);
+    const imageData = imagen.rows[0].imagen;
+    return imageData;
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir
+    console.error('Error al obtener la imagen:', error);
+    throw error;
+  }
+}
+
+async function createSolicitud(rut, id_agr) {
+  try {
+    // Crea una nueva solicitud
     const rol_agr = 'Pendiente';
     const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, rol_agr) VALUES ($1, $2, $3) RETURNING *', [rut, id_agr, rol_agr]);
     return response.rows[0];
-    }
-    catch (error) {
-      console.log('Error al crear la solicitud:', error);
-    }
   }
+  catch (error) {
+    console.log('Error al crear la solicitud:', error);
+  }
+}
 
-  async function createInvitacion(invitacion) {
-    try {
-      // Crea una nueva solicitud
-    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', 
+async function createInvitacion(invitacion) {
+  try {
+    // Crea una nueva solicitud
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *',
       [invitacion.rut, invitacion.id_agr, invitacion.fecha_integracion, invitacion.rol_agr]);
     return response.rows[0];
-    }
-    catch (error) {
-      console.log('Error al crear la invitacion:', error);
-    }
   }
+  catch (error) {
+    console.log('Error al crear la invitacion:', error);
+  }
+}
 
-  async function getSolicitudes(id_agr) {
-    try {
-      // Obtiene todas las solicitudes de la agrupacion
-      const solicitudes = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr = $2', [id_agr, 'Pendiente']);
-      return solicitudes.rows;
-    } catch (error) {
-      console.log('Error al obtener las solicitudes:', error);
-    }
+async function getSolicitudes(id_agr) {
+  try {
+    // Obtiene todas las solicitudes de la agrupacion
+    const solicitudes = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr = $2', [id_agr, 'Pendiente']);
+    return solicitudes.rows;
+  } catch (error) {
+    console.log('Error al obtener las solicitudes:', error);
   }
-  async function updateSolicitud(rut, id_agr) {
-    try{
-      // Actualiza la solicitud con el rut y id_agr especificados
-      const validarSolicitud = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
-      if (validarSolicitud.rows[0].rol_agr === 'Miembro') {
-        return 'El usuario ya es miembro de la agrupación';
-      }
-      //Si no existe la solicitud
-      else if(validarSolicitud.rows[0] < 0)
-        {
-          return 'No existe la solicitud';
-        }
-        const fecha_ingreso = new Date();
-      const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1, fecha_integracion = $2 WHERE rut = $3 AND id_agr = $4 RETURNING *', ['Miembro',fecha_ingreso, rut, id_agr]);
-      return response.rows[0];
+}
+async function updateSolicitud(rut, id_agr) {
+  try {
+    // Actualiza la solicitud con el rut y id_agr especificados
+    const validarSolicitud = await pool.query('SELECT * FROM "Pertenece" WHERE rut = $1 AND id_agr = $2', [rut, id_agr]);
+    if (validarSolicitud.rows[0].rol_agr === 'Miembro') {
+      return 'El usuario ya es miembro de la agrupación';
     }
-    catch (error) {
-      console.log('Error al actualizar la solicitud:', error);
+    //Si no existe la solicitud
+    else if (validarSolicitud.rows[0] < 0) {
+      return 'No existe la solicitud';
+    }
+    const fecha_ingreso = new Date();
+    const response = await pool.query('UPDATE "Pertenece" SET rol_agr = $1, fecha_integracion = $2 WHERE rut = $3 AND id_agr = $4 RETURNING *', ['Miembro', fecha_ingreso, rut, id_agr]);
+    return response.rows[0];
+  }
+  catch (error) {
+    console.log('Error al actualizar la solicitud:', error);
   }
 }
 
@@ -327,34 +326,44 @@ async function getLider(id_agr) {
   }
 }
 
+async function getLiderArray(id_agr) {
+  try {
+    // Obtiene el lider de la agrupacion
+    const lider = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr = $2', [id_agr, 'Lider']);
+    return lider.rows;
+  } catch (error) {
+    console.log('Error al obtener el lider:', error);
+  }
+}
+
 async function validateEliminarGrupo(id_agr) {
   try {
     // Obtiene todas las actividades de una agrupacion
     const actividades = await getActividadesByAgrupacion(id_agr);
     //Evaluar si hay actividades pasadas la fecha actual
-    if(actividades.length > 0){
+    if (actividades.length > 0) {
       const fechasActividades = await getFechasActividades(id_agr);
       const fechaActual = new Date();
       for (let i = 0; i < fechasActividades.length; i++) {
-        if(fechaActual > fechasActividades[i].fecha){
+        if (fechaActual > fechasActividades[i].fecha) {
           //Soft delete por ya haber organizado actividades
           const agrupacion = await softDeleteAgrupacion(id_agr);
-          if(agrupacion.length === 0){
+          if (agrupacion.length === 0) {
             return 'Error al eliminar la agrupación';
           }
-          return 'Agrupacion eliminada para los usuarios'; 
+          return 'Agrupacion eliminada para los usuarios';
         }
       }
     }
 
-    if(actividades.length > 0){
+    if (actividades.length > 0) {
       //Obtener la cantidad de participantes para cada actividad
       for (let i = 0; i < actividades.length; i++) {
         const participantes = await getParticipantesActividad(actividades[i].id_act);
-        if(participantes.length > 1){
+        if (participantes.length > 1) {
           //Soft delete por tener actividades con mas de un participante
           const agrupacion = await softDeleteAgrupacion(id_agr);
-          if(agrupacion.length === 0){
+          if (agrupacion.length === 0) {
             return 'Error al eliminar la agrupación';
           }
           return 'Agrupacion eliminada para los usuarios';
@@ -414,11 +423,11 @@ async function rejectSolicitud(rut, id_agr) {
 }
 
 async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificacion, rut, fecha_creacion, imagen) {
-  try{
+  try {
     // Actualiza la agrupación con el id especificado
     const NuevosDatosAgrupacion = await pool.query(
-      `UPDATE "Agrupacion" SET nombre_agr = $1, descripcion = $2, verificado = $3, fecha_verificacion = $4, rut = $5, fecha_creacion = $6 WHERE id_agr = $7 RETURNING *`, 
-      [agrupacion.nombre_agr, agrupacion.descripcion, verificado,fecha_verificacion,rut, fecha_creacion, id_agr]
+      `UPDATE "Agrupacion" SET nombre_agr = $1, descripcion = $2, verificado = $3, fecha_verificacion = $4, rut = $5, fecha_creacion = $6 WHERE id_agr = $7 RETURNING *`,
+      [agrupacion.nombre_agr, agrupacion.descripcion, verificado, fecha_verificacion, rut, fecha_creacion, id_agr]
     );
 
     // Retorna la agrupación actualizada
@@ -431,8 +440,8 @@ async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificaci
 
 async function insertTagsAgrupacion(id_agr, tags) {
   try {
-      const response = await pool.query('INSERT INTO "Posee_1" (id_agr, id_tag) VALUES ($1, $2) RETURNING *', [id_agr, tags]);
-    
+    const response = await pool.query('INSERT INTO "Posee_1" (id_agr, id_tag) VALUES ($1, $2) RETURNING *', [id_agr, tags]);
+
     return 'Tags ingresados correctamente';
   } catch (error) {
     console.log('Error al ingresar los tags:', error);
@@ -472,97 +481,98 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     };
 
     return correos;
-    } catch (error) {
-      console.error('Error al notificar a los miembros de la publicación:', error);
-    }
+  } catch (error) {
+    console.error('Error al notificar a los miembros de la publicación:', error);
   }
+}
 
-  //redeemCodigo es un método que toma un código de invitación y un rut
-  //Primero, se busca en la tabla "Pertenece" si existe un elemento cuyo 'rol_agr' sea igual al código de invitación y 'rut' sea igual a '11.111.111-1'
-  //SI no existe, se retorna un mensaje de error
-  //Si existe, se actualiza esa tabla con los siguientes valores:
-  //rut: rut, fecha_integracion: hoy,  rol_agr: 'Miembro'
-  //Finalmente, se retorna un mensaje de éxito
+//redeemCodigo es un método que toma un código de invitación y un rut
+//Primero, se busca en la tabla "Pertenece" si existe un elemento cuyo 'rol_agr' sea igual al código de invitación y 'rut' sea igual a '11.111.111-1'
+//SI no existe, se retorna un mensaje de error
+//Si existe, se actualiza esa tabla con los siguientes valores:
+//rut: rut, fecha_integracion: hoy,  rol_agr: 'Miembro'
+//Finalmente, se retorna un mensaje de éxito
 
-  async function redeemCodigo(codigo, rut) {
-    try {
-      // Step 1: Get 'rol_agr' from 'Pertenece' where 'rol_agr' matches 'codigo' and 'rut' matches '11.111.111-1'
-      const perteneceResult = await pool.query('SELECT * FROM "Pertenece" WHERE rol_agr = $1 AND rut = $2', [codigo, '11.111.111-1']);
-      if (perteneceResult.rows.length === 0) {
-        return 'Código de invitación no válido';
-      }
-
-      // Step 2: Update 'Pertenece' with 'rut', 'fecha_integracion' and 'rol_agr'
-      const response = await pool.query('UPDATE "Pertenece" SET rut = $1, fecha_integracion = CURRENT_TIMESTAMP, rol_agr = $2 WHERE rol_agr = $3 AND rut = $4 RETURNING *', [rut, 'Miembro', codigo, '11.111.111-1']);
-      
-      return {
-        "mensaje": 'Código de invitación canjeado con éxito',
-        "response": response.rows[0],
-        "id_agr": response.rows[0].id_agr
-        };
-
-    } catch (error) {
-      console.error('Error al canjear el código de invitación:', error);
+async function redeemCodigo(codigo, rut) {
+  try {
+    // Step 1: Get 'rol_agr' from 'Pertenece' where 'rol_agr' matches 'codigo' and 'rut' matches '11.111.111-1'
+    const perteneceResult = await pool.query('SELECT * FROM "Pertenece" WHERE rol_agr = $1 AND rut = $2', [codigo, '11.111.111-1']);
+    if (perteneceResult.rows.length === 0) {
+      return 'Código de invitación no válido';
     }
-  }
 
-  async function getAgrupacionesNoInscritas(rut) {
-    try {
-      // Obtiene las agrupaciones que no están inscritas por el usuario con el rut especificado
-      const agrupaciones = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr NOT IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
-      return agrupaciones.rows;
-    } catch (error) {
-      console.log('Error al obtener las agrupaciones no inscritas:', error);
-    }
-  }
+    // Step 2: Update 'Pertenece' with 'rut', 'fecha_integracion' and 'rol_agr'
+    const response = await pool.query('UPDATE "Pertenece" SET rut = $1, fecha_integracion = CURRENT_TIMESTAMP, rol_agr = $2 WHERE rol_agr = $3 AND rut = $4 RETURNING *', [rut, 'Miembro', codigo, '11.111.111-1']);
 
-  async function getTagsAgrupacion(id_agr) {
-    try {
-      // Obtiene los tags de la agrupación con el id especificado
-      const tags = await pool.query('SELECT * FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
-      return tags.rows;
-    } catch (error) {
-      console.log('Error al obtener los tags de la agrupación:', error);
-    }
-  }
+    return {
+      "mensaje": 'Código de invitación canjeado con éxito',
+      "response": response.rows[0],
+      "id_agr": response.rows[0].id_agr
+    };
 
-  async function deleteTagAgrupacion(id_agr, id_tag) {
-    try {
-      // Elimina el tag de la agrupación
-      const response = await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1 AND id_tag = $2 RETURNING *', [id_agr, id_tag]);
-      return 'Tag eliminado de la agrupación';
-    } catch (error) {
-      console.log('Error al eliminar el tag de la agrupación:', error);
-    }
+  } catch (error) {
+    console.error('Error al canjear el código de invitación:', error);
   }
+}
 
-  module.exports = {
-    getAgrupaciones,
-    getAgrupacionById,
-    createAgrupacion,
-    createSolicitarAcreditacion,
-    getUsuariosdeAgrupacion,
-    getRolUsuario,
-    updateRolUsuario,
-    updateAgrupacionVerificado,
-    updateAgrupacionNoVerificado,
-    getImage,
-    createSolicitud,
-    getSolicitudes,
-    updateSolicitud,
-    deleteAgrupacion,
-    getLider,
-    validateEliminarGrupo,
-    getAgrupacionesDeUsuario,
-    deleteUsuarioAgrupacion,
-    rejectSolicitud,
-    updateAgrupacion,
-    insertTagsAgrupacion,
-    getAgrupacionesPorNombre,
-    getPublicacionCorreos,
-    createInvitacion,
-    redeemCodigo,
-    getAgrupacionesNoInscritas,
-    getTagsAgrupacion,
-    deleteTagAgrupacion
-  };
+async function getAgrupacionesNoInscritas(rut) {
+  try {
+    // Obtiene las agrupaciones que no están inscritas por el usuario con el rut especificado
+    const agrupaciones = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr NOT IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)', [rut]);
+    return agrupaciones.rows;
+  } catch (error) {
+    console.log('Error al obtener las agrupaciones no inscritas:', error);
+  }
+}
+
+async function getTagsAgrupacion(id_agr) {
+  try {
+    // Obtiene los tags de la agrupación con el id especificado
+    const tags = await pool.query('SELECT * FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
+    return tags.rows;
+  } catch (error) {
+    console.log('Error al obtener los tags de la agrupación:', error);
+  }
+}
+
+async function deleteTagAgrupacion(id_agr, id_tag) {
+  try {
+    // Elimina el tag de la agrupación
+    const response = await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1 AND id_tag = $2 RETURNING *', [id_agr, id_tag]);
+    return 'Tag eliminado de la agrupación';
+  } catch (error) {
+    console.log('Error al eliminar el tag de la agrupación:', error);
+  }
+}
+
+module.exports = {
+  getAgrupaciones,
+  getAgrupacionById,
+  createAgrupacion,
+  createSolicitarAcreditacion,
+  getUsuariosdeAgrupacion,
+  getRolUsuario,
+  updateRolUsuario,
+  updateAgrupacionVerificado,
+  updateAgrupacionNoVerificado,
+  getImage,
+  createSolicitud,
+  getSolicitudes,
+  updateSolicitud,
+  deleteAgrupacion,
+  getLider,
+  getLiderArray,
+  validateEliminarGrupo,
+  getAgrupacionesDeUsuario,
+  deleteUsuarioAgrupacion,
+  rejectSolicitud,
+  updateAgrupacion,
+  insertTagsAgrupacion,
+  getAgrupacionesPorNombre,
+  getPublicacionCorreos,
+  createInvitacion,
+  redeemCodigo,
+  getAgrupacionesNoInscritas,
+  getTagsAgrupacion,
+  deleteTagAgrupacion
+};

@@ -1,7 +1,7 @@
 "use strict";
 
 const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, updateRolUsuario, getImage,
-    createSolicitud, getSolicitudes, updateSolicitud, getLider, validateEliminarGrupo,
+    createSolicitud, getSolicitudes, updateSolicitud, getLider, getLiderArray, validateEliminarGrupo,
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
@@ -220,6 +220,20 @@ async function obtenerLider(req, res) {
     }
 }
 
+async function obtenerLiderArray(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const lider = await getLiderArray(id_agr);
+        if (lider.length === 0) {
+            return res.code(404).send('No se encontró el líder');
+        }
+        res.code(200).send(lider);
+    } catch (error) {
+        console.error('Error al obtener el líder:', error);
+        res.code(500).send('Error al obtener el líder');
+    }
+}
+
 async function eliminarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
@@ -308,6 +322,9 @@ async function CambiarRoldeUsuario(req, res) {
         res.code(500).send('Error al cambiar el rol del usuario');
     }
 }
+
+
+
 
 async function abandonarAgrupacion(req, res) {
     try {
@@ -563,5 +580,6 @@ module.exports = {
     unirseAgrupacion,
     VerGruposNoInscritos,
     ObtenerTagsAgrupacion,
-    eliminarTagAgrupacion
+    eliminarTagAgrupacion,
+    obtenerLiderArray
 };

@@ -869,6 +869,7 @@ export default {
             });
 
           }
+          this.dialogmiembros = false;
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }

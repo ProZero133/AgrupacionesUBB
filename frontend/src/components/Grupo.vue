@@ -792,7 +792,8 @@ export default {
 
         if (response.ok) {
           const datosLiderAgrupacion = await response.json();
-          if (datosLiderAgrupacion.rut === rutLider) {
+
+          if (datosLiderAgrupacion[0].rut === rutLider) {
             this.lider = true;
           } else {
             this.lider = false;
@@ -811,12 +812,14 @@ export default {
       this.rol = this.getRol();
       this.rut = this.getRut();
       await this.ObtenerLider();
+
       if (this.rol === 'Admin' || this.lider === true) {
         return this.adminOlider = true;
       } else {
         return this.adminOlider = false;
       }
     },
+
 
     async ObtenerRolUsr(rut) {
       try {

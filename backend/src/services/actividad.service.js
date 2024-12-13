@@ -19,7 +19,6 @@ async function getActyAgr() {
         const actividades = await pool.query('SELECT * FROM "Actividad"');
         const programa = await pool.query('SELECT * FROM "Programa"');
         const agrupaciones = await pool.query('SELECT * FROM "Agrupacion"');
-
         // une las tablas
         const actyAgr = actividades.rows.map(act => {
             const agr = agrupaciones.rows.find(agr => agr.id_agr === act.id_agr);
@@ -93,6 +92,13 @@ async function getActividadesByAgrupacion(id_agr) {
         // Recorrer actividades y quitar las que sean publicas y no esten aprobadas
         for (let i = 0; i < actividades.rows.length; i++) {
             if (actividades.rows[i].tipo === true && actividades.rows[i].aprobado === false) {
+                actividades.rows.splice(i, 1);
+                i--;
+            }
+        }
+        // Elimina las actividades que tengan visible en false
+        for (let i = 0; i < actividades.rows.length; i++) {
+            if (actividades.rows[i].visible === false) {
                 actividades.rows.splice(i, 1);
                 i--;
             }

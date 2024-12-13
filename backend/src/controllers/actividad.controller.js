@@ -76,12 +76,9 @@ async function crearActividad(req, reply) {
         // No es necesario convertir la imagen de base64 a hexadecimal
         // Si la imagen está en base64 y es una cadena, se puede dejar tal cual
         if (body.imagen && typeof body.imagen === 'string') {
-            console.log("Imagen recibida en base64");
         }
 
         if (error) {
-            console.log("Error en la validación");
-            console.log(error.details.map(detail => detail.message));
             // Si hay un error, retorna un error de validación
             reply.code(400).send(error.details.map(detail => detail.message));
             return;
@@ -160,7 +157,6 @@ async function eliminarActividad(req, res) {
         }
         // Elimina la actividad
         await deleteActividad(id_act);
-
         // Retorna un mensaje de éxito
         res.status(200).send('Actividad eliminada');
     } catch (error) {
@@ -223,13 +219,7 @@ async function programarActividad(req, res) {
         // Programa la actividad
         const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         const lider = await getLider(id_agr);
-
-        console.log("lider: ", lider);
-
         const rut = lider.rut;
-
-        console.log("rut: ", rut);
-        
         await setParticipanteActividad(id_act, rut);
 
         // Retorna la actividad programada
@@ -311,7 +301,6 @@ async function AceptacionActividad(req, res) {
         // Programa la actividad
         const actividad = await setAprobacionActividad(id_act);
         // Retorna la actividad programada
-        console.log(actividad);
         res.code(200).send(actividad);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir

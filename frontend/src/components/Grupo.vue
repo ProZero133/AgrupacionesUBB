@@ -1051,7 +1051,7 @@ export default {
           }
 
           this.VerPublicaciones();
-
+          
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1164,7 +1164,6 @@ export default {
           this.$root.showSnackBar('error', 'Error al aceptar la solicitud', 'Operación fallida');
         }
       } catch (error) {
-        console.log('Error al aceptar la solicitud');
       }
     },
     async rechazarSolicitud(rut) {
@@ -1180,7 +1179,7 @@ export default {
           this.$root.showSnackBar('error', 'Error al rechazar la solicitud', 'Operación fallida');
         }
       } catch (error) {
-        console.log('Error al rechazar la solicitud');
+        console.error('Error al hacer fetch:', error);
       }
     },
     handleOptionClick(title, rut) {
@@ -1490,16 +1489,15 @@ export default {
             if (!post.ok) throw new Error('Error al eliminar la publicación');
 
             const url = `${global.BACKEND_URL}/publicaciones/${elemento.id}`;
-            const response = await fetch(url, {
+            const responsePublicacion = await fetch(url, {
               method: 'DELETE',
             });
-            if (response.ok) {
+            if (responsePublicacion.ok) {
               this.$root.showSnackBar('success', 'Publicación eliminada correctamente', 'Operación exitosa');
               this.dialogPub = false;
-              this.VerActividades();
             } else {
               this.$root.showSnackBar('error', 'Error al eliminar la publicación', 'Operación fallida');
-              console.error('Error en la respuesta:', response.status);
+              console.error('Error en la respuesta:', responsePublicacion.status);
             }
           } catch (error) {
             console.error('Error al hacer fetch:', error);
@@ -1508,16 +1506,15 @@ export default {
         }
         else {
           const url = `${global.BACKEND_URL}/formulario/${elemento.id}`;
-          const response = await fetch(url, {
+          const responseForm = await fetch(url, {
             method: 'DELETE',
           });
-          if (response.ok) {
+          if (responseForm.ok) {
             this.dialogPub = false;
-            this.VerActividades();
             this.$root.showSnackBar('success', 'Formulario eliminado correctamente', 'Operación exitosa');
           } else {
             this.$root.showSnackBar('error', 'Error al eliminar el formulario', 'Operación fallida');
-            console.error('Error en la respuesta:', response.status);
+            console.error('Error en la respuesta:', responseForm.status);
           }
           const publi = await fetch(`${global.BACKEND_URL}/publicaciones/${elemento.id}`, {
             method: 'DELETE',
@@ -1526,7 +1523,8 @@ export default {
       }
       // Cerrar dialog
       this.dialogPub = false;
-      this.VerActividades();
+      window.location.reload();
+      await this.VerActividades();
     },
     async puedeEliminarElemento() {
       await this.esMiembro();

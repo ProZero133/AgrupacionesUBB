@@ -11,6 +11,7 @@ const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
+
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
     if (agrupaciones.length === 0) {

@@ -84,6 +84,7 @@ export default {
   data() {
     return {
       itemsAgr: [],
+      GruposVisibles: [],
       preferencias: [],
       tab: 'agrupaciones',
       searchQueryAgrupaciones: '',
@@ -203,7 +204,15 @@ export default {
         if (response.ok) {
           const data = await response.json();
 
-          this.itemsAgr = await Promise.all(data.map(async item => {
+          data.forEach((Agrupacion, index) => {
+            console.log(`Agrupacion ${index + 1}: `, Agrupacion);
+            if (Agrupacion.visible === true) {
+              // añade la agrupacion al array GruposVisibles
+              this.GruposVisibles.push(Agrupacion);
+            }
+          });
+
+          this.itemsAgr = await Promise.all(this.GruposVisibles.map(async item => {
             const tags = await this.VerTagsGrupo(item.id_agr);
             return {
               title: item.nombre_agr,

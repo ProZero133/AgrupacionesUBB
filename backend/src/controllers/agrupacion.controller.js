@@ -143,7 +143,8 @@ async function unirseAgrupacion(req, res) {
             rut: usuario[0].rut,
             nombre: usuario[0].nombre,
             lider_correo: lider[0].correo,
-            nombre_agr: agrupacion.nombre_agr
+            nombre_agr: agrupacion.nombre_agr,
+            carrera: usuario[0].carrera
         };
 
         const invitar = await integrateUsuario(mailDetails);

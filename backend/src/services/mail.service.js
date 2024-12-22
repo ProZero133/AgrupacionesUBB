@@ -141,6 +141,7 @@ async function integrateUsuario(mailDetails) {
         nombre: mailDetails.nombre,
         agrupacion_nombre: mailDetails.nombre_agr,
         rut: mailDetails.rut,
+        carrera: mailDetails.carrera,
     };
 
     const htmlBody = loadHtmlTemplate(templatePath, replacements);

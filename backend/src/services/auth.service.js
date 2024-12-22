@@ -73,8 +73,8 @@ async function validarUsuario(email) {
     }
 });
   console.log("Respuesta por Rut",responserut.data);
-  const carrera = obtenerCarrera(response.data.carrera);
-  console.log("Carrera: ",carrera);
+  const carrera = obtenerCarrera(response.data.recordset[0].carrera);
+  console.log("Carrera: ",carrera); 
   
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
     if (result.rows.length === 0) {

@@ -2,9 +2,38 @@ const { pool } = require('../db.js');
 const nodemailer = require('nodemailer');
 const config = require('../config/configEnv.js');
 const { registrarUsuario } = require('../services/user.service.js');
+const axios = require('axios');
 
 const mailUser = config.MAIL_USER;
 const mailPass = config.MAIL_PASS;
+const API_ConectaUBB = config.API_ConectaUBB;
+
+const codigoCarreras = {
+  2901: 'Arquitectura',
+  2915: 'Bachillerato en Ciencias',
+  2945: 'Contador Público y Auditor',
+  2912: 'Derecho',
+  2904: 'Diseño Industrial',
+  2921: 'Ingeniería Civil',
+  2929: 'Ingeniería Civil Eléctrica',
+  2928: 'Ingeniería Civil en Automatización',
+  2927: 'Ingeniería Civil en Informática',
+  2920: 'Ingeniería Civil Industrial',
+  2926: 'Ingeniería Civil Mecánica',
+  2919: 'Ingeniería Civil Química',
+  2949: 'Ingeniería Comercial',
+  2937: 'Ingeniería de Ejecución en Computación e Informática',
+  2917: 'Ingeniería Eléctrica',
+  2916: 'Ingeniería Electrónica',
+  2905: 'Ingeniería en Construcción',
+  2918: 'Ingeniería Estadística',
+  2933: 'Ingeniería Mecánica',
+  2910: 'Trabajo Social'
+};
+
+function obtenerCarrera(codigo) {
+  return codigoCarreras[codigo] || 'NONE';
+}
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -27,6 +56,26 @@ transporter.verify((error) => {
 async function validarUsuario(email) {
   try {
     // busca el usuario en la base de datos servidor universidad (Simulado por el momento)
+    console.log("Consultando correo: ",email);
+    const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
+      correo: email
+  }, {
+      headers: {
+          'Content-Type': 'application/json',
+      }
+  });
+  console.log("Respuesta por correo",response.data);
+  const responserut = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+    rut: '20487563'
+}, {
+    headers: {
+        'Content-Type': 'application/json',
+    }
+});
+  console.log("Respuesta por Rut",responserut.data);
+  const carrera = obtenerCarrera(response.data.carrera);
+  console.log("Carrera: ",carrera);
+  
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
     if (result.rows.length === 0) {
       return { success: false, message: 'Usuario no encontrado' };
@@ -64,7 +113,6 @@ async function validarUsuarioEnPlataforma(rut) {
 }
 
 async function asignarToken(fastify, usuario,codigo, reply) {
-
   const token = codigo;
 
   const mailOptions = {

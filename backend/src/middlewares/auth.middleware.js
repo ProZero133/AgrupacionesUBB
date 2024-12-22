@@ -1,18 +1,24 @@
 // auth.middleware.js
-async function verifyToken(request, reply) {
-  try {
-    const token = request.cookies.authToken; // Asume que el token se almacena en una cookie llamada 'token'
-    if (!token) {
-      return reply.status(401).send({ success: false, message: 'Token no proporcionado' });
-    }
-
-    const decoded = this.jwt.verify(token);
-
-    // Adjunta el usuario decodificado a la solicitud para su uso posterior
-    request.user = decoded;
-  } catch (error) {
-    return reply.status(401).send({ success: false, message: 'Token inválido o no proporcionado' });
+const config = require('../config/configEnv.js');
+const secretKey = config.JWT_SECRET;
+function verifyToken(request, reply, done) {
+  const authHeader = request.headers['authorization'];
+  if (!authHeader) {
+    return reply.status(401).send({ success: false, message: 'No se encuentra el token' });
   }
+
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return reply.status(401).send({ success: false, message: 'No se encuentra el token' });
+  }
+
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return reply.status(401).send({ success: false, message: 'Fallo al autenticar el token' });
+    }
+    request.user = decoded;
+    done();
+  });
 }
 
 async function IsAdmin(request, reply) {

@@ -405,28 +405,25 @@ export default {
         console.log('Actividades públicas obtenidas:', dataPublicas);
 
         // Asegúrate de que data y dataPublicas sean arrays
-        if (!Array.isArray(data.actividades)) {
+        if (!Array.isArray(data)) {
           console.error('Error: data.actividades no es un array');
-          data.actividades = [];
-        }
-        if (!Array.isArray(dataPublicas)) {
-          console.error('Error: dataPublicas no es un array');
-          return;
+          data = [];
         }
 
         // Eliminar actividad publica si ya esta su id en data.actividades
-        if (response.ok && actividadesPublicas.ok && data.actividades.length > 0 && dataPublicas.length > 0) {
+        if (response.ok && actividadesPublicas.ok && Array.isArray(dataPublicas)) {
           dataPublicas.forEach((actiPublica) => {
             const index = data.actividades.findIndex((acti) => acti.id_act === actiPublica.id_act);
             if (index !== -1) {
-              data.actividades.splice(index, 1);
+              data.splice(index, 1);
             }
           });
+          data.push(...dataPublicas);
         }
 
         // Añadir las actividades publicas a las actividades en data.actividades
-        data.actividades.push(...dataPublicas);
-        this.actividades = data.actividades;
+        
+        this.actividades = data;
 
         for (const actis of this.actividades) {
           try {

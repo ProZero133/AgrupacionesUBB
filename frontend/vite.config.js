@@ -1,8 +1,13 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
+import dotenv from 'dotenv'
 
+dotenv.config()
 const path = require('path')
+const port = process.env.VuePort
+const backendUrl = process.env.BackendURL
+const viteHost = process.env.ViteHost
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,7 +20,7 @@ export default defineConfig({
   ],
   define: {
     'process.env': {},
-    'global.BACKEND_URL': JSON.stringify('http://localhost:3000')
+    'global.BACKEND_URL': JSON.stringify(backendUrl),
   },
   resolve: {
     alias: {
@@ -23,7 +28,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    host: viteHost,
+    port: port
   },
   /* remove the need to specify .vue files https://vitejs.dev/config/#resolve-extensions
   resolve: {

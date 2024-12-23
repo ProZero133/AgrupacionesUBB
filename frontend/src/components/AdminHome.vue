@@ -41,7 +41,14 @@
             <v-card-text class="text-justify">
               {{ item.descripcion.length > 180 ? item.descripcion.slice(0, 180) + '...' : item.descripcion }}
             </v-card-text>
-
+            <v-card-text class="TagsGrupo">
+              <v-chip-group>
+                <v-chip v-for="tag in item.tags" :key="tag.id_tag" class="res-tags" color="primary" text-color="white"
+                  outlined>
+                  {{ tag.nombre_tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-card-text>
           </v-card>
         </v-col>
 
@@ -104,8 +111,7 @@
       <v-card-title class="headline">Grupos del Usuario</v-card-title>
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
-          <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index"
-            @click="ir_a_agrupacion(grupo.id_agr)">
+          <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_agrupacion(grupo.id_agr)">
             <v-list-item-content>
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
@@ -156,6 +162,7 @@ export default {
         return this.itemsUsuarios;
       }
       const search = this.searchQueryUsuarios.toLowerCase();
+
       return this.itemsUsuarios.filter(item =>
         item.nombreUsuario.toLowerCase().includes(search) ||
         item.rutUsuario.toLowerCase().includes(search) ||
@@ -192,21 +199,49 @@ export default {
       return null;
     },
 
+    async VerTagsGrupo(id_agr) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${id_agr}`, {
+          method: 'GET',
+        });
+        // Verifica si la respuesta es exitosa
+        if (response.ok) {
+          // Convierte la respuesta en formato JSON
+          const data = await response.json();
+          return data;
+        } else {
+          console.error('No se encontraron Tags para la agrupación', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
     async fetchItems() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`);
+        const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+          method: 'GET',
+        });
+        // Para cada grupo, obtener VerTagsGrupo
         if (response.ok) {
           const data = await response.json();
 
-          this.itemsAgr = data.map(item => ({
-            title: item.nombre_agr,
-            verificado: item.verificado,
-            descripcion: item.descripcion,
-            img: item.imagen,
-            idAgrupacion: item.id_agr,
-            integrantes: item.integrantes,
+          console.log('Data:', data);
+
+          this.itemsAgr = await Promise.all(data.map(async item => {
+            const tags = await this.VerTagsGrupo(item.id_agr);
+            return {
+              title: item.nombre_agr,
+              verificado: item.verificado,
+              descripcion: item.descripcion,
+              img: item.imagen,
+              idAgrupacion: item.id_agr,
+              integrantes: item.integrantes,
+              tags: tags, // Almacena los tags en cada agrupación
+            };
           }));
-          
+
           await this.ObtenerIntegrantesAgrupaciones();
 
           for (const img of this.itemsAgr) {
@@ -274,7 +309,7 @@ export default {
     },
 
     AbrirDialogAgrupacion(id) {
-      console.log("Entra a AbrirDialogAgrupacion"); 
+      console.log("Entra a AbrirDialogAgrupacion");
       const agrupacion = this.itemsAgr.find(item => item.idAgrupacion === id);
       if (agrupacion) {
         this.selectedAgrupacion = agrupacion;

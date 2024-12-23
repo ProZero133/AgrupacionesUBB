@@ -1,29 +1,39 @@
 // auth.middleware.js
 const config = require('../config/configEnv.js');
 const secretKey = config.JWT_SECRET;
-const fastify = require('../main.js');
 
 
 
-fastify.decorate("authenticate", async (request, reply) => {
+async function authenticate(request, reply) {
   try {
-    const token = request.cookies.token;
+    const token = request;
     if (!token) {
       return reply.status(401).send({ error: 'No autorizado' });
     }
-    const decoded = await fastify.jwt.verify(token);
+    const decoded = await request.jwtVerify();
     request.user = decoded; // Adjunta los datos del usuario al objeto request
   } catch (err) {
     reply.status(401).send({ error: 'Token inválido' });
   }
-});
+}
 
-fastify.decorate("authorize", (roles) => {
-  return async (request, reply) => {
-    if (!roles.includes(request.user.role)) {
-      return reply.status(403).send({ error: 'Acceso denegado' });
-    }
-  };
-});
+async function isAdmin(request, reply) {
+  await authenticate(request.headers, reply);
+  if (request.user && request.user.rol !== 'Admin') {
+    return reply.status(403).send({ error: 'Acceso denegado: rol no autorizado' });
+  }
+}
 
-module.exports = { IsAdmin, IsUser };
+async function isUser(request, reply) {
+  await authenticate(request, reply);
+  if (request.user && request.user.rol !== 'Estudiante\n') {
+    return reply.status(403).send({ error: 'Acceso denegado: rol no autorizado' });
+  }
+}
+async function isUserOrAdmin(request, reply) {
+  await authenticate(request, reply);
+  if (request.user && request.user.rol !== 'Estudiante' && request.user.rol !== 'Admin') {
+    return reply.status(403).send({ error: 'Acceso denegado: rol no autorizado' });
+  }
+}
+module.exports = { isAdmin, isUser, isUserOrAdmin, authenticate };

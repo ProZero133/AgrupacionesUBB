@@ -6,30 +6,43 @@ const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion,
   obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion, obtenerLiderArray,
   eliminarTagAgrupacion } = require('../controllers/agrupacion.controller.js');
 const { eliminarTag } = require('../controllers/tags.controller.js');
+const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
 module.exports = function(fastify, options, done) {
+  fastify.decorate("authenticate", async (request, reply) => {
+    try {
+      const token = request.cookies.TokenAutorizacion;
+      if (!token) {
+        return reply.status(401).send({ error: 'No autorizado' });
+      }
+      const decoded = await fastify.jwt.verify(token);
+      request.user = decoded; 
+    } catch (err) {
+      reply.status(401).send({ error: 'Token inválido' });
+    }
+  });
     
-  fastify.get('/agrupaciones', VerGrupos);
-  fastify.get('/agrupaciones/:id', ObtenerAgrupacionesPorID);
-  fastify.post('/agrupaciones', crearAgrupacion);
-  fastify.put('/agrupaciones/:id_agr', editarAgrupacion);
-  fastify.get('/imagenagrupacion/:id', obtenerImagenAgrupacion);
-  fastify.post('/enviarsolicitud/:rut/:id_agr', unirseAgrupacion);
-  fastify.get('/versolicitudes/:id_agr', solicitudesAgrupacion);
-  fastify.post('/aceptarsolicitud/:rut/:id_agr', aceptarSolicitud);
-  fastify.post('/rechazarsolicitud/:rut/:id_agr', rechazarSolicitud);
-  fastify.delete('/eliminaragrupacion/:id_agr/:rut', eliminarAgrupacion);
-  fastify.delete('/abandonaragrupacion/:id_agr/:rut', abandonarAgrupacion);
-  fastify.put('/solicitaracreditacion/:id_agr/:rut', solicitarAcreditacion);
-  fastify.post('/ingresartagsagrupacion', ingresarTagsAgrupacion);
-  fastify.get('/agrupacionesNombre/:nombre_agr', VerGruposPorNombre);
-  fastify.get('/obtenerLider/:id_agr', obtenerLider);
-  fastify.get('/LiderArray/:id_agr', obtenerLiderArray);
-  fastify.get('/obtenerRolUsuario/:rut/:id_agr', ObtenerRolUsuario);
-  fastify.post('/notificarMiembrosPublicacion', notificarMiembrosPublicacion);
-  fastify.post('/ingresarPorCodigo/:rut/:codigo', ingresarPorCodigo);
-  fastify.get('/agrupacionesnoinscritas/:rut', VerGruposNoInscritos);
-  fastify.get('/obtenerTagsAgrupacion/:id_agr', ObtenerTagsAgrupacion);
-  fastify.delete('/eliminarTagAgrupacion/:id_agr/:id_tag', eliminarTagAgrupacion);
+  fastify.get('/agrupaciones',{ preHandler: [isUserOrAdmin] },VerGrupos);
+  fastify.get('/agrupaciones/:id', { preHandler: [isUserOrAdmin] },ObtenerAgrupacionesPorID);
+  fastify.post('/agrupaciones', { preHandler: [isUser] },crearAgrupacion);
+  fastify.put('/agrupaciones/:id_agr', { preHandler: [isUserOrAdmin] },editarAgrupacion);
+  fastify.get('/imagenagrupacion/:id', { preHandler: [isUserOrAdmin] },obtenerImagenAgrupacion);
+  fastify.post('/enviarsolicitud/:rut/:id_agr',{ preHandler: [isUserOrAdmin] }, unirseAgrupacion);
+  fastify.get('/versolicitudes/:id_agr', { preHandler: [isUserOrAdmin] },solicitudesAgrupacion);
+  fastify.post('/aceptarsolicitud/:rut/:id_agr', { preHandler: [isUser] },aceptarSolicitud);
+  fastify.post('/rechazarsolicitud/:rut/:id_agr', { preHandler: [isUser] },rechazarSolicitud);
+  fastify.delete('/eliminaragrupacion/:id_agr/:rut', { preHandler: [isUserOrAdmin] },eliminarAgrupacion);
+  fastify.delete('/abandonaragrupacion/:id_agr/:rut', { preHandler: [isUserOrAdmin] },abandonarAgrupacion);
+  fastify.put('/solicitaracreditacion/:id_agr/:rut', { preHandler: [isUser] },solicitarAcreditacion);
+  fastify.post('/ingresartagsagrupacion', { preHandler: [isUser] },ingresarTagsAgrupacion);
+  fastify.get('/agrupacionesNombre/:nombre_agr', { preHandler: [isUserOrAdmin] },VerGruposPorNombre);
+  fastify.get('/obtenerLider/:id_agr', { preHandler: [isUserOrAdmin] },obtenerLider);
+  fastify.get('/LiderArray/:id_agr', { preHandler: [isUserOrAdmin] },obtenerLiderArray);
+  fastify.get('/obtenerRolUsuario/:rut/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerRolUsuario);
+  fastify.post('/notificarMiembrosPublicacion', { preHandler: [isUserOrAdmin] },notificarMiembrosPublicacion);
+  fastify.post('/ingresarPorCodigo/:rut/:codigo',{ preHandler: [isUser] }, ingresarPorCodigo);
+  fastify.get('/agrupacionesnoinscritas/:rut',{ preHandler: [isUser] }, VerGruposNoInscritos);
+  fastify.get('/obtenerTagsAgrupacion/:id_agr',{ preHandler: [isUserOrAdmin] }, ObtenerTagsAgrupacion);
+  fastify.delete('/eliminarTagAgrupacion/:id_agr/:id_tag',{ preHandler: [isUserOrAdmin] }, eliminarTagAgrupacion);
   done();
 };

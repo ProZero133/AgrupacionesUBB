@@ -15,9 +15,9 @@ module.exports = function(fastify, options, done) {
           reply.status(401).send({ error: 'Token inválido' });
         }
       });
-    fastify.get('/tags', obtenerTags);
-    fastify.get('/tags/:id', obtenerTagPorId);
-    fastify.post('/tags', crearTag);
-    fastify.delete('/tags/:id', eliminarTag);
+    fastify.get('/tags', { preHandler: [isUserOrAdmin] },obtenerTags);
+    fastify.get('/tags/:id', { preHandler: [isUserOrAdmin] },obtenerTagPorId);
+    fastify.post('/tags', { preHandler: [isUser] },crearTag);
+    fastify.delete('/tags/:id', { preHandler: [isUserOrAdmin] },eliminarTag);
     done();
 }

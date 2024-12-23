@@ -15,9 +15,9 @@ module.exports = function (fastify, opts, done) {
           reply.status(401).send({ error: 'Token inválido' });
         }
       });
-    fastify.get('/imagen', obtenerImagenes);
-    fastify.get('/imagen/:id', obtenerImagenPorID);
-    fastify.post('/imagen', crearImagen);
-    fastify.delete('/imagen/:id', eliminarImagen);
+    fastify.get('/imagen', { preHandler: [isUserOrAdmin] },obtenerImagenes);
+    fastify.get('/imagen/:id', { preHandler: [isUserOrAdmin] },obtenerImagenPorID);
+    fastify.post('/imagen', { preHandler: [isUser] },crearImagen);
+    fastify.delete('/imagen/:id', { preHandler: [isUserOrAdmin] },eliminarImagen);
     done();
 };

@@ -505,10 +505,6 @@ export default {
               if (publicacion.tipoPub === 'formulario') {
                 elemento.hipervinculo = publicacion.hipervinculo;
                 elemento.tipo_elemento = 'Formulario'
-              } else if (publicacion.tipoPub === 'votacion') {
-                elemento.opciones = publicacion.opciones;
-                elemento.opcionPreferida = '';
-                elemento.tipo_elemento = 'Votación';
               } else {
                 elemento.tipo_elemento = 'Publicación';
               }

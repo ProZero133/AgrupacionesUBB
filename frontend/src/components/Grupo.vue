@@ -400,19 +400,6 @@
                 Contestar formulario
               </v-btn>
             </v-col>
-            <v-col v-if="elemento.tipo_elemento === 'votacion'" cols="12">
-              <v-row>
-                <v-radio-group v-model="elemento.opcionPreferida">
-                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
-                    :value="opcion.id_opcion">
-                  </v-radio>
-                </v-radio-group>
-              </v-row>
-              <v-row>
-                <v-btn color="primary"
-                  @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
-              </v-row>
-            </v-col>
           </v-card-text>
         </v-card>
       </v-col>
@@ -1142,9 +1129,6 @@ export default {
 
               if (publicacion.tipoPub === 'formulario') {
                 elemento.hipervinculo = publicacion.hipervinculo;
-              } else if (publicacion.tipoPub === 'votacion') {
-                elemento.opciones = publicacion.opciones;
-                elemento.opcionPreferida = '';
               }
 
               return elemento;

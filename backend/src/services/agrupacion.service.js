@@ -280,17 +280,15 @@ async function deleteAgrupacion(id_agr) {
     // Elimina las actividades de la agrupación
     await pool.query('DELETE FROM "Actividad" WHERE id_agr = $1', [id_agr]);
     // Primero, toma todas las publicaciones cuya id_agr sea igual a la id_agr de la agrupación, y guardamos sus id_pub en un array
-    // Luego, elimina todas las votaciones, posts, formularios y opciones asociadas a las publicaciones
+    // Luego, elimina todas los posts, formularios y opciones asociadas a las publicaciones
     // Finalmente, elimina las publicaciones
 
     const idpubByAgr = await pool.query('SELECT id_pub FROM "Publicacion" WHERE id_agr = $1', [id_agr]);
     const publicacionesIds = idpubByAgr.rows.map(row => row.id_pub);
 
     for (const id_pub of publicacionesIds) {
-      await pool.query('DELETE FROM "Votacion" WHERE id_pub = $1', [id_pub]);
       await pool.query('DELETE FROM "Post" WHERE id_pub = $1', [id_pub]);
       await pool.query('DELETE FROM "Formulario" WHERE id_pub = $1', [id_pub]);
-      await pool.query('DELETE FROM "Opcion" WHERE id_votacion = $1', [id_pub]);
     }
 
     await pool.query('DELETE FROM "Publicacion" WHERE id_agr = $1', [id_agr]);

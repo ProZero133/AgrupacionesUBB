@@ -324,10 +324,8 @@ async PostearImagen() {
             // Convierte la respuesta en formato JSON
             this.pubId = await response.json();
 
-            // Si tipoReal es 'Votación', se ejecuta crearVotacion. Si es 'Post', se ejecuta crearPost. Si es 'Formulario', se ejecuta crearFormulario. Si es otro valor, se muestra un mensaje de error.
-            if (this.tipoReal === 'Votación') {
-              this.crearVotacion();
-            } else if (this.tipoReal === 'Post') {
+            // Si tipoReal es 'Post', se ejecuta crearPost. Si es 'Formulario', se ejecuta crearFormulario. Si es otro valor, se muestra un mensaje de error.
+            if (this.tipoReal === 'Post') {
               this.crearPost();
             } else if (this.tipoReal === 'Formulario') {
               this.crearFormulario();
@@ -347,57 +345,6 @@ async PostearImagen() {
     }
   },
 
-  async crearVotacion() {
-    try {
-      const response = await fetch(`${global.BACKEND_URL}/votaciones`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id_pub: this.pubId, descripcion: this.descripcion }),
-      });
-  
-      // Verifica si la respuesta es exitosa
-      if (response.ok) {
-        // Convierte la respuesta en formato JSON
-        const data = await response.json();
-  
-        // Envío de las opciones
-        const fetchPromises = this.opciones.map(async (opcion) => {
-          try {
-            const response = await fetch(`${global.BACKEND_URL}/opcion`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ nombre: opcion, id_votacion: this.pubId }),
-            });
-  
-            // Verifica si la respuesta es exitosa
-            if (response.ok) {
-              // Convierte la respuesta en formato JSON
-              const data = await response.json();
-            } else {
-              console.error('Error en la respuesta:', response.status);
-            }
-          } catch (error) {
-            console.error('Error al hacer fetch:', error);
-          }
-        });
-        // Espera a que todas las promesas de fetch se resuelvan
-        await Promise.all(fetchPromises);
-
-        await this.notificarPublicacion(this.pubId);
-        // Mostrar el snackbar después de que todas las solicitudes se hayan completado
-        this.$root.showSnackBar('success', 'Votación creada con éxito!');
-        this.$router.push(`/api/grupo/${this.groupId}`);
-      } else {
-        console.error('Error en la respuesta:', response.status);
-      }
-    } catch (error) {
-      console.error('Error al hacer fetch:', error);
-    }
-  },
 
   async crearFormulario() {
     try {

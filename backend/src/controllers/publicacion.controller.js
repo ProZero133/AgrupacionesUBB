@@ -4,7 +4,6 @@ const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
     deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario} = require("../services/publicacion.service.js");
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
-const { getVotacionById } = require("../services/votacion.service");
 
 const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
@@ -95,24 +94,6 @@ async function obtenerPublicacionesPorId(req, res) {
             }
         }
 
-        if (publicacion.tipoPub === 'nulo') {
-            try {
-                const votacion = await getVotacionById(publicacion.id_pub);
-                if (votacion && votacion.opciones && votacion.opciones.length > 0) {
-                    publicacion.descripcion = votacion.descripcion;
-                    publicacion.tipoPub = 'votacion';
-                    publicacion.opciones = votacion.opciones;
-                } else {
-                    publicacion.descripcion = 'No hay descripción disponibleee';
-                    publicacion.tipoPub = 'nulo';
-                }
-            } catch (error) {
-                console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
-                publicacion.descripcion = 'No hay descripción disponibleeee';
-                publicacion.tipoPub = 'nulo';
-            }
-        }
-
         // Retorna la publicacion procesada
         if (res) {
             return res.code(200).send(publicacion);
@@ -168,28 +149,6 @@ async function obtenerPublicacionesPorGrupo(req, res) {
                         }
                     } catch (error) {
                         console.error(`Error al obtener el formulario con id ${publicacion.id_pub}: `, error);
-                        publicacion.descripcion = 'No hay descripción disponible';
-                        publicacion.tipoPub = 'nulo';
-                    }
-                }
-            }
-
-            // Procesar publicaciones que son votaciones
-            for (let i = 0; i < respuesta.length; i++) {
-                const publicacion = respuesta[i];
-                if (publicacion.tipoPub === 'nulo') {
-                    try {
-                        const votacion = await getVotacionById(publicacion.id_pub);
-                        if (votacion && votacion.opciones && votacion.opciones.length > 0) {
-                            publicacion.descripcion = votacion.descripcion;
-                            publicacion.tipoPub = 'votacion';
-                            publicacion.opciones = votacion.opciones;
-                        } else {
-                            publicacion.descripcion = 'No hay descripción disponible';
-                            publicacion.tipoPub = 'nulo';
-                        }
-                    } catch (error) {
-                        console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
                         publicacion.descripcion = 'No hay descripción disponible';
                         publicacion.tipoPub = 'nulo';
                     }
@@ -329,28 +288,6 @@ async function obtenerPublicacionesPorGrupoUsuario(req, res) {
                         }
                     } catch (error) {
                         console.error(`Error al obtener el formulario con id ${publicacion.id_pub}: `, error);
-                        publicacion.descripcion = 'No hay descripción disponible';
-                        publicacion.tipoPub = 'nulo';
-                    }
-                }
-            }
-
-            // Procesar publicaciones que son votaciones
-            for (let i = 0; i < respuesta.length; i++) {
-                const publicacion = respuesta[i];
-                if (publicacion.tipoPub === 'nulo') {
-                    try {
-                        const votacion = await getVotacionById(publicacion.id_pub);
-                        if (votacion && votacion.opciones && votacion.opciones.length > 0) {
-                            publicacion.descripcion = votacion.descripcion;
-                            publicacion.tipoPub = 'votacion';
-                            publicacion.opciones = votacion.opciones;
-                        } else {
-                            publicacion.descripcion = 'No hay descripción disponible';
-                            publicacion.tipoPub = 'nulo';
-                        }
-                    } catch (error) {
-                        console.error(`Error al obtener la votación con id ${publicacion.id_pub}: `, error);
                         publicacion.descripcion = 'No hay descripción disponible';
                         publicacion.tipoPub = 'nulo';
                     }

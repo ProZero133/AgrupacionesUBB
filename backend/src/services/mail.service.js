@@ -32,17 +32,13 @@ function loadHtmlTemplate(filePath, replacements) {
 async function notifyPublicacion(publicacion) {
     let oldPub = publicacion.tipoPub;
 
-    if (publicacion.tipoPub == 'votacion'){
-        oldPub = 'Nueva votación';
-    } else if (publicacion.tipoPub == 'post'){
+    if (publicacion.tipoPub == 'post'){
         oldPub = 'Nuevo post';
     } else if (publicacion.tipoPub == 'formulario'){
         oldPub = 'Nuevo formulario';
     }
 
-    if (publicacion.tipoPub == 'votacion'){
-        publicacion.tipoPub = 'una nueva votación';
-    } else if (publicacion.tipoPub == 'post'){
+    if (publicacion.tipoPub == 'post'){
         publicacion.tipoPub = 'un nuevo post';
     } else if (publicacion.tipoPub == 'formulario'){
         publicacion.tipoPub = 'un nuevo formulario';

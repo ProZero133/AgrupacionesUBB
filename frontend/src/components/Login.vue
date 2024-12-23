@@ -1,7 +1,8 @@
 <template>
   <v-container class="container-loginrut">
 
-    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom" disabled></v-switch>
+    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"
+      disabled></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
     <v-form v-if="showLoginByRut" class="form-loginrut">
@@ -17,18 +18,18 @@
       <v-text-field class="tfCorreo" v-model="email" label="Correo institucional" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
-    
+
     <v-dialog v-model="dialog" persistent max-width="350">
-    <v-card>
-      <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="verificationCode" label="Código de verificación" required></v-text-field>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="green darken-1" text @click="verifyCode">Verificar</v-btn>
-      </v-card-actions>
-    </v-card>
+      <v-card>
+        <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="verificationCode" label="Código de verificación" required></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="verifyCode">Verificar</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
   </v-container>
 </template>
@@ -58,14 +59,15 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ email: this.email }),
         });
         const data = await response.json();
         // BORRAR
         // console.log(data);
-        
-        if (response.ok && data.success ) {
+
+        if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;
           this.dialog = true;
@@ -82,27 +84,28 @@ export default {
     async verifyCode() {
       if (this.verificationCode === this.serverCode) {
         try {
-        const nombre = this.userData.nombre;
-        const rut = this.userData.rut;
-        const role = this.userData.rol;
-        const email = this.userData.correo;
-        const carrera = this.userData.carrera;
-        this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
-        this.$cookies.set('token', this.tokenValue);
-        const response = await fetch(`${global.BACKEND_URL}/TokenAutorizacion`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ rol: role }),
-        });
-        const data = await response.json();
-        this.$cookies.set('TokenAutorizacion', data.token);
+          const nombre = this.userData.nombre;
+          const rut = this.userData.rut;
+          const role = this.userData.rol;
+          const email = this.userData.correo;
+          const carrera = this.userData.carrera;
+          this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
+          this.$cookies.set('token', this.tokenValue);
+          const response = await fetch(`${global.BACKEND_URL}/TokenAutorizacion`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
+            body: JSON.stringify({ rol: role }),
+          });
+          const data = await response.json();
+          this.$cookies.set('TokenAutorizacion', data.token);
 
-          if(role === 'Admin'){
+          if (role === 'Admin') {
             this.$router.push(`/api/adminhome`);
 
-          }else{
+          } else {
             this.$router.push(`/api/home`);
           }
         } catch (error) {
@@ -174,5 +177,4 @@ export default {
 .tfCredenciales {
   min-width: 350px;
 }
-
 </style>

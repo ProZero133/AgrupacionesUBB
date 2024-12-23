@@ -168,6 +168,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/acreditaciones`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           const data = await response.json();
@@ -187,6 +191,10 @@ export default {
         for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
           const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
             method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
           if (response.ok) {
             const data = await response.json();
@@ -204,6 +212,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/ActAgr`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           const data = await response.json();
@@ -224,6 +236,7 @@ export default {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
             verificado: 'Verificado',
@@ -253,6 +266,7 @@ export default {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
             verificado: 'Noverificado',
@@ -281,6 +295,7 @@ export default {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
             Aprobado: true,
@@ -306,6 +321,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerCreador/${Actividad_a_Aceptar.id_act}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           const creadorActData = await response.json();
@@ -336,6 +355,7 @@ export default {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
           }),

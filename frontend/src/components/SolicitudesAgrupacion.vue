@@ -16,7 +16,8 @@
                             <tr v-for="solicitud in solicitudes" :key="solicitud.rut">
                                 <td>{{ solicitud.rut }}</td>
                                 <td class="text-right"> <!-- Alinea el botón a la derecha -->
-                                    <v-btn color="primary" small @click="aceptarSolicitud(solicitud.rut)">Admitir</v-btn>
+                                    <v-btn color="primary" small
+                                        @click="aceptarSolicitud(solicitud.rut)">Admitir</v-btn>
                                 </td>
                             </tr>
                         </tbody>
@@ -34,6 +35,7 @@
     width: 60vw;
     margin-left: 20vh;
 }
+
 .text-right {
     width: 50vw;
     text-align: right;
@@ -61,36 +63,40 @@ export default {
     }),
     methods: {
         getRut() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[2] = tokenParts[2].replace('rut=', '');
-              return tokenParts[2] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[2] = tokenParts[2].replace('rut=', '');
+                    return tokenParts[2];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
-    getRol() {
-          const token = this.$cookies.get('token');
-          if (token) {
-            try {
-              const tokenParts = token.split('&');
-              tokenParts[0] = tokenParts[0].replace('rol=', '');
-              return tokenParts[0] ;
-            } catch (error) {
-              console.error('Invalid token:', error);
+        getRol() {
+            const token = this.$cookies.get('token');
+            if (token) {
+                try {
+                    const tokenParts = token.split('&');
+                    tokenParts[0] = tokenParts[0].replace('rol=', '');
+                    return tokenParts[0];
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                }
             }
-          }
-          return null;
+            return null;
         },
         async VerSolicitudes() {
             try {
                 const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
                 const response = await fetch(url, {
                     method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
                 });
                 if (response.ok) {
                     const data = await response.json();
@@ -107,6 +113,10 @@ export default {
                 const url = `${global.BACKEND_URL}/aceptarsolicitud/${rut}/${this.groupId}`;
                 const response = await fetch(url, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
                 });
                 if (response.ok) {
                     this.VerSolicitudes();

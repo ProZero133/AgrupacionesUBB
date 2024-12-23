@@ -166,15 +166,15 @@
           <v-col cols="7">
             <p>{{ actividad.descripcion }}</p>
           </v-col>
-          
-            <v-btn class="BotonAbandonar" width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
-                    @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
-                    depressed>Abandonar actividad</v-btn>
-        
+
+          <v-btn class="BotonAbandonar" width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold"
+            @mouseleave="cancelHold" @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold"
+            :style="progressStyle" depressed>Abandonar actividad</v-btn>
+
         </v-row>
       </v-card-text>
       <v-card-actions>
-        
+
         <v-spacer></v-spacer>
 
       </v-card-actions>
@@ -231,7 +231,7 @@
   min-height: 250px;
 }
 
-.BotonAbandonar{
+.BotonAbandonar {
   margin-left: 55vw;
 }
 </style>
@@ -350,6 +350,10 @@ export default {
             try {
               const responde = await fetch(`${global.BACKEND_URL}/imagen/` + grupo.imagen, {
                 method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
               });
               // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
               if (responde.ok) {
@@ -397,6 +401,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         const data = await response.json();
         console.log('Actividades obtenidas:', data);
@@ -404,6 +412,10 @@ export default {
         // Obtener actividades publicas
         const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         const dataPublicas = await actividadesPublicas.json();
         console.log('Actividades públicas obtenidas:', dataPublicas);
@@ -426,13 +438,17 @@ export default {
         }
 
         // Añadir las actividades publicas a las actividades en data.actividades
-        
+
         this.actividades = data;
 
         for (const actis of this.actividades) {
           try {
             const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
               method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
             });
             // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
             if (responde.ok) {
@@ -473,6 +489,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/VerPublicacionesGruposUsuario/${this.rut.trim()}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (response.ok) {
@@ -484,6 +504,10 @@ export default {
               try {
                 const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                  },
                 });
                 if (responde.ok) {
                   const dataImagen = await responde.text();
@@ -547,6 +571,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
         });
@@ -622,6 +647,7 @@ export default {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
         // Verifica si la respuesta es exitosa
@@ -631,37 +657,41 @@ export default {
           this.ActividadesParticipa = data;
 
           for (const actis of this.ActividadesParticipa) {
-              try {
-                const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
-                  method: 'GET',
-                });
-                //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
-                if (responde.ok) {
-                  const dataImagen = await responde.text();
-                  actis.imagen = dataImagen;
-                } else {
-                  console.error('Error en la respuesta:', responde.status);
-                }
-              }
-              catch (error) {
-                console.error('Error al hacer fetch:', error);
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+              });
+              //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                actis.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
               }
             }
-            // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
-            // Los campos de actividad se pasarán de la siguiente manera a elementos:
-            // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-            this.actividadesParticipa = this.ActividadesParticipa.map((elemento) => {
-              return {
-                id: elemento.id_act,
-                nombre: elemento.nom_act,
-                descripcion: elemento.descripcion,
-                tipo: elemento.tipo,
-                imagen: elemento.imagen,
-                id_agr: elemento.id_agr,
-                tipo_elemento: 'Actividad',
-                fecha_creacion: elemento.fecha_creacion
-              };
-            });
+            catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
+          // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+          // Los campos de actividad se pasarán de la siguiente manera a elementos:
+          // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+          this.actividadesParticipa = this.ActividadesParticipa.map((elemento) => {
+            return {
+              id: elemento.id_act,
+              nombre: elemento.nom_act,
+              descripcion: elemento.descripcion,
+              tipo: elemento.tipo,
+              imagen: elemento.imagen,
+              id_agr: elemento.id_agr,
+              tipo_elemento: 'Actividad',
+              fecha_creacion: elemento.fecha_creacion
+            };
+          });
 
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -676,6 +706,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
         });

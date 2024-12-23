@@ -189,7 +189,13 @@ export default {
                 return;
             }
             try {
-                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
                 this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
@@ -210,8 +216,9 @@ export default {
                 const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
                 });
 
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
@@ -221,8 +228,9 @@ export default {
                     const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
                         method: 'GET',
                         headers: {
-                            'Content-Type': 'application/json'
-                        }
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                        },
                     });
 
                     if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
@@ -242,7 +250,8 @@ export default {
                 const response = await fetch(`${global.BACKEND_URL}/actualizarPreferencias/${this.rut}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
                     body: JSON.stringify({ preferencias: idTags })
                 });
@@ -257,8 +266,9 @@ export default {
                 const response = await fetch(`${global.BACKEND_URL}/eliminarPreferencia/${this.rut}/${item.id_tag}`, {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
                 });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 this.obtenerPreferencias();
@@ -271,7 +281,8 @@ export default {
                 const response = await fetch(`${global.BACKEND_URL}/tags`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
                     body: JSON.stringify({ nombre_tag, rut: this.rut })
                 });
@@ -282,7 +293,8 @@ export default {
                     await fetch(`${global.BACKEND_URL}/actualizarPreferencias/${this.rut}`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                         },
                         body: JSON.stringify({ preferencias: [data[0].id_tag] })
                     });

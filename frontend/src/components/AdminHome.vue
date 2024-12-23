@@ -8,7 +8,7 @@
     </template>
   </v-toolbar>
 
-  <!-- Buscador de Agrupaciones -->
+  <!-- Tab Buscador de Agrupaciones -->
   <v-tab-item value="agrupaciones" v-if="tab === 'agrupaciones'">
     <v-container>
       <v-row>
@@ -105,7 +105,7 @@
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
           <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index"
-            @click="AbrirDialogAgrupacion(grupo.rutUsuario)">
+            @click="ir_a_agrupacion(grupo.id_agr)">
             <v-list-item-content>
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
@@ -264,7 +264,7 @@ export default {
             rutUsuario: item.rut,
             correoUsuario: item.correo,
             carreraUsuario: item.carrera,
-          })).filter(item => item.rutUsuario !== '11.111.111-1'); // Pone el rut que no quieras que se muestre, en este caso, Jhon
+          })).filter(item => item.rutUsuario !== '11.111.111-1'); // se pone el rut que no se muestre, en este caso, Jhon
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -272,13 +272,16 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     AbrirDialogAgrupacion(id) {
+      console.log("Entra a AbrirDialogAgrupacion"); 
       const agrupacion = this.itemsAgr.find(item => item.idAgrupacion === id);
       if (agrupacion) {
         this.selectedAgrupacion = agrupacion;
         this.dialogAgrupacion = true; // Abre el diálogo con los detalles
       }
     },
+
     async ir_a_grupos_usuario(rut) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`);
@@ -303,6 +306,7 @@ export default {
       this.$router.push(`/api/grupo/${idAgrupacion}`);
     },
   },
+
   mounted() {
     this.fetchItems();
     this.BuscarUsuarios();

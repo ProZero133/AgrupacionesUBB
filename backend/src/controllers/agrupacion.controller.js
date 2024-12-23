@@ -11,6 +11,7 @@ const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
+
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
     if (agrupaciones.length === 0) {
@@ -142,7 +143,8 @@ async function unirseAgrupacion(req, res) {
             rut: usuario[0].rut,
             nombre: usuario[0].nombre,
             lider_correo: lider[0].correo,
-            nombre_agr: agrupacion.nombre_agr
+            nombre_agr: agrupacion.nombre_agr,
+            carrera: usuario[0].carrera
         };
 
         const invitar = await integrateUsuario(mailDetails);

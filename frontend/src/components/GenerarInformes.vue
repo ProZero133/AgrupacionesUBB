@@ -1,15 +1,15 @@
 <template>
     <v-container class="contenedorPrincipal" grid-list-xs>
         <v-btn v-if="selectedGrupo" @click="menu = !menu" color="primary" text>
-                {{ selectedGrupo.nombre_agr }}
-            </v-btn>
-            <v-menu v-model="menu" :close-on-content-click="false" offset-y>
-                <v-list >
-                    <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="selectGrupo(grupo)">
-                        <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
+            {{ selectedGrupo.nombre_agr }}
+        </v-btn>
+        <v-menu v-model="menu" :close-on-content-click="false" offset-y>
+            <v-list>
+                <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="selectGrupo(grupo)">
+                    <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-menu>
         <v-data-table v-model:expanded="expanded" :headers="dessertHeaders" :items="desserts" item-value="name"
             show-expand>
             <template v-slot:top>
@@ -109,6 +109,10 @@ export default {
             try {
                 const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${this.rut}`, {
                     method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
                 });
                 const data = await response.json();
 

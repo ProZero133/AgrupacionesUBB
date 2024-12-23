@@ -13,6 +13,7 @@ async function getUsuarios() {
         return error;
     }
 }
+
 async function getUsuarioServidor(rut){
     try{
         const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);

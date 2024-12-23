@@ -334,6 +334,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${this.rut}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {

@@ -18,7 +18,7 @@ async function authenticate(request, reply) {
 }
 
 async function isAdmin(request, reply) {
-  await authenticate(request.headers, reply);
+  await authenticate(request, reply);
   if (request.user && request.user.rol !== 'Admin') {
     return reply.status(403).send({ error: 'Acceso denegado: rol no autorizado' });
   }
@@ -31,6 +31,7 @@ async function isUser(request, reply) {
   }
 }
 async function isUserOrAdmin(request, reply) {
+  await authenticate(request, reply);
   if (request.user && request.user.rol !== 'Estudiante\n' && request.user.rol !== 'Admin') {
     return reply.status(403).send({ error: 'Acceso denegado: rol no autorizado' });
   }

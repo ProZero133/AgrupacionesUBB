@@ -18,21 +18,25 @@ const routes = [
           path: 'home',
           name: 'Home',
           component: () => import('@/views/UserHomeView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'adminhome',
           name: 'AdminHome',
           component: () => import('@/views/AdminHome.vue'),
+          meta: { requiresAdmin: true }
         },
         {
           path: 'solicitar_acreditacion',
           name: 'SolicitarAcreditacion',
           component: () => import('@/views/SolicitarAcreditacionView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'verificaciones',
           name: 'Verificaciones',
           component: () => import('@/views/VerificacionesView.vue'),
+          meta: { requiresAdmin: true }
         },
         {
           path: 'administrar_roles_agrupaciones/:id',
@@ -43,16 +47,19 @@ const routes = [
           path: 'crear_actividad/:id',
           name: 'Crear Actividad',
           component: () => import('@/views/CrearActividadView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'crear_agrupacion',
           name: 'Crear Agrupacion',
           component: () => import('@/views/CrearAgrupacionView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'crear_publicacion/:id',
           name: 'Crear Publicacion',
           component: () => import('@/views/CrearPublicacionView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'login',
@@ -73,6 +80,7 @@ const routes = [
           path: 'crear_tag',
           name: 'Crear Tag',
           component: () => import('@/views/CrearTagView.vue'),
+          meta: { requiresUser: true }
         },
         {
           path: 'solicitudes_agrupacion/:id_agr',
@@ -107,10 +115,32 @@ router.beforeEach((to, from, next) => {
   const publicPages = ['/api/login'];
   const authRequired = !publicPages.includes(to.path);
   const token = VueCookies.get('token');
-
+  const tokenAuth = VueCookies.get('TokenAutorizacion');
   if (authRequired && (!token || token === 'undefined')) {
     return next('/api/login');
   }
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    const decodedToken = JSON.parse(atob(tokenAuth.split('.')[1]));
+    const userRole = decodedToken.rol;
+    console.log('Rol del usuario',userRole);
+    if (userRole !== 'Admin') {
+      if (to.path !== '/api/home') {
+        return next('/api/home');
+      }
+    }
+  }else{
+    if (to.matched.some(record => record.meta.requiresUser)) {
+      const decodedToken = JSON.parse(atob(tokenAuth.split('.')[1]));
+      const userRole = decodedToken.rol;
+      console.log('Rol del usuario',decodedToken);
+      if (userRole !== 'Estudiante\n') {
+        if (to.path !== '/api/adminhome') {
+          return next('/api/adminhome');
+        }
+      }
+    }
+  }
+
 
   next();
 })

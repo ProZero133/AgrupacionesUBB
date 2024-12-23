@@ -15,10 +15,10 @@ module.exports = function (fastify, opts, done) {
           reply.status(401).send({ error: 'Token inválido' });
         }
       });
-    fastify.get('/formulario', obtenerFormularios);
-    fastify.get('/formulario/:id', obtenerFormularioPorId);
-    fastify.post('/formulario', crearFormulario);
-    fastify.put('/formulario/:id', actualizarFormulario);
-    fastify.delete('/formulario/:id', eliminarFormulario);
+    fastify.get('/formulario',{ preHandler: [isUserOrAdmin] }, obtenerFormularios);
+    fastify.get('/formulario/:id', { preHandler: [isUserOrAdmin] },obtenerFormularioPorId);
+    fastify.post('/formulario', { preHandler: [isUser] },crearFormulario);
+    fastify.put('/formulario/:id', { preHandler: [isUser] },actualizarFormulario);
+    fastify.delete('/formulario/:id', { preHandler: [isUserOrAdmin] },eliminarFormulario);
     done();
 };

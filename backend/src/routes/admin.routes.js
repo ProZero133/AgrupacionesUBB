@@ -17,14 +17,14 @@ module.exports = function(fastify, options, done) {
     }
   });
   
-  fastify.get('/usuarios', ObtenerUsuarios);
-  fastify.get('/acreditaciones', ObtenerAcreditaciones);
-  fastify.put('/aceptacionAcr/:id_agr', AceptacionAcreditaciondeGrupo);
-  fastify.put('/rechazoAcr/:id_agr', RechazoAcreditaciondeGrupo);
-  fastify.get('/administracionderoles/:id_agr', ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
-  fastify.get('/obtencionderoles/:id_agr/:rut', ObtenerRolUsuario); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
-  fastify.put('/administracionderoles/:id_agr/:rut', CambiarRoldeUsuario); // Cambia el rol de un usuario en una agrupacion
-  fastify.put('/aceptacionAct/:id_act', AceptacionActividad);
+  fastify.get('/usuarios', { preHandler: [isAdmin] },ObtenerUsuarios);
+  fastify.get('/acreditaciones', { preHandler: [isAdmin] },ObtenerAcreditaciones);
+  fastify.put('/aceptacionAcr/:id_agr', { preHandler: [isAdmin] },AceptacionAcreditaciondeGrupo);
+  fastify.put('/rechazoAcr/:id_agr', { preHandler: [isAdmin] },RechazoAcreditaciondeGrupo);
+  fastify.get('/administracionderoles/:id_agr', { preHandler: [isAdmin] },ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
+  fastify.get('/obtencionderoles/:id_agr/:rut', { preHandler: [isAdmin] },ObtenerRolUsuario); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
+  fastify.put('/administracionderoles/:id_agr/:rut', { preHandler: [isAdmin] },CambiarRoldeUsuario); // Cambia el rol de un usuario en una agrupacion
+  fastify.put('/aceptacionAct/:id_act', { preHandler: [isAdmin] },AceptacionActividad);
 
   done();
 };

@@ -14,9 +14,9 @@ module.exports = function(fastify, options, done) {
           reply.status(401).send({ error: 'Token inválido' });
         }
       });
-    fastify.post('/crearNotificacion/:rut/:titulo/:descripcion', crearNotificacion);
-    fastify.get('/obtenerNotificacionesUsuario/:rut', obtenerNotificacionesUsuario);
-    fastify.delete('/limpiarNotificacionesUsuario/:rut', limpiarNotificacionesUsuario);
-    fastify.delete('/limpiarNotificacion/:id_noti', limpiarNotificacion);
+    fastify.post('/crearNotificacion/:rut/:titulo/:descripcion', { preHandler: [isUser] },crearNotificacion);
+    fastify.get('/obtenerNotificacionesUsuario/:rut', { preHandler: [isUser] },obtenerNotificacionesUsuario);
+    fastify.delete('/limpiarNotificacionesUsuario/:rut', { preHandler: [isUser] },limpiarNotificacionesUsuario);
+    fastify.delete('/limpiarNotificacion/:id_noti', { preHandler: [isUser] },limpiarNotificacion);
     done();
 };

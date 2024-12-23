@@ -15,10 +15,10 @@ module.exports = function(fastify, options, done) {
           reply.status(401).send({ error: 'Token inválido' });
         }
       });
-    fastify.get('/publicaciones', obtenerPublicaciones);
-    fastify.get('/publicaciones/:id', obtenerPublicacionesPorId);
-    fastify.get('/publicacionesgrupo/:id', obtenerPublicacionesPorGrupo);
-    fastify.post('/publicaciones', crearPublicacion);
-    fastify.delete('/publicaciones/:id', eliminarPublicacion);
+    fastify.get('/publicaciones', { preHandler: [isUserOrAdmin] },obtenerPublicaciones);
+    fastify.get('/publicaciones/:id', { preHandler: [isUserOrAdmin] },obtenerPublicacionesPorId);
+    fastify.get('/publicacionesgrupo/:id', { preHandler: [isUserOrAdmin] },obtenerPublicacionesPorGrupo);
+    fastify.post('/publicaciones', { preHandler: [isUser] },crearPublicacion);
+    fastify.delete('/publicaciones/:id', { preHandler: [isUser] },eliminarPublicacion);
     done();
 }

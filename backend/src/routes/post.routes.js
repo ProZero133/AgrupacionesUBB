@@ -16,10 +16,10 @@ module.exports = function (fastify, opts, done) {
         }
       });
 
-    fastify.get('/post', obtenerPosts);
-    fastify.get('/post/:id', obtenerPostPorId);
-    fastify.post('/post', crearPost);
-    fastify.delete('/post/:id', eliminarPost);
+    fastify.get('/post',{ preHandler: [isUserOrAdmin] }, obtenerPosts);
+    fastify.get('/post/:id',{ preHandler: [isUserOrAdmin] }, obtenerPostPorId);
+    fastify.post('/post', { preHandler: [isUser] },crearPost);
+    fastify.delete('/post/:id', { preHandler: [isUserOrAdmin] },eliminarPost);
     
     done();
 };

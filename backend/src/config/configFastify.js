@@ -20,15 +20,16 @@ const secret = config.JWT_SECRET;
 const cookieSecret = config.COOKIE_SECRET;
 const url = config.URL;
 
+fastify.register(require('@fastify/jwt'), {
+  secret: secret
+});
+
 fastify.register(fastifyCors, {
     // Configura los orígenes permitidos
     origin: true
   });
   fastify.register(fastifyCookie, {
     secret: cookieSecret,
-  });
-  fastify.register(require('@fastify/jwt'), {
-    secret: secret // Asegúrate de usar una clave secreta segura y almacenarla de forma segura
   });
   fastify.register(fastifyMultipart);
   fastify.register(login);

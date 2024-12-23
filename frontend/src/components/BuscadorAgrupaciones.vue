@@ -202,6 +202,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/agrupacionesnoinscritas/${this.rut}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Para cada grupo, obtener VerTagsGrupo
         if (response.ok) {

@@ -630,6 +630,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
         });
@@ -657,6 +658,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ mail: this.mailInvitado, id_agr: this.datosGrupo.id_agr, nombre_agr: this.datosGrupo.nombre_agr }),
         });
@@ -709,6 +711,7 @@ export default {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
 
@@ -758,6 +761,7 @@ export default {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
 
@@ -787,6 +791,7 @@ export default {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
 
@@ -828,6 +833,7 @@ export default {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
 
@@ -860,6 +866,7 @@ export default {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
               },
               body: JSON.stringify({
                 rol_agr: "Miembro"
@@ -871,6 +878,7 @@ export default {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
             body: JSON.stringify({
               rol_agr
@@ -895,6 +903,7 @@ export default {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
             body: JSON.stringify({
               rol_agr
@@ -921,6 +930,10 @@ export default {
         const url = `${global.BACKEND_URL}/abandonaragrupacion/${this.groupId}/${miembroRut}`;
         const response = await fetch(url, {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         this.ObtenerUsuariosDeAgrupacion();
         if (response.ok) {
@@ -946,6 +959,10 @@ export default {
         const url = `${global.BACKEND_URL}/agrupaciones/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         // Verifica si la respuesta es exitosa
@@ -957,6 +974,10 @@ export default {
           try {
             const responde = await fetch(`${global.BACKEND_URL}/imagen/` + this.datosGrupo.imagen, {
               method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
             });
             //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
             if (responde.ok) {
@@ -1006,6 +1027,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/actividadesgrupo/${this.groupId}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         // Verifica si la respuesta es exitosa
@@ -1019,6 +1044,10 @@ export default {
               try {
                 const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
                   method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                  },
                 });
                 //Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
                 if (responde.ok) {
@@ -1054,7 +1083,7 @@ export default {
           }
 
           this.VerPublicaciones();
-          
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1069,6 +1098,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/publicacionesgrupo/${this.groupId}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (response.ok) {
@@ -1080,6 +1113,10 @@ export default {
               try {
                 const responde = await fetch(`${global.BACKEND_URL}/imagen/` + publis.imagen, {
                   method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                  },
                 });
                 if (responde.ok) {
                   const dataImagen = await responde.text();
@@ -1128,6 +1165,10 @@ export default {
         const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         const dataResponse = await response.json();
@@ -1139,6 +1180,10 @@ export default {
             const urlUsuarioServidor = `${global.BACKEND_URL}/usuarioServidor/${rutUsuario}`;
             const respuestaUsuarioServidor = await fetch(urlUsuarioServidor, {
               method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
             });
             const dataUsuarioServidor = await respuestaUsuarioServidor.json();
             solicitudes.push(dataUsuarioServidor);
@@ -1158,6 +1203,10 @@ export default {
         const url = `${global.BACKEND_URL}/aceptarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           this.VerSolicitudes();
@@ -1174,6 +1223,10 @@ export default {
         const url = `${global.BACKEND_URL}/rechazarsolicitud/${rut}/${this.groupId}`;
         const response = await fetch(url, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           this.VerSolicitudes();
@@ -1228,6 +1281,7 @@ export default {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
             nombre_agr: nombre,
@@ -1241,6 +1295,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
             body: JSON.stringify({
               id_agr: this.groupId,
@@ -1276,8 +1331,9 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${this.groupId}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (!response.ok) throw new Error('Error en la respuesta de la red');
@@ -1287,8 +1343,9 @@ export default {
           const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json'
-            }
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
 
           if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
@@ -1311,7 +1368,13 @@ export default {
         return;
       }
       try {
-        const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+        const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
         if (!response.ok) throw new Error('Error en la respuesta de la red');
         const data = await response.json();
         this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
@@ -1326,6 +1389,10 @@ export default {
         const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rut}`;
         const response = await fetch(url, {
           method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           this.snackbarMessage = 'Solicitud enviada correctamente';
@@ -1384,6 +1451,10 @@ export default {
         const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rut}`;
         const response = fetch(url, {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (response.ok) {
           this.$root.showSnackBar('success', 'Grupo eliminado correctamente', 'Operación exitosa');
@@ -1402,8 +1473,9 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/eliminarTagAgrupacion/${this.groupId}/${item.id_tag}`, {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         if (!response.ok) throw new Error('Error en la respuesta de la red');
         this.obtenerTagsGrupo();
@@ -1473,6 +1545,10 @@ export default {
           const url = `${global.BACKEND_URL}/actividades/${elemento.id}/${this.rut}`;
           const response = await fetch(url, {
             method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
           if (response.ok) {
             this.$root.showSnackBar('success', 'Actividad eliminada correctamente', 'Operación exitosa');
@@ -1488,12 +1564,20 @@ export default {
           try {
             const post = await fetch(`${global.BACKEND_URL}/post/${elemento.id}`, {
               method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
             });
             if (!post.ok) throw new Error('Error al eliminar la publicación');
 
             const url = `${global.BACKEND_URL}/publicaciones/${elemento.id}`;
             const responsePublicacion = await fetch(url, {
               method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
             });
             if (responsePublicacion.ok) {
               this.$root.showSnackBar('success', 'Publicación eliminada correctamente', 'Operación exitosa');
@@ -1511,6 +1595,10 @@ export default {
           const url = `${global.BACKEND_URL}/formulario/${elemento.id}`;
           const responseForm = await fetch(url, {
             method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
           if (responseForm.ok) {
             this.dialogPub = false;
@@ -1521,6 +1609,10 @@ export default {
           }
           const publi = await fetch(`${global.BACKEND_URL}/publicaciones/${elemento.id}`, {
             method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
         }
       }

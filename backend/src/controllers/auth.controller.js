@@ -1,31 +1,24 @@
-const { validarUsuario, asignarToken, validarTokenService } = require('../services/auth.service');
-
-async function validarTokenController(fastify, reply) {
-  const { token } = fastify.query;
+const { validarUsuario, asignarToken } = require('../services/auth.service');
+async function TokenAutorizacionController(request, reply) {
+ const { rol } = request.body; // Asume que el rol se envía en el cuerpo de la solicitud
   try {
-    const decoded = fastify.jwt.verify(token);
-    const rol = decoded.rol; // Asegúrate de usar 'rol_u' para coincidir con tu estructura de datos
-    // Establece una cookie de primera parte
-    reply.setCookie('authToken', token, {
-      path: '/',
+    const payload = {
+      rol,
+    };
+    const token = request.server.jwt.sign(payload);
+    reply.setCookie('TokenAutorizacion', token, {
       httpOnly: true,
+      secure: false,
       sameSite: 'strict',
-      secure: true,
-      maxAge: 3600
+      maxAge: 3600, // Expiración en segundos (1 hora)
     });
 
-    // Redirige al usuario basado en su rol
-    if (rol === 'Estudiante') {
-      reply.redirect(`${url}/api/home`);
-    } else if (rol === 'Admin') {
-      reply.redirect(`${url}/api/adminhome`);
-    } else {
-      reply.send({ success: false, message: 'Rol no reconocido' });
-    }
+
+    reply.send({ success: true, message: 'Token válido', token: token });
   } catch (error) {
     reply.send({ success: false, message: 'Token inválido o expirado', error: error.message });
   }
-};
+}
 
 async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
@@ -44,4 +37,4 @@ async function EmailLogin(request, reply) {
   }
 }
 
-module.exports = { EmailLogin, validarTokenController};
+module.exports = { EmailLogin, TokenAutorizacionController};

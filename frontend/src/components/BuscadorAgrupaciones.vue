@@ -37,11 +37,11 @@
             </v-card-text>
             <v-card-text class="TagsGrupo">
               <v-chip-group>
-              <v-chip v-for="tag in item.tags" :key="tag.id_tag" class="res-tags" color="primary"
-                text-color="white" outlined>
-                {{ tag.nombre_tag }}
-              </v-chip>
-            </v-chip-group>
+                <v-chip v-for="tag in item.tags" :key="tag.id_tag" class="res-tags" color="primary" text-color="white"
+                  outlined>
+                  {{ tag.nombre_tag }}
+                </v-chip>
+              </v-chip-group>
             </v-card-text>
             <v-card-actions class="justify-end" style="position: absolute; bottom: 0; right: 0;">
               <v-btn color="primary" text @click="solicitarUnirse(item.idAgrupacion)">Solicitar unirse</v-btn>
@@ -97,7 +97,7 @@ export default {
   computed: {
     filteredItemsAgrupaciones() {
       const preferenciasNombres = this.preferencias.map(tag => tag.nombre_tag);
-      
+
       if (!this.searchQueryAgrupaciones) {
         return this.itemsAgr.sort((a, b) => {
           const aHasPreference = a.tags && a.tags.some(tag => {
@@ -111,6 +111,7 @@ export default {
           return (bHasPreference === true ? 1 : 0) - (aHasPreference === true ? 1 : 0);
         });
       }
+
       const search = this.searchQueryAgrupaciones.toLowerCase();
       return this.itemsAgr
         .filter(item => item.title.toLowerCase().includes(search))
@@ -133,6 +134,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo/${this.rut}/${this.codigo}`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         // Verifica si la respuesta es exitosa
@@ -177,11 +182,16 @@ export default {
       }
       return null;
     },
+
     async VerTagsGrupo(id_agr) {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${id_agr}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {
@@ -195,6 +205,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+
     async fetchItems() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/agrupacionesnoinscritas/${this.rut}`, {
@@ -231,7 +242,13 @@ export default {
 
           for (const img of this.itemsAgr) {
             try {
-              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, { method: 'GET' });
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+              });
               if (responde.ok) {
                 const dataImagen = await responde.text();
                 img.img = dataImagen;
@@ -269,6 +286,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${idAgrupacion}`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (response.ok) {
@@ -282,56 +303,64 @@ export default {
       }
     },
     async obtenerPreferencias() {
-            try {
-                const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
 
-                if (!response.ok) throw new Error('Error en la respuesta de la red');
-                const data = await response.json();
-                this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
-                const tagsPromises = data.map(async (item) => {
-                    const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.preferencias = []; // Asegúrate de que preferencias esté vacío antes de asignar nuevos valores
+        const tagsPromises = data.map(async (item) => {
+          const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
+          });
 
-                    if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
-                    const tagData = await tagResponse.json();
-                    return tagData[0]; // Asume que siempre hay al menos un elemento y toma el primero
-                });
-                const tags = await Promise.all(tagsPromises);
+          if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
+          const tagData = await tagResponse.json();
+          return tagData[0]; // Asume que siempre hay al menos un elemento y toma el primero
+        });
+        const tags = await Promise.all(tagsPromises);
 
-                this.preferencias = tags; // Asigna el resultado a preferencias
+        this.preferencias = tags; // Asigna el resultado a preferencias
 
-            } catch (error) {
-                console.error('Error al obtener preferencias:', error);
-            }
-        },
+      } catch (error) {
+        console.error('Error al obtener preferencias:', error);
+      }
+    },
 
   },
   async fetchSearchResults(searchValue) {
-            // Convertir searchValue a cadena explícitamente
-            const stringValue = searchValue.trim();
-            if (stringValue === '') {
-                this.searchResults = [];
-                return;
-            }
-            try {
-                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
-                if (!response.ok) throw new Error('Error en la respuesta de la red');
-                const data = await response.json();
-                this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
-            } catch (error) {
-                console.error('Error al buscar:', error);
-                this.searchResults = [];
-            }
+    // Convertir searchValue a cadena explícitamente
+    const stringValue = searchValue.trim();
+    if (stringValue === '') {
+      this.searchResults = [];
+      return;
+    }
+    try {
+      const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
         },
+      });
+      if (!response.ok) throw new Error('Error en la respuesta de la red');
+      const data = await response.json();
+      this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
+    } catch (error) {
+      console.error('Error al buscar:', error);
+      this.searchResults = [];
+    }
+  },
   mounted() {
 
     this.rut = this.getRut();

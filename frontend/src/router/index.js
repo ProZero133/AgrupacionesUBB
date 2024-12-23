@@ -38,11 +38,7 @@ const routes = [
           component: () => import('@/views/VerificacionesView.vue'),
           meta: { requiresAdmin: true }
         },
-        {
-          path: 'administrar_roles_agrupaciones/:id',
-          name: 'Administrar_Roles_Agrupaciones',
-          component: () => import('@/views/AdministrarRolesAgrupacionesview.vue'),
-        },
+        
         {
           path: 'crear_actividad/:id',
           name: 'Crear Actividad',

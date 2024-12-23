@@ -5,8 +5,7 @@ const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion,
   eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion,
   obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion, obtenerLiderArray,
   eliminarTagAgrupacion } = require('../controllers/agrupacion.controller.js');
-const { eliminarTag } = require('../controllers/tags.controller.js');
-const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
+  const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
 module.exports = function(fastify, options, done) {
   fastify.decorate("authenticate", async (request, reply) => {

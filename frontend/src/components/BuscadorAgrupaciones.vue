@@ -134,6 +134,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo/${this.rut}/${this.codigo}`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         // Verifica si la respuesta es exitosa
@@ -184,6 +188,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${id_agr}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {
@@ -234,7 +242,13 @@ export default {
 
           for (const img of this.itemsAgr) {
             try {
-              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, { method: 'GET' });
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+              });
               if (responde.ok) {
                 const dataImagen = await responde.text();
                 img.img = dataImagen;
@@ -272,6 +286,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${idAgrupacion}`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (response.ok) {
@@ -289,8 +307,9 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
 
         if (!response.ok) throw new Error('Error en la respuesta de la red');
@@ -300,8 +319,9 @@ export default {
           const tagResponse = await fetch(`${global.BACKEND_URL}/obtenerTagPorId/${item.id_tag}`, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json'
-            }
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
 
           if (!tagResponse.ok) throw new Error('Error al obtener tag por ID');
@@ -326,7 +346,13 @@ export default {
       return;
     }
     try {
-      const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+      const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+      });
       if (!response.ok) throw new Error('Error en la respuesta de la red');
       const data = await response.json();
       this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta

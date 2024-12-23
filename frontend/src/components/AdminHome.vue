@@ -204,6 +204,10 @@ export default {
         // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/obtenerTagsAgrupacion/${id_agr}`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {
@@ -222,6 +226,10 @@ export default {
       try {
         const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
         });
         // Para cada grupo, obtener VerTagsGrupo
         if (response.ok) {
@@ -246,7 +254,14 @@ export default {
 
           for (const img of this.itemsAgr) {
             try {
-              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img, { method: 'GET' });
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + img.img,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                  },
+                });
               if (responde.ok) {
                 const dataImagen = await responde.text();
                 img.img = dataImagen;
@@ -273,6 +288,10 @@ export default {
         for (const agrupacion of this.itemsAgr) {
           const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.idAgrupacion}`, {
             method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
           });
           if (response.ok) {
             const data = await response.json();
@@ -291,7 +310,13 @@ export default {
 
     async BuscarUsuarios() {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/usuarios`);
+        const response = await fetch(`${global.BACKEND_URL}/usuarios`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
+          });
         if (response.ok) {
           const data = await response.json();
           this.itemsUsuarios = data.map(item => ({
@@ -319,7 +344,13 @@ export default {
 
     async ir_a_grupos_usuario(rut) {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`);
+        const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
+          });
         if (response.ok) {
           const data = await response.json();
           this.gruposUsuario = data.map(item => ({

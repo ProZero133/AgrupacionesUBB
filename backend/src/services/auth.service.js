@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const config = require('../config/configEnv.js');
 const { registrarUsuario } = require('../services/user.service.js');
 const axios = require('axios');
+const fastify = require('../config/configFastify.js');
 
 const mailUser = config.MAIL_USER;
 const mailPass = config.MAIL_PASS;
@@ -32,6 +33,7 @@ const codigoCarreras = {
 };
 
 function obtenerCarrera(codigo) {
+  console.log("Buscando carrera con codigo: ",codigo);
   return codigoCarreras[codigo] || 'NONE';
 }
 
@@ -56,7 +58,6 @@ transporter.verify((error) => {
 async function validarUsuario(email) {
   try {
     // busca el usuario en la base de datos servidor universidad (Simulado por el momento)
-    console.log("Consultando correo: ",email);
     const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
       correo: email
   }, {
@@ -73,7 +74,7 @@ async function validarUsuario(email) {
     }
 });
   console.log("Respuesta por Rut",responserut.data);
-  const carrera = obtenerCarrera(response.data.carrera);
+  const carrera = obtenerCarrera(response.data.recordset[0].carrera);
   console.log("Carrera: ",carrera);
   
     const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
@@ -86,9 +87,7 @@ async function validarUsuario(email) {
     usuario.rol= resultPlataforma.user[0].rol;
     // retorna toda la información del usuario
     if (resultPlataforma.success) {
-      //añade el codigo de verificacion al usuario
-
-      return { success: true, message: 'Usuario encontrado', usuario };
+      return { success: true, message: 'Usuario encontrado', usuario, carrera };
     } else {
       return { success: false, message: 'Usuario no encontrado' };
     }

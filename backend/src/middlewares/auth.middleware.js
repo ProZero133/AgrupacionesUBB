@@ -1,38 +1,29 @@
 // auth.middleware.js
 const config = require('../config/configEnv.js');
 const secretKey = config.JWT_SECRET;
-function verifyToken(request, reply, done) {
-  const authHeader = request.headers['authorization'];
-  if (!authHeader) {
-    return reply.status(401).send({ success: false, message: 'No se encuentra el token' });
-  }
+const fastify = require('../main.js');
 
-  const token = authHeader.split(' ')[1];
-  if (!token) {
-    return reply.status(401).send({ success: false, message: 'No se encuentra el token' });
-  }
 
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      return reply.status(401).send({ success: false, message: 'Fallo al autenticar el token' });
+
+fastify.decorate("authenticate", async (request, reply) => {
+  try {
+    const token = request.cookies.token;
+    if (!token) {
+      return reply.status(401).send({ error: 'No autorizado' });
     }
-    request.user = decoded;
-    done();
-  });
-}
-
-async function IsAdmin(request, reply) {
-  await verifyToken.call(this, request, reply);
-  if (request.user && request.user.rol !== 'admin') {
-    return reply.status(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
+    const decoded = await fastify.jwt.verify(token);
+    request.user = decoded; // Adjunta los datos del usuario al objeto request
+  } catch (err) {
+    reply.status(401).send({ error: 'Token inválido' });
   }
-}
+});
 
-async function IsUser(request, reply) {
-  await verifyToken.call(this, request, reply);
-  if (request.user && request.user.rol !== 'usuario') {
-    return reply.status(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
-  }
-}
+fastify.decorate("authorize", (roles) => {
+  return async (request, reply) => {
+    if (!roles.includes(request.user.role)) {
+      return reply.status(403).send({ error: 'Acceso denegado' });
+    }
+  };
+});
 
 module.exports = { IsAdmin, IsUser };

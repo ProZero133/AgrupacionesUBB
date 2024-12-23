@@ -46,6 +46,7 @@ export default {
       verificationCode: '',
       showLoginByRut: false,
       tokenValue: this.$cookies.get('token'),
+      tokenAutorizacion: this.$cookies.get('TokenAutorizacion'),
       userData: {},
     };
   },
@@ -61,7 +62,6 @@ export default {
           body: JSON.stringify({ email: this.email }),
         });
         const data = await response.json();
-        
         // BORRAR
         // console.log(data);
         
@@ -89,6 +89,16 @@ export default {
         const carrera = this.userData.carrera;
         this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
         this.$cookies.set('token', this.tokenValue);
+        const response = await fetch(`${global.BACKEND_URL}/TokenAutorizacion`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ rol: role }),
+        });
+        const data = await response.json();
+        this.$cookies.set('TokenAutorizacion', data.token);
+
           if(role === 'Admin'){
             this.$router.push(`/api/adminhome`);
 

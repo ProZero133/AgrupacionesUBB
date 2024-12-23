@@ -5,7 +5,6 @@ const { obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, 
   ObtenerTag, obtenerUsuarioServidor, obtenerUsuarioPorCorreo, invitarUsuario, EliminarPreferenciaUsuario } = require('../controllers/user.controller');
 const { obtenerAgrupacionesDeUsuario } = require('../controllers/agrupacion.controller');
 const { obtenerPublicacionesPorGrupoUsuario } = require('../controllers/publicacion.controller');
-const { IsUser } = require('../middlewares/auth.middleware');
 
 module.exports = function(fastify, options, done) {
   fastify.get('/VerActividadesGruposUsuario/:rut', ObtenerActividadesPorGrupoUsuario);

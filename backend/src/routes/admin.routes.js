@@ -1,4 +1,3 @@
-const { IsAdmin } = require('../middlewares/auth.middleware');
 const { ObtenerUsuarios } = require('../controllers/admin.controller');
 const { ObtenerAcreditaciones, AceptacionAcreditaciondeGrupo, RechazoAcreditaciondeGrupo } = require('../controllers/AcreditacionGrupo.controller');
 const { ObtenerUsuariosdeAgrupacion, ObtenerRolUsuario, CambiarRoldeUsuario } = require('../controllers/agrupacion.controller');

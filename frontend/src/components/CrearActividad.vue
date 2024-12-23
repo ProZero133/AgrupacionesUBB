@@ -261,7 +261,6 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
-          body: JSON.stringify({ imagen: this.urlImagen }),
         });
         if (response.ok) {
           const data = await response.json();

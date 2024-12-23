@@ -14,47 +14,36 @@
 
                     <v-col cols="12" md="7" class="nomdes">
 
-            <v-col cols="12">
-              <v-text-field v-model="nombre_agr" label="Nombre de la agrupación" clearable required
-                variant="solo-filled" :rules="nombreRules"></v-text-field>
-            </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="nombre_agr" label="Nombre de la agrupación" clearable required
+                                variant="solo-filled" :rules="nombreRules"></v-text-field>
+                        </v-col>
 
-            <v-col cols="12">
-              <v-textarea class="descripcionAct" v-model="descripcion" label="Descripción de la agrupación" clearable
-                required variant="solo-filled" rows="10" no-resize :rules="descrules" counter>
-              </v-textarea>
-            </v-col>
+                        <v-col cols="12">
+                            <v-textarea class="descripcionAct" v-model="descripcion"
+                                label="Descripción de la agrupación" clearable required variant="solo-filled" rows="10"
+                                no-resize :rules="descrules" counter>
+                            </v-textarea>
+                        </v-col>
 
-          </v-col>
+                    </v-col>
 
-          <v-col cols="12" md="5">
+                    <v-col cols="12" md="5">
 
-            <v-col cols="12">
-              <v-file-input
-                v-model="imagen"
-                accept="image/png, image/jpeg, image/bmp"
-                label="Imagen para la agrupación"
-                clearable
-                required
-                variant="solo-filled"
-                prepend-icon=""
-                :rules="imgRules"
-                @change="onFileChange($event)"
-                @click:clear="urlImagen = defaultImageUrl">
-              </v-file-input>
-            </v-col>
+                        <v-col cols="12">
+                            <v-file-input v-model="imagen" accept="image/png, image/jpeg, image/bmp"
+                                label="Imagen para la agrupación" clearable required variant="solo-filled"
+                                prepend-icon="" :rules="imgRules" @change="onFileChange($event)"
+                                @click:clear="urlImagen = defaultImageUrl">
+                            </v-file-input>
+                        </v-col>
 
-            <v-col>
-              <v-img
-                class="image"
-                max-height="280px"
-                aspect-ratio="1"
-                :src='urlImagen'
-                :rules="imgRules"
-                />
-            </v-col>
+                        <v-col>
+                            <v-img class="image" max-height="280px" aspect-ratio="1" :src='urlImagen'
+                                :rules="imgRules" />
+                        </v-col>
 
-          </v-col>
+                    </v-col>
 
                     <v-col cols="12">
                         <v-card class="search-container">
@@ -65,10 +54,10 @@
                             <v-card-text>
                                 <!-- Aquí se mostrarán los resultados de la búsqueda -->
                                 <v-chip-group>
-                                <v-chip class="results-container" v-for="item in searchResults" :key="item.id"
-                                    @click="selectItem(item)">
-                                    {{ item.nombre_tag }}
-                                </v-chip>
+                                    <v-chip class="results-container" v-for="item in searchResults" :key="item.id"
+                                        @click="selectItem(item)">
+                                        {{ item.nombre_tag }}
+                                    </v-chip>
                                 </v-chip-group>
                             </v-card-text>
                         </v-card>
@@ -76,9 +65,10 @@
                             <v-card-title>Tags seleccionados</v-card-title>
                             <v-card-text class="selected-item" v-for="item in tags" :key="item.id">
                                 <v-chip-group>
-                                <v-chip class="selected-item" v-for="item in tags" :key="item.id" @click="eliminarTag(item)">
-                                    {{ item.nombre_tag }}
-                                </v-chip>
+                                    <v-chip class="selected-item" v-for="item in tags" :key="item.id"
+                                        @click="eliminarTag(item)">
+                                        {{ item.nombre_tag }}
+                                    </v-chip>
                                 </v-chip-group>
                             </v-card-text>
                         </v-card>
@@ -108,24 +98,24 @@ export default {
 
     data: () => ({
         descrules: [
-      v => !!v || 'Descripción requerida.',
-      v => v.length <= 500 || 'Máximo 500 caracteres.'
-    ],
-    nombreRules: [
-      v => !!v || 'Nombre de la actividad requerido.',
-      v => v.length <= 50 || 'Máximo 50 caracteres.'
-    ],
-    imgRules: [
-      value => {
-        return (
-          !value ||
-          !value.length ||
-          value[0].size < 1000000 ||
-          'Tamaño máximo de imagen: 1MB.'
-        );
-      },
-      v => !!v || 'La imagen es requerida.'
-    ],
+            v => !!v || 'Descripción requerida.',
+            v => v.length <= 500 || 'Máximo 500 caracteres.'
+        ],
+        nombreRules: [
+            v => !!v || 'Nombre de la actividad requerido.',
+            v => v.length <= 50 || 'Máximo 50 caracteres.'
+        ],
+        imgRules: [
+            value => {
+                return (
+                    !value ||
+                    !value.length ||
+                    value[0].size < 1000000 ||
+                    'Tamaño máximo de imagen: 1MB.'
+                );
+            },
+            v => !!v || 'La imagen es requerida.'
+        ],
 
         searchQuery: '',
         searchResults: [],
@@ -211,6 +201,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
                     body: JSON.stringify({ imagen: this.urlImagen }),
                 });
@@ -226,24 +217,25 @@ export default {
                 console.error('Error al hacer fetch:', error);
             }
         },
-        
+
         async PostearImagen() {
             try {
                 const response = await fetch(`${global.BACKEND_URL}/imagen`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ imagen: this.urlImagen }),
-            });
-            // Verifica si la respuesta es exitosa
-            if (response.ok) {
-            // Convierte la respuesta en formato JSON
-                const data = await response.json();
-                this.idImagen = data.id_imagen;
-            } else {
-                console.error('Error en la respuesta:', response.status);
-            }
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                    body: JSON.stringify({ imagen: this.urlImagen }),
+                });
+                // Verifica si la respuesta es exitosa
+                if (response.ok) {
+                    // Convierte la respuesta en formato JSON
+                    const data = await response.json();
+                    this.idImagen = data.id_imagen;
+                } else {
+                    console.error('Error en la respuesta:', response.status);
+                }
             } catch (error) {
                 console.error('Error al hacer fetch:', error);
             }
@@ -265,14 +257,15 @@ export default {
 
             try {
                 const rut = this.rutUsuario;
-                const fecha_creacion= new Date();
+                const fecha_creacion = new Date();
                 const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, imagen: this.idImagen}),
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                    body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, imagen: this.idImagen }),
+                });
 
                 // Verifica si la respuesta es exitosa
                 if (response.ok) {
@@ -298,7 +291,13 @@ export default {
                 return;
             }
             try {
-                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`);
+                const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
                 const data = await response.json();
                 this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
@@ -317,6 +316,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
                     body: JSON.stringify({ id_tag: id_tag, id_agr: id_agr }),
                 });
@@ -340,18 +340,17 @@ export default {
 
 <style>
 .descripcionAct {
-  height: 20px !important;
-  margin-top: -20px;
-  margin-bottom: 230px;
+    height: 20px !important;
+    margin-top: -20px;
+    margin-bottom: 230px;
 }
 
 .image {
-  margin-top: -20px;
-  margin-bottom: -20px;
+    margin-top: -20px;
+    margin-bottom: -20px;
 }
 
-.selected-items-container{
+.selected-items-container {
     height: 200px;
 }
-
 </style>

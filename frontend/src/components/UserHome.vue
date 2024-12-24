@@ -570,7 +570,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
@@ -705,7 +705,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/abandonaractividad/${this.idactActual}/${this.rut}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),

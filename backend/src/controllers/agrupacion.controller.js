@@ -119,8 +119,14 @@ async function obtenerImagenAgrupacion(req, res) {
 async function unirseAgrupacion(req, res) {
     try {
         const rut = req.params.rut;
+        console.log("rut", rut);
+
         const id_agr = req.params.id_agr;
+        console.log("id_agr", id_agr);
+
         const usuario = await getUsuarioByRut(rut);
+        console.log("usuario", usuario);
+        
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');
         }

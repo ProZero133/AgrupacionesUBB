@@ -26,7 +26,7 @@
           <!-- tab miembros -->
           <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
-            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr">
+            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['user_nombre']" :sort-desc="[false]">
               <template v-slot:item.action="{ item }">
 
                 <div class="d-flex justify-end">
@@ -616,7 +616,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
@@ -644,7 +644,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/invitarUsuario`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ mail: this.mailInvitado, id_agr: this.datosGrupo.id_agr, nombre_agr: this.datosGrupo.nombre_agr }),
@@ -1188,7 +1188,7 @@ export default {
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
@@ -1208,7 +1208,7 @@ export default {
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });

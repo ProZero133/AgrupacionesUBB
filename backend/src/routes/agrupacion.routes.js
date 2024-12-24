@@ -26,10 +26,10 @@ module.exports = function(fastify, options, done) {
   fastify.post('/agrupaciones', { preHandler: [isUser] },crearAgrupacion);
   fastify.put('/agrupaciones/:id_agr', { preHandler: [isUserOrAdmin] },editarAgrupacion);
   fastify.get('/imagenagrupacion/:id', { preHandler: [isUserOrAdmin] },obtenerImagenAgrupacion);
-  fastify.post('/enviarsolicitud/:rut/:id_agr',{ preHandler: [isUserOrAdmin] }, unirseAgrupacion);
+  fastify.post('/enviarsolicitud/:rut/:id_agr', unirseAgrupacion);
   fastify.get('/versolicitudes/:id_agr', { preHandler: [isUserOrAdmin] },solicitudesAgrupacion);
-  fastify.post('/aceptarsolicitud/:rut/:id_agr', { preHandler: [isUser] },aceptarSolicitud);
-  fastify.post('/rechazarsolicitud/:rut/:id_agr', { preHandler: [isUser] },rechazarSolicitud);
+  fastify.post('/aceptarsolicitud/:rut/:id_agr', { preHandler: [isUserOrAdmin] },aceptarSolicitud);
+  fastify.post('/rechazarsolicitud/:rut/:id_agr', { preHandler: [isUserOrAdmin] },rechazarSolicitud);
   fastify.delete('/eliminaragrupacion/:id_agr/:rut', { preHandler: [isUserOrAdmin] },eliminarAgrupacion);
   fastify.delete('/abandonaragrupacion/:id_agr/:rut', { preHandler: [isUserOrAdmin] },abandonarAgrupacion);
   fastify.put('/solicitaracreditacion/:id_agr/:rut', { preHandler: [isUser] },solicitarAcreditacion);

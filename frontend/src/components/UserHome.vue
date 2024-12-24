@@ -1,4 +1,5 @@
 <template>
+  <v-main>
   <v-container cols="12"></v-container>
   <v-toolbar color="primary">
     <template v-slot:extension>
@@ -182,7 +183,8 @@
     </v-card>
   </v-dialog>
 
-
+<Footer />
+</v-main>
 </template>
 
 <style scoped>
@@ -234,6 +236,7 @@
 .BotonAbandonar {
   margin-left: 55vw;
 }
+
 </style>
 
 <script>
@@ -241,6 +244,7 @@
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
 import VueCookies from 'vue-cookies';
+import Footer from '../layouts/global/Footer.vue';
 
 export default {
   name: 'UserHome',
@@ -258,6 +262,9 @@ export default {
     rol: '',
     tab: 'actividades',
   }),
+  components: {
+    Footer,
+  },
   setup() {
     const router = useRouter();
     return {

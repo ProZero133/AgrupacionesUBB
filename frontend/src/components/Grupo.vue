@@ -404,9 +404,9 @@
         </v-card>
       </v-col>
     </v-row>
-
+    <Footer />
   </v-container>
-
+  
   <!-- Botón de Crear Actividad o Publicación -->
   <VLayoutItem v-if="rolA" model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
@@ -480,6 +480,7 @@
         </v-list>
       </v-menu>
     </div>
+
   </VLayoutItem>
 </template>
 
@@ -488,7 +489,7 @@ import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
 import { mergeProps } from 'vue';
 import { da, fa, fi, ro } from 'vuetify/lib/locale/index.mjs';
-
+import Footer from '../layouts/global/Footer.vue';
 export default {
   setup() {
     const route = useRoute();
@@ -499,7 +500,9 @@ export default {
       groupId, // Return it to use in the template if needed
     };
   },
-
+components: {
+    Footer,
+  },
   data: () => ({
     lider: false,
     adminOlider: false,

@@ -135,7 +135,6 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo/${this.rut}/${this.codigo}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
@@ -282,12 +281,13 @@ export default {
     },
 
     async solicitarUnirse(idAgrupacion) {
+
+      console.log('Solicitando unirse a la agrupación con ID:', idAgrupacion);
+
       try {
-        // Realiza una solicitud fetch a tu backend Fastify
         const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${idAgrupacion}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
@@ -302,6 +302,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+    
     async obtenerPreferencias() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {

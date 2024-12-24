@@ -26,7 +26,7 @@
           <!-- tab miembros -->
           <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
-            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr">
+            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['user_nombre']" :sort-desc="[false]">
               <template v-slot:item.action="{ item }">
 
                 <div class="d-flex justify-end">
@@ -1191,7 +1191,7 @@ components: {
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
@@ -1211,7 +1211,7 @@ components: {
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });

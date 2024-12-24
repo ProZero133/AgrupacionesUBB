@@ -616,7 +616,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({}),
@@ -644,7 +644,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/invitarUsuario`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ mail: this.mailInvitado, id_agr: this.datosGrupo.id_agr, nombre_agr: this.datosGrupo.nombre_agr }),

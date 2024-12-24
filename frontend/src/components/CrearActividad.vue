@@ -236,7 +236,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/imagen`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ imagen: this.urlImagen }),

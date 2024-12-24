@@ -58,7 +58,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ email: this.email }),

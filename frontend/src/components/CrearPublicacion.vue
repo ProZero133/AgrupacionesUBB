@@ -243,7 +243,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/imagen`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ imagen: this.urlImagen }),
@@ -326,7 +326,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/formulario`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ id_pub: this.pubId, descripcion: this.descripcion, hipervinculo: this.enlace }),
@@ -353,7 +353,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/post`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ id_pub: this.pubId, cuerpo: this.descripcion }),
@@ -379,7 +379,7 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/notificarMiembrosPublicacion`, {
           method: 'POST',
           headers: {
-
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ id_pub }),

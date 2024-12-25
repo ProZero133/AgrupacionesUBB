@@ -406,7 +406,7 @@
     </v-row>
     <Footer />
   </v-container>
-  
+
   <!-- Botón de Crear Actividad o Publicación -->
   <VLayoutItem v-if="rolA" model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
@@ -480,8 +480,8 @@
         </v-list>
       </v-menu>
     </div>
-
   </VLayoutItem>
+ 
 </template>
 
 <script>

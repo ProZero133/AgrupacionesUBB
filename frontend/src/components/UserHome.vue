@@ -1,12 +1,12 @@
 <template>
   <v-main>
   <v-container cols="12"></v-container>
-  <v-toolbar color="primary">
+  <v-toolbar style="background-color: #014898;">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
-        <v-tab prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
-        <v-tab prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
-        <v-tab prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
+        <v-tab  style="color: white;" prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
+        <v-tab  style="color: white;" prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
+        <v-tab  style="color: white;" prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
       </v-tabs>
     </template>
   </v-toolbar>

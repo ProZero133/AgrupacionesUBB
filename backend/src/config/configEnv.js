@@ -18,7 +18,7 @@ const FastifyPort = process.env.FastifyPort;
 const FastifyHost = process.env.FastifyHost;
 
 /** Host del servidor */
-const HOST = process.env.HOST;
+const HOST = process.env.host;
 
 /** URL de la base de datos */
 const DB_URL = process.env.DB_URL;

@@ -1,6 +1,12 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 async function TokenAutorizacionController(request, reply) {
  const { rol } = request.body; // Asume que el rol se envía en el cuerpo de la solicitud
+ const decoded = await request.jwtVerify();
+ if(rol !== decoded.rol){
+    reply.send({ success: false, message: 'Rol no autorizado' });
+    return;
+  }
+  
   try {
     const payload = {
       rol,
@@ -28,9 +34,19 @@ async function EmailLogin(request, reply) {
   const result = await validarUsuario(email);
   const usuario = result;
   if (result.success) {
+    const payload = {
+      rol: result.usuario.rol,
+    };
+    const token = request.server.jwt.sign(payload);
+    reply.setCookie('AuthToken', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 3600, // Expiración en segundos (1 hora)
+    });
     asignarToken(request.server, usuario, codigo, reply);
     //Envia el mismo codigo al frontend
-    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result });
+    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
   } else {
     console.log('Usuario no encontrado, no se enviará correo de verificación');
     reply.send({ success: false, message: 'Usuario no encontrado' });

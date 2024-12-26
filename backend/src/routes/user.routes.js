@@ -19,9 +19,10 @@ module.exports = function(fastify, options, done) {
       reply.status(401).send({ error: 'Token inválido' });
     }
   });
+
   fastify.get('/VerActividadesGruposUsuario/:rut', { preHandler: [isUserOrAdmin] },ObtenerActividadesPorGrupoUsuario);
   fastify.get('/VerPublicacionesGruposUsuario/:rut', { preHandler: [isUserOrAdmin] },obtenerPublicacionesPorGrupoUsuario);
-  fastify.post('/usuarioPorRut/:rut', { preHandler: [isUserOrAdmin] },obtenerUsuarioPorRut);
+  fastify.get('/usuarioPorRut/:rut', { preHandler: [isUserOrAdmin] },obtenerUsuarioPorRut);
   fastify.post('/usuarioPorCorreo/:correo', { preHandler: [isUserOrAdmin] },obtenerUsuarioPorCorreo);
   fastify.get('/usuarioServidor/:rut', { preHandler: [isUserOrAdmin] },obtenerUsuarioServidor);
   fastify.get('/buscarTags/:tag', { preHandler: [isUserOrAdmin] },ObtenerTagsSimilares);

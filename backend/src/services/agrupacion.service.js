@@ -400,6 +400,16 @@ async function getAgrupacionesDeUsuario(rut) {
   }
 }
 
+async function getPertenece(rut) {
+  try {
+    // Obtiene la relación de pertenencia del usuario con el rut y id_agr especificados
+    const pertenece = await pool.query('SELECT * FROM "Pertenece" WHERE Rut = $1', [rut]);
+    return pertenece.rows;
+  } catch (error) {
+    console.log('Error al obtener la relación de pertenencia:', error);
+  }
+}
+
 async function deleteUsuarioAgrupacion(rut, id_agr) {
   try {
     // Elimina al usuario de la agrupación
@@ -562,6 +572,7 @@ module.exports = {
   getLiderArray,
   validateEliminarGrupo,
   getAgrupacionesDeUsuario,
+  getPertenece,
   deleteUsuarioAgrupacion,
   rejectSolicitud,
   updateAgrupacion,

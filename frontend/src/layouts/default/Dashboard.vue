@@ -79,7 +79,7 @@
             { name: 'Buscador Agrupaciones', icon: 'mdi-account-search', path: '/api/buscador_agrupaciones', tier: 1},
             { name: 'Crear Agrupacion', icon: 'mdi-account-multiple-plus', path: '/api/crear_agrupacion', tier: 1},
             { name: 'Verificaciones', icon: 'mdi-check', path: '/api/verificaciones', tier: 2},
-            { name: 'Generar Informes', icon: 'mdi-file-document', path: '/api/generarInformes', tier: 1},
+            { name: 'Generar Informes', icon: 'mdi-file-document', path: '/api/generarInformes', tier: 0},
             { name: 'Logout', icon: 'mdi-login', path: '/api/login', tier: 0}, 
         ],
 

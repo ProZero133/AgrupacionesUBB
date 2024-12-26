@@ -5,7 +5,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
-    deleteTagAgrupacion, updateAgrupacion } = require("../services/agrupacion.service.js");
+    deleteTagAgrupacion, updateAgrupacion, getPertenece } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -284,6 +284,24 @@ async function obtenerAgrupacionesDeUsuario(req, res) {
     }
 }
 
+async function obtenerAgrupacionesPertenece(req, res) {
+    try {
+        const rut = req.params.rut;
+        const user = await getUsuarioByRut(rut);
+        if (user.length === 0) {
+            return res.code(404).send('Usuario no encontrado');
+        }
+        const pertenencia = await getPertenece(rut);
+        if (pertenencia.length === 0) {
+            return res.code(404).send('No se encontraron agrupaciones');
+        }
+        res.code(200).send(pertenencia);
+    } catch (error) {
+        console.error('Error al obtener las agrupaciones del usuario:', error);
+        res.code(500).send('Error al obtener las agrupaciones del usuario');
+    }
+}
+
 async function ObtenerRolUsuario(req, res) {
     try {
         const id_agr = req.params.id_agr;
@@ -313,12 +331,7 @@ async function CambiarRoldeUsuario(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
-        /* 
-                const usuarioEsLider = await getLider(id_agr);
-                if (usuarioEsLider[0].rut !== rut) {
-                    return res.code(401).send('No tienes permisos para cambiar el rol del usuario');
-                }
-         */
+
         const result = await updateRolUsuario(rut, id_agr, rol);
 
         if (!result) {
@@ -347,13 +360,7 @@ async function abandonarAgrupacion(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
-/* 
-        const usuarioEnAgrupacion = await obtenerAgrupacionesDeUsuario(rut);
 
-        if (usuarioEnAgrupacion.length === 0) {
-            return res.code(404).send('Usuario no pertenece a la agrupación');
-        }
- */
         const result = await deleteUsuarioAgrupacion(rut, id_agr);
         if (!result) {
             return res.code(500).send('Error al abandonar la agrupación');
@@ -589,5 +596,6 @@ module.exports = {
     VerGruposNoInscritos,
     ObtenerTagsAgrupacion,
     eliminarTagAgrupacion,
-    obtenerLiderArray
+    obtenerLiderArray,
+    obtenerAgrupacionesPertenece
 };

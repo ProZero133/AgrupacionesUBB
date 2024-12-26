@@ -5,7 +5,6 @@ const password = config.PASSWORD;
 const host = config.HOST;
 const portpg = config.PortPg;
 const database = config.DATABASE;
-console.log(user, password, host, portpg, database);
 const pool = new Pool({
   user: user,
   password: password,

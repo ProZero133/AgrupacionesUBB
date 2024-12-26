@@ -47,6 +47,7 @@ export default {
       verificationCode: '',
       showLoginByRut: false,
       tokenValue: this.$cookies.get('token'),
+      authToken: this.$cookies.get('AuthToken'),
       tokenAutorizacion: this.$cookies.get('TokenAutorizacion'),
       userData: {},
     };
@@ -64,12 +65,11 @@ export default {
           body: JSON.stringify({ email: this.email }),
         });
         const data = await response.json();
-        // BORRAR
-        // console.log(data);
 
         if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;
+          this.$cookies.set('AuthToken', data.token);
           this.dialog = true;
         } else {
           this.isLoading = false; // Desactiva la pantalla de carga si hay un error
@@ -96,6 +96,7 @@ export default {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              'AuthToken': `Bearer ${this.$cookies.get('AuthToken')}`,
             },
             body: JSON.stringify({ rol: role }),
           });

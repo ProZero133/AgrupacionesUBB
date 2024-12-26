@@ -239,11 +239,18 @@ async function participarActividad(req, res) {
         // Obtener actividad
         const actividad = await getActividadById(id_act);
         // Obtener participantes de la actividad
-        const participantes = await obtenerParticipantesActividad(id_act);
-        const cuposRestantes = actividad.rows[0].cupos - participantes.participantes.length;
-        console.log("Cupos actividad: ", actividad.rows[0].cupos);
-        console.log(cuposRestantes);
+        const participantes = await ParticipantesActividad(id_act);
+        const cuposRestantes = actividad.rows[0].cupos - participantes.length;
         // Programa la actividad
+        if (cuposRestantes <= 0) {
+            return res.send({ success: false, message: 'No hay cupos disponibles' });
+        }
+        // Error si ya esta participando
+        for (let i = 0; i < participantes.length; i++) {
+            if (participantes[i].rut === rut) {
+                return res.send({ success: false, message: 'Ya estas participando en esta actividad' });
+            }
+        }
         await setParticipanteActividad(id_act, rut);
 
         // operacion exitosa
@@ -268,9 +275,24 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener las actividades de los grupos del usuario' });
     }
 }
+async function ParticipantesActividad(req, res) {
+    try {
+        const id_act = req;
+    
+        const participantes = await getParticipantesActividad(id_act);
+        if (participantes.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron participantes' });
+        }
+        return participantes;
+    } catch (error) {
+        console.error('Error al obtener los participantes de la actividad:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener los participantes de la actividad' });
+    }
+}
 async function obtenerParticipantesActividad(req, res) {
     try {
         const { id_act } = req.params;
+    
         const participantes = await getParticipantesActividad(id_act);
         if (participantes.length === 0) {
             return res.send({ success: false, message: 'No se encontraron participantes' });

@@ -630,12 +630,14 @@ export default {
           body: JSON.stringify({}),
         });
         const data = await response.json();
-        if (response.ok) {
+        if (data.ok) {
           this.dialogPub = false;
           this.$root.showSnackBar('success', 'Te has unido a una actividad', 'Operacion exitosa');
         } else {
           console.error(data.message);
           console.error('Error en la respuesta:', response.status);
+          this.$root.showSnackBar('error', data.message, 'Error de carga de datos');
+          this.dialogPub = false;
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);

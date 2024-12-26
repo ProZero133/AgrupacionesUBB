@@ -414,7 +414,6 @@ export default {
           },
         });
         const data = await response.json();
-        console.log('Actividades obtenidas:', data);
 
         // Obtener actividades publicas
         const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
@@ -425,7 +424,6 @@ export default {
           },
         });
         const dataPublicas = await actividadesPublicas.json();
-        console.log('Actividades públicas obtenidas:', dataPublicas);
 
         // Asegúrate de que data y dataPublicas sean arrays
         if (!Array.isArray(data)) {

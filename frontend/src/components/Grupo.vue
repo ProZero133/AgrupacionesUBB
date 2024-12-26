@@ -26,7 +26,8 @@
           <!-- tab miembros -->
           <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
-            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['user_nombre']" :sort-desc="[false]">
+            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['user_nombre']"
+              :sort-desc="[false]">
               <template v-slot:item.action="{ item }">
 
                 <div class="d-flex justify-end">
@@ -361,7 +362,11 @@
               <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
             <v-col cols="6">
-              <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+              <v-btn :disabled="elemento.participantes >= elemento.cupos" :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+              <v-icon :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" class="ml-2">
+                mdi-account-circle-outline
+              </v-icon>
+              <span>{{ elemento.participantes }} / {{ elemento.cupos }}</span>
             </v-col>
           </v-row>
 
@@ -481,7 +486,7 @@
       </v-menu>
     </div>
   </VLayoutItem>
- 
+
 </template>
 
 <script>
@@ -500,7 +505,7 @@ export default {
       groupId, // Return it to use in the template if needed
     };
   },
-components: {
+  components: {
     Footer,
   },
   data: () => ({
@@ -1005,11 +1010,35 @@ components: {
     },
 
     // Function to insert elements from array1 into array2 in sorted order
-    anadirAElementos(array) {
-      array.forEach(element => {
+    async anadirAElementos(array) {
+      for (const element of array) {
+        if (element.tipo_elemento === 'actividad') {
+          const participantes = await this.CantidadParticipantes(element.id);
+          element.participantes = participantes;
+        }
         const index = this.findInsertIndex(this.elementos, element);
         this.elementos.splice(index, 0, element);
-      });
+      }
+    },
+    async CantidadParticipantes(id_act) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerParticipantes/${id_act}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.participantes.length;
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
     },
 
     async VerActividades() {
@@ -1065,7 +1094,8 @@ components: {
                 imagen: elemento.imagen,
                 id_agr: elemento.id_agr,
                 tipo_elemento: 'actividad',
-                fecha_creacion: elemento.fecha_creacion
+                fecha_creacion: elemento.fecha_creacion,
+                cupos: elemento.cupos
               };
             });
 

@@ -15,7 +15,8 @@ const {
   obtenerActividadesParticipante,
   abandonarActividad,
   eliminarActividadPublica,
-  ObtenerActividadesPublicas
+  ObtenerActividadesPublicas,
+  obtenerParticipantesActividad
 } = require('../controllers/actividad.controller.js');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
@@ -48,5 +49,6 @@ module.exports = function (fastify, options, done) {
   fastify.get('/actividadesparticipante/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipante);
   fastify.post('/abandonaractividad/:id_act/:rut', { preHandler: [isUser] },abandonarActividad);
   fastify.get('/actividadesPublicas', { preHandler: [isUserOrAdmin] },ObtenerActividadesPublicas);
+  fastify.get('/obtenerParticipantes/:id_act', { preHandler: [isUserOrAdmin] },obtenerParticipantesActividad);
   done();
 };

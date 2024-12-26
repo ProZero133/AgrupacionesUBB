@@ -60,7 +60,6 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({ email: this.email }),
         });
@@ -91,12 +90,13 @@ export default {
           const carrera = this.userData.carrera;
           this.tokenValue = `rol=${role}&nombre=${nombre}&rut=${rut}&email=${email}&carrera=${carrera}`;
           this.$cookies.set('token', this.tokenValue);
+
+          const authToken = this.$cookies.get('AuthToken');
           const response = await fetch(`${global.BACKEND_URL}/TokenAutorizacion`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-              'AuthToken': `Bearer ${this.$cookies.get('AuthToken')}`,
+              'Authorization': `Bearer ${this.$cookies.get('AuthToken')}`,
             },
             body: JSON.stringify({ rol: role }),
           });

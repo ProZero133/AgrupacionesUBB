@@ -236,7 +236,13 @@ async function participarActividad(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
-
+        // Obtener actividad
+        const actividad = await getActividadById(id_act);
+        // Obtener participantes de la actividad
+        const participantes = await obtenerParticipantesActividad(id_act);
+        const cuposRestantes = actividad.rows[0].cupos - participantes.participantes.length;
+        console.log("Cupos actividad: ", actividad.rows[0].cupos);
+        console.log(cuposRestantes);
         // Programa la actividad
         await setParticipanteActividad(id_act, rut);
 
@@ -262,7 +268,19 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener las actividades de los grupos del usuario' });
     }
 }
-
+async function obtenerParticipantesActividad(req, res) {
+    try {
+        const { id_act } = req.params;
+        const participantes = await getParticipantesActividad(id_act);
+        if (participantes.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron participantes' });
+        }
+        return res.send({ success: true, participantes });
+    } catch (error) {
+        console.error('Error al obtener los participantes de la actividad:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener los participantes de la actividad' });
+    }
+}
 async function obtenerActividadesParticipante(req, res) {
     try {
         const { rut } = req.params;
@@ -340,5 +358,6 @@ module.exports = {
     abandonarActividad,
     AceptacionActividad,
     eliminarActividadPublica,
-    ObtenerActividadesPublicas
+    ObtenerActividadesPublicas,
+    obtenerParticipantesActividad
 };

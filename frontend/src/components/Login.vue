@@ -72,7 +72,7 @@ export default {
         } else {
           this.isLoading = false; // Desactiva la pantalla de carga si hay un error
           //Snackbar de error
-          this.$root.showSnackBar('error', 'No se pudo enviar el codigo al correo', 'Operación fallida');
+          this.$root.showSnackBar('error', data.message, 'Operación fallida');
         }
       } catch (error) {
         console.error('Error en el login:', error);

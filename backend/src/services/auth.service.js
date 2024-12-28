@@ -33,7 +33,7 @@ const codigoCarreras = {
 };
 
 function obtenerCarrera(codigo) {
-  console.log("Buscando carrera con codigo: ",codigo);
+  console.log("Buscando carrera con codigo: ", codigo);
   return codigoCarreras[codigo] || 'NONE';
 }
 
@@ -57,42 +57,73 @@ transporter.verify((error) => {
 
 async function validarUsuario(email) {
   try {
-    // busca el usuario en la base de datos servidor universidad (Simulado por el momento)
+    // busca el usuario en la base de datos servidor universidad
     const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
       correo: email
-  }, {
+    }, {
       headers: {
-          'Content-Type': 'application/json',
-      }
-  });
-  console.log("Respuesta por correo",response.data);
-  const responserut = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
-    rut: '20487563'
-}, {
-    headers: {
         'Content-Type': 'application/json',
-    }
-});
-  console.log("Respuesta por Rut",responserut.data);
-  const carrera = obtenerCarrera(response.data.recordset[0].carrera);
-  console.log("Carrera: ",carrera);
-  
-    const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [email]);
-    if (result.rows.length === 0) {
+      }
+    });
+    if (response.data.recordset.length === 0) {
       return { success: false, message: 'Usuario no encontrado' };
     }
-    const usuario = result.rows[0];
-    // busca el usuario en la base de datos de la plataforma
-    const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
-    usuario.rol= resultPlataforma.user[0].rol;
-    // retorna toda la información del usuario
-    if (resultPlataforma.success) {
-      return { success: true, message: 'Usuario encontrado', usuario, carrera };
-    } else {
-      return { success: false, message: 'Usuario no encontrado' };
+    const usuarioAPI = response.data.recordset[0];
+    const usuario = {
+      rut: '',
+      nombre: '',
+      correo: '',
+      carrera: '',
+      rol_u: ''
+    };
+
+    const listadoAdmin = await obtenerAdministradores();
+    for (let i = 0; i < listadoAdmin.length; i++) {
+      if (listadoAdmin[i].rut === usuarioAPI.rut.toString()) {
+        usuario.rut = usuarioAPI.rut.toString();
+        usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+        usuario.correo = usuarioAPI.correo;
+        usuario.carrera = usuarioAPI.reparticion;
+        usuario.rol_u = 'Admin';
+
+        const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+        usuario.rol = resultPlataforma.user[0].rol;
+        return { success: true, message: resultPlataforma.message, usuario };
+      }
     }
 
-   
+    if (usuarioAPI.rol === 'ALUMNO') {
+      if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+        console.log("Usuario no admitido");
+        return { success: false, message: 'Usuario no admitido' };
+      }
+      usuario.rut = usuarioAPI.rut.toString();
+      usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+      usuario.correo = usuarioAPI.correo;
+      usuario.carrera = obtenerCarrera(usuarioAPI.carrera);
+      usuario.rol_u = 'Estudiante';
+    } else {
+      if (usuarioAPI.rol === 'FUNCIONARIO ACADEMICO' || usuarioAPI.rol === 'FUNCIONARIO ADMINISTRATIVO') {
+        if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+          return { success: false, message: 'Usuario no admitido' };
+        }
+        usuario.rut = usuarioAPI.rut.toString();
+        usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+        usuario.correo = usuarioAPI.correo;
+        usuario.carrera = usuarioAPI.reparticion;
+        usuario.rol_u = 'Funcionario';
+      }
+    }
+    // busca el usuario en la base de datos de la plataforma
+    const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+    usuario.rol = resultPlataforma.user[0].rol;
+    // retorna toda la información del usuario
+    if (resultPlataforma.success) {
+      return { success: true, message: resultPlataforma.message, usuario };
+    } else {
+      return { success: false, message: resultPlataforma.message };
+    }
+
   } catch (error) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
@@ -102,7 +133,9 @@ async function validarUsuarioEnPlataforma(rut) {
   try {
     const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
     if (result.rows.length === 0) {
-      return { success: false, message: 'Usuario no encontrado' };
+      registrarUsuario(rut, 'Estudiante');
+      const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
+      return { success: true, message: 'Usuario registrado', user: result.rows };
     } else {
       return { success: true, message: 'Usuario encontrado', user: result.rows };
     }
@@ -110,8 +143,17 @@ async function validarUsuarioEnPlataforma(rut) {
     return { success: false, message: 'Token inválido o expirado', error: error.message };
   }
 }
+async function obtenerAdministradores() {
+  try {
+    const result = await pool.query(`SELECT * FROM usuario WHERE rol = 'Admin';`);
+    return result.rows;
+  } catch (error) {
+    console.error('Error en la consulta:', error);
+    return error;
+  }
+}
 
-async function asignarToken(fastify, usuario,codigo, reply) {
+async function asignarToken(fastify, usuario, codigo, reply) {
   const token = codigo;
 
   const mailOptions = {
@@ -132,4 +174,8 @@ async function asignarToken(fastify, usuario,codigo, reply) {
 
 
 
-module.exports = { validarUsuario, asignarToken };
+module.exports = {
+  validarUsuario,
+  asignarToken,
+  obtenerAdministradores,
+};

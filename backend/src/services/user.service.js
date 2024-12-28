@@ -1,4 +1,4 @@
-const {pool} = require('../db.js');
+const { pool } = require('../db.js');
 
 
 // Obtiene todos los usuarios del servidor de la universidad
@@ -14,12 +14,12 @@ async function getUsuarios() {
     }
 }
 
-async function getUsuarioServidor(rut){
-    try{
+async function getUsuarioServidor(rut) {
+    try {
         const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
         return result.rows[0];
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return { error: "Ocurrió un error al obtener el usuario por RUT." };
     }
@@ -27,7 +27,7 @@ async function getUsuarioServidor(rut){
 
 
 // Obtiene todos los usuarios registrados en la plataforma
-async function obtenerUsuariosPlataforma(){
+async function obtenerUsuariosPlataforma() {
     try {
         const result = await pool.query(`SELECT * FROM usuario;`);
         return result.rows;
@@ -38,70 +38,125 @@ async function obtenerUsuariosPlataforma(){
 }
 
 // Busca un usuario en especifico en la plataforma segun su rut
-async function getUsuarioByRut(req){
-    try{
+async function getUsuarioByRut(req) {
+    try {
         const rut = req;
         const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
         return result.rows;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return { error: "Ocurrió un error al obtener el usuario por RUT." };
     }
 }
 
-async function getUsuarioByCorreo(req){
-    try{
+async function getUsuarioByCorreo(req) {
+    try {
         const correo = req;
         const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [correo]);
         return result.rows;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return { error: "Ocurrió un error al obtener el usuario por correo." };
     }
 }
 
-// Registra un usuario en la plataforma
-async function registrarUsuario(rut, rol){
+// Obtiene un usuario de la plataforma segun su rut
+async function obtenerUsuarioPlataforma(rut) {
     try {
-        //Consultar si el usuario ya existe en la plataforma
-        const usuario = await obtenerUsuarioPlataforma(rut);
-        if(usuario.length > 0){
-            return {success: false, message: 'Usuario ya existe en la plataforma'};
-        }
-        //Registrar usuario en la plataforma
-        const result = await pool.query(`
-            INSERT INTO usuario (rut, rol) VALUES ($1, $2);`, [rut, rol]);
-        if(result.rowCount > 0){
-            return {success: true, message: 'Usuario registrado correctamente'};
-        }
-        return {success: false, message: 'No se pudo registrar el usuario'};
-        
+        const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
+        return result.rows;
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;
     }
 }
 
-async function getTagsSimilares(tag){
-    try{
+// Registra un usuario en la plataforma
+async function registrarUsuario(rut, rol) {
+    try {
+        //Consultar si el usuario ya existe en la plataforma
+        const usuario = await obtenerUsuarioPlataforma(rut);
+        if (usuario.length > 0) {
+            return { success: false, message: 'Usuario ya existe en la plataforma' };
+        }
+        //Registrar usuario en la plataforma
+        const result = await pool.query(`
+            INSERT INTO usuario (rut, rol) VALUES ($1, $2);`, [rut, rol]);
+        if (result.rowCount > 0) {
+            return { success: true, message: 'Usuario registrado correctamente' };
+        }
+        return { success: false, message: 'No se pudo registrar el usuario' };
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function registrarAdministrador(rut) {
+    try {
+        //Consultar si el usuario ya existe en la plataforma
+        const usuario = await obtenerUsuarioPlataforma(rut);
+        if (usuario.length > 0) {
+            // Actualizar rol
+            const result = await pool.query(`UPDATE usuario SET rol = 'Admin' WHERE rut = $1;`, [rut]);
+            if (result.rowCount > 0) {
+                return { success: true, message: 'Usuario actualizado correctamente' };
+            }
+        }
+        //Registrar usuario en la plataforma
+        const result = await pool.query(`
+            INSERT INTO usuario (rut, rol) VALUES ($1, 'Admin');`, [rut]);
+        if (result.rowCount > 0) {
+            return { success: true, message: 'Usuario registrado correctamente' };
+        }
+        return { success: false, message: 'No se pudo registrar el usuario' };
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function eliminarAdministrador(rut) {
+    try {
+        //Consultar si el usuario ya existe en la plataforma
+        const usuario = await obtenerUsuarioPlataforma(rut);
+        if (usuario.length > 0) {
+            // Actualizar rol
+            const result = await pool.query(`UPDATE usuario SET rol = 'Estudiante' WHERE rut = $1;`, [rut]);
+            if (result.rowCount > 0) {
+                return { success: true, message: 'Usuario actualizado correctamente' };
+            }
+        }
+        return { success: false, message: 'No se pudo actualizar el usuario' };
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function getTagsSimilares(tag) {
+    try {
         // Convertir el parámetro de búsqueda a minúsculas
         const lowerTag = tag.toLowerCase();
         const result = await pool.query(`SELECT * FROM "Tags" WHERE LOWER(nombre_tag) LIKE '%${lowerTag}%'`);
         return result.rows;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return error;
     }
 }
-async function getPreferenciasUsuario(rut){
-    try{
+async function getPreferenciasUsuario(rut) {
+    try {
         const result = await pool.query(`SELECT * FROM "Posee_3" WHERE rut = $1;`, [rut]);
         return result.rows;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return error;
     }
@@ -126,23 +181,23 @@ async function updatePreferenciasUsuario(rut, preferencias) {
 
     return { success: allInsertsSuccessful };
 }
-async function getTagById(id){
-    try{
+async function getTagById(id) {
+    try {
         const result = await pool.query(`SELECT * FROM "Tags" WHERE id_tag = $1;`, [id]);
         return result.rows;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return error;
     }
 }
 
-async function deletePreferenciaUsuario(rut, id){
-    try{
+async function deletePreferenciaUsuario(rut, id) {
+    try {
         const result = await pool.query(`DELETE FROM "Posee_3" WHERE rut = $1 AND id_tag = $2;`, [rut, id]);
         return result;
     }
-    catch(error){
+    catch (error) {
         console.error('Error en la consulta:', error);
         return error;
     }
@@ -154,11 +209,12 @@ module.exports = {
     obtenerUsuariosPlataforma,
     getUsuarioByRut,
     getUsuarioByCorreo,
-    registrarUsuario,
     getTagsSimilares,
     getPreferenciasUsuario,
     updatePreferenciasUsuario,
     getTagById,
     getUsuarioServidor,
-    deletePreferenciaUsuario
+    deletePreferenciaUsuario,
+    registrarAdministrador,
+    eliminarAdministrador
 };

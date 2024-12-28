@@ -64,7 +64,6 @@ export default {
           body: JSON.stringify({ email: this.email }),
         });
         const data = await response.json();
-
         if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;
@@ -102,10 +101,8 @@ export default {
           });
           const data = await response.json();
           this.$cookies.set('TokenAutorizacion', data.token);
-
           if (role === 'Admin') {
             this.$router.push(`/api/adminhome`);
-
           } else {
             this.$router.push(`/api/home`);
           }

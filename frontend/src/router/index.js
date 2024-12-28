@@ -118,7 +118,6 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     const decodedToken = JSON.parse(atob(tokenAuth.split('.')[1]));
     const userRole = decodedToken.rol;
-    console.log('Rol del usuario',userRole);
     if (userRole !== 'Admin') {
       if (to.path !== '/api/home') {
         return next('/api/home');
@@ -128,8 +127,7 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresUser)) {
       const decodedToken = JSON.parse(atob(tokenAuth.split('.')[1]));
       const userRole = decodedToken.rol;
-      console.log('Rol del usuario',decodedToken);
-      if (userRole !== 'Estudiante\n') {
+      if (userRole !== 'Estudiante') {
         if (to.path !== '/api/adminhome') {
           return next('/api/adminhome');
         }

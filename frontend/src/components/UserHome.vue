@@ -5,7 +5,7 @@
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
         <v-tab  style="color: white;" prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
-        <v-tab  style="color: white;" prepend-icon="mdi-account-multiple" value="misgrupos" @click="VerSolicitudes">Mis grupos</v-tab>
+        <v-tab  style="color: white;" prepend-icon="mdi-account-multiple" value="misgrupos">Mis grupos</v-tab>
         <v-tab  style="color: white;" prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
       </v-tabs>
     </template>
@@ -138,7 +138,11 @@
             <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
           </v-col>
           <v-col cols="6">
-            <v-btn color="green darken-1" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+            <v-btn :disabled="elemento.participantes >= elemento.cupos" :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+              <v-icon :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" class="ml-2">
+                mdi-account-circle-outline
+              </v-icon>
+            <span>{{ elemento.participantes }} / {{ elemento.cupos }}</span>
           </v-col>
         </v-row>
 
@@ -394,13 +398,39 @@ export default {
       }
       return low;
     },
+    async CantidadParticipantes(id_act) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerParticipantes/${id_act}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.participantes.length;
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
 
     // Function to insert elements from array1 into array2 in sorted order
-    anadirAElementos(array) {
-      array.forEach(element => {
+    async anadirAElementos(array) {
+      for (const element of array) {
+        console.log("Elemento: ",element);
+        if (element.tipo_elemento === 'Actividad') {
+          console.log("Elemento tipo actividad: ",element);
+          const participantes = await this.CantidadParticipantes(element.id);
+          element.participantes = participantes;
+        }
         const index = this.findInsertIndex(this.elementos, element);
         this.elementos.splice(index, 0, element);
-      });
+      }
     },
 
     async VerActividades() {
@@ -414,7 +444,6 @@ export default {
           },
         });
         const data = await response.json();
-
         // Obtener actividades publicas
         const actividadesPublicas = await fetch(`${global.BACKEND_URL}/actividadesPublicas`, {
           method: 'GET',
@@ -425,14 +454,7 @@ export default {
         });
         const dataPublicas = await actividadesPublicas.json();
 
-        // Asegúrate de que data y dataPublicas sean arrays
-        if (!Array.isArray(data)) {
-          console.error('Error: data.actividades no es un array');
-          data = [];
-        }
-
-        // Eliminar actividad publica si ya esta su id en data.actividades
-        if (response.ok && actividadesPublicas.ok && Array.isArray(dataPublicas)) {
+        if (response.ok && actividadesPublicas.ok && dataPublicas.success) {
           dataPublicas.forEach((actiPublica) => {
             const index = data.actividades.findIndex((acti) => acti.id_act === actiPublica.id_act);
             if (index !== -1) {
@@ -445,7 +467,7 @@ export default {
         // Añadir las actividades publicas a las actividades en data.actividades
 
         this.actividades = data;
-
+        if(data.succes !== false){
         for (const actis of this.actividades) {
           try {
             const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
@@ -466,7 +488,7 @@ export default {
             console.error('Error al hacer fetch:', error);
           }
         }
-
+      
         // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
         // Los campos de actividad se pasarán de la siguiente manera a elementos:
         // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
@@ -480,10 +502,12 @@ export default {
             id_agr: elemento.id_agr,
             tipo_elemento: 'Actividad',
             fecha_creacion: elemento.fecha_creacion,
+            cupos: elemento.cupos
           };
         });
         this.anadirAElementos(elementitos);
-
+      }
+      
         this.VerPublicaciones();
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -657,10 +681,14 @@ export default {
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {
+          
           // Convierte la respuesta en formato JSON
           const data = await response.json();
+          if(data.success === false){
+            this.ActividadesParticipa = [];
+            return;
+          }
           this.ActividadesParticipa = data;
-
           for (const actis of this.ActividadesParticipa) {
             try {
               const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
@@ -694,7 +722,8 @@ export default {
               imagen: elemento.imagen,
               id_agr: elemento.id_agr,
               tipo_elemento: 'Actividad',
-              fecha_creacion: elemento.fecha_creacion
+              fecha_creacion: elemento.fecha_creacion,
+              cupos: elemento.cupos
             };
           });
 

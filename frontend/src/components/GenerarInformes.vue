@@ -11,7 +11,22 @@
 
     <!-------------------- TAB USUARIOS -------------------------->
     <v-tab-item value="Usuarios" v-if="tab === 'Usuarios'">
-
+        <v-container>
+            <v-row>
+                <v-col cols="12">
+                    <v-text-field label="Ingrese texto" v-model="valorTextBoxUsuario"
+                        @keyup.enter="obteneralgo()"></v-text-field>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-data-table :headers="headersBuscadorUsuario" :items="usuariosBuscados" class="elevation-15"
+                    @click:row="abrirUsuarioSeleccionado">
+                    <template v-slot:item.correo="{ item }">
+                        <v-chip color="primary" dark>{{ item.correo }}</v-chip>
+                    </template>
+                </v-data-table>
+            </v-row>
+        </v-container>
     </v-tab-item>
     <!------------------------------------------------------------>
 
@@ -128,7 +143,6 @@ export default {
         Actividades: ['Actividades'],
         actividades: [],
         publicaciones: [],
-        votaciones: [],
         formularios: [],
 
         // nombre y id grupos usuario
@@ -145,13 +159,28 @@ export default {
 
         // contenido de la tabla de agrupaciones
         headersAgrupaciones: [
-            { text: 'Nombre', value: 'nombre_agr' },
-            { text: 'Descripción', value: 'descripcion' },
-            { text: 'Fecha de creación', value: 'fecha_creacion' },
-            { text: 'Estado', value: 'estado' },
+            { title: 'Nombre', value: 'nombre_agr' },
+            { title: 'Descripción', value: 'descripcion' },
+            { title: 'Fecha de creación', value: 'fecha_creacion' },
+            { title: 'Estado', value: 'estado' },
         ],
 
+        // valorTextBoxUsuario
+        valorTextBoxUsuario: '',
+        UsuariosRegistrados: [],
+        SubstringCorreo: [],
 
+        // datos de la tabla de usuarios
+        headersBuscadorUsuario: [
+            { title: 'Nombres', value: 'nombres' },
+            { title: 'Primer Apellido', value: 'primer_apellido' },
+            { title: 'Segundo Apellido', value: 'segundo_apellido' },
+            { title: 'Correo', value: 'correo' },
+            { title: 'Rol', value: 'rol' },
+        ],
+        usuariosBuscados: [],
+
+        // PDF
         contenidoPDF: [],
         datos: [],
         tab: 'Actividades',
@@ -191,6 +220,7 @@ export default {
 
             return null;
         },
+
         async obtenerGrupos() {
             try {
 
@@ -287,7 +317,6 @@ export default {
             }
         },
 
-
         async validarParticipacion() {
             try {
                 for (let i = 0; i < this.actividades.length; i++) {
@@ -316,8 +345,6 @@ export default {
                 console.error('Error al hacer fetch:', error);
             }
         },
-
-
 
         // funcion para generar un pdf con los datos de contenidoPDF
         async generarPDFAct() {
@@ -353,7 +380,7 @@ export default {
                         'Descripción': item.descripcion,
                     }));
 
-                    console.log
+
 
                     // Genera la página
                     doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11);
@@ -380,7 +407,6 @@ export default {
                 doc.save('Informe_Actividades_ConectaUBB.pdf');
             }
         },
-
 
         async generarTabla() {
 
@@ -419,12 +445,6 @@ export default {
         async generarInformeAgrupaciones(rut) {
 
             if (this.rol === "Admin") {
-                console.log("rol", this.rol);
-
-                console.log("grupos: ", this.grupos);
-                console.log("gruposConID: ", this.gruposConID);
-                console.log("resultadoGrupos: ", this.resultadoGrupos);
-
 
                 const AgrupacionesUsuario = this.gruposConID;
 
@@ -571,13 +591,33 @@ export default {
 
         },
 
+        async obteneralgo() {
+            // llama a la ruta /correoSubString/:correo
+            const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+                body: JSON.stringify({
+                    correo: this.valorTextBoxUsuario,
+                }),
+            });
+
+            if (response.ok) {
+                this.usuariosBuscados = await response.json();
+            } else {
+                console.error('No se encontraron usuarios:', response.status);
+            }
+        },
+
     },
     mounted() {
         this.rut = this.getRut();
         this.rol = this.getRol();
         this.obtenerGrupos();
     }
-}
+};
 
 
 </script>

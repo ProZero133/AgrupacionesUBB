@@ -1,5 +1,8 @@
 const { pool } = require('../db.js');
+const axios = require('axios');
+const config = require('../config/configEnv.js');
 
+const API_ConectaUBB = config.API_ConectaUBB;
 
 // Obtiene todos los usuarios del servidor de la universidad
 async function getUsuarios() {
@@ -61,6 +64,29 @@ async function getUsuarioByCorreo(req) {
         return { error: "Ocurrió un error al obtener el usuario por correo." };
     }
 }
+
+async function getCorreoSubstring(req) {
+    try {
+        const correo = req;
+        // llama a la API de la universidad para obtener los usuarios
+        const response = await axios.post(`${API_ConectaUBB}/substringCorreo`, {
+            correo: correo
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        if (response.data.recordset.length === 0) {
+            return { success: false, message: 'Usuario no encontrado' };
+        }
+        
+        return response.data.recordset;
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return { error: "Ocurrió un error al obtener los usuarios por correo." };
+    }
+}
+
 
 // Obtiene un usuario de la plataforma segun su rut
 async function obtenerUsuarioPlataforma(rut) {
@@ -209,6 +235,7 @@ module.exports = {
     obtenerUsuariosPlataforma,
     getUsuarioByRut,
     getUsuarioByCorreo,
+    getCorreoSubstring,
     getTagsSimilares,
     getPreferenciasUsuario,
     updatePreferenciasUsuario,

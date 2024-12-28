@@ -44,7 +44,7 @@ async function EmailLogin(request, reply) {
       sameSite: 'strict',
       maxAge: 3600, // Expiración en segundos (1 hora)
     });
-    //asignarToken(request.server, usuario, codigo, reply);
+    asignarToken(request.server, usuario, codigo, reply);
     //Envia el mismo codigo al frontend
     reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
   } else {

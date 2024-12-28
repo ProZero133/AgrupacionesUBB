@@ -129,15 +129,13 @@ router.beforeEach((to, from, next) => {
       const decodedToken = JSON.parse(atob(tokenAuth.split('.')[1]));
       const userRole = decodedToken.rol;
       console.log('Rol del usuario',decodedToken);
-      if (userRole !== 'Estudiante\n') {
+      if (userRole !== 'Estudiante') {
         if (to.path !== '/api/adminhome') {
           return next('/api/adminhome');
         }
       }
     }
   }
-
-
   next();
 })
 

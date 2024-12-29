@@ -32,7 +32,6 @@ async function crearImagen(req, res) {
         const { error, value } = imagenesBodySchema.validate(req.body);
 
         if (error) {
-            console.log("Error en la validación de imagen");
             return res.code(400).send(error.message);
         }
 

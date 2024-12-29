@@ -1,7 +1,9 @@
 const { pool } = require('../db.js');
 const { getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad } = require('../services/actividad.service.js');
 const { getUsuarioByRut } = require('../services/user.service.js');
-// const { enviarCorreo } = require('../services/mail.service.js');
+const axios = require('axios');
+const config = require('../config/configEnv.js');
+const API_ConectaUBB = config.API_ConectaUBB;
 
 async function getAgrupaciones() {
   try {
@@ -52,31 +54,6 @@ async function createAgrupacion(agrupacion) {
     throw error;
   }
 }
-
-/* wachito, esto no funciona y me taime asi que voy a hacer uno unica y explusivamente para el verificado
-async function updateAgrupacion(id) {
-  try {
-    // Verifica si la agrupación existe
-    const validarAgrupacion = await pool.query('SELECT * FROM "Agrupaciones" WHERE id = $1', [id]);
-    
-    if (validarAgrupacion.rows.length === 0) {
-      return 'La agrupación no existe';
-    }
-
-    // Actualiza la agrupación con el id especificado
-    const NuevosDatosAgrupacion = await pool.query(
-      `UPDATE "Agrupacion" SET id_agr = $1, nombre_agr = $2, descripcion = $3, rut = $4, fecha_creacion = $5, verificado = $6, fecha_verificacion = $7 WHERE id = $8 RETURNING *`, 
-      [agrupacion.id_agr, agrupacion.nombre_agr, agrupacion.descripcion, agrupacion.rut, agrupacion.fecha_creacion, agrupacion.verificado, agrupacion.fecha_verificacion, id]
-    );
-
-    // Retorna la agrupación actualizada
-    return NuevosDatosAgrupacion.rows[0];
-  } catch (error) {
-    console.log('Error al actualizar la agrupación:', error);
-    throw error;
-  }
-}
-*/
 
 async function createSolicitarAcreditacion(id_agr, rut) {
   try {
@@ -167,11 +144,15 @@ async function updateAgrupacionNoVerificado(id) {
 async function getUsuariosdeAgrupacion(id) {
   try {
     // Obtiene los usuarios de la agrupación con el id especificado
-    // "sm_usuario" -> tabla de usuarios simulados
-    // "usuario" -> tabla de usuarios reales
-    const usuarios = await pool.query('SELECT   u.rut AS user_rut,   u.nombre AS user_nombre,   a.id_agr AS agrupacion_id,   a.nombre_agr AS agrupacion_nombre, p.* FROM "Pertenece" p JOIN "sm_usuario" u ON u.rut = p.rut JOIN "Agrupacion" a ON a.id_agr = p.id_agr WHERE p.id_agr = $1;', [id]);
-
-    return usuarios.rows;
+    const usuariosPlataforma = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1', [id]);
+    for (let i = 0; i < usuariosPlataforma.rows.length; i++) {
+      if (usuariosPlataforma.rows[i].rut != '11.111.111-1') {
+        const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);
+      usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+      usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
+      }
+    }
+    return usuariosPlataforma.rows;
   } catch (error) {
     console.log('Error al obtener los usuarios de la agrupación:', error);
   }
@@ -466,25 +447,22 @@ async function getAgrupacionesPorNombre(nombre_agr) {
   }
 }
 
-// notifyMiembroPublicacion
-// Es una funcion que recibe dos parametros: id_agr y id_pub
-// Primero, se obtienen todos los 'pertenece' cuyo id_agr sea igual a id_agr, y se guarda el "rut" de cada uno en un array
-// Luego, por cada rut, se obtienen todos los usuarios de "sm_usuario" cuyo rut coincida con el rut obtenido. De estos usuarios, se obtiene el "correo" y se guarda en un array
-// Finalmente, se envia un correo a cada uno de los correos obtenidos, notificandoles de la publicacion
-
-
 async function getPublicacionCorreos(id_agr, id_pub) {
   try {
-    // Step 1: Get all 'rut' from 'Pertenece' where 'id_agr' matches
     const perteneceResult = await pool.query('SELECT rut FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
     const ruts = perteneceResult.rows.map(row => row.rut);
 
-    // Step 2: Get 'correo' for each 'rut' from 'sm_usuario'
     const correos = [];
     for (const rut of ruts) {
-      const usuarioResult = await pool.query('SELECT correo FROM "sm_usuario" WHERE rut = $1', [rut]);
-      if (usuarioResult.rows.length > 0) {
-        correos.push(usuarioResult.rows[0].correo);
+      const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+                  rut: rut
+                }, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }
+                });
+      if (response.data.recordsets > 0) {
+        correos.push(response.data.recordsets[0][0].correo);
       }
     };
 

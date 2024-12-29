@@ -33,7 +33,6 @@ async function crearTag(req, res) {
             return res.code(400).send(error.message);
         }
         // Validar que el tag no exista
-        console.log("Nombre tag:",body.nombre_tag)
         const tagExistente = await obtenerTagPorNombre(body.nombre_tag);
         if (tagExistente) {
             return res.send({ success: false, message: 'El tag ya existe' });
@@ -73,7 +72,6 @@ async function obtenerTagPorNombre(nombre_tag) {
     try {
         // Obtiene el tag por su nombre
         const tag = await getTagByNombre(nombre_tag);
-        console.log("Resultado buscar tag:", tag);
         if (!tag) {
             return null; // No se encontró el tag
         }

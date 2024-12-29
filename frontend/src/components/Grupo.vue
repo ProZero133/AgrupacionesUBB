@@ -703,6 +703,7 @@ export default {
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
+        console.log("Llego a obtener usuarios de agrupacion");
         const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
@@ -716,6 +717,7 @@ export default {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
+          console.log(this.MiembrosdeAgr);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1189,9 +1191,7 @@ export default {
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
-
         const dataResponse = await response.json();
-
         if (response.ok || response.status === 404) {
           const solicitudes = [];
           for (const solicitud of dataResponse) {

@@ -119,14 +119,9 @@ async function obtenerImagenAgrupacion(req, res) {
 async function unirseAgrupacion(req, res) {
     try {
         const rut = req.params.rut;
-        console.log("rut", rut);
-
         const id_agr = req.params.id_agr;
-        console.log("id_agr", id_agr);
-
         const usuario = await getUsuarioByRut(rut);
-        console.log("usuario", usuario);
-        
+
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');
         }
@@ -167,7 +162,7 @@ async function solicitudesAgrupacion(req, res) {
         const id_agr = req.params.id_agr;
         const result = await getSolicitudes(id_agr);
         if (result.length === 0) {
-            return res.code(404).send('No hay solicitudes pendientes');
+            return res.send({ success: false, message: 'No se encontraron solicitudes' });
         }
         res.code(200).send(result);
     } catch (error) {

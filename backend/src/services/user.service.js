@@ -1,6 +1,7 @@
 const { pool } = require('../db.js');
-
-
+const axios = require('axios');
+const config = require('../config/configEnv.js');
+const API_ConectaUBB = config.API_ConectaUBB;
 // Obtiene todos los usuarios del servidor de la universidad
 async function getUsuarios() {
     try {
@@ -14,10 +15,17 @@ async function getUsuarios() {
     }
 }
 
-async function getUsuarioServidor(rut) {
+async function getUsuarioServidor(rutUsuario) {
     try {
-        const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
-        return result.rows[0];
+        const rut = rutUsuario;
+        const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+            rut: rut
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        return response.data.recordsets[0];
     }
     catch (error) {
         console.error('Error en la consulta:', error);
@@ -41,8 +49,16 @@ async function obtenerUsuariosPlataforma() {
 async function getUsuarioByRut(req) {
     try {
         const rut = req;
-        const result = await pool.query(`SELECT * FROM sm_usuario WHERE rut = $1;`, [rut]);
-        return result.rows;
+        const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+            rut: rut
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const usuario = response.data.recordsets[0][0];
+        usuario.nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+        return usuario;
     }
     catch (error) {
         console.error('Error en la consulta:', error);
@@ -53,8 +69,16 @@ async function getUsuarioByRut(req) {
 async function getUsuarioByCorreo(req) {
     try {
         const correo = req;
-        const result = await pool.query(`SELECT * FROM sm_usuario WHERE correo = $1;`, [correo]);
-        return result.rows;
+        const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
+            correo: correo
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const usuario = response.data.recordsets[0][0];
+        usuario.nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+        return usuario;
     }
     catch (error) {
         console.error('Error en la consulta:', error);

@@ -33,7 +33,6 @@ const codigoCarreras = {
 };
 
 function obtenerCarrera(codigo) {
-  console.log("Buscando carrera con codigo: ", codigo);
   return codigoCarreras[codigo] || 'NONE';
 }
 

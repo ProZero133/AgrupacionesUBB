@@ -281,9 +281,6 @@ export default {
     },
 
     async ObtenerIntegrantesAgrupaciones() {
-
-      console.log('entra en ObtenerIntegrantesAgrupaciones');
-
       try {
         for (const agrupacion of this.itemsAgr) {
           const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.idAgrupacion}`, {
@@ -296,8 +293,6 @@ export default {
           if (response.ok) {
             const data = await response.json();
             agrupacion.integrantes = data.length;
-
-            console.log('Integrantes:', agrupacion.integrantes);
 
           } else {
             console.error('Error en la respuesta:', response.status);

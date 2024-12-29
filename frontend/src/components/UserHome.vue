@@ -172,11 +172,11 @@
           <v-col cols="7">
             <p>{{ actividad.descripcion }}</p>
           </v-col>
-
-          <v-btn class="BotonAbandonar" width="250px" color="primary" text @mousedown="startHold" @mouseup="cancelHold"
+          
+          <v-btn class="BotonAbandonar" text @mousedown="startHold" @mouseup="cancelHold"
             @mouseleave="cancelHold" @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold"
             :style="progressStyle" depressed>Abandonar actividad</v-btn>
-
+          
         </v-row>
       </v-card-text>
       <v-card-actions>
@@ -284,9 +284,7 @@
   min-height: 250px;
 }
 
-.BotonAbandonar {
-  margin-left: 55vw;
-}
+
 
 </style>
 
@@ -306,9 +304,13 @@ export default {
     actividades: [],
     publicaciones: [],
     elementos: [],
+    pressTimer: null,
+    pressTime: 0,
+    progress: 0,
     actividadesParticipa: [],
     urlImagen: addImage,
     idactActual: null,
+    
     rut: '',
     rol: '',
     tab: 'actividades',
@@ -454,6 +456,9 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
+          if (data.success === false) {
+            return 0;
+          }
           return data.participantes.length;
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -650,6 +655,7 @@ export default {
         if (response.ok) {
           this.dialog = false;
           this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+          this.VerActividadesParticipando(this.rut);
         } else {
           console.error(data.message);
           console.error('Error en la respuesta:', response.status);

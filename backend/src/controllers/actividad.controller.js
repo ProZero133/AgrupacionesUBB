@@ -237,7 +237,7 @@ async function participarActividad(req, res) {
         const id_act = req.params.id_act;
         const rut = req.params.rut;
         // Obtener actividad
-        const actividad = await getActividadById(id_act);
+        const actividad = await getActividadById(id_act);;
         // Obtener participantes de la actividad
         const participantes = await ParticipantesActividad(id_act);
         const cuposRestantes = actividad.rows[0].cupos - participantes.length;
@@ -280,9 +280,6 @@ async function ParticipantesActividad(req, res) {
         const id_act = req;
     
         const participantes = await getParticipantesActividad(id_act);
-        if (participantes.length === 0) {
-            return res.send({ success: false, message: 'No se encontraron participantes' });
-        }
         return participantes;
     } catch (error) {
         console.error('Error al obtener los participantes de la actividad:', error);

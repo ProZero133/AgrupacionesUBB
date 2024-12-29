@@ -1,6 +1,7 @@
 <template>
   <v-main>
   <v-container cols="12"></v-container>
+  <v-img :src="LogoPagina" max-height="150" class="mt-2"></v-img>
   <v-toolbar style="background-color: #014898;">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
@@ -187,8 +188,54 @@
     </v-card>
   </v-dialog>
 
-<Footer />
+  <v-card class="footer-card" style="background-color: #014898;" dark>
+    <v-container>
+      <v-row justify="space-between" align="center">
+        <!-- Logo -->
+        <v-col cols="12" md="2">
+          <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
+        </v-col>
+        <v-col cols="12" md="2">
+          <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
+        </v-col>
+        <!-- Información de contacto -->
+        <v-col cols="12" md="4">
+          <div class="text-center" style="color: white;">
+            <p>Conectando agrupaciones y estudiantes de
+              la Universidad del Bío-Bío.
+            </p>
+            <p>Conecta UBB es una iniciativa estudiantil,
+              con apoyo de la Dirección de Desarrollo
+              Estudiantil.</p>
+          </div>
+        </v-col>
+
+        <!-- Redes sociales -->
+        <v-col cols="12" md="4">
+          
+          <div class="text-center">
+            <p style="color: white;">Si tienes dudas o consultas escríbenos a
+            </p>
+            <p style="color: white;">conectaubb@gmail.com
+            </p>
+            <p style="color: white;">Conéctate con las redes sociales de la DDE
+            </p>
+            <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
+              <v-icon>mdi-facebook</v-icon>
+            </v-btn>
+            <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
+              <v-icon>mdi-twitter</v-icon>
+            </v-btn>
+            <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
+              <v-icon>mdi-instagram</v-icon>
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
 </v-main>
+
 </template>
 
 <style scoped>
@@ -248,11 +295,11 @@
 import addImage from '../assets/imagePlaceholder.png';
 import { useRouter } from 'vue-router';
 import VueCookies from 'vue-cookies';
-import Footer from '../layouts/global/Footer.vue';
-
+import conectaUBB from '../assets/ConectaUBBLine.png';
 export default {
   name: 'UserHome',
   data: () => ({
+    LogoPagina: conectaUBB,
     dialog: false,
     dialogActividades: false,
     grupos: [],
@@ -266,9 +313,6 @@ export default {
     rol: '',
     tab: 'actividades',
   }),
-  components: {
-    Footer,
-  },
   setup() {
     const router = useRouter();
     return {
@@ -422,9 +466,7 @@ export default {
     // Function to insert elements from array1 into array2 in sorted order
     async anadirAElementos(array) {
       for (const element of array) {
-        console.log("Elemento: ",element);
         if (element.tipo_elemento === 'Actividad') {
-          console.log("Elemento tipo actividad: ",element);
           const participantes = await this.CantidadParticipantes(element.id);
           element.participantes = participantes;
         }

@@ -19,7 +19,7 @@
       <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
 
-    <v-dialog v-model="dialog" persistent max-width="350">
+    <v-dialog v-model="dialog" max-width="350">
       <v-card>
         <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
         <v-card-text>

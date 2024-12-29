@@ -409,7 +409,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <Footer />
   </v-container>
 
   <!-- Botón de Crear Actividad o Publicación -->
@@ -486,7 +485,51 @@
       </v-menu>
     </div>
   </VLayoutItem>
+  <v-card class="footer-card" style="background-color: #014898;" dark>
+    <v-container>
+      <v-row justify="space-between" align="center">
+        <!-- Logo -->
+        <v-col cols="12" md="2">
+          <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
+        </v-col>
+        <v-col cols="12" md="2">
+          <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
+        </v-col>
+        <!-- Información de contacto -->
+        <v-col cols="12" md="4">
+          <div class="text-center" style="color: white;">
+            <p>Conectando agrupaciones y estudiantes de
+              la Universidad del Bío-Bío.
+            </p>
+            <p>Conecta UBB es una iniciativa estudiantil,
+              con apoyo de la Dirección de Desarrollo
+              Estudiantil.</p>
+          </div>
+        </v-col>
 
+        <!-- Redes sociales -->
+        <v-col cols="12" md="4">
+          <div class="text-center">
+            <p style="color: white;">Si tienes dudas o consultas escríbenos a
+            </p>
+            <p style="color: white;">conectaubb@gmail.com
+            </p>
+            <p style="color: white;">Conéctate con las redes sociales de la DDE
+            </p>
+            <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
+              <v-icon>mdi-facebook</v-icon>
+            </v-btn>
+            <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
+              <v-icon>mdi-twitter</v-icon>
+            </v-btn>
+            <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
+              <v-icon>mdi-instagram</v-icon>
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
@@ -494,7 +537,6 @@ import addImage from '../assets/placeholder.png';
 import { useRoute } from 'vue-router';
 import { mergeProps } from 'vue';
 import { da, fa, fi, ro } from 'vuetify/lib/locale/index.mjs';
-import Footer from '../layouts/global/Footer.vue';
 export default {
   setup() {
     const route = useRoute();
@@ -504,9 +546,6 @@ export default {
     return {
       groupId, // Return it to use in the template if needed
     };
-  },
-  components: {
-    Footer,
   },
   data: () => ({
     lider: false,

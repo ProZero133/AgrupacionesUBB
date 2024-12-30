@@ -1443,11 +1443,10 @@ export default {
 
     async SolicitarAcreditaciondeGrupo() {
       try {
-        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}/${this.rut}`;
+        const url = `${global.BACKEND_URL}/solicitaracreditacion/${this.groupId}`;
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });

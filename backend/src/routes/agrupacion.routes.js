@@ -32,7 +32,7 @@ module.exports = function(fastify, options, done) {
   fastify.post('/rechazarsolicitud/:rut/:id_agr', { preHandler: [isUserOrAdmin] },rechazarSolicitud);
   fastify.delete('/eliminaragrupacion/:id_agr', { preHandler: [isUserOrAdmin] },eliminarAgrupacion);
   fastify.delete('/abandonaragrupacion/:id_agr/:rut', { preHandler: [isUserOrAdmin] },abandonarAgrupacion);
-  fastify.put('/solicitaracreditacion/:id_agr/:rut', { preHandler: [isUser] },solicitarAcreditacion);
+  fastify.put('/solicitaracreditacion/:id_agr', { preHandler: [isUser] },solicitarAcreditacion);
   fastify.post('/ingresartagsagrupacion', { preHandler: [isUser] },ingresarTagsAgrupacion);
   fastify.get('/agrupacionesNombre/:nombre_agr', { preHandler: [isUserOrAdmin] },VerGruposPorNombre);
   fastify.get('/obtenerLider/:id_agr', { preHandler: [isUserOrAdmin] },obtenerLider);

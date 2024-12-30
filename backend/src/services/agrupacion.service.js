@@ -365,6 +365,11 @@ async function deleteUsuarioAgrupacion(rut, id_agr) {
   try {
     // Elimina al usuario de la agrupación
     const usuario = await pool.query('DELETE FROM "Pertenece" WHERE rut = $1 AND id_agr = $2 RETURNING *', [rut, id_agr]);
+    const miembros = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 ', [id_agr]);
+    if (miembros.rows.length === 0) {
+      await softDeleteAgrupacion(id_agr);
+      return 'Agrupacion eliminada por falta de miembros';
+    }
     return 'Usuario eliminado de la agrupación';
   } catch (error) {
     console.log('Error al eliminar el usuario de la agrupación:', error);

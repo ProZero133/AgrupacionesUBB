@@ -416,7 +416,7 @@
   <!-- Botón de Crear Actividad o Publicación -->
   <VLayoutItem v-if="rolA" model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
-      <v-menu>
+      <v-menu v-if="rol !== 'Admin'">
         <template v-slot:activator="{ props: menu }">
           <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
@@ -755,10 +755,8 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("data", data);
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
-          this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
-          console.log("miembros agrupacion", this.MiembrosdeAgr);
+          this.MiembrosdeAgr = filtrada; 
 
 
         } else {
@@ -1617,7 +1615,6 @@ export default {
               'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
           });
-          console.log("response", response);
           if (response.ok) {
             this.$root.showSnackBar('success', 'Actividad eliminada correctamente', 'Operación exitosa');
           } else {

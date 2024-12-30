@@ -4,6 +4,7 @@ const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificad
 const { getAgrupacionById } = require("../services/agrupacion.service.js");
 const { getUsuarioByRut, obtenerUsuariosPlataforma } = require("../services/user.service.js");
 const { notifyRechazo } = require("../services/mail.service.js");
+const { getLider } = require("../services/agrupacion.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
     try {
@@ -13,16 +14,22 @@ async function ObtenerAcreditaciones(req, reply) {
         // Obtiene todos los usuarios
         const usuarios = await obtenerUsuariosPlataforma();
 
+        // Obtiene al lider del grupo
+        const lider = usuarios.map(usuario => {
+            if (usuario.rol === 'Lider') {
+                return usuario;
+            }
+        });
+
         // combina las agrupaciones con los usuarios
         const Agrupaciones_y_Usuarios = agrupacionesCompletas.map(Agrupacion => {
             const usuario = usuarios.find(usuario => usuario.rut === Agrupacion.rut);
             return { ...Agrupacion, ...usuario };
         });
 
-
         // Obtiene todas las acreditaciones en donde el atributo "verificado" sea igual "Pendiente"
         const agrupacionesPendientes = Agrupaciones_y_Usuarios.filter(Agrupacion => Agrupacion.verificado === 'Pendiente');
-        
+
         reply.code(200).send(agrupacionesPendientes);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
@@ -40,9 +47,12 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
 
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
         const agrupa = await getAgrupacionById(id);
-        const usuario = await getUsuarioByRut(agrupa.rut);
+        const Lider = await getLider(agrupa.id_agr);
+        const usuario = await getUsuarioByRut(Lider.rut);
+
         const notificacion = {
-            correo: usuario[0].correo,
+            nombre: usuario.nombre,
+            correo: usuario.correo,
             agrupacion: agrupa.nombre_agr,
             verificado: verificado
         };
@@ -57,8 +67,8 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
         }
 
         // Actualiza la agrupacion con el id especificado, estableciendo "verificado" a "Verificado"
-        
-        
+
+
         reply.code(200).send('Acreditación exitosa');
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
@@ -75,11 +85,13 @@ async function RechazoAcreditaciondeGrupo(req, reply) {
         const motivo = req.body.motivo;
 
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
-
         const agrupa = await getAgrupacionById(id);
-        const usuario = await getUsuarioByRut(agrupa.rut);
+        const Lider = await getLider(agrupa.id_agr);
+        const usuario = await getUsuarioByRut(Lider.rut);
+
         const notificacion = {
-            correo: usuario[0].correo,
+            nombre: usuario.user_nombre,
+            correo: usuario.correo,
             agrupacion: agrupa.nombre_agr,
             motivo: motivo,
             verificado: verificado

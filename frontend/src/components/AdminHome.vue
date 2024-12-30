@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar color="primary">
+  <v-toolbar color="#014898">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-account-group" value="agrupaciones">Agrupaciones</v-tab>
@@ -25,8 +25,8 @@
 
         <v-col cols="12" md="6" lg="3" v-for="(item, index) in filteredItemsAgrupaciones" :key="index">
           <v-card class="gruposCard" max-width="400" @click="AbrirDialogAgrupacion(item.idAgrupacion)">
-            <v-sheet :color="item.visible === false ? 'red' : (item.verificado === 'Verificado' ? 'green' : 'grey')"
-              height="6"></v-sheet>
+            <v-sheet :color="item.visible === false ? 'grey' : (item.verificado === 'Verificado' ? 'green' : '#014898')"
+              height="8"></v-sheet>
             <v-img class="align-end text-white" height="200" :src="item.img" cover
               :style="{ filter: item.visible === false ? 'grayscale(100%)' : 'none' }"
               gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
@@ -303,7 +303,6 @@ export default {
             };
           }));
 
-          console.log("itemsAgr", this.itemsAgr);
 
 
           await this.ObtenerIntegrantesAgrupaciones();

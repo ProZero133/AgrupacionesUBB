@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar color="primary">
+    <v-toolbar color="#014898">
         <template v-slot:extension>
             <v-tabs v-model="tab" grow>
                 <v-tab v-if="rol === 'Admin'" prepend-icon="mdi-shield-account" value="Usuarios">Usuarios</v-tab>

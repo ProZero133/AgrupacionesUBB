@@ -314,7 +314,6 @@ export default {
             const data = await response.json();
             const id_act = data.id_act;
             const fecha_actividad = this.date; // Convierte la fecha al formato YYYY-MM-DD
-            console.log("Fecha actividad: " + fecha_actividad);
             const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {

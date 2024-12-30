@@ -43,7 +43,15 @@ async function crearAgrupacion(req, res) {
     try {
         // Valida el cuerpo de la solicitud
         const { error, value } = agrupacionBodySchema.validate(req.body);
-
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const rol = decoded.rol;
+        if(rut !== req.body.rut){
+            return res.code(401).send('Rut no pertece al usuario');
+        }
+        if(rol !== 'Estudiante'){
+            return res.code(401).send('No tienes permisos para crear una agrupacion')
+        }
         if (error) {
             // Retorna un error si el cuerpo de la solicitud es inválido
             res.code(400).send(error.details.map(detail => detail.message));
@@ -51,6 +59,7 @@ async function crearAgrupacion(req, res) {
         }
         const fechaActual = new Date();
         req.body.fecha_creacion = fechaActual;
+        req.body.verificado = "Noverificado";
         // Crea una nueva agrupacion
         const agrupacion = await createAgrupacion(req.body);
 
@@ -67,20 +76,19 @@ async function editarAgrupacion(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id_agr = req.params.id_agr;
+        const lider=await getLiderArray(id_agr);
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        if(lider[0].rut !== rut){
+            return res.code(401).send('No tienes permisos para editar la agrupacion')
+        }
         const agrupacionactual = await getAgrupacionById(id_agr);
         if (agrupacionactual.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
         const agrupa = agrupacionactual
-        const verificado = agrupa.verificado;
-        const fecha_verificacion = agrupa.fecha_verificacion;
-        const rut = agrupa.rut;
-        const fecha_creacion = agrupa.fecha_creacion;
         const imagen = agrupa.imagen;
-        req.body.verificado = verificado;
-        req.body.fecha_verificacion = fecha_verificacion;
-        req.body.rut = rut;
-        req.body.fecha_creacion = fecha_creacion;
+        req.body.rut = agrupa.rut;
         req.body.imagen = imagen;
         // Valida el cuerpo de la solicitud
         const { error, value } = agrupacionBodySchema.validate(req.body);
@@ -91,7 +99,7 @@ async function editarAgrupacion(req, res) {
             return;
         }
         // Actualiza la agrupacion
-        const agrupacion = await updateAgrupacion(id_agr, req.body, verificado, fecha_verificacion, rut, fecha_creacion, imagen);
+        const agrupacion = await updateAgrupacion(id_agr, req.body, rut, imagen);
 
         // Retorna la agrupacion actualizada
         res.code(200).send(agrupacion);
@@ -240,7 +248,8 @@ async function obtenerLiderArray(req, res) {
 async function eliminarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
-        const rut = req.params.rut;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
         const user = await getUsuarioByRut(rut);
         if (user.length === 0) {
             return res.code(404).send('Usuario no encontrado');

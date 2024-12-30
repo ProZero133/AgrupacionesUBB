@@ -1,6 +1,6 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 async function TokenAutorizacionController(request, reply) {
- const { rol } = request.body; // Asume que el rol se envía en el cuerpo de la solicitud
+ const { rol, rut } = request.body; // Asume que el rol se envía en el cuerpo de la solicitud
  const decoded = await request.jwtVerify();
  if(rol !== decoded.rol){
     reply.send({ success: false, message: 'Rol no autorizado' });
@@ -10,6 +10,7 @@ async function TokenAutorizacionController(request, reply) {
   try {
     const payload = {
       rol,
+      rut,
     };
     const token = request.server.jwt.sign(payload);
     reply.setCookie('TokenAutorizacion', token, {
@@ -36,6 +37,7 @@ async function EmailLogin(request, reply) {
   if (result.success) {
     const payload = {
       rol: result.usuario.rol,
+      rut: result.usuario.rut,
     };
     const token = request.server.jwt.sign(payload);
     reply.setCookie('AuthToken', token, {

@@ -742,7 +742,6 @@ export default {
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        console.log("Llego a obtener usuarios de agrupacion");
         const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
@@ -756,7 +755,6 @@ export default {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
           this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
-          console.log(this.MiembrosdeAgr);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -1344,6 +1342,7 @@ export default {
           body: JSON.stringify({
             nombre_agr: nombre,
             descripcion: descripciongrupo,
+            rut: this.rut,
           }),
         });
 
@@ -1506,7 +1505,7 @@ export default {
     },
     EliminarGrupo() {
       try {
-        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}/${this.rut}`;
+        const url = `${global.BACKEND_URL}/eliminaragrupacion/${this.groupId}`;
         const response = fetch(url, {
           method: 'DELETE',
           headers: {

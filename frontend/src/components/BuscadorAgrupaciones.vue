@@ -264,7 +264,6 @@ export default {
           const data = await response.json();
 
           data.forEach((Agrupacion, index) => {
-            console.log(`Agrupacion ${index + 1}: `, Agrupacion);
             if (Agrupacion.visible === true) {
               // añade la agrupacion al array GruposVisibles
               this.GruposVisibles.push(Agrupacion);
@@ -326,9 +325,6 @@ export default {
     },
 
     async solicitarUnirse(idAgrupacion) {
-
-      console.log('Solicitando unirse a la agrupación con ID:', idAgrupacion);
-
       try {
         const response = await fetch(`${global.BACKEND_URL}/enviarsolicitud/${this.rut}/${idAgrupacion}`, {
           method: 'POST',

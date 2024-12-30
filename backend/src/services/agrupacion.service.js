@@ -148,8 +148,8 @@ async function getUsuariosdeAgrupacion(id) {
     for (let i = 0; i < usuariosPlataforma.rows.length; i++) {
       if (usuariosPlataforma.rows[i].rut != '11.111.111-1') {
         const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);
-      usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
-      usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
+        usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+        usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
       }
     }
     return usuariosPlataforma.rows;
@@ -317,41 +317,11 @@ async function getLiderArray(id_agr) {
 
 async function validateEliminarGrupo(id_agr) {
   try {
-    // Obtiene todas las actividades de una agrupacion
-    const actividades = await getActividadesByAgrupacion(id_agr);
-    //Evaluar si hay actividades pasadas la fecha actual
-    if (actividades.length > 0) {
-      const fechasActividades = await getFechasActividades(id_agr);
-      const fechaActual = new Date();
-      for (let i = 0; i < fechasActividades.length; i++) {
-        if (fechaActual > fechasActividades[i].fecha) {
-          //Soft delete por ya haber organizado actividades
-          const agrupacion = await softDeleteAgrupacion(id_agr);
-          if (agrupacion.length === 0) {
-            return 'Error al eliminar la agrupación';
-          }
-          return 'Agrupacion eliminada para los usuarios';
-        }
-      }
-    }
 
-    if (actividades.length > 0) {
-      //Obtener la cantidad de participantes para cada actividad
-      for (let i = 0; i < actividades.length; i++) {
-        const participantes = await getParticipantesActividad(actividades[i].id_act);
-        if (participantes.length > 1) {
-          //Soft delete por tener actividades con mas de un participante
-          const agrupacion = await softDeleteAgrupacion(id_agr);
-          if (agrupacion.length === 0) {
-            return 'Error al eliminar la agrupación';
-          }
-          return 'Agrupacion eliminada para los usuarios';
-        }
-      }
+    const agrupacion = await softDeleteAgrupacion(id_agr);
+    if (agrupacion.length === 0) {
+      return 'Error al eliminar la agrupación';
     }
-    //Eliminar la agrupacion si no tiene actividades o tiene actividades con un solo participante
-    const agrupacion = await deleteAgrupacion(id_agr);
-
     return 'Agrupacion eliminada';
   }
   catch (error) {
@@ -411,12 +381,12 @@ async function rejectSolicitud(rut, id_agr) {
   }
 }
 
-async function updateAgrupacion(id_agr, agrupacion, verificado, fecha_verificacion, rut, fecha_creacion, imagen) {
+async function updateAgrupacion(id_agr, agrupacion, rut, imagen) {
   try {
     // Actualiza la agrupación con el id especificado
     const NuevosDatosAgrupacion = await pool.query(
-      `UPDATE "Agrupacion" SET nombre_agr = $1, descripcion = $2, verificado = $3, fecha_verificacion = $4, rut = $5, fecha_creacion = $6 WHERE id_agr = $7 RETURNING *`,
-      [agrupacion.nombre_agr, agrupacion.descripcion, verificado, fecha_verificacion, rut, fecha_creacion, id_agr]
+      `UPDATE "Agrupacion" SET nombre_agr = $1, descripcion = $2, rut = $3 WHERE id_agr = $4 RETURNING *`,
+      [agrupacion.nombre_agr, agrupacion.descripcion, rut, id_agr]
     );
 
     // Retorna la agrupación actualizada
@@ -455,12 +425,12 @@ async function getPublicacionCorreos(id_agr, id_pub) {
     const correos = [];
     for (const rut of ruts) {
       const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
-                  rut: rut
-                }, {
-                  headers: {
-                    'Content-Type': 'application/json',
-                  }
-                });
+        rut: rut
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       if (response.data.recordsets > 0) {
         correos.push(response.data.recordsets[0][0].correo);
       }

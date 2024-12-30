@@ -122,8 +122,6 @@ export default {
         nombre_agr: '',
         descripcion: '',
         rutUsuario: '',
-        grupoverificado: 'Noverificado',
-        fecha_verificacion: null,
         tags: [],
         rol: '',
 
@@ -131,26 +129,6 @@ export default {
         defaultImageUrl: addImage,
         urlImagen: addImage,
         idImagen: '',
-
-        dateErrors: {
-            creacion: [],
-            verificacion: [],
-        },
-
-        dateRules: [
-            value => {
-                if (value) return true
-                return 'La fecha es requerida.'
-            },
-            value => {
-                const today = new Date();
-                const selectedDate = new Date(value);
-                today.setHours(0, 0, 0, 0); // Remove time part
-                selectedDate.setHours(0, 0, 0, 0); // Consistent with today's time removal
-                if (selectedDate >= today) return true;
-                return 'La fecha no puede ser antes de hoy.';
-            },
-        ],
     }),
     methods: {
         onFileChange(e) {
@@ -242,7 +220,6 @@ export default {
         },
 
         async CreaAgrupacion(nombre_agr, descripcion, tags) {
-            const verificado = this.grupoverificado;
             if (this.urlImagen == this.defaultImageUrl || this.urlImagen == '') {
                 console.error('Error al subir la imagen');
                 this.$root.showSnackBar('error', 'Falta subir una imagen!', 'Error de subida');
@@ -257,14 +234,13 @@ export default {
 
             try {
                 const rut = this.rutUsuario;
-                const fecha_creacion = new Date();
                 const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
-                    body: JSON.stringify({ nombre_agr, descripcion, rut, fecha_creacion, verificado, imagen: this.idImagen }),
+                    body: JSON.stringify({ nombre_agr, descripcion, rut, imagen: this.idImagen }),
                 });
 
                 // Verifica si la respuesta es exitosa

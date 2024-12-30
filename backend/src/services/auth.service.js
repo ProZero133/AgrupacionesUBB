@@ -93,7 +93,6 @@ async function validarUsuario(email) {
 
     if (usuarioAPI.rol === 'ALUMNO') {
       if (usuarioAPI.sit_acad === 'NO VIGENTE') {
-        console.log("Usuario no admitido");
         return { success: false, message: 'Usuario no admitido' };
       }
       usuario.rut = usuarioAPI.rut.toString();

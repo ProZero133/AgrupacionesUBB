@@ -279,8 +279,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
 
-          console.log('Data:', data);
-
           this.itemsAgr = await Promise.all(data.map(async item => {
             const tags = await this.VerTagsGrupo(item.id_agr);
             return {
@@ -373,7 +371,6 @@ export default {
     },
 
     AbrirDialogAgrupacion(id) {
-      console.log("Entra a AbrirDialogAgrupacion");
       const agrupacion = this.itemsAgr.find(item => item.idAgrupacion === id);
       if (agrupacion) {
         this.selectedAgrupacion = agrupacion;

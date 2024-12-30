@@ -12,11 +12,6 @@ const agrupacionBodySchema = Joi.object({
         "any.required": "La descripción es obligatoria.",
         "string.base": "La descripción debe ser de tipo string.",
         }),
-    verificado: Joi.string().required().valid("Verificado", "Noverificado", "Pendiente").messages({
-        "string.empty": "El estado de verificación no puede estar vacío.",
-        "any.required": "El estado de verificación es obligatorio.",
-        "string.base": "El estado de verificación debe ser de tipo string.",
-        }),
     fecha_verificacion: Joi.date().messages({
         "date.base": "La fecha de verificación debe ser de tipo date.",
         }),
@@ -24,11 +19,6 @@ const agrupacionBodySchema = Joi.object({
         "string.empty": "El RUT no puede estar vacío.",
         "any.required": "El RUT es obligatorio.",
         "string.base": "El RUT debe ser de tipo string.",
-        }),
-    fecha_creacion: Joi.date().required().messages({
-        "date.empty": "La fecha de creación no puede estar vacía.",
-        "any.required": "La fecha de creación es obligatoria.",
-        "date.base": "La fecha de creación debe ser de tipo date.",
         }),
     imagen: Joi.number().integer().optional().messages({
         "number.base": "La imagen debe ser de tipo number.",

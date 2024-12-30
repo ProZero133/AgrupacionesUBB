@@ -317,7 +317,6 @@ export default {
 
     async CreadorActividad(id_act) {
       const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
-      console.log(Actividad_a_Aceptar);
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerCreador/${Actividad_a_Aceptar.id_act}`, {
           method: 'GET',
@@ -328,7 +327,6 @@ export default {
         });
         if (response.ok) {
           const creadorActData = await response.json();
-          console.log("creadorActData: ", creadorActData);
           return creadorActData; // Devuelve los datos del creador
         } else {
           console.error('Error en la respuesta:', response.status);
@@ -342,14 +340,7 @@ export default {
 
     async RechazarActividad(id_act) {
       this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
-
-      console.log("id_act: ", id_act);
-
       const creadorActData = await this.CreadorActividad(id_act);
-      console.log("creadorActData: ", creadorActData);
-      console.log("creadorActData.id_act: ", creadorActData[0].id_act);
-      console.log("creadorActData.rut: ", creadorActData[0].rut);
-
       try {
         const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${creadorActData[0].id_act}/${creadorActData[0].rut}`, {
           method: 'DELETE',

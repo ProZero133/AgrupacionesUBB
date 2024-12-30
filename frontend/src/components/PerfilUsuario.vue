@@ -345,11 +345,9 @@ export default {
                         body: JSON.stringify({ preferencias: [data[0].id_tag] })
                     });
                     this.obtenerPreferencias();
-                    console.log(response);
                     this.dialoTag = false;
                     this.fetchSearchResults(this.searchQuery);
                 } else {
-                    console.log(response);
                     throw new Error('Error en la respuesta de la red');
                 }
             } catch (error) {

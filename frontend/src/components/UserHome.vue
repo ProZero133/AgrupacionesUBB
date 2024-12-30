@@ -109,7 +109,7 @@
       <v-card-text>
         <v-row>
           <v-col cols="5">
-            <v-img class="image" aspect-ratio="1" :src="elemento.imagen" cover />
+            <v-img class="image" aspect-ratio="1" :src="elemento.imagen" contain />
           </v-col>
           <v-col cols="7">
             <p>{{ elemento.descripcion }}</p>
@@ -284,7 +284,10 @@
   min-height: 250px;
 }
 
-
+.image {
+  width: 100%;
+  height: auto;
+}
 
 </style>
 

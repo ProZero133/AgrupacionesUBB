@@ -97,7 +97,7 @@ export default {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.$cookies.get('AuthToken')}`,
             },
-            body: JSON.stringify({ rol: role }),
+            body: JSON.stringify({ rol: role, rut: rut }),
           });
           const data = await response.json();
           this.$cookies.set('TokenAutorizacion', data.token);

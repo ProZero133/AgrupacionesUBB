@@ -4,18 +4,6 @@ const config = require('../config/configEnv.js');
 
 const API_ConectaUBB = config.API_ConectaUBB;
 
-// Obtiene todos los usuarios del servidor de la universidad
-async function getUsuarios() {
-    try {
-        const result = await pool.query(`
-            SELECT * FROM sm_usuario;
-        `);
-        return result.rows;
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        return error;
-    }
-}
 
 async function getUsuarioServidor(rutUsuario) {
     try {
@@ -59,7 +47,9 @@ async function getUsuarioByRut(req) {
             }
         });
         const usuario = response.data.recordsets[0][0];
+
         usuario.nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+        
         return usuario;
     }
     catch (error) {
@@ -253,7 +243,6 @@ async function deletePreferenciaUsuario(rut, id) {
 }
 
 module.exports = {
-    getUsuarios,
     registrarUsuario,
     obtenerUsuariosPlataforma,
     getUsuarioByRut,

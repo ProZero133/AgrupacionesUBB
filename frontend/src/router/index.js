@@ -93,6 +93,11 @@ const routes = [
           name: 'Generar Informes',
           component: () => import('@/views/GenerarInformesView.vue'),
         },
+        {
+          path: 'ver_tags',
+          name: 'Ver Tags',
+          component: () => import('@/views/VerTagsView.vue'),
+        },
       ],
     },
     {

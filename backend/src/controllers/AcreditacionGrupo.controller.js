@@ -2,7 +2,7 @@
 
 const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificado } = require("../services/agrupacion.service.js");
 const { getAgrupacionById } = require("../services/agrupacion.service.js");
-const { getUsuarioByRut, getUsuarios } = require("../services/user.service.js");
+const { getUsuarioByRut, obtenerUsuariosPlataforma } = require("../services/user.service.js");
 const { notifyRechazo } = require("../services/mail.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
@@ -11,7 +11,7 @@ async function ObtenerAcreditaciones(req, reply) {
         const agrupacionesCompletas = await getAgrupaciones();
 
         // Obtiene todos los usuarios
-        const usuarios = await getUsuarios();
+        const usuarios = await obtenerUsuariosPlataforma();
 
         // combina las agrupaciones con los usuarios
         const Agrupaciones_y_Usuarios = agrupacionesCompletas.map(Agrupacion => {

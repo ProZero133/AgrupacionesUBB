@@ -23,7 +23,7 @@ module.exports = function(fastify, options, done) {
   fastify.get('/acreditaciones', { preHandler: [isAdmin] },ObtenerAcreditaciones);
   fastify.put('/aceptacionAcr/:id_agr', { preHandler: [isAdmin] },AceptacionAcreditaciondeGrupo);
   fastify.put('/rechazoAcr/:id_agr', { preHandler: [isAdmin] },RechazoAcreditaciondeGrupo);
-  fastify.get('/administracionderoles/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
+  fastify.get('/obtenerUsuariosAgrupacion/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
   fastify.get('/obtencionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },ObtenerRolUsuario); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
   fastify.put('/administracionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },CambiarRoldeUsuario); // Cambia el rol de un usuario en una agrupacion
   fastify.put('/aceptacionAct/:id_act', { preHandler: [isAdmin] },AceptacionActividad);

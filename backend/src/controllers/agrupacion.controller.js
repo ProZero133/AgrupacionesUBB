@@ -11,6 +11,7 @@ const { getUsuarioByRut } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
+const { validarUsuario } = require('../services/auth.service.js');
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -46,10 +47,10 @@ async function crearAgrupacion(req, res) {
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
         const rol = decoded.rol;
-        if(rut !== req.body.rut){
+        if (rut !== req.body.rut) {
             return res.code(401).send('Rut no pertece al usuario');
         }
-        if(rol !== 'Estudiante'){
+        if (rol !== 'Estudiante') {
             return res.code(401).send('No tienes permisos para crear una agrupacion')
         }
         if (error) {
@@ -76,10 +77,10 @@ async function editarAgrupacion(req, res) {
     try {
         // Obtiene el id de la agrupacion
         const id_agr = req.params.id_agr;
-        const lider=await getLiderArray(id_agr);
+        const lider = await getLiderArray(id_agr);
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
-        if(lider[0].rut !== rut){
+        if (lider[0].rut !== rut) {
             return res.code(401).send('No tienes permisos para editar la agrupacion')
         }
         const agrupacionactual = await getAgrupacionById(id_agr);
@@ -126,37 +127,43 @@ async function obtenerImagenAgrupacion(req, res) {
 
 async function unirseAgrupacion(req, res) {
     try {
+        // buscar al usuario en la base de datos
         const rut = req.params.rut;
         const id_agr = req.params.id_agr;
         const usuario = await getUsuarioByRut(rut);
-
-        if (usuario.length === 0) {
+        const usuarioCompleto = await validarUsuario(usuario.correo)
+        if (usuarioCompleto.length === 0) {
             return res.code(404).send('Usuario no encontrado');
         }
-        const agrupacion = await getAgrupacionById(id_agr);
-        if (agrupacion.length === 0) {
+
+        //buscar al lider de la agrupacion en la bdd
+        const Lider = await getLiderArray(id_agr);
+        const LiderCompleto = await getUsuarioByRut(Lider[0].rut);
+        if (Lider.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
 
-        const lider = await getUsuarioByRut(agrupacion.rut);
-        if (usuario.length === 0) {
-            return res.code(404).send('Lider no encontrado');
+        //buscar la agrupacion en la bdd
+        const agrupacionDatos = await getAgrupacionById(id_agr);
+        if (agrupacionDatos.length === 0) {
+            return res.code(404).send('Agrupación no encontrada');
         }
 
+        // crea el correo
         const result = await createSolicitud(rut, id_agr);
         if (!result) {
             return res.code(500).send('Error al enviar solicitud');
         }
 
         const mailDetails = {
-            rut: usuario[0].rut,
-            nombre: usuario[0].nombre,
-            lider_correo: lider[0].correo,
-            nombre_agr: agrupacion.nombre_agr,
-            carrera: usuario[0].carrera
+            rut: usuarioCompleto.usuario.rut,
+            nombre: usuarioCompleto.usuario.nombre,
+            lider_correo: LiderCompleto.correo,
+            nombre_agr: agrupacionDatos.nombre_agr,
+            carrera: usuarioCompleto.usuario.carrera
         };
 
-        const invitar = await integrateUsuario(mailDetails);
+        await integrateUsuario(mailDetails);
 
         res.code(201).send(result);
     } catch (error) {
@@ -207,9 +214,11 @@ async function ObtenerUsuariosdeAgrupacion(req, res) {
     try {
         const id = req.params.id_agr;
         const usuarios = await getUsuariosdeAgrupacion(id);
+
         if (usuarios.length === 0) {
             return res.code(404).send('No se encontraron usuarios');
         }
+
         res.code(200).send(usuarios);
     } catch (error) {
         console.error('Error al obtener los usuarios de la agrupación:', error);
@@ -310,9 +319,9 @@ async function ObtenerRolUsuario(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const rut = req.params.rut;
-        
+
         const rolUsr = await getRolUsuario(rut, id_agr);
-        
+
         res.code(200).send(rolUsr);
     } catch (error) {
         console.error('Error al obtener el rol del usuario:', error);
@@ -473,7 +482,7 @@ async function notificarMiembrosPublicacion(req, res) {
         }
 
         const infoRequest = await getPublicacionCorreos(publicacion.id_agr, id_pub);
-        
+
         publicacion.correos = infoRequest;
         publicacion.nombre_agr = agrupacion.nombre_agr;
 
@@ -531,9 +540,9 @@ async function ObtenerTagsAgrupacion(req, res) {
         const id_agr = req.params.id_agr;
         const tags = await getTagsAgrupacion(id_agr);
         if (tags.length === 0) {
-            return res.code(404).send('No se encontraron tags');
+            return 0;
         }
-     
+
         for (const tag of tags) {
             const tagInfo = await obtenerTagPorId(tag.id_tag);
             if (tagInfo.rows.length > 0) {

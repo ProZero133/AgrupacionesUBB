@@ -189,7 +189,7 @@ export default {
     async ObtenerIntegrantesAgrupaciones() {
       try {
         for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
-          const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
+          const response = await fetch(`${global.BACKEND_URL}/obtenerUsuariosAgrupacion/${agrupacion.id_agr}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

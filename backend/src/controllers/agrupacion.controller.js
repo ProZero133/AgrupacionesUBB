@@ -390,7 +390,8 @@ async function abandonarAgrupacion(req, res) {
 async function solicitarAcreditacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
-        const rut = req.params.rut;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
         const usuario = await getUsuarioByRut(rut);
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');
@@ -398,6 +399,10 @@ async function solicitarAcreditacion(req, res) {
         const agrupacion = await getAgrupacionById(id_agr);
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
+        }
+        const rutLider = agrupacion.rut;
+        if (rutLider !== rut) {
+            return res.code(401).send('No tienes permisos para solicitar la acreditación');
         }
         const result = await createSolicitarAcreditacion(id_agr, rut);
         if (!result) {

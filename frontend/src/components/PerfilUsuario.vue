@@ -333,6 +333,8 @@ export default {
                     body: JSON.stringify({ nombre_tag, rut: this.rut })
                 });
                 if (response.ok) {
+                    this.$root.showSnackBar('success', 'Tag creado', 'Operación exitosa');
+                    this.dialoTag = false;
                     const nuevoTag = await fetch(`${global.BACKEND_URL}/buscarTags/${nombre_tag}`);
                     if (!nuevoTag.ok) throw new Error('Error en la respuesta de la red');
                     const data = await nuevoTag.json();
@@ -348,6 +350,7 @@ export default {
                     this.dialoTag = false;
                     this.fetchSearchResults(this.searchQuery);
                 } else {
+                    this.dialoTag = false;
                     throw new Error('Error en la respuesta de la red');
                 }
             } catch (error) {

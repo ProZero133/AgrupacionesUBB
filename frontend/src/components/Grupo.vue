@@ -595,7 +595,7 @@ export default {
     ],
 
     headersSolicitudes: [
-      { title: 'Nombre', value: 'nombre', sortable: true },
+      { title: 'Nombre', value: 'nombres', sortable: true },
       { title: 'Rut', value: 'rut', sortable: true },
       { value: 'action', sortable: false },
     ],
@@ -1251,7 +1251,7 @@ export default {
               },
             });
             const dataUsuarioServidor = await respuestaUsuarioServidor.json();
-            solicitudes.push(dataUsuarioServidor);
+            solicitudes.push(dataUsuarioServidor[0]);
           }
           this.solicitudes = solicitudes;
 

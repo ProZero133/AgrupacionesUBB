@@ -90,7 +90,7 @@ async function RechazoAcreditaciondeGrupo(req, reply) {
         const usuario = await getUsuarioByRut(Lider.rut);
 
         const notificacion = {
-            nombre: usuario.user_nombre,
+            nombre: usuario.nombre,
             correo: usuario.correo,
             agrupacion: agrupa.nombre_agr,
             motivo: motivo,

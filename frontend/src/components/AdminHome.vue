@@ -63,28 +63,22 @@
   <v-tab-item value="usuariosSistema" v-if="tab === 'usuariosSistema'">
     <v-container>
       <v-row>
-        <v-container> </v-container>
-
-        <v-container class="Busqueda">
-          <v-toolbar dense floating class="search-bar">
-            <v-text-field v-model="searchQueryUsuarios" prepend-icon="mdi-magnify" hide-details single-line
-              placeholder="Nombre, Rut, Carrera o Correo electronico del usuario"></v-text-field>
-          </v-toolbar>
-        </v-container>
-
-        <v-divider></v-divider>
-
-        <v-virtual-scroll :items="filteredItemsUsuarios" item-height="73">
-          <template v-slot:default="{ item }">
-            <v-list-item :key="item.rutUsuario" :subtitle="item.rutUsuario + ' - ' + item.correoUsuario"
-              :title="item.carreraUsuario + ' - ' + item.nombreUsuario" v-if="searchQueryUsuarios !== ''">
-              <template v-slot:append>
-                <v-btn icon="mdi-account-group" size="small" variant="tonal"
-                  @click="ir_a_grupos_usuario(item.rutUsuario)"></v-btn>
-              </template>
-            </v-list-item>
+        <v-col cols="12">
+          <v-title style="font-size: 1.5rem; font-weight: bold;">Ingrese el correo de un usuario</v-title>
+          <v-text-field label="Ingrese nombre.apellido" v-model="valorTextBoxUsuario"
+            @keyup.enter="valorTextBoxUsuario.length >= 4 ? obteneralgo() : $root.showSnackBar('error', 'Ingrese minimo 4 caracteres')"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-data-table :headers="headersBuscadorUsuario" :items="usuariosBuscados" class="elevation-15"
+          @click:row="abrirUsuarioSeleccionado">
+          <template v-slot:item.correo="{ item }">
+            <v-chip color="primary" dark>{{ item.correo }}</v-chip>
           </template>
-        </v-virtual-scroll>
+          <template v-slot:item.action="{ item }">
+            <v-btn color="primary" @click="ir_a_grupos_usuario(item.rut)">Ver Grupos</v-btn>
+          </template>
+        </v-data-table>
       </v-row>
     </v-container>
   </v-tab-item>
@@ -115,13 +109,21 @@
   <!-- Dialogo para mostrar los grupos del usuario -->
   <v-dialog v-model="dialogUsuario" max-width="500">
     <v-card>
-      <v-card-title class="headline">Grupos del Usuario</v-card-title>
+      <v-card-title class="headline text-center">Grupos del Usuario</v-card-title>
+      <v-card-subtitle class="text-center">
+        Seleccione la agrupación a la que desea ir
+      </v-card-subtitle>
+
+      <v-divider></v-divider>
+      
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
           <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_agrupacion(grupo.id_agr)">
             <v-list-item-content>
+              
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
+              <v-divider></v-divider>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -184,6 +186,7 @@
 </template>
 
 <script>
+
 export default {
   data() {
     return {
@@ -198,6 +201,17 @@ export default {
       dialogAgrupacion: false, // Controla el diálogo para agrupaciones
       gruposUsuario: [], // Almacena los grupos del usuario seleccionado
       selectedAgrupacion: {}, // Almacena los detalles de la agrupación seleccionada
+
+      usuariosBuscados: [],
+      valorTextBoxUsuario: '',
+      headersBuscadorUsuario: [
+        { title: 'Nombres', value: 'nombres' },
+        { title: 'Primer Apellido', value: 'primer_apellido' },
+        { title: 'Segundo Apellido', value: 'segundo_apellido' },
+        { title: 'Correo', value: 'correo' },
+        { title: 'Rol', value: 'rol' },
+        { value: 'action', align: 'center' },
+      ],
     };
   },
   computed: {
@@ -215,10 +229,8 @@ export default {
       const search = this.searchQueryUsuarios.toLowerCase();
 
       return this.itemsUsuarios.filter(item =>
-        item.nombreUsuario.toLowerCase().includes(search) ||
         item.rutUsuario.toLowerCase().includes(search) ||
-        item.correoUsuario.toLowerCase().includes(search) ||
-        item.carreraUsuario.toLowerCase().includes(search)
+        item.rolUsuario.toLowerCase().includes(search)
       );
     }
   },
@@ -368,18 +380,31 @@ export default {
         });
         if (response.ok) {
           const data = await response.json();
+          console.log(data);
+
           this.itemsUsuarios = data.map(item => ({
-            nombreUsuario: item.nombre,
             rutUsuario: item.rut,
-            correoUsuario: item.correo,
-            carreraUsuario: item.carrera,
+            rolUsuario: item.rol,
           })).filter(item => item.rutUsuario !== '11.111.111-1'); // se pone el rut que no se muestre, en este caso, Jhon
+          console.log("this items usuarios", this.itemsUsuarios);
         } else {
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
       }
+    },
+
+    async BuscarUsuariosBDD() {
+
+      const response = await axios.post(`${API_ConectaUBB}/correoSubString`, {
+        correo: email
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
     },
 
     AbrirDialogAgrupacion(id) {
@@ -391,6 +416,7 @@ export default {
     },
 
     async ir_a_grupos_usuario(rut) {
+      console.log("RUT: ", rut);
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`, {
           method: 'GET',
@@ -418,6 +444,27 @@ export default {
 
     ir_a_agrupacion(idAgrupacion) {
       this.$router.push(`/api/grupo/${idAgrupacion}`);
+    },
+
+    async obteneralgo() {
+      // llama a la ruta /correoSubString/:correo
+      const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+        body: JSON.stringify({
+          correo: this.valorTextBoxUsuario,
+        }),
+      });
+
+      if (response.ok) {
+        this.usuariosBuscados = [];
+        this.usuariosBuscados = await response.json();
+      } else {
+        console.error('No se encontraron usuarios:', response.status);
+      }
     },
   },
 

@@ -230,12 +230,8 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/aceptacionAcr/${Agrupacion_a_Aceptar.id_agr}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
-          body: JSON.stringify({
-            verificado: 'Verificado',
-          }),
         });
 
         if (response.ok) {
@@ -260,7 +256,6 @@ export default {
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
-            verificado: 'Noverificado',
             motivo: motivo,
           }),
         });

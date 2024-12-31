@@ -3,7 +3,7 @@
 const { getAgrupaciones, updateAgrupacionVerificado, updateAgrupacionNoVerificado } = require("../services/agrupacion.service.js");
 const { getAgrupacionById } = require("../services/agrupacion.service.js");
 const { getUsuarioByRut, obtenerUsuariosPlataforma } = require("../services/user.service.js");
-const { notifyRechazo } = require("../services/mail.service.js");
+const { notifyAcreditacion } = require("../services/mail.service.js");
 const { getLider } = require("../services/agrupacion.service.js");
 
 async function ObtenerAcreditaciones(req, reply) {
@@ -42,11 +42,19 @@ async function ObtenerAcreditaciones(req, reply) {
 async function AceptacionAcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
+        const decoded = await req.jwtVerify();
+        const rol = decoded.rol;
+        if (rol !== 'Admin') {
+            reply.code(403).send({ error: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
         const id = req.params.id_agr;
-        const verificado = req.body.verificado;
-
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
         const agrupa = await getAgrupacionById(id);
+        if(agrupa.verificado !== 'Pendiente'){
+            reply.code(400).send('La agrupación no está pendiente de acreditación');
+            return;
+        }
         const Lider = await getLider(agrupa.id_agr);
         const usuario = await getUsuarioByRut(Lider.rut);
 
@@ -54,11 +62,11 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
             nombre: usuario.nombre,
             correo: usuario.correo,
             agrupacion: agrupa.nombre_agr,
-            verificado: verificado
+            verificado: 'Verificado'
         };
 
         //Se notifica al usuario que su acreditación fue rechazada
-        const notifica = await notifyRechazo(notificacion);
+        const notifica = await notifyAcreditacion(notificacion);
 
         try {
             const notificado = await updateAgrupacionVerificado(id);
@@ -80,12 +88,21 @@ async function AceptacionAcreditaciondeGrupo(req, reply) {
 async function RechazoAcreditaciondeGrupo(req, reply) {
     try {
         // se obtiene el id de la agrupacion
+        const decoded = await req.jwtVerify();
+        const rol = decoded.rol;
+        if (rol !== 'Admin') {
+            reply.code(403).send({ error: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
         const id = req.params.id_agr;
-        const verificado = req.body.verificado;
         const motivo = req.body.motivo;
 
         //Primero, se busca la agrupacion con el id especificado, para obtener su rut
         const agrupa = await getAgrupacionById(id);
+        if(agrupa.verificado !== 'Pendiente'){
+            reply.code(400).send('La agrupación no está pendiente de acreditación');
+            return;
+        }
         const Lider = await getLider(agrupa.id_agr);
         const usuario = await getUsuarioByRut(Lider.rut);
 
@@ -94,11 +111,11 @@ async function RechazoAcreditaciondeGrupo(req, reply) {
             correo: usuario.correo,
             agrupacion: agrupa.nombre_agr,
             motivo: motivo,
-            verificado: verificado
+            verificado: 'Noverificado'
         };
 
         //Se notifica al usuario que su acreditación fue rechazada
-        const notifica = await notifyRechazo(notificacion);
+        const notifica = await notifyAcreditacion(notificacion);
 
         try {
             const notificado = await updateAgrupacionNoVerificado(id);

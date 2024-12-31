@@ -159,7 +159,7 @@ async function integrateUsuario(mailDetails) {
     return results;
 }
 
-async function notifyRechazo(mailDetails) {
+async function notifyAcreditacion(mailDetails) {
 
     let templatePath;
     let sujeto;
@@ -295,7 +295,7 @@ module.exports = {
     notifyPublicacion,
     inviteUsuario,
     integrateUsuario,
-    notifyRechazo,
+    notifyAcreditacion,
     createNotificacion,
     getNotificacionesUsuario,
     deleteNotificacionesUsuario,

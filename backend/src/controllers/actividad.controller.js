@@ -19,6 +19,7 @@ const {
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById } = require('../services/agrupacion.service.js');
+const { getUsuarioByRut, obtenerUsuarioPlataforma } = require('../services/user.service.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -177,17 +178,17 @@ async function eliminarActividad(req, res) {
         const id_act = req.params.id_act;
         const rut = req.params.rut;
         const actividad = await getActividadById(id_act);
-        
+
         if (actividad.length === 0) {
             return res.send({ success: false, message: 'No se encontro la actividad' });
         }
         
         const lider = await getLider(actividad.rows[0].id_agr);
+        const rut_usuario = await getUsuarioByRut(rut);
+        const rol_usuario = await obtenerUsuarioPlataforma(rut);
 
-        console.log(lider.rut);
-
-        if (rut !== lider.rut) {
-            return res.send({ success: false, message: 'No eres el lider de la agrupacion' });
+        if (rut !== lider.rut && rol_usuario[0].rol !== 'Admin') {
+            return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
         // Elimina la actividad
         await deleteActividad(id_act);

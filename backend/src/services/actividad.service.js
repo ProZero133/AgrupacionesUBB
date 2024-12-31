@@ -103,7 +103,7 @@ async function getActividadesByAgrupacion(id_agr) {
                 i--;
             }
         }
-        
+
         // Retorna las actividades
         return actividades.rows;
     }
@@ -124,7 +124,7 @@ async function getFechasActividades(id_agr) {
 
 async function getFechaActividad(id_act) {
     try {
-        const fechaActividad = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_act = $1', [id_act]);
+        const fechaActividad = await pool.query('SELECT * FROM "Programa" WHERE id_act = $1', [id_act]);
         return fechaActividad.rows[0];
     }
     catch (error) {
@@ -215,22 +215,24 @@ async function deleteActividad(id) {
         //Validar que la actividad aun no ocurra
         const fechasActividades = await getFechaActividad(id);
         const fechaActual = new Date();
-        
-        if (fechaActual > fechasActividades.fecha_actividad) {
-            return 'No es posible eliminar una actividad que ya ocurrio';
+
+
+        if (fechasActividades !== undefined) {
+            if (fechaActual > fechasActividades.fecha_actividad) {
+                return 'No es posible eliminar una actividad que ya ocurrio';
+            }
         }
         const cantidadParticipantes = await getParticipantesActividad(id);
         if (cantidadParticipantes.length > 1) {
             await softDeleteActividad(id);
         }
         else {
-        const del = await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id]);
-        const delProg = await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id]);
-        const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+            const del = await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id]);
+            const delProg = await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id]);
+            const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
         }
 
     } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la actividad:', error);
         throw error;
     }
@@ -269,7 +271,7 @@ async function getActividadesByGrupoUsuario(rut) {
             WHERE tipo = false AND id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
         `, [rut]);
         // Elimina las actividades que tengan visible en false
-    
+
         for (let i = 0; i < actividades.rows.length; i++) {
             if (actividades.rows[i].visible === false) {
                 actividades.rows.splice(i, 1);
@@ -277,7 +279,7 @@ async function getActividadesByGrupoUsuario(rut) {
             }
         }
 
-           
+
         if (actividades.rows.length === 0) {
             return [];
         }
@@ -347,9 +349,9 @@ async function deletePrograma(id_act) {
         const fechaPrograma = await pool.query('SELECT * FROM "Programa" WHERE id_act = $1', [id_act]);
 
         await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id_act]);
-        
+
         // Retorna un mensaje de éxito como json
-        return { success: true, message: 'Programa eliminado de la actividad', fechaPrograma};
+        return { success: true, message: 'Programa eliminado de la actividad', fechaPrograma };
 
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
@@ -394,5 +396,5 @@ module.exports = {
     deletePrograma,
     getActividadesPublicas,
     softDeleteActividad
-    
+
 };

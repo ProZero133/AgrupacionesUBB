@@ -380,7 +380,6 @@ export default {
         });
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
 
           this.itemsUsuarios = data.map(item => ({
             rutUsuario: item.rut,

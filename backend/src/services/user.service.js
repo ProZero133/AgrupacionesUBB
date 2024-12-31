@@ -250,6 +250,7 @@ module.exports = {
     getCorreoSubstring,
     getTagsSimilares,
     getPreferenciasUsuario,
+    obtenerUsuarioPlataforma,
     updatePreferenciasUsuario,
     getTagById,
     getUsuarioServidor,

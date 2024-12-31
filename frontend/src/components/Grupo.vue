@@ -1683,7 +1683,7 @@ export default {
       }
       // Cerrar dialog
       this.dialogPub = false;
-      // window.location.reload();
+      window.location.reload();
       await this.VerActividades();
     },
 

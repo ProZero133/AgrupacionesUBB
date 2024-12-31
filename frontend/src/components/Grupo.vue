@@ -362,7 +362,9 @@
               <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
             <v-col cols="6">
-              <v-btn :disabled="elemento.participantes >= elemento.cupos" :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+                <v-btn v-if="this.rol!='Admin'" :disabled="elemento.participantes >= elemento.cupos"
+                :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text
+                @click="ParticiparActividad(elemento.id)">Participar</v-btn>
               <v-icon :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" class="ml-2">
                 mdi-account-circle-outline
               </v-icon>
@@ -414,7 +416,7 @@
   <!-- Botón de Crear Actividad o Publicación -->
   <VLayoutItem v-if="rolA" model-value position="bottom" class="text-end pointer-events-none" size="120">
     <div class="ma-9 pointer-events-initial">
-      <v-menu>
+      <v-menu v-if="rol !== 'Admin'">
         <template v-slot:activator="{ props: menu }">
           <v-tooltip location="start">
             <template v-slot:activator="{ props: tooltip }">
@@ -742,7 +744,7 @@ export default {
 
     async ObtenerUsuariosDeAgrupacion() {
       try {
-        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}`;
+        const url = `${global.BACKEND_URL}/obtenerUsuariosAgrupacion/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -754,7 +756,9 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
-          this.MiembrosdeAgr = filtrada;  // Solo asigna los datos filtrados
+          this.MiembrosdeAgr = filtrada; 
+
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -813,8 +817,13 @@ export default {
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {
-        this.$root.showSnackBar('error', 'Seguro que eres parte de este grupo?', 'Error de carga de datos');
-        console.error('Error al obtener el rol:', error);
+        if (this.rol === 'Admin') {
+          return;
+        } else {
+          this.$root.showSnackBar('error', 'Seguro que eres parte de este grupo?', 'Error de carga de datos');
+          console.error('Error al obtener el rol:', error);
+        }
+
       }
     },
 
@@ -1674,9 +1683,10 @@ export default {
       }
       // Cerrar dialog
       this.dialogPub = false;
-      window.location.reload();
+      // window.location.reload();
       await this.VerActividades();
     },
+
     async puedeEliminarElemento() {
       await this.esMiembro();
       const rolPlataforma = this.rol

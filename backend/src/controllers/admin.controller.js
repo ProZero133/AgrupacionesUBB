@@ -1,7 +1,7 @@
-const { getUsuarios, obtenerUsuariosPlataforma, getCorreoSubstring } = require('../services/user.service');
+const { obtenerUsuariosPlataforma, getCorreoSubstring } = require('../services/user.service');
 
 async function ObtenerUsuarios(request, reply) {
-    const resultUsuarios = await getUsuarios();
+    const resultUsuarios = await obtenerUsuariosPlataforma();
     if (resultUsuarios.length === 0) {
         return reply.send({ success: false, message: 'No se encontraron usuarios' });
     }

@@ -174,6 +174,7 @@ async function notifyRechazo(mailDetails) {
     } else {
         templatePath = path.join(__dirname, '../mails/rechazoCorreo.html');
         replacements = {
+            nombre: mailDetails.correo,
             agrupacion: mailDetails.agrupacion,
             motivo: mailDetails.motivo,
         };

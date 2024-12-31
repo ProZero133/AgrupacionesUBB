@@ -150,6 +150,7 @@ async function getUsuariosdeAgrupacion(id) {
         const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);
         usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
         usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
+        usuariosPlataforma.rows[i].correo = usuario.correo;
       }
     }
     return usuariosPlataforma.rows;

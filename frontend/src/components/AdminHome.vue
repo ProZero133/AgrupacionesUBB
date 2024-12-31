@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar color="primary">
+  <v-toolbar color="#014898">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-account-group" value="agrupaciones">Agrupaciones</v-tab>
@@ -25,13 +25,16 @@
 
         <v-col cols="12" md="6" lg="3" v-for="(item, index) in filteredItemsAgrupaciones" :key="index">
           <v-card class="gruposCard" max-width="400" @click="AbrirDialogAgrupacion(item.idAgrupacion)">
+            <v-sheet :color="item.visible === false ? 'grey' : (item.verificado === 'Verificado' ? 'green' : '#014898')"
+              height="8"></v-sheet>
             <v-img class="align-end text-white" height="200" :src="item.img" cover
+              :style="{ filter: item.visible === false ? 'grayscale(100%)' : 'none' }"
               gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
               <v-card-title>{{ item.title }}</v-card-title>
             </v-img>
             <v-card-subtitle class="pt-4">
               <div class="d-flex justify-space-between">
-                <div>Estado grupo: {{ item.verificado }}</div>
+                <div>Estado grupo: {{ item.visible === false ? 'invisible' : item.verificado }}</div>
                 <div>
                   <v-icon small :color="item.integrantes === 0 ? 'red' : 'primary'">mdi-account-multiple</v-icon>
                   {{ item.integrantes || 0 }}
@@ -91,9 +94,13 @@
     <v-card>
       <v-card-title class="headline">{{ selectedAgrupacion.title }}</v-card-title>
       <v-card-text>
-        <v-img :src="selectedAgrupacion.img" height="300" cover></v-img>
+        <v-img :src="selectedAgrupacion.img" height="300" cover
+          :style="{ filter: selectedAgrupacion.visible === false ? 'grayscale(100%)' : 'none' }"
+          gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
+        </v-img>
         <v-divider></v-divider>
-        <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.verificado }}</p>
+        <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.visible === false ? 'invisible' :
+          selectedAgrupacion.verificado }}</p>
         <p><strong>Cantidad de Integrantes:</strong> {{ selectedAgrupacion.integrantes || 0 }}</p>
         <p><strong>Descripción:</strong></p>
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
@@ -259,10 +266,13 @@ export default {
           const data = await response.json();
           return data;
         } else {
-          console.error('No se encontraron Tags para la agrupación', response.status);
+          return [];
         }
       } catch (error) {
-        console.error('Error al hacer fetch:', error);
+        if (error.response && error.response.status === 404) {
+        } else {
+          console.error('Error al hacer fetch:', error);
+        }
       }
     },
 
@@ -288,9 +298,12 @@ export default {
               img: item.imagen,
               idAgrupacion: item.id_agr,
               integrantes: item.integrantes,
+              visible: item.visible,
               tags: tags, // Almacena los tags en cada agrupación
             };
           }));
+
+
 
           await this.ObtenerIntegrantesAgrupaciones();
 
@@ -325,10 +338,9 @@ export default {
     async ObtenerIntegrantesAgrupaciones() {
       try {
         for (const agrupacion of this.itemsAgr) {
-          const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.idAgrupacion}`, {
+          const response = await fetch(`${global.BACKEND_URL}/obtenerUsuariosAgrupacion/${agrupacion.idAgrupacion}`, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
           });
@@ -348,12 +360,12 @@ export default {
     async BuscarUsuarios() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/usuarios`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-            },
-          });
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           this.itemsUsuarios = data.map(item => ({
@@ -381,12 +393,12 @@ export default {
     async ir_a_grupos_usuario(rut) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-            },
-          });
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           this.gruposUsuario = data.map(item => ({

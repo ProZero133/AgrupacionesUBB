@@ -119,7 +119,6 @@ export default {
         { title: 'Nombre Agrupacion', value: 'nombre_agr', sortable: true },
         { title: 'Cantidad de Integrantes', value: 'integrantes', sortable: true },
         { title: 'Líder de Agrupacion', value: 'nombre', sortable: true },
-        { title: 'RUT líder', value: 'rut', sortable: true },
         { title: 'Correo líder', value: 'correo', sortable: true },
         { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true },
         { value: 'action', sortable: false },
@@ -176,7 +175,11 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.AgrupacionesPendientesObtenidas = data;
-          await this.ObtenerIntegrantesAgrupaciones();
+          for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
+            await this.ObtenerUsuariosDeAgrupacion(agrupacion.id_agr);
+          }
+
+
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -186,41 +189,33 @@ export default {
       }
     },
 
-    async ObtenerIntegrantesAgrupaciones() {
+    //funciones de agrupacion
+    async ObtenerUsuariosDeAgrupacion(id_agr) {
       try {
-        for (const agrupacion of this.AgrupacionesPendientesObtenidas) {
-          const response = await fetch(`${global.BACKEND_URL}/administracionderoles/${agrupacion.id_agr}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            agrupacion.integrantes = data.length;
-          } else {
-            console.error('Error en la respuesta:', response.status);
-          }
-        }
-      } catch (error) {
-        console.error('Error al hacer fetch:', error);
-      }
-    },
-
-    async ObtenerActividadesPendientes() {
-      try {
-        const response = await fetch(`${global.BACKEND_URL}/ActAgr`, {
+        const url = `${global.BACKEND_URL}/obtenerUsuariosAgrupacion/${id_agr}`;
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
+
         if (response.ok) {
           const data = await response.json();
-          this.ActividadesPendientesObtenidas = data.filter(item => item.tipo === true && item.aprobado === false);
-
+          const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
+          this.MiembrosdeAgr = filtrada;
+            this.AgrupacionesPendientesObtenidas = this.AgrupacionesPendientesObtenidas.map((item) => {
+            if (item.id_agr === id_agr) {
+              item.integrantes = filtrada.length;
+              const lider = filtrada.find((usuario) => usuario.rol_agr === 'Lider');
+              if (lider) {
+              item.nombre = lider.user_nombre;
+              item.correo = lider.correo;
+              }
+            }
+            return item;
+            });
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -255,11 +250,7 @@ export default {
         this.showSnackbar('Error al aceptar la agrupación', 'error');
       }
     },
-    openRechazarDialog(id_agr) {
-      this.selectedId = id_agr;
-      this.motivoRechazo = '';
-      this.rechazarDialog = true;
-    },
+
     async RechazarAgrupacion(id_agr, motivo) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/rechazoAcr/${id_agr}`, {
@@ -288,6 +279,56 @@ export default {
       }
     },
 
+    openRechazarDialog(id_agr) {
+      this.selectedId = id_agr;
+      this.motivoRechazo = '';
+      this.rechazarDialog = true;
+    },
+    // Funciones de actividad
+    async ObtenerActividadesPendientes() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/ActAgr`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.ActividadesPendientesObtenidas = data.filter(item => item.tipo === true && item.aprobado === false);
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async CreadorActividad(id_act) {
+      const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/obtenerCreador/${Actividad_a_Aceptar.id_act}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (response.ok) {
+          const creadorActData = await response.json();
+          return creadorActData; // Devuelve los datos del creador
+        } else {
+          console.error('Error en la respuesta:', response.status);
+          return null; // Devuelve null en caso de error
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+        return null; // Devuelve null en caso de error
+      }
+    },
+
     async AceptarActividad(id_act) {
       try {
         const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
@@ -312,29 +353,6 @@ export default {
       } catch (error) {
         console.error('Error al hacer fetch:', error);
         this.showSnackbar('Error al aceptar la actividad', 'error');
-      }
-    },
-
-    async CreadorActividad(id_act) {
-      const Actividad_a_Aceptar = this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
-      try {
-        const response = await fetch(`${global.BACKEND_URL}/obtenerCreador/${Actividad_a_Aceptar.id_act}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-          },
-        });
-        if (response.ok) {
-          const creadorActData = await response.json();
-          return creadorActData; // Devuelve los datos del creador
-        } else {
-          console.error('Error en la respuesta:', response.status);
-          return null; // Devuelve null en caso de error
-        }
-      } catch (error) {
-        console.error('Error al hacer fetch:', error);
-        return null; // Devuelve null en caso de error
       }
     },
 

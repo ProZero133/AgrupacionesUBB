@@ -18,7 +18,7 @@ const {
     getActividadesPublicas
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
-const { getLider } = require('../services/agrupacion.service.js');
+const { getLider, getLiderArray, getRolUsuario, getAgrupacionById } = require('../services/agrupacion.service.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -65,6 +65,19 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener actividades' });
     }
 }
+async function obtenerTimestamp() {
+    const ahora = new Date();
+    const opcionesFecha = { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' };
+    const opcionesHora = { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    const formatoFecha = new Intl.DateTimeFormat('en-CA', opcionesFecha).format(ahora);
+    const partesHora = new Intl.DateTimeFormat('en-GB', opcionesHora).formatToParts(ahora);
+    const hora = partesHora.find((p) => p.type === 'hour').value;
+    const minutos = partesHora.find((p) => p.type === 'minute').value;
+    const segundos = partesHora.find((p) => p.type === 'second').value;
+    const milisegundos = ahora.getMilliseconds().toString().padStart(3, '0');
+    const timestamp = `${formatoFecha} ${hora}:${minutos}:${segundos}.${milisegundos}`;
+    return timestamp;
+}
 
 async function crearActividad(req, reply) {
     try {
@@ -72,10 +85,26 @@ async function crearActividad(req, reply) {
 
         const { body } = req;
         const { error, value } = actividadBodySchema.validate(body);
+        const timestamp = await obtenerTimestamp();
+        body.fecha_creacion = timestamp;
 
-        // No es necesario convertir la imagen de base64 a hexadecimal
-        // Si la imagen está en base64 y es una cadena, se puede dejar tal cual
-        if (body.imagen && typeof body.imagen === 'string') {
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const lider = await getLiderArray(body.id_agr);
+        const rol = await getRolUsuario(rut, body.id_agr).rol_agr;
+        const agrupacion = await getAgrupacionById(body.id_agr);
+        if(agrupacion.length === 0){
+            return reply.send({ success: false, message: 'No se encontro la agrupacion' });
+        }
+        if(agrupacion.verificado !== 'Verificado' && body.tipo === true){
+            return reply.send({ success: false, message: 'La agrupacion no esta acreditada' });
+        }
+        if (rut !== lider[0].rut && rol !== 'Miembro oficial') {
+            return reply.send({ success: false, message: 'No tienes permisos para crear actividades' });
+        }
+
+        if(rol === 'Miembro oficial' && body.tipo === false){
+            return reply.send({ success: false, message: 'No tienes permisos para crear actividades publicas' });
         }
 
         if (error) {
@@ -278,7 +307,7 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
 async function ParticipantesActividad(req, res) {
     try {
         const id_act = req;
-    
+
         const participantes = await getParticipantesActividad(id_act);
         return participantes;
     } catch (error) {
@@ -289,7 +318,7 @@ async function ParticipantesActividad(req, res) {
 async function obtenerParticipantesActividad(req, res) {
     try {
         const { id_act } = req.params;
-    
+
         const participantes = await getParticipantesActividad(id_act);
         if (participantes.length === 0) {
             return res.send({ success: false, message: 'No se encontraron participantes' });

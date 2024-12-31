@@ -306,7 +306,7 @@ export default {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
             },
-            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos, fecha_creacion: hoy }),
+            body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
           });
           // Verifica si la respuesta es exitosa
           if (response.ok) {

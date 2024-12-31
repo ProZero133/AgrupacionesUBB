@@ -42,8 +42,8 @@ module.exports = function (fastify, options, done) {
   fastify.post('/participar/:id_act/:rut', { preHandler: [isUser] },participarActividad);
   fastify.post('/actividades',{ preHandler: [isUser] }, crearActividad);
   fastify.put('/actividades/:id', { preHandler: [isUser] },updateActividad);
-  fastify.delete('/actividades/:id_act/:rut', { preHandler: [isUserOrAdmin] },eliminarActividad);
-  fastify.delete('/borrarActividades/:id_act/:rut', { preHandler: [isUserOrAdmin] },eliminarActividadPublica);
+  fastify.delete('/actividades/:id_act', { preHandler: [isUserOrAdmin] },eliminarActividad);
+  fastify.delete('/borrarActividades/:id_act/:rut', { preHandler: [isAdmin] },eliminarActividadPublica);
   fastify.get('/obtenerCreador/:id_act', { preHandler: [isUserOrAdmin] },ObtenerCreadorActividad);
   fastify.delete('/rechazarActividad/:id_act', { preHandler: [isAdmin] },rechazarActividad);
   fastify.get('/actividadesparticipante/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipante);

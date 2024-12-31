@@ -405,6 +405,9 @@ async function solicitarAcreditacion(req, res) {
             return res.code(401).send('No tienes permisos para solicitar la acreditación');
         }
         const result = await createSolicitarAcreditacion(id_agr, rut);
+        if (typeof result !== 'object') {
+            return res.code(400).send(result);
+        }
         if (!result) {
             return res.code(500).send('Error al enviar solicitud');
         }

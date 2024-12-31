@@ -18,7 +18,7 @@ const {
     getActividadesPublicas
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
-const { getLider, getLiderArray, getRolUsuario, getAgrupacionById } = require('../services/agrupacion.service.js');
+const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
 const { getUsuarioByRut, obtenerUsuarioPlataforma } = require('../services/user.service.js');
 
 async function ObtenerActividades(req, res) {
@@ -88,7 +88,6 @@ async function crearActividad(req, reply) {
         const { error, value } = actividadBodySchema.validate(body);
         const timestamp = await obtenerTimestamp();
         body.fecha_creacion = timestamp;
-
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
         const lider = await getLiderArray(body.id_agr);
@@ -176,7 +175,8 @@ async function eliminarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
-        const rut = req.params.rut;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
         const actividad = await getActividadById(id_act);
 
         if (actividad.length === 0) {
@@ -184,9 +184,7 @@ async function eliminarActividad(req, res) {
         }
         
         const lider = await getLider(actividad.rows[0].id_agr);
-        const rut_usuario = await getUsuarioByRut(rut);
         const rol_usuario = await obtenerUsuarioPlataforma(rut);
-
         if (rut !== lider.rut && rol_usuario[0].rol !== 'Admin') {
             return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
@@ -207,7 +205,12 @@ async function eliminarActividadPublica(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
-
+        const decoded = req.jwtVerify();
+        const adminRut = decoded.rut;
+        const administrador = await obtenerUsuarioPlataforma(adminRut);
+        if (administrador[0].rol !== 'Admin') {
+            return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
+        }
         const actividad = await getActividadById(id_act);
 
         if (actividad.length === 0) {
@@ -252,9 +255,19 @@ async function programarActividad(req, res) {
         const id_agr = req.params.id_agr;
         const fecha_actividad = req.body.fecha_actividad;
         // Programa la actividad
-        const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
+        const decoded = await req.jwtVerify();
+        const rutActual = decoded.rut;
         const lider = await getLider(id_agr);
         const rut = lider.rut;
+        const rol = await getRolUsuario(rutActual, id_agr).rol_agr;
+        const act = await getActividadById(id_act);
+        if (act.length === 0) {
+            return res.send({ success: false, message: 'No se encontro la actividad' });
+        }
+        if (rutActual !== rut && rol !== 'Miembro oficial') {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para programar la actividad' });
+        }
+        const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         await setParticipanteActividad(id_act, rut);
 
         // Retorna la actividad programada

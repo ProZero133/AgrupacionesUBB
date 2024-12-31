@@ -112,6 +112,16 @@ async function obtenerUsuarioPlataforma(rut) {
     }
 }
 
+async function obtenerAdministradoresPlataforma() {
+    try {
+        const result = await pool.query(`SELECT * FROM usuario WHERE rol = 'Admin';`);
+        return result.rows;
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
 // Registra un usuario en la plataforma
 async function registrarUsuario(rut, rol) {
     try {
@@ -256,5 +266,6 @@ module.exports = {
     getUsuarioServidor,
     deletePreferenciaUsuario,
     registrarAdministrador,
-    eliminarAdministrador
+    eliminarAdministrador,
+    obtenerAdministradoresPlataforma
 };

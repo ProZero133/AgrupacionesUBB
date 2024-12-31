@@ -1607,7 +1607,7 @@ export default {
     async eliminarElemento(elemento) {
       if (elemento.tipo_elemento === 'actividad') {
         try {
-          const url = `${global.BACKEND_URL}/actividades/${elemento.id}/${this.rut}`;
+          const url = `${global.BACKEND_URL}/actividades/${elemento.id}`;
           const response = await fetch(url, {
             method: 'DELETE',
             headers: {

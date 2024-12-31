@@ -32,15 +32,15 @@ function loadHtmlTemplate(filePath, replacements) {
 async function notifyPublicacion(publicacion) {
     let oldPub = publicacion.tipoPub;
 
-    if (publicacion.tipoPub == 'post'){
+    if (publicacion.tipoPub == 'post') {
         oldPub = 'Nuevo post';
-    } else if (publicacion.tipoPub == 'formulario'){
+    } else if (publicacion.tipoPub == 'formulario') {
         oldPub = 'Nuevo formulario';
     }
 
-    if (publicacion.tipoPub == 'post'){
+    if (publicacion.tipoPub == 'post') {
         publicacion.tipoPub = 'un nuevo post';
-    } else if (publicacion.tipoPub == 'formulario'){
+    } else if (publicacion.tipoPub == 'formulario') {
         publicacion.tipoPub = 'un nuevo formulario';
     }
     const templatePath = path.join(__dirname, '../mails/mailPublicacion.html');
@@ -165,7 +165,7 @@ async function notifyRechazo(mailDetails) {
     let sujeto;
     let replacements;
 
-    if (mailDetails.verificado == 'Verificado'){
+    if (mailDetails.verificado == 'Verificado') {
         templatePath = path.join(__dirname, '../mails/aprueboCorreo.html');
         replacements = {
             agrupacion: mailDetails.agrupacion,
@@ -200,6 +200,41 @@ async function notifyRechazo(mailDetails) {
     }
 
     return results;
+}
+
+async function notifySolicitudAcritacion(mailDetails) {
+    let templatePath;
+    let sujeto;
+    let replacements;
+
+    templatePath = path.join(__dirname, '../mails/mailSolicitudAcreditacion.html');
+    replacements = {
+        nombre: mailDetails.nombre,
+        correo: mailDetails.correo,
+        agrupacion: mailDetails.agrupacion,
+        motivo: mailDetails.motivo,
+    };
+    sujeto = 'Nueva solicitud de acreditación ' + mailDetails.agrupacion;
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaubb@gmail.com>',
+        to: mailDetails.correo,
+        subject: sujeto,
+        html: htmlBody
+    };
+
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.correo}`, info: info });
+    } catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
+    }
+
+    return results;
+
 }
 
 async function createNotificacion(rut, titulo, descripcion) {
@@ -263,5 +298,6 @@ module.exports = {
     notifyRechazo,
     createNotificacion,
     getNotificacionesUsuario,
-    deleteNotificacionesUsuario
+    deleteNotificacionesUsuario,
+    notifySolicitudAcritacion
 };

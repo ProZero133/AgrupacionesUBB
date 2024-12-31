@@ -1,6 +1,7 @@
 const { pool } = require('../db.js');
 const { getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad } = require('../services/actividad.service.js');
-const { getUsuarioByRut } = require('../services/user.service.js');
+const { getUsuarioByRut, obtenerAdministradoresPlataforma } = require('../services/user.service.js');
+const { notifySolicitudAcritacion } = require('../services/mail.service.js');
 const axios = require('axios');
 const config = require('../config/configEnv.js');
 const API_ConectaUBB = config.API_ConectaUBB;
@@ -59,7 +60,19 @@ async function createSolicitarAcreditacion(id_agr, rut) {
   try {
     const agrupacion = await getAgrupacionById(id_agr);
     const usuario = await getUsuarioByRut(rut);
-
+    const nombre=usuario.nombre;
+    const ListaAdministradores = await obtenerAdministradoresPlataforma();
+    // Obtener correo de los administradores desde API ConectaUBB
+    for (let i = 0; i < ListaAdministradores.length; i++) {
+      const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+        rut: ListaAdministradores[i].rut
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      ListaAdministradores[i].correo = response.data.recordsets[0][0].correo;
+    }
     if (!agrupacion) {
       return 'La agrupación no existe';
     }
@@ -87,6 +100,15 @@ async function createSolicitarAcreditacion(id_agr, rut) {
         id_agr
       ]
     );
+    // Notificar a los administradores
+    for (let i = 0; i < ListaAdministradores.length; i++) {
+      const notificacion = {
+        nombre: nombre,
+        correo: ListaAdministradores[i].correo,
+        agrupacion: agrupacion.nombre_agr,
+    };
+    const notifica = await notifySolicitudAcritacion(notificacion);
+    }
     // Retorna la agrupación actualizada
     return NuevosDatosAgrupacion.rows[0];
   } catch (error) {
@@ -143,8 +165,8 @@ async function updateAgrupacionNoVerificado(id) {
 
 async function getUsuariosdeAgrupacion(id) {
   try {
-    // Obtiene los usuarios de la agrupación con el id especificado
-    const usuariosPlataforma = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1', [id]);
+    // Obtiene los usuarios de la agrupación con el id especificado donde el rol sea distinto de 'Pendiente'
+    const usuariosPlataforma = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr != $2', [id, 'Pendiente']);
     for (let i = 0; i < usuariosPlataforma.rows.length; i++) {
       if (usuariosPlataforma.rows[i].rut != '11.111.111-1') {
         const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);

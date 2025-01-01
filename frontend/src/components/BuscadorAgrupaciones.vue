@@ -180,22 +180,23 @@ export default {
         const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo`, {
           method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
           body: JSON.stringify({
             codigo: this.codigo,
           }),
         });
-
+        const data = await response.json();
         // Verifica si la respuesta es exitosa
         if (response.ok) {
-          // Convierte la respuesta en formato JSON
-          const data = await response.json();
-
+          this.dialogIngresar = false;
           this.$root.showSnackBar('success', "Bienvenido al grupo!", 'Código canjeado con éxito.');
-          this.$router.push('/api/grupo/' + data.id_agr);
+          this.$router.push('/api/grupo/' + data.data.id_agr);
 
         } else {
+          this.dialogIngresar = false;
+          this.$root.showSnackBar('error', data.message, 'Código inválido o ya canjeado.');
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {

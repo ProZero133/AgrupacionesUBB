@@ -755,7 +755,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente' & item.rut !== "11.111.111-1");
+          const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
           this.MiembrosdeAgr = filtrada; 
 
 

@@ -386,8 +386,7 @@ export default {
           this.itemsUsuarios = data.map(item => ({
             rutUsuario: item.rut,
             rolUsuario: item.rol,
-          })).filter(item => item.rutUsuario !== '11.111.111-1'); // se pone el rut que no se muestre, en este caso, Jhon
-          console.log("this items usuarios", this.itemsUsuarios);
+          })); // se pone el rut que no se muestre, en este caso, Jhon
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -417,7 +416,6 @@ export default {
     },
 
     async ir_a_grupos_usuario(rut) {
-      console.log("RUT: ", rut);
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${rut}`, {
           method: 'GET',

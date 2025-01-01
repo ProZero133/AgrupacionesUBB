@@ -1,4 +1,5 @@
 <template>
+  <v-img :src="LogoPagina" max-height="150" class="mt-2"></v-img>
   <v-toolbar color="#014898">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>
@@ -186,10 +187,11 @@
 </template>
 
 <script>
-
+import conectaUBB from '../assets/ConectaUBBLine.png';
 export default {
   data() {
     return {
+      LogoPagina: conectaUBB,
       itemsAgr: [],
       itemsUsuarios: [],
       tab: 'agrupaciones',

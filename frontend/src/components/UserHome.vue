@@ -646,13 +646,11 @@ export default {
     },
     async ParticiparActividad(id) {
       try {
-        const response = await fetch(`${global.BACKEND_URL}/participar/${id}/${this.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/participar/${id}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
-          body: JSON.stringify({}),
         });
         const data = await response.json();
         if (response.ok) {

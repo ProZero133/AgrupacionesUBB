@@ -283,9 +283,17 @@ async function participarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
-        const rut = req.params.rut;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
         // Obtener actividad
-        const actividad = await getActividadById(id_act);;
+        const miembro = await getRolUsuario(rut, id_act).rol_agr;
+        const actividad = await getActividadById(id_act);
+        if (miembro === 'Pendiente' && actividad.rows[0].tipo === false) {
+            return res.code(401).send({ success: false, message: 'No puedes participar en esta actividad' });
+        }
+        if(actividad.rows[0].tipo === true && actividad.rows[0].aprobado === false){
+            return res.code(401).send({ success: false, message: 'La actividad no ha sido aprobada' });
+        }
         // Obtener participantes de la actividad
         const participantes = await ParticipantesActividad(id_act);
         const cuposRestantes = actividad.rows[0].cupos - participantes.length;

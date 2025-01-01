@@ -94,10 +94,8 @@ export default {
           const response = await fetch(`${global.BACKEND_URL}/TokenAutorizacion`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.$cookies.get('AuthToken')}`,
             },
-            body: JSON.stringify({ rol: role, rut: rut }),
           });
           const data = await response.json();
           this.$cookies.set('TokenAutorizacion', data.token);

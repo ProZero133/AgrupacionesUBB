@@ -39,7 +39,7 @@ module.exports = function (fastify, options, done) {
   fastify.get('/actividades/:id', { preHandler: [isUserOrAdmin] },ObtenerActividadPorID);
   fastify.get('/actividadesgrupo/:id', { preHandler: [isUserOrAdmin] },ObtenerActividadesPorAgrupacion);
   fastify.post('/programar/:id_act/:id_agr', { preHandler: [isUser] },programarActividad);
-  fastify.post('/participar/:id_act/:rut', { preHandler: [isUser] },participarActividad);
+  fastify.post('/participar/:id_act', { preHandler: [isUser] },participarActividad);
   fastify.post('/actividades',{ preHandler: [isUser] }, crearActividad);
   fastify.put('/actividades/:id', { preHandler: [isUser] },updateActividad);
   fastify.delete('/actividades/:id_act', { preHandler: [isUserOrAdmin] },eliminarActividad);

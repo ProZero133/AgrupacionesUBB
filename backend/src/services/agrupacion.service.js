@@ -299,7 +299,7 @@ async function deleteAgrupacion(id_agr) {
 
     await pool.query('DELETE FROM "Pertenece" WHERE id_agr = $1', [id_agr]);
 
-    await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
+    await pool.query('DELETE FROM "Agrupacion_tags" WHERE id_agr = $1', [id_agr]);
     // Finalmente, elimina la agrupación
     const agrupacion = await pool.query('DELETE FROM "Agrupacion" WHERE id_agr = $1 RETURNING *', [id_agr]);
     return agrupacion.rows[0];
@@ -427,7 +427,7 @@ async function updateAgrupacion(id_agr, agrupacion, rut, imagen) {
 
 async function insertTagsAgrupacion(id_agr, tags) {
   try {
-    const response = await pool.query('INSERT INTO "Posee_1" (id_agr, id_tag) VALUES ($1, $2) RETURNING *', [id_agr, tags]);
+    const response = await pool.query('INSERT INTO "Agrupacion_tags" (id_agr, id_tag) VALUES ($1, $2) RETURNING *', [id_agr, tags]);
 
     return 'Tags ingresados correctamente';
   } catch (error) {
@@ -512,7 +512,7 @@ async function getAgrupacionesNoInscritas(rut) {
 async function getTagsAgrupacion(id_agr) {
   try {
     // Obtiene los tags de la agrupación con el id especificado
-    const tags = await pool.query('SELECT * FROM "Posee_1" WHERE id_agr = $1', [id_agr]);
+    const tags = await pool.query('SELECT * FROM "Agrupacion_tags" WHERE id_agr = $1', [id_agr]);
     return tags.rows;
   } catch (error) {
     console.log('Error al obtener los tags de la agrupación:', error);
@@ -522,7 +522,7 @@ async function getTagsAgrupacion(id_agr) {
 async function deleteTagAgrupacion(id_agr, id_tag) {
   try {
     // Elimina el tag de la agrupación
-    const response = await pool.query('DELETE FROM "Posee_1" WHERE id_agr = $1 AND id_tag = $2 RETURNING *', [id_agr, id_tag]);
+    const response = await pool.query('DELETE FROM "Agrupacion_tags" WHERE id_agr = $1 AND id_tag = $2 RETURNING *', [id_agr, id_tag]);
     return 'Tag eliminado de la agrupación';
   } catch (error) {
     console.log('Error al eliminar el tag de la agrupación:', error);

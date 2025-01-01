@@ -202,7 +202,7 @@ async function getTagsSimilares(tag) {
 }
 async function getPreferenciasUsuario(rut) {
     try {
-        const result = await pool.query(`SELECT * FROM "Posee_3" WHERE rut = $1;`, [rut]);
+        const result = await pool.query(`SELECT * FROM "Usuario_tags" WHERE rut = $1;`, [rut]);
         return result.rows;
     }
     catch (error) {
@@ -218,7 +218,7 @@ async function updatePreferenciasUsuario(rut, preferencias) {
             // Suponiendo que la tabla se llama 'preferencias_usuario' y tiene columnas 'rut' y 'preferencia'
             // Ajusta la consulta según tu esquema de base de datos
             const result = await pool.query(
-                `INSERT INTO "Posee_3" (rut, id_tag) VALUES ($1, $2)`,
+                `INSERT INTO "Usuario_tags" (rut, id_tag) VALUES ($1, $2)`,
                 [rut, preferencias[i]] // Asumiendo que preferencias[i] es un valor adecuado para insertar
             );
         } catch (error) {
@@ -243,7 +243,7 @@ async function getTagById(id) {
 
 async function deletePreferenciaUsuario(rut, id) {
     try {
-        const result = await pool.query(`DELETE FROM "Posee_3" WHERE rut = $1 AND id_tag = $2;`, [rut, id]);
+        const result = await pool.query(`DELETE FROM "Usuario_tags" WHERE rut = $1 AND id_tag = $2;`, [rut, id]);
         return result;
     }
     catch (error) {

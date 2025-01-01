@@ -1,7 +1,8 @@
 const { validarUsuario, asignarToken } = require('../services/auth.service');
 async function TokenAutorizacionController(request, reply) {
- const { rol, rut } = request.body; // Asume que el rol se envía en el cuerpo de la solicitud
  const decoded = await request.jwtVerify();
+ const rol = decoded.rol;
+ const rut = decoded.rut;
  if(rol !== decoded.rol){
     reply.send({ success: false, message: 'Rol no autorizado' });
     return;

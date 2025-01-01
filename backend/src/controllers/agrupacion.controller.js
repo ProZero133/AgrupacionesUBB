@@ -400,6 +400,10 @@ async function solicitarAcreditacion(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
+        const integrantes = await getUsuariosdeAgrupacion(id_agr);
+        if (integrantes.length < 3) {
+            return res.code(400).send('La agrupación debe tener al menos 3 integrantes');
+        }
         const rutLider = agrupacion.rut;
         if (rutLider !== rut) {
             return res.code(401).send('No tienes permisos para solicitar la acreditación');

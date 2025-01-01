@@ -563,26 +563,26 @@ async function ingresarPorCodigo(req, res) {
         const rutActual = decoded.rut;
         const rol = decoded.rol;
         if (rol !== 'Estudiante') {
-            return res.code(401).send('No tienes permisos para unirte a una agrupación');
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ingresar a una agrupación' });
         }
-        const codigo = req.body.codigo;
+        const { codigo } = req.body;
         const decipher = crypto.createDecipheriv(ALGORITHM, SECRET_KEY, IV);
         const encryptedData = Buffer.from(codigo, 'base64'); // Decodificar de Base64
         const decrypted = Buffer.concat([decipher.update(encryptedData), decipher.final()]);
         const [rut, id_agr] = decrypted.toString('utf8').split('|').map(str => str.trim());
 
         if (rut !== rutActual) {
-            return res.code(401).send('El código no corresponde al usuario');
+            return res.code(401).send({ success: false, message: 'El código no corresponde al usuario' });
         }
         const miembro = await getRolUsuario(rutActual, id_agr);
-        if (miembro.length > 0) {
-            return res.code(401).send('Ya eres miembro de la agrupación');
+        if (miembro) {
+            return res.code(401).send({ success: false, message: 'Ya eres miembro de la agrupación' });
         }
         const ingresar = await redeemCodigo(rut, id_agr);
         if (!ingresar) {
-            return res.code(500).send('Error al ingresar a la agrupación');
+            return res.code(500).send({ success: false, message: 'Error al ingresar a la agrupación' });
         }
-        return res.code(200).send({ success: true, message: 'Ingreso exitoso' });
+        return res.code(200).send({ success: true, message: 'Ingreso exitoso', data: ingresar });
 
 
     } catch (error) {

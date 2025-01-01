@@ -39,7 +39,7 @@ module.exports = function(fastify, options, done) {
   fastify.get('/LiderArray/:id_agr', { preHandler: [isUserOrAdmin] },obtenerLiderArray);
   fastify.get('/obtenerRolUsuario/:rut/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerRolUsuario);
   fastify.post('/notificarMiembrosPublicacion', { preHandler: [isUserOrAdmin] },notificarMiembrosPublicacion);
-  fastify.post('/ingresarPorCodigo/:rut/:codigo',{ preHandler: [isUser] }, ingresarPorCodigo);
+  fastify.post('/ingresarPorCodigo',{ preHandler: [isUser] }, ingresarPorCodigo);
   fastify.get('/agrupacionesnoinscritas/:rut',{ preHandler: [isUser] }, VerGruposNoInscritos);
   fastify.get('/obtenerTagsAgrupacion/:id_agr',{ preHandler: [isUserOrAdmin] }, ObtenerTagsAgrupacion);
   fastify.delete('/eliminarTagAgrupacion/:id_agr/:id_tag',{ preHandler: [isUserOrAdmin] }, eliminarTagAgrupacion);

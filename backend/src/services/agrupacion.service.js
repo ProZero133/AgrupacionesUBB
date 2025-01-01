@@ -473,6 +473,9 @@ async function redeemCodigo(rut, id_agr) {
   try {
     const fecha_ingreso = new Date();
     const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [rut, id_agr,fecha_ingreso, 'Miembro']);
+    if (response.rows.length === 0) {
+      return [];
+    }
     return response.rows[0];
   } catch (error) {
     console.error('Error al canjear el código de invitación:', error);

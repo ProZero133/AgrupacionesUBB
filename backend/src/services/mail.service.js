@@ -79,7 +79,7 @@ async function inviteUsuario(invitacion) {
     const replacements = {
         nombre: invitacion.nombre,
         nombre_agr: invitacion.nombre_agr,
-        codigo: invitacion.rol_agr
+        codigo: invitacion.codigo
     };
 
     const htmlBody = loadHtmlTemplate(templatePath, replacements);
@@ -99,34 +99,6 @@ async function inviteUsuario(invitacion) {
         results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
     }
 
-    return results;
-}
-
-async function inviteUsuario(invitacion) {
-
-    const templatePath = path.join(__dirname, '../mails/invitacionCorreo.html');
-    const replacements = {
-        nombre: invitacion.nombre,
-        nombre_agr: invitacion.nombre_agr,
-        codigo: invitacion.rol_agr
-    };
-
-    const htmlBody = loadHtmlTemplate(templatePath, replacements);
-    const results = [];
-
-    const mailOptions = {
-        from: '"ConectaUBB" <conectaubb@gmail.com>',
-        to: invitacion.correo,
-        subject: `Invitación a ${invitacion.nombre_agr}`,
-        html: htmlBody
-    };
-
-    try {
-        let info = await transporter.sendMail(mailOptions);
-        results.push({ success: true, message: `Correo enviado a ${invitacion.correo}`, info: info });
-    } catch (error) {
-        results.push({ success: false, message: `Error al enviar correo a ${invitacion.correo}`, error: error });
-    }
     return results;
 }
 

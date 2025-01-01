@@ -7,12 +7,15 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
     deleteTagAgrupacion, updateAgrupacion, getPertenece } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
-const { getUsuarioByRut } = require("../services/user.service.js");
+const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
-const { notifyPublicacion, integrateUsuario } = require("../services/mail.service.js");
+const { notifyPublicacion, integrateUsuario, inviteUsuario } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
 const { validarUsuario } = require('../services/auth.service.js');
-
+const crypto = require('crypto')
+const ALGORITHM = 'aes-256-cbc';
+const SECRET_KEY = Buffer.from('aluecr2etfsyg2345578h01234g67890', 'utf-8');
+const IV = Buffer.alloc(16, 0);
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
     if (agrupaciones.length === 0) {
@@ -506,26 +509,85 @@ async function notificarMiembrosPublicacion(req, res) {
         res.code(500).send('Error al notificar a los miembros de la publicación');
     }
 }
-
-async function ingresarPorCodigo(req, res) {
+async function invitarUsuario(req, res) {
     try {
-        const rut = req.params.rut;
-        const codigo = req.params.codigo;
+        const decoded = await req.jwtVerify();
+        const rutActual = decoded.rut;
+        const mail = req.body.mail;
+        const id_agr = req.body.id_agr;
 
-        const usuario = await getUsuarioByRut(rut);
+        const rol = await getRolUsuario(rutActual, id_agr);
+        if (rol.rol_agr !== 'Lider' && rol.rol_agr !== 'Admin' && rol.rol_agr !== 'Miembro oficial') {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para invitar a un usuario' });
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (agrupacion.length === 0) {
+            return res.code(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }
+        const usuario = await getUsuarioByCorreo(mail);
         if (usuario.length === 0) {
-            return res.code(404).send('Usuario no encontrado');
+            return res.code(404).send({ success: false, message: 'Usuario no encontrado' });
         }
-
-        const result = await redeemCodigo(codigo, rut);
-        if (!result) {
-            return res.code(500).send('Error al ingresar el código');
+        const usuarioPLataforma = await obtenerUsuarioPlataforma(usuario.rut);
+        if (usuarioPLataforma.length === 0) {
+            return res.code(404).send({ success: false, message: 'Usuario no encontrado' });
         }
+        if (usuarioPLataforma[0].rol === 'Admin') {
+            return res.code(401).send({success: false, message: 'No puedes invitar a un administrador'});
+        }
+        const rut = usuarioPLataforma[0].rut;
 
-        res.code(200).send(result);
+        const data = `${rut}|${id_agr}`;
+        const cipher = crypto.createCipheriv(ALGORITHM, SECRET_KEY, IV);
+        const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()]).toString('base64');
+        const invitacion = {
+            nombre_agr: agrupacion.nombre_agr,
+            correo: req.body.mail,
+            nombre: usuario.nombre,
+            codigo: encrypted
+        };
+        const invitar = await inviteUsuario(invitacion);
+        if (!invitar) {
+            return res.code(500).send({ success: false, message: 'Error al invitar al usuario' });
+        }
+        return res.code(200).send({ succes: true, message: 'Invitación enviada' });
     } catch (error) {
         console.error('Error al ingresar el código:', error);
         res.code(500).send('Error al ingresar el código');
+    }
+}
+
+async function ingresarPorCodigo(req, res) {
+    try {
+        const decoded = await req.jwtVerify();
+        const rutActual = decoded.rut;
+        const rol = decoded.rol;
+        if (rol !== 'Estudiante') {
+            return res.code(401).send('No tienes permisos para unirte a una agrupación');
+        }
+        const codigo = req.body.codigo;
+        const decipher = crypto.createDecipheriv(ALGORITHM, SECRET_KEY, IV);
+        const encryptedData = Buffer.from(codigo, 'base64'); // Decodificar de Base64
+        const decrypted = Buffer.concat([decipher.update(encryptedData), decipher.final()]);
+        const [rut, id_agr] = decrypted.toString('utf8').split('|').map(str => str.trim());
+
+        if (rut !== rutActual) {
+            return res.code(401).send('El código no corresponde al usuario');
+        }
+        const miembro = await getRolUsuario(rutActual, id_agr);
+        if (miembro.length > 0) {
+            return res.code(401).send('Ya eres miembro de la agrupación');
+        }
+        const ingresar = await redeemCodigo(rut, id_agr);
+        if (!ingresar) {
+            return res.code(500).send('Error al ingresar a la agrupación');
+        }
+        return res.code(200).send({ success: true, message: 'Ingreso exitoso' });
+
+
+    } catch (error) {
+        console.error('Error al invitar al usuario:', error);
+        res.code(500).send('Error al invitar al usuario');
     }
 }
 
@@ -622,5 +684,6 @@ module.exports = {
     ObtenerTagsAgrupacion,
     eliminarTagAgrupacion,
     obtenerLiderArray,
-    obtenerAgrupacionesPertenece
+    obtenerAgrupacionesPertenece,
+    invitarUsuario,
 };

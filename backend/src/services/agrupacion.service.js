@@ -61,7 +61,7 @@ async function createSolicitarAcreditacion(id_agr, rut) {
   try {
     const agrupacion = await getAgrupacionById(id_agr);
     const usuario = await getUsuarioByRut(rut);
-    const nombre=usuario.nombre;
+    const nombre = usuario.nombre;
     const ListaAdministradores = await obtenerAdministradoresPlataforma();
     // Obtener correo de los administradores desde API ConectaUBB
     for (let i = 0; i < ListaAdministradores.length; i++) {
@@ -107,8 +107,8 @@ async function createSolicitarAcreditacion(id_agr, rut) {
         nombre: nombre,
         correo: ListaAdministradores[i].correo,
         agrupacion: agrupacion.nombre_agr,
-    };
-    const notifica = await notifySolicitudAcritacion(notificacion);
+      };
+      const notifica = await notifySolicitudAcritacion(notificacion);
     }
     // Retorna la agrupación actualizada
     return NuevosDatosAgrupacion.rows[0];
@@ -169,12 +169,10 @@ async function getUsuariosdeAgrupacion(id) {
     // Obtiene los usuarios de la agrupación con el id especificado donde el rol sea distinto de 'Pendiente'
     const usuariosPlataforma = await pool.query('SELECT * FROM "Pertenece" WHERE id_agr = $1 AND rol_agr != $2', [id, 'Pendiente']);
     for (let i = 0; i < usuariosPlataforma.rows.length; i++) {
-      if (usuariosPlataforma.rows[i].rut != '11.111.111-1') {
-        const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);
-        usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
-        usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
-        usuariosPlataforma.rows[i].correo = usuario.correo;
-      }
+      const usuario = await getUsuarioByRut(usuariosPlataforma.rows[i].rut);
+      usuariosPlataforma.rows[i].user_nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
+      usuariosPlataforma.rows[i].agrupacion_id = usuariosPlataforma.rows[i].id_agr;
+      usuariosPlataforma.rows[i].correo = usuario.correo;
     }
     return usuariosPlataforma.rows;
   } catch (error) {
@@ -471,30 +469,11 @@ async function getPublicacionCorreos(id_agr, id_pub) {
   }
 }
 
-//redeemCodigo es un método que toma un código de invitación y un rut
-//Primero, se busca en la tabla "Pertenece" si existe un elemento cuyo 'rol_agr' sea igual al código de invitación y 'rut' sea igual a '11.111.111-1'
-//SI no existe, se retorna un mensaje de error
-//Si existe, se actualiza esa tabla con los siguientes valores:
-//rut: rut, fecha_integracion: hoy,  rol_agr: 'Miembro'
-//Finalmente, se retorna un mensaje de éxito
-
-async function redeemCodigo(codigo, rut) {
+async function redeemCodigo(rut, id_agr) {
   try {
-    // Step 1: Get 'rol_agr' from 'Pertenece' where 'rol_agr' matches 'codigo' and 'rut' matches '11.111.111-1'
-    const perteneceResult = await pool.query('SELECT * FROM "Pertenece" WHERE rol_agr = $1 AND rut = $2', [codigo, '11.111.111-1']);
-    if (perteneceResult.rows.length === 0) {
-      return 'Código de invitación no válido';
-    }
-
-    // Step 2: Update 'Pertenece' with 'rut', 'fecha_integracion' and 'rol_agr'
-    const response = await pool.query('UPDATE "Pertenece" SET rut = $1, fecha_integracion = CURRENT_TIMESTAMP, rol_agr = $2 WHERE rol_agr = $3 AND rut = $4 RETURNING *', [rut, 'Miembro', codigo, '11.111.111-1']);
-
-    return {
-      "mensaje": 'Código de invitación canjeado con éxito',
-      "response": response.rows[0],
-      "id_agr": response.rows[0].id_agr
-    };
-
+    const fecha_ingreso = new Date();
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [rut, id_agr,fecha_ingreso, 'Miembro']);
+    return response.rows[0];
   } catch (error) {
     console.error('Error al canjear el código de invitación:', error);
   }

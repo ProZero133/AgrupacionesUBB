@@ -34,6 +34,16 @@ async function obtenerUsuariosPlataforma() {
         return error;
     }
 }
+// Obtiene un usuario de la plataforma segun su rut
+async function obtenerUsuarioPlataforma(rut) {
+    try {
+        const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
+        return result.rows;
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
 
 // Busca un usuario en especifico en la plataforma segun su rut
 async function getUsuarioByRut(req) {
@@ -97,18 +107,6 @@ async function getCorreoSubstring(req) {
     } catch (error) {
         console.error('Error en la consulta:', error);
         return { error: "Ocurrió un error al obtener los usuarios por correo." };
-    }
-}
-
-
-// Obtiene un usuario de la plataforma segun su rut
-async function obtenerUsuarioPlataforma(rut) {
-    try {
-        const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
-        return result.rows;
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        return error;
     }
 }
 

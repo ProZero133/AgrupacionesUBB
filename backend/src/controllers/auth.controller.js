@@ -1,4 +1,4 @@
-const { validarUsuario, asignarToken } = require('../services/auth.service');
+const { validarUsuario, asignarToken, validarUsuarioRut } = require('../services/auth.service');
 async function TokenAutorizacionController(request, reply) {
  const decoded = await request.jwtVerify();
  const rol = decoded.rol;
@@ -55,4 +55,31 @@ async function EmailLogin(request, reply) {
   }
 }
 
-module.exports = { EmailLogin, TokenAutorizacionController};
+async function RutLogin(request, reply) {
+  const { rut } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
+  // Generar un código de verificación de 6 dígitos y letras
+  const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+  // Llamar a la base de datos para verificar si el usuario existe
+  const result = await validarUsuarioRut(rut);
+  const usuario = result;
+  if (result.success) {
+    const payload = {
+      rol: result.usuario.rol,
+      rut: result.usuario.rut,
+    };
+    const token = request.server.jwt.sign(payload);
+    reply.setCookie('AuthToken', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 3600, // Expiración en segundos (1 hora)
+    });
+    asignarToken(request.server, usuario, codigo, reply);
+    //Envia el mismo codigo al frontend
+    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
+  } else {
+    reply.send({ success: false, message: result.message });
+  }
+}
+
+module.exports = { EmailLogin, TokenAutorizacionController, RutLogin };

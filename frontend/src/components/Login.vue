@@ -1,16 +1,14 @@
 <template>
   <v-container class="container-loginrut">
 
-    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"
-      disabled></v-switch>
+    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
 
     <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
     <v-form v-if="showLoginByRut" class="form-loginrut">
-      <v-label>Iniciar sesión con credenciales institucionales</v-label>
-      <v-text-field class="tfCredenciales" v-model="username" label="Rut" required></v-text-field>
-      <v-text-field class="tfCredenciales" v-model="password" label="Contraseña" type="password"
+      <v-label>Iniciar sesión con RUT</v-label>
+      <v-text-field class="tfCredenciales" v-model="username" label="Rut sin puntos ni digito verificador"
         required></v-text-field>
-      <v-btn type="submit" color="primary">Iniciar sesión</v-btn>
+      <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
 
     <v-form v-else class="form-logincorreo" @submit.prevent="login">
@@ -56,14 +54,26 @@ export default {
     async login() {
       this.isLoading = true;
       try {
-        const response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: this.email }),
-        });
-        const data = await response.json();
+        let data = {};
+        let response = {};
+        if (this.showLoginByRut === false) {
+          response = await fetch(`${global.BACKEND_URL}/EmailLogin`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: this.email }),
+          });
+        } else {
+          response = await fetch(`${global.BACKEND_URL}/RutLogin`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rut: this.username }),
+          });
+        }
+        data = await response.json();
         if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;

@@ -177,11 +177,14 @@ export default {
     async ingresarPorCodigo() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo/${this.rut}/${this.codigo}`, {
+        const response = await fetch(`${global.BACKEND_URL}/ingresarPorCodigo`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
+          body: JSON.stringify({
+            codigo: this.codigo,
+          }),
         });
 
         // Verifica si la respuesta es exitosa

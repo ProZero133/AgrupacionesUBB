@@ -2,7 +2,6 @@ const { validarUsuario, asignarToken } = require('../services/auth.service');
 const { getAgrupaciones, createInvitacion } = require('../services/agrupacion.service');
 const { getUsuarioByRut, getTagsSimilares, getPreferenciasUsuario,
   updatePreferenciasUsuario, getTagById, getUsuarioServidor, getUsuarioByCorreo, deletePreferenciaUsuario } = require('../services/user.service');
-const { inviteUsuario } = require("../services/mail.service.js");
 
 const { func } = require('joi');
 
@@ -163,37 +162,6 @@ function generateRandomString(length) {
   return result;
 }
 
-async function invitarUsuario(req, res) {
-  try {
-    const invitacion = {
-      id_agr: req.body.id_agr,
-      nombre_agr: req.body.nombre_agr,
-      rol_agr: rol_agr = generateRandomString(6),
-      fecha_integracion: new Date().toISOString(),
-      rut: '11.111.111-1',
-      correo: req.body.mail
-    };
-
-    const usuario = await getUsuarioByCorreo(req.body.mail);
-    if (usuario.length === 0) {
-      return res.send({ success: false, message: 'No se encontró el usuario:' + req.params.id_agr });
-    }
-    invitacion.nombre = usuario[0].nombre;
-
-    try {
-      const invitacrear = await createInvitacion(invitacion);
-    } catch (error) {
-      console.error('Error al crear la invitación:', error);
-    }
-
-    const invitar = await inviteUsuario(invitacion);
-
-  } catch(error){
-    console.error('Error al invitar al usuario:', error);
-    res.code(500).send('Error al invitar al usuario');
-  }
-}
-
 async function EliminarPreferenciaUsuario(req, res){
   try{
     const rut = req.params.rut;
@@ -222,6 +190,5 @@ module.exports = {
   ActualizarPreferenciasUsuario,
   ObtenerTag,
   obtenerUsuarioServidor,
-  invitarUsuario,
   EliminarPreferenciaUsuario
 };

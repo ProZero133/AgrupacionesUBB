@@ -698,13 +698,15 @@ export default {
           },
           body: JSON.stringify({ mail: this.mailInvitado, id_agr: this.datosGrupo.id_agr, nombre_agr: this.datosGrupo.nombre_agr }),
         });
+        const data = await response.json();
         // Verifica si la respuesta es exitosa
         if (response.ok) {
           // Convierte la respuesta en formato JSON
-          this.$root.showSnackBar('', 'Usuario invitado con éxito!');
+          this.$root.showSnackBar('success', data.message, 'Operación exitosa');
           this.dialoginvitar = false;
         } else {
           this.dialoginvitar = false;
+          this.$root.showSnackBar('error', data.message, 'Error de carga de datos');
           console.error('Error en la respuesta:', response.status);
         }
       } catch (error) {

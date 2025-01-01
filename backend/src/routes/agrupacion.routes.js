@@ -4,7 +4,7 @@ const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion,
   obtenerImagenAgrupacion, unirseAgrupacion, solicitudesAgrupacion, aceptarSolicitud, 
   eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion,
   obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion, obtenerLiderArray,
-  eliminarTagAgrupacion,obtenerAgrupacionesPertenece } = require('../controllers/agrupacion.controller.js');
+  eliminarTagAgrupacion,obtenerAgrupacionesPertenece, invitarUsuario } = require('../controllers/agrupacion.controller.js');
   const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
 module.exports = function(fastify, options, done) {
@@ -44,5 +44,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/obtenerTagsAgrupacion/:id_agr',{ preHandler: [isUserOrAdmin] }, ObtenerTagsAgrupacion);
   fastify.delete('/eliminarTagAgrupacion/:id_agr/:id_tag',{ preHandler: [isUserOrAdmin] }, eliminarTagAgrupacion);
   fastify.get('/agrupacionesPertenece/:rut',{ preHandler: [isUserOrAdmin] }, obtenerAgrupacionesPertenece);
+  fastify.post('/invitarUsuario', { preHandler: [isUserOrAdmin] },invitarUsuario);
   done();
 };

@@ -127,6 +127,79 @@ async function validarUsuario(email) {
   }
 }
 
+async function validarUsuarioRut(rut) {
+  try {
+    // busca el usuario en la base de datos servidor universidad
+    const response = await axios.post(`${API_ConectaUBB}/usuariosRut`, {
+      rut: rut
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    if (response.data.recordset.length === 0) {
+      return { success: false, message: 'Usuario no encontrado' };
+    }
+    const usuarioAPI = response.data.recordset[0];
+    const usuario = {
+      rut: '',
+      nombre: '',
+      correo: '',
+      carrera: '',
+      rol_u: ''
+    };
+
+    const listadoAdmin = await obtenerAdministradores();
+    for (let i = 0; i < listadoAdmin.length; i++) {
+      if (listadoAdmin[i].rut === usuarioAPI.rut.toString()) {
+        usuario.rut = usuarioAPI.rut.toString();
+        usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+        usuario.correo = usuarioAPI.correo;
+        usuario.carrera = usuarioAPI.reparticion;
+        usuario.rol_u = 'Admin';
+
+        const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+        usuario.rol = resultPlataforma.user[0].rol;
+        return { success: true, message: resultPlataforma.message, usuario };
+      }
+    }
+
+    if (usuarioAPI.rol === 'ALUMNO') {
+      if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+        return { success: false, message: 'Usuario no admitido' };
+      }
+      usuario.rut = usuarioAPI.rut.toString();
+      usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+      usuario.correo = usuarioAPI.correo;
+      usuario.carrera = obtenerCarrera(usuarioAPI.carrera);
+      usuario.rol_u = 'Estudiante';
+    } else {
+      if (usuarioAPI.rol === 'FUNCIONARIO ACADEMICO' || usuarioAPI.rol === 'FUNCIONARIO ADMINISTRATIVO') {
+        if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+          return { success: false, message: 'Usuario no admitido' };
+        }
+        usuario.rut = usuarioAPI.rut.toString();
+        usuario.nombre = `${usuarioAPI.nombres} ${usuarioAPI.primer_apellido} ${usuarioAPI.segundo_apellido}`;
+        usuario.correo = usuarioAPI.correo;
+        usuario.carrera = usuarioAPI.reparticion;
+        usuario.rol_u = 'Funcionario';
+      }
+    }
+    // busca el usuario en la base de datos de la plataforma
+    const resultPlataforma = await validarUsuarioEnPlataforma(usuario.rut);
+    usuario.rol = resultPlataforma.user[0].rol;
+    // retorna toda la información del usuario
+    if (resultPlataforma.success) {
+      return { success: true, message: resultPlataforma.message, usuario };
+    } else {
+      return { success: false, message: resultPlataforma.message };
+    }
+
+  } catch (error) {
+    return { success: false, message: 'Token inválido o expirado', error: error.message };
+  }
+}
+
 async function validarUsuarioEnPlataforma(rut) {
   try {
     const result = await pool.query(`SELECT * FROM usuario WHERE rut = $1;`, [rut]);
@@ -176,4 +249,5 @@ module.exports = {
   validarUsuario,
   asignarToken,
   obtenerAdministradores,
+  validarUsuarioRut
 };

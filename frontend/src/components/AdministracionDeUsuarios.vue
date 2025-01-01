@@ -123,7 +123,6 @@ export default {
                     },
                 });
                 const data = await response.json();
-                console.log(data);
                 this.administradores = data;
             } catch (error) {
                 this.$root.showSnackBar('error', 'Error', 'No se pudo obtener la lista de administradores');

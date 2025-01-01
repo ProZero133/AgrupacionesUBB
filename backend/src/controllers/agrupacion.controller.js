@@ -308,6 +308,7 @@ async function obtenerAgrupacionesPertenece(req, res) {
             return res.code(404).send('Usuario no encontrado');
         }
         const pertenencia = await getPertenece(rut);
+        console.log(pertenencia);
         if (pertenencia.length === 0) {
             return res.code(404).send('No se encontraron agrupaciones');
         }

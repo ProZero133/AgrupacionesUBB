@@ -37,7 +37,7 @@
                   <v-dialog width="auto" scrollable>
                     <template v-slot:activator="{ props: activatorProps }">
                       <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined" v-bind="activatorProps"
-                        @click="ObtenerRolUsr(item.user_rut)"></v-btn>
+                        @click="ObtenerRolUsr(item.rut)"></v-btn>
                     </template>
 
                     <template v-slot:default="{ isActive }">
@@ -872,16 +872,17 @@ export default {
 
 
     async ObtenerRolUsr(rut) {
+      console.log("rut, ", rut);
       try {
         const url = `${global.BACKEND_URL}/obtencionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
-
+        const data = await response.json();
+        console.log("data, ", data);
         if (response.ok) {
           const datosUsuarioSeleccionado = await response.json();
           this.selectedRole = datosUsuarioSeleccionado.rol_agr;

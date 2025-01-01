@@ -1,33 +1,93 @@
 <template>
   <v-main>
-  <v-container cols="12"></v-container>
-  <v-img :src="LogoPagina" max-height="150" class="mt-2"></v-img>
-  <v-toolbar style="background-color: #014898;">
-    <template v-slot:extension>
-      <v-tabs v-model="tab" grow>
-        <v-tab  style="color: white;" prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
-        <v-tab  style="color: white;" prepend-icon="mdi-account-multiple" value="misgrupos">Mis grupos</v-tab>
-        <v-tab  style="color: white;" prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
-      </v-tabs>
-    </template>
-  </v-toolbar>
+    <v-img :src="LogoPagina" max-height="150" class="mt-2"></v-img>
+    <v-toolbar style="background-color: #014898;">
+      <template v-slot:extension>
+        <v-tabs v-model="tab" grow>
+          <v-tab style="color: white;" prepend-icon="mdi-home" value="actividades">Inicio</v-tab>
+          <v-tab style="color: white;" prepend-icon="mdi-account-multiple" value="misgrupos">Mis grupos</v-tab>
+          <v-tab style="color: white;" prepend-icon="mdi-calendar-month" value="misActividades">Mis actividades</v-tab>
+        </v-tabs>
+      </template>
+    </v-toolbar>
 
-  <!-- Pagina Principal -->
-  <v-tab-item value="actividades" v-if="tab === 'actividades'">
-    <v-container cols="12">
-      <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6 ml-n10">
-        <v-card-title class="pasando">
-          <span class="text-h4 textopasando">Qué está pasando?</span>
-        </v-card-title>
-      </v-col>
-      <v-row align="start" no-gutters class="mt-6">
-        <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-          <v-card rounded="xl" elevation="12" class="card-actividades" v-on:click="seleccionar(elemento.id)">
-            <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-            <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
-              formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
-            <v-card-text>
+    <!-- Pagina Principal -->
+    <v-tab-item value="actividades" v-if="tab === 'actividades'">
+      <v-container cols="12">
+        <v-col cols="12" class="flex-grow-0 flex-shrink-0 mb-n6 ml-n10">
+          <v-card-title class="pasando">
+            <span class="text-h4 textopasando">Qué está pasando?</span>
+          </v-card-title>
+        </v-col>
+        <v-row align="start" no-gutters class="mt-6">
+          <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
+            <v-card rounded="xl" elevation="12" class="card-actividades" v-on:click="seleccionar(elemento.id)">
+              <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+              <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
+                formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
+              <v-card-text>
 
+                <v-row>
+                  <v-col cols="5">
+                    <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover />
+                  </v-col>
+                  <v-col cols="7">
+                    <p>{{ elemento.descripcion }}</p>
+                  </v-col>
+                </v-row>
+
+                <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
+                  <v-row>
+                    <v-radio-group v-model="elemento.opcionPreferida" disabled>
+                      <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
+                        :value="opcion.id_opcion">
+                      </v-radio>
+                    </v-radio-group>
+                  </v-row>
+                </v-col>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-tab-item>
+
+    <!-- Mis grupos -->
+    <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
+      <v-container cols="12">
+        <v-row align="start" no-gutters class="mt-6">
+          <v-col v-for="grupo in grupos" :key="grupo.id_agr" cols="12" md="6">
+            <v-card class="card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
+              <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
+              <v-card-text>
+
+                <v-row>
+                  <v-col cols="4">
+                    <v-img class="image" aspect-ratio="1" :src='grupo.imagen' cover />
+                  </v-col>
+                  <v-col cols="8">
+                    <p>{{ grupo.descripcion }}</p>
+                    <p>Liderado por: {{ grupo.rut }}</p>
+                    <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
+                  </v-col>
+                </v-row>
+
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-tab-item>
+
+    <v-tab-item value="misActividades" v-if="tab === 'misActividades'">
+      <v-container>
+        <v-row>
+          <v-col v-for="elemento in actividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12"
+            md="6">
+            <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id)">
+              <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
+              <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
+                formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
               <v-row>
                 <v-col cols="5">
                   <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover />
@@ -36,205 +96,147 @@
                   <p>{{ elemento.descripcion }}</p>
                 </v-col>
               </v-row>
-
-              <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
-                <v-row>
-                  <v-radio-group v-model="elemento.opcionPreferida" disabled>
-                    <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
-                      :value="opcion.id_opcion">
-                    </v-radio>
-                  </v-radio-group>
-                </v-row>
-              </v-col>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-tab-item>
-
-  <!-- Mis grupos -->
-  <v-tab-item value="misgrupos" v-if="tab === 'misgrupos'">
-    <v-container cols="12">
-      <v-row align="start" no-gutters class="mt-6">
-        <v-col v-for="grupo in grupos" :key="grupo.id_agr" cols="12" md="6">
-          <v-card class="card-misgrupos" v-on:click="iragGrupo(grupo.id_agr)">
-            <v-card-title>{{ grupo.nombre_agr }}</v-card-title>
-            <v-card-text>
-
-              <v-row>
-                <v-col cols="4">
-                  <v-img class="image" aspect-ratio="1" :src='grupo.imagen' cover />
-                </v-col>
-                <v-col cols="8">
-                  <p>{{ grupo.descripcion }}</p>
-                  <p>Liderado por: {{ grupo.rut }}</p>
-                  <p>Fecha de creación: {{ grupo.fecha_creacion }}</p>
-                </v-col>
-              </v-row>
-
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-tab-item>
-
-  <v-tab-item value="misActividades" v-if="tab === 'misActividades'">
-    <v-container>
-      <v-row>
-        <v-col v-for="elemento in actividadesParticipa" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-          <v-card class="card-actividades" v-on:click="seleccionarActividad(elemento.id)">
-            <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-            <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
-              formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
-            <v-row>
-              <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover />
-              </v-col>
-              <v-col cols="7">
-                <p>{{ elemento.descripcion }}</p>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-tab-item>
-
-  <v-dialog v-model="dialog">
-    <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id" class="mb-15 card-actividades"
-      border="10px">
-      <v-card-title class="headline">{{ elemento.nombre }}</v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="5">
-            <v-img class="image" aspect-ratio="1" :src="elemento.imagen" contain />
+            </v-card>
           </v-col>
-          <v-col cols="7">
-            <p>{{ elemento.descripcion }}</p>
-          </v-col>
-
-          <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
-            <v-row>
-              <v-radio-group v-model="elemento.opcionPreferida">
-                <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
-                  :value="opcion.id_opcion">
-                </v-radio>
-              </v-radio-group>
-            </v-row>
-            <v-row>
-              <v-btn color="primary"
-                @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
-            </v-row>
-          </v-col>
-
         </v-row>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
+      </v-container>
+    </v-tab-item>
 
-        <v-row v-if="elemento.tipo_elemento === 'Actividad'">
-          <v-col cols="6">
-            <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
-          </v-col>
-          <v-col cols="6">
-            <v-btn :disabled="elemento.participantes >= elemento.cupos" :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text @click="ParticiparActividad(elemento.id)">Participar</v-btn>
+    <v-dialog v-model="dialog">
+      <v-card min-width="380" v-for="elemento in elementoFiltrado" :key="elemento.id" class="mb-15 card-actividades"
+        border="10px">
+        <v-card-title class="headline">{{ elemento.nombre }}</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="5">
+              <v-img class="image" aspect-ratio="1" :src="elemento.imagen" contain />
+            </v-col>
+            <v-col cols="7">
+              <p>{{ elemento.descripcion }}</p>
+            </v-col>
+
+            <v-col v-if="elemento.tipo_elemento === 'Votación'" cols="12">
+              <v-row>
+                <v-radio-group v-model="elemento.opcionPreferida">
+                  <v-radio v-for="(opcion, index) in elemento.opciones" :key="index" :label="opcion.nombre"
+                    :value="opcion.id_opcion">
+                  </v-radio>
+                </v-radio-group>
+              </v-row>
+              <v-row>
+                <v-btn color="primary"
+                  @click="this.$root.showSnackBar('success', nom_act, 'No hay backend yupi!!!!!!');">Votar</v-btn>
+              </v-row>
+            </v-col>
+
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-row v-if="elemento.tipo_elemento === 'Actividad'">
+            <v-col cols="6">
+              <v-btn color="green darken-1" text @click="dialog = false">Cerrar</v-btn>
+            </v-col>
+            <v-col cols="6">
+              <v-btn :disabled="elemento.participantes >= elemento.cupos"
+                :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text
+                @click="ParticiparActividad(elemento.id)">Participar</v-btn>
               <v-icon :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" class="ml-2">
                 mdi-account-circle-outline
               </v-icon>
-            <span>{{ elemento.participantes }} / {{ elemento.cupos }}</span>
+              <span>{{ elemento.participantes }} / {{ elemento.cupos }}</span>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="elemento.tipo_elemento === 'Formulario'">
+            <v-col v-if="elemento.hipervinculo" cols="12">
+              <v-btn class="text-link" :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
+                target="_blank" rel="noopener noreferrer" color="primary">
+                Contestar formulario
+              </v-btn>
+            </v-col>
+          </v-row>
+
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogActividades">
+      <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id" class="mb-15 card-actividades"
+        border="10px">
+        <v-card-title class="headline">{{ actividad.nombre }}</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="5">
+              <v-img class="image" aspect-ratio="1" :src="actividad.imagen" cover />
+            </v-col>
+            <v-col cols="7">
+              <p>{{ actividad.descripcion }}</p>
+            </v-col>
+
+            <v-btn class="BotonAbandonar" text @mousedown="startHold" @mouseup="cancelHold" @mouseleave="cancelHold"
+              @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
+              depressed>Abandonar actividad</v-btn>
+
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+
+          <v-spacer></v-spacer>
+
+        </v-card-actions>
+
+      </v-card>
+    </v-dialog>
+
+    <v-card class="footer-card" style="background-color: #014898;" dark>
+      <v-container>
+        <v-row justify="space-between" align="center">
+          <!-- Logo -->
+          <v-col cols="12" md="2">
+            <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
+          </v-col>
+          <!-- Información de contacto -->
+          <v-col cols="12" md="4">
+            <div class="text-center" style="color: white;">
+              <p>Conectando agrupaciones y estudiantes de
+                la Universidad del Bío-Bío.
+              </p>
+              <p>Conecta UBB es una iniciativa estudiantil,
+                con apoyo de la Dirección de Desarrollo
+                Estudiantil.</p>
+            </div>
+          </v-col>
+
+          <!-- Redes sociales -->
+          <v-col cols="12" md="4">
+
+            <div class="text-center">
+              <p style="color: white;">Si tienes dudas o consultas escríbenos a
+              </p>
+              <p style="color: white;">conectaubb@gmail.com
+              </p>
+              <p style="color: white;">Conéctate con las redes sociales de la DDE
+              </p>
+              <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
+                <v-icon>mdi-facebook</v-icon>
+              </v-btn>
+              <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
+                <v-icon>mdi-twitter</v-icon>
+              </v-btn>
+              <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
+                <v-icon>mdi-instagram</v-icon>
+              </v-btn>
+            </div>
           </v-col>
         </v-row>
-
-        <v-row v-if="elemento.tipo_elemento === 'Formulario'">
-          <v-col v-if="elemento.hipervinculo" cols="12">
-            <v-btn class="text-link" :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
-              target="_blank" rel="noopener noreferrer" color="primary">
-              Contestar formulario
-            </v-btn>
-          </v-col>
-        </v-row>
-
-      </v-card-actions>
+      </v-container>
     </v-card>
-  </v-dialog>
-
-  <v-dialog v-model="dialogActividades">
-    <v-card min-width="380" v-for="actividad in actividadFiltrada" :key="actividad.id" class="mb-15 card-actividades"
-      border="10px">
-      <v-card-title class="headline">{{ actividad.nombre }}</v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="5">
-            <v-img class="image" aspect-ratio="1" :src="actividad.imagen" cover />
-          </v-col>
-          <v-col cols="7">
-            <p>{{ actividad.descripcion }}</p>
-          </v-col>
-          
-          <v-btn class="BotonAbandonar" text @mousedown="startHold" @mouseup="cancelHold"
-            @mouseleave="cancelHold" @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold"
-            :style="progressStyle" depressed>Abandonar actividad</v-btn>
-          
-        </v-row>
-      </v-card-text>
-      <v-card-actions>
-
-        <v-spacer></v-spacer>
-
-      </v-card-actions>
-
-    </v-card>
-  </v-dialog>
-
-  <v-card class="footer-card" style="background-color: #014898;" dark>
-    <v-container>
-      <v-row justify="space-between" align="center">
-        <!-- Logo -->
-        <v-col cols="12" md="2">
-          <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
-        </v-col>
-        <v-col cols="12" md="2">
-          <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
-        </v-col>
-        <!-- Información de contacto -->
-        <v-col cols="12" md="4">
-          <div class="text-center" style="color: white;">
-            <p>Conectando agrupaciones y estudiantes de
-              la Universidad del Bío-Bío.
-            </p>
-            <p>Conecta UBB es una iniciativa estudiantil,
-              con apoyo de la Dirección de Desarrollo
-              Estudiantil.</p>
-          </div>
-        </v-col>
-
-        <!-- Redes sociales -->
-        <v-col cols="12" md="4">
-          
-          <div class="text-center">
-            <p style="color: white;">Si tienes dudas o consultas escríbenos a
-            </p>
-            <p style="color: white;">conectaubb@gmail.com
-            </p>
-            <p style="color: white;">Conéctate con las redes sociales de la DDE
-            </p>
-            <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
-              <v-icon>mdi-facebook</v-icon>
-            </v-btn>
-            <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
-              <v-icon>mdi-twitter</v-icon>
-            </v-btn>
-            <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
-              <v-icon>mdi-instagram</v-icon>
-            </v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
-</v-main>
+  </v-main>
 
 </template>
 
@@ -288,7 +290,6 @@
   width: 100%;
   height: auto;
 }
-
 </style>
 
 <script>
@@ -313,7 +314,7 @@ export default {
     actividadesParticipa: [],
     urlImagen: addImage,
     idactActual: null,
-    
+
     rut: '',
     rol: '',
     tab: 'actividades',
@@ -517,47 +518,47 @@ export default {
         // Añadir las actividades publicas a las actividades en data.actividades
 
         this.actividades = data;
-        if(data.succes !== false){
-        for (const actis of this.actividades) {
-          try {
-            const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-              },
-            });
-            // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
-            if (responde.ok) {
-              const dataImagen = await responde.text();
-              actis.imagen = dataImagen;
-            } else {
-              console.error('Error en la respuesta:', responde.status);
+        if (data.succes !== false) {
+          for (const actis of this.actividades) {
+            try {
+              const responde = await fetch(`${global.BACKEND_URL}/imagen/` + actis.imagen, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+              });
+              // Sobre escribe la imagen almacena la data con la nueva imagen en dataTransformada
+              if (responde.ok) {
+                const dataImagen = await responde.text();
+                actis.imagen = dataImagen;
+              } else {
+                console.error('Error en la respuesta:', responde.status);
+              }
+            } catch (error) {
+              console.error('Error al hacer fetch:', error);
             }
-          } catch (error) {
-            console.error('Error al hacer fetch:', error);
           }
+
+          // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
+          // Los campos de actividad se pasarán de la siguiente manera a elementos:
+          // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
+          const elementitos = this.actividades.map((elemento) => {
+            return {
+              id: elemento.id_act,
+              nombre: elemento.nom_act,
+              descripcion: elemento.descripcion,
+              tipo: elemento.tipo,
+              imagen: elemento.imagen,
+              id_agr: elemento.id_agr,
+              tipo_elemento: 'Actividad',
+              fecha_creacion: elemento.fecha_creacion,
+              cupos: elemento.cupos
+            };
+          });
+          this.anadirAElementos(elementitos);
         }
-      
-        // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
-        // Los campos de actividad se pasarán de la siguiente manera a elementos:
-        // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-        const elementitos = this.actividades.map((elemento) => {
-          return {
-            id: elemento.id_act,
-            nombre: elemento.nom_act,
-            descripcion: elemento.descripcion,
-            tipo: elemento.tipo,
-            imagen: elemento.imagen,
-            id_agr: elemento.id_agr,
-            tipo_elemento: 'Actividad',
-            fecha_creacion: elemento.fecha_creacion,
-            cupos: elemento.cupos
-          };
-        });
-        this.anadirAElementos(elementitos);
-      }
-      
+
         this.VerPublicaciones();
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -730,10 +731,10 @@ export default {
         });
         // Verifica si la respuesta es exitosa
         if (response.ok) {
-          
+
           // Convierte la respuesta en formato JSON
           const data = await response.json();
-          if(data.success === false){
+          if (data.success === false) {
             this.ActividadesParticipa = [];
             return;
           }

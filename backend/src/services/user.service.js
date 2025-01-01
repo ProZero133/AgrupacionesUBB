@@ -112,16 +112,6 @@ async function obtenerUsuarioPlataforma(rut) {
     }
 }
 
-async function obtenerAdministradoresPlataforma() {
-    try {
-        const result = await pool.query(`SELECT * FROM usuario WHERE rol = 'Admin';`);
-        return result.rows;
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        return error;
-    }
-}
-
 // Registra un usuario en la plataforma
 async function registrarUsuario(rut, rol) {
     try {
@@ -144,49 +134,6 @@ async function registrarUsuario(rut, rol) {
     }
 }
 
-async function registrarAdministrador(rut) {
-    try {
-        //Consultar si el usuario ya existe en la plataforma
-        const usuario = await obtenerUsuarioPlataforma(rut);
-        if (usuario.length > 0) {
-            // Actualizar rol
-            const result = await pool.query(`UPDATE usuario SET rol = 'Admin' WHERE rut = $1;`, [rut]);
-            if (result.rowCount > 0) {
-                return { success: true, message: 'Usuario actualizado correctamente' };
-            }
-        }
-        //Registrar usuario en la plataforma
-        const result = await pool.query(`
-            INSERT INTO usuario (rut, rol) VALUES ($1, 'Admin');`, [rut]);
-        if (result.rowCount > 0) {
-            return { success: true, message: 'Usuario registrado correctamente' };
-        }
-        return { success: false, message: 'No se pudo registrar el usuario' };
-
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        return error;
-    }
-}
-
-async function eliminarAdministrador(rut) {
-    try {
-        //Consultar si el usuario ya existe en la plataforma
-        const usuario = await obtenerUsuarioPlataforma(rut);
-        if (usuario.length > 0) {
-            // Actualizar rol
-            const result = await pool.query(`UPDATE usuario SET rol = 'Estudiante' WHERE rut = $1;`, [rut]);
-            if (result.rowCount > 0) {
-                return { success: true, message: 'Usuario actualizado correctamente' };
-            }
-        }
-        return { success: false, message: 'No se pudo actualizar el usuario' };
-
-    } catch (error) {
-        console.error('Error en la consulta:', error);
-        return error;
-    }
-}
 
 async function getTagsSimilares(tag) {
     try {
@@ -265,7 +212,4 @@ module.exports = {
     getTagById,
     getUsuarioServidor,
     deletePreferenciaUsuario,
-    registrarAdministrador,
-    eliminarAdministrador,
-    obtenerAdministradoresPlataforma
 };

@@ -14,7 +14,6 @@ fastify.listen({
         process.exit(1);
     }
     console.log(`Servidor escuchando en el puerto ${fastifyPort}`);
-    console.log(`con url: ${url}`);
 });
 
 module.exports = fastify;

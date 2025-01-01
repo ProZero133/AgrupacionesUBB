@@ -1,6 +1,7 @@
 const { pool } = require('../db.js');
 const { getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad } = require('../services/actividad.service.js');
-const { getUsuarioByRut, obtenerAdministradoresPlataforma } = require('../services/user.service.js');
+const { getUsuarioByRut } = require('../services/user.service.js');
+const { obtenerAdministradoresPlataforma } = require('../services/admin.service.js');
 const { notifySolicitudAcritacion } = require('../services/mail.service.js');
 const axios = require('axios');
 const config = require('../config/configEnv.js');

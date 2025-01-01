@@ -98,6 +98,11 @@ const routes = [
           name: 'Ver Tags',
           component: () => import('@/views/VerTagsView.vue'),
         },
+        {
+          path: 'administraciondeusuarios',
+          name: 'Administracion de Usuarios',
+          component: () => import('@/views/AdministracionDeUsuariosView.vue'),
+        },
       ],
     },
     {

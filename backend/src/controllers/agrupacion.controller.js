@@ -5,7 +5,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
-    deleteTagAgrupacion, updateAgrupacion, getPertenece } = require("../services/agrupacion.service.js");
+    deleteTagAgrupacion, updateAgrupacion, getPertenece, getAparienciaAgrupacion, updateAparienciaAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -679,6 +679,54 @@ async function eliminarTagAgrupacion(req, res) {
     }
 }
 
+async function obtenerAparienciaAgrupacion(req, res) {
+    try {
+        const { id_agr } = req.params;
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }
+        const apariencia = await getAparienciaAgrupacion(id_agr);
+        if (apariencia) {
+            return res.status(200).send({ success: true, data: apariencia });
+        } else {
+            return res.status(404).send({ success: false, message: 'Apariencia no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error al obtener la apariencia de la agrupación:', error);
+        res.code(500).send('Error al obtener la apariencia de la agrupación');
+    }
+}
+async function actualizarAparienciaAgrupacion(req, res) {
+    try {
+        const { id_agr } = req.params;
+        const apariencia = req.body;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const rol = decoded.rol;
+        const lider = await getLiderArray(id_agr);
+        if (lider[0].rut !== rut) {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar la apariencia de la agrupación' });
+        }
+        if (rol !== 'Estudiante') {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar la apariencia de la agrupación' });
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }    
+        const updatedApariencia = await updateAparienciaAgrupacion(id_agr, apariencia);
+        if (updatedApariencia) {
+            return res.status(200).send({ success: true, data: updatedApariencia });
+        } else {
+            return res.status(404).send({ success: false, message: 'Apariencia no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error al actualizar la apariencia de la agrupación:', error);
+        return res.status(500).send({ success: false, message: 'Error al actualizar la apariencia de la agrupación' });
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -708,4 +756,6 @@ module.exports = {
     obtenerLiderArray,
     obtenerAgrupacionesPertenece,
     invitarUsuario,
+    obtenerAparienciaAgrupacion,
+    actualizarAparienciaAgrupacion
 };

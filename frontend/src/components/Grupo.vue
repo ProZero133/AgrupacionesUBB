@@ -4,12 +4,40 @@
   </v-container>
   <v-container cols="12">
     <v-img :width="1600" :height="200" aspect-ratio="16/9" cover class="mx-auto" :src=datosGrupo.imagen></v-img>
-    <v-card class="mx-auto px-12 py-8 texto" max-width="1600">
+    <v-card class="mx-auto px-12 py-8 texto" :max-width="1600" :style="{
+      borderRadius: `${BordeDescripcion}px`,
+      backgroundColor: FondoDescripcion,
+      boxShadow: `${SombraDescripcionX}px ${SombraDescripcionY}px ${SombraDescripcionBlur}px ${SombraDescripcionColor}`,
+    }">
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
-
+      <div class="social-icons">
+        <v-btn icon :href="`https://www.facebook.com/${facebook}`" target="_blank">
+          <v-icon>mdi-facebook</v-icon>
+        </v-btn>
+        <v-btn icon :href="`https://www.instagram.com/${instagram}`" target="_blank">
+          <v-icon>mdi-instagram</v-icon>
+        </v-btn>
+        <v-btn icon :href="`https://www.twitter.com/${twitter}`" target="_blank">
+          <v-icon>mdi-twitter</v-icon>
+        </v-btn>
+      </div>
     </v-card>
-
+    <v-dialog v-model="dialogRedesSociales" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Redes sociales</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="facebook" label="Facebook"></v-text-field>
+          <v-text-field v-model="instagram" label="Instagram"></v-text-field>
+          <v-text-field v-model="twitter" label="Twitter"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="dialogRedesSociales = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="guardarRedesSociales">Guardar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="dialogmiembros" max-width="600px">
 
       <v-card>
@@ -188,14 +216,6 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="12">
-              <v-file-input v-model="imagengrupo" accept="image/png, image/jpeg, image/bmp"
-                label="Imagen de la agrupación" clearable required variant="solo-filled" prepend-icon=""
-                @change="onFileChange($event)" @click:clear="urlImagen = defaultImageUrl" disabled>
-              </v-file-input>
-            </v-col>
-          </v-row>
-          <v-row>
             <v-card class="search-container pa-3 mb-3">
               <v-card-title class="pa-0">Añadir Tags a las preferencias</v-card-title>
               <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)" append-icon="mdi-magnify"
@@ -253,7 +273,8 @@
 
     <v-dialog v-model="dialogsolicitar" max-width="500px" min-width="400px">
       <v-card text="Solicitar acreditación">
-        <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr }}?</v-card-title>
+        <v-card-title class="acred">¿Estas seguro de solicitar acreditar<br>{{ datosGrupo.nombre_agr
+          }}?</v-card-title>
         <v-card-text>
           <!-- Confirmar si esta seguro de solicitar la acreditacion de su grupo -->
           <v-row>
@@ -387,14 +408,19 @@
     <!-- ACTIVIDADES Y PUBLICACIONES -->
     <v-row align="start" no-gutters class="mt-6">
       <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
-        <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)">
+        <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)" :style="{
+          borderRadius: `${BordeActividades}px`,
+          backgroundColor: FondoActividades,
+          boxShadow: `${SombraActividadesX}px ${SombraActividadesY}px ${SombraActividadesBlur}px ${SombraActividadesColor}`,
+        }">
           <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
-          <v-card-subtitle class="publicadoen">Publicado {{
-            formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
+          <v-card-subtitle class="publicadoen">
+            Publicado {{ formatearFecha(elemento.fecha_creacion) }}
+          </v-card-subtitle>
           <v-card-text>
             <v-row>
               <v-col cols="5">
-                <v-img class="image" aspect-ratio="1" :src='elemento.imagen' cover />
+                <v-img class="image" aspect-ratio="1" :src="elemento.imagen" cover />
               </v-col>
               <v-col cols="7">
                 <p>{{ elemento.descripcion }}</p>
@@ -478,8 +504,7 @@
           </v-tooltip>
         </template>
         <v-list class="tultipApariencia">
-          <v-list-item v-for="(item, index) in aparienciaItems" :key="index"
-            v-on:click="this.$router.push(item.path + `${groupId}`)" disabled>
+          <v-list-item v-for="(item, index) in aparienciaItems" :key="index" @click="openDialog(item.path)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -531,6 +556,45 @@
       </v-row>
     </v-container>
   </v-card>
+
+  <!-- Dialogo para personalizar la descripción -->
+  <v-dialog v-model="dialogFondo" max-width="500px">
+    <v-card>
+      <v-card-title class="headline">Personalizar Descripción</v-card-title>
+      <v-card-text>
+        <v-slider v-model="BordeDescripcion" label="Borde Descripción" min="0" max="100"></v-slider>
+        <v-color-picker v-model="FondoDescripcion" label="Fondo Descripción" mode="hexa"></v-color-picker>
+        <v-slider v-model="SombraDescripcionX" label="Sombra Descripción X" min="-50" max="50"></v-slider>
+        <v-slider v-model="SombraDescripcionY" label="Sombra Descripción Y" min="-50" max="50"></v-slider>
+        <v-slider v-model="SombraDescripcionBlur" label="Sombra Descripción Blur" min="0" max="50"></v-slider>
+        <v-color-picker v-model="SombraDescripcionColor" label="Sombra Descripción Color" mode="hexa"></v-color-picker>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="dialogFondo = false">Cancelar</v-btn>
+        <v-btn color="green darken-1" text @click="subirApariencia">Guardar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo para personalizar las actividades -->
+  <v-dialog v-model="dialogBordes" max-width="500px">
+    <v-card>
+      <v-card-title class="headline">Personalizar Actividades</v-card-title>
+      <v-card-text>
+        <v-color-picker v-model="FondoActividades" label="Fondo Actividades" mode="hexa"></v-color-picker>
+        <v-slider v-model="SombraActividadesX" label="Sombra Actividades X" min="-50" max="50"></v-slider>
+        <v-slider v-model="SombraActividadesY" label="Sombra Actividades Y" min="-50" max="50"></v-slider>
+        <v-slider v-model="SombraActividadesBlur" label="Sombra Actividades Blur" min="0" max="50"></v-slider>
+        <v-color-picker v-model="SombraActividadesColor" label="Sombra Actividades Color" mode="hexa"></v-color-picker>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="dialogBordes = false">Cancelar</v-btn>
+        <v-btn color="green darken-1" text @click="subirApariencia">Guardar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -549,6 +613,24 @@ export default {
     };
   },
   data: () => ({
+    dialogRedesSociales: false,
+    dialogFondo: false,
+    dialogBordes: false,
+    facebook: '',
+    instagram: '',
+    twitter: '',
+    BordeDescripcion: 16,
+    FondoDescripcion: '#f5f5f5',
+    SombraDescripcionX: 0,
+    SombraDescripcionY: 6,
+    SombraDescripcionBlur: 12,
+    SombraDescripcionColor: 'rgba(0, 0, 0, 0.2)',
+    BordeActividades: 16,
+    FondoActividades: '#f5f5f5',
+    SombraActividadesX: 0,
+    SombraActividadesY: 6,
+    SombraActividadesBlur: 12,
+    SombraActividadesColor: 'rgba(0, 0, 0, 0.2)',
     lider: false,
     adminOlider: false,
     rolEnAgrupacion: '',
@@ -632,9 +714,9 @@ export default {
     ],
 
     aparienciaItems: [
-      { title: 'Cambiar Fondo', roles: ['Lider'] },
-      { title: 'Cambiar Fondo descripción', roles: ['Lider'] },
-      { title: 'Cambiar Bordes actividades', roles: ['Lider'] },
+      { title: 'Cambiar Fondo', roles: ['Lider'], path: 'dialogFondo' },
+      { title: 'Cambiar Bordes actividades', roles: ['Lider'], path: 'dialogBordes' },
+      { title: 'Asignar Redes sociales', roles: ['Lider'], path: 'dialogRedesSociales' },
     ],
 
     rolesPermitidosEliminar: ['Lider', 'Administrador'],
@@ -1702,7 +1784,104 @@ export default {
       else {
         this.permisoEliminar = false
       }
-    }
+    },
+    async openDialog(elemento) {
+      if (elemento === 'dialogRedesSociales') {
+        this.dialogRedesSociales = true;
+      } else if (elemento === 'dialogFondo') {
+        this.dialogFondo = true;
+      } else if (elemento === 'dialogBordes') {
+        this.dialogBordes = true;
+      }
+    },
+    async subirApariencia() {
+      try {
+        const sombraDescripcion = [
+          this.SombraDescripcionX,
+          this.SombraDescripcionY,
+          this.SombraDescripcionBlur,
+          this.SombraDescripcionColor,
+        ];
+        const sombraActividades = [
+          this.SombraActividadesX,
+          this.SombraActividadesY,
+          this.SombraActividadesBlur,
+          this.SombraActividadesColor,
+        ];
+        const response = await fetch(`${global.BACKEND_URL}/apariencia/${this.groupId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            BordeDescripcion: `${this.BordeDescripcion}px`,
+            FondoDescripcion: this.FondoDescripcion,
+            SombraDescripcion: sombraDescripcion,
+            BordeActividades: `${this.BordeActividades}px`,
+            FondoActividades: this.FondoActividades,
+            SombraActividades: sombraActividades,
+          }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          this.dialogBordes = false;
+          this.dialogFondo = false;
+          this.$root.showSnackBar('success', data.message, 'Operación exitosa');
+        } else {
+          this.dialogBordes = false;
+          this.dialogFondo = false;
+          this.$root.showSnackBar('error', data.message, 'Operación fallida');
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async fetchCustomization() {
+      const response = await fetch(`${global.BACKEND_URL}/apariencia/${this.groupId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        this.BordeDescripcion = data.data.bordedescripcion;
+        this.FondoDescripcion = data.data.fondodescripcion;
+        if (data.data.sombradescripcion) {
+          const [SombraDescripcionX, SombraDescripcionY, SombraDescripcionBlur, SombraDescripcionColor] = data.data.sombradescripcion.split('|');
+          this.SombraDescripcionX = parseFloat(SombraDescripcionX);
+          this.SombraDescripcionY = parseFloat(SombraDescripcionY);
+          this.SombraDescripcionBlur = parseFloat(SombraDescripcionBlur);
+          this.SombraDescripcionColor = SombraDescripcionColor;
+        }
+
+        this.BordeActividades = data.data.bordeactividad;
+        this.FondoActividades = data.data.fondoactividad;
+        if (data.data.sombraactividad) {
+          const [SombraActividadesX, SombraActividadesY, SombraActividadesBlur, SombraActividadesColor] = data.data.sombraactividad.split('|');
+          this.SombraActividadesX = parseFloat(SombraActividadesX);
+          this.SombraActividadesY = parseFloat(SombraActividadesY);
+          this.SombraActividadesBlur = parseFloat(SombraActividadesBlur);
+          this.SombraActividadesColor = SombraActividadesColor;
+        }
+      } else {
+        this.BordeDescripcion = 20;
+        this.FondoDescripcion = '#FFFFFF';
+        this.SombraDescripcionX = 0;
+        this.SombraDescripcionY = 6;
+        this.SombraDescripcionBlur = 12;
+        this.SombraDescripcionColor = 'rgba(0, 0, 0, 0.2)';
+        this.BordeActividades = 20;
+        this.FondoActividades = '#FFFFFF';
+        this.SombraActividadesX = 0;
+        this.SombraActividadesY = 6;
+        this.SombraActividadesBlur = 12;
+        this.SombraActividadesColor = 'rgba(0, 0, 0, 0.2)';
+        this.$root.showSnackBar('error', data.message, 'Operación fallida');
+      }
+    },
 
   },
   mounted() {
@@ -1715,7 +1894,8 @@ export default {
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
     this.obtenerTagsGrupo();
-    this.puedeEliminarElemento()
+    this.puedeEliminarElemento();
+    this.fetchCustomization();
   },
   computed: {
     progressStyle() {
@@ -1761,7 +1941,7 @@ export default {
   margin: 0 auto;
   margin-bottom: -40px;
   /* This centers the card within its container */
-  border: 2px solid rgb(207, 207, 207) !important;
+
   min-height: 350px;
 }
 

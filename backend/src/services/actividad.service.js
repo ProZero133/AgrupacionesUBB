@@ -216,10 +216,10 @@ async function deleteActividad(id) {
         const fechasActividades = await getFechaActividad(id);
         const fechaActual = new Date();
 
-
         if (fechasActividades !== undefined) {
             if (fechaActual > fechasActividades.fecha_actividad) {
-                return 'No es posible eliminar una actividad que ya ocurrio';
+                await softDeleteActividad(id);
+                return 'Actividad eliminada';
             }
         }
         const cantidadParticipantes = await getParticipantesActividad(id);

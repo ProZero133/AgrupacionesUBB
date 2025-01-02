@@ -16,7 +16,7 @@
                 <v-col cols="12">
                     <v-title style="font-size: 1.5rem; font-weight: bold;">Ingrese el correo de un usuario</v-title>
                     <v-text-field label="Ingrese nombre.apellido" v-model="valorTextBoxUsuario"
-                        @keyup.enter="valorTextBoxUsuario.length >= 4 ? obteneralgo() : $root.showSnackBar('error', 'Ingrese minimo 4 caracteres')"></v-text-field>
+                        @keyup.enter="valorTextBoxUsuario.length >= 4 ? substringUsuarioBDD() : $root.showSnackBar('error', 'Ingrese minimo 4 caracteres')"></v-text-field>
                 </v-col>
             </v-row>
             <v-row>
@@ -24,6 +24,9 @@
                     @click:row="abrirUsuarioSeleccionado">
                     <template v-slot:item.correo="{ item }">
                         <v-chip color="primary" dark>{{ item.correo }}</v-chip>
+                    </template>
+                    <template v-slot:item.action="{ item }">
+                        <v-btn color="#014898" @click="generarInformeUsuario(item.rut)">generar informe</v-btn>
                     </template>
                 </v-data-table>
             </v-row>
@@ -169,9 +172,6 @@
 
 <script>
 import { useRouter } from 'vue-router';
-import VueCookies from 'vue-cookies';
-import { id } from 'vuetify/lib/locale/index.mjs';
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -180,41 +180,14 @@ export default {
     data: () => ({
         rut: '',
         rol: '',
-        // nombre grupos usuario
-        grupos: [],
-
-        // nombre grupos usuario seleccionados
-        selectedGrupos: [],
-        Actividades: ['Actividades'],
-        actividades: [],
-        publicaciones: [],
-        formularios: [],
-
-        // nombre y id grupos usuario
-        gruposConID: [],
-        resultadoGrupos: [],
-        cambioIDGrupo: [],
-
-        // headers de la tabla de actividades
-        headersInformeAct: [
-            { title: 'Nombre evento', value: 'nom_act', sortable: true },
-            { title: 'Visibilidad', value: 'tipo', sortable: true },
-            { title: 'Fecha de realizacion', value: 'fecha_creacion', align: 'end', sortable: false },
-            { title: 'Descripción', value: 'descripcion', sortable: false },
-        ],
-
-        // contenido de la tabla de agrupaciones
-        headersAgrupaciones: [
-            { title: 'Nombre', value: 'nombre_agr' },
-            { title: 'Descripción', value: 'descripcion' },
-            { title: 'Fecha de creación', value: 'fecha_creacion' },
-            { title: 'Estado', value: 'estado' },
-        ],
-
+        tab: 'Actividades',
+        // variables tab Usuarios
         // valorTextBoxUsuario
         valorTextBoxUsuario: '',
         UsuariosRegistrados: [],
         SubstringCorreo: [],
+        usuariosBuscados: [],
+        nombreAgrupacion: [],
 
         // datos de la tabla de usuarios
         headersBuscadorUsuario: [
@@ -225,12 +198,44 @@ export default {
             { title: 'Rol', value: 'rol' },
             { value: 'action', align: 'center' },
         ],
-        usuariosBuscados: [],
+
+        // variables tab Actividades
+        // nombre grupos usuario seleccionados
+        selectedGrupos: [],
+        Actividades: ['Actividades'],
+        actividades: [],
+        publicaciones: [],
+        formularios: [],
+
+        // headers de la tabla de actividades
+        headersInformeAct: [
+            { title: 'Nombre evento', value: 'nom_act', sortable: true },
+            { title: 'Visibilidad', value: 'tipo', sortable: true },
+            { title: 'Fecha de realizacion', value: 'fecha_creacion', align: 'end', sortable: false },
+            { title: 'Descripción', value: 'descripcion', sortable: false },
+        ],
+
+        // variables tab Agrupaciones
+        // nombre y id grupos usuario
+        gruposConID: [],
+        resultadoGrupos: [],
+        cambioIDGrupo: [],
+
+        // contenido de la tabla de agrupaciones
+        headersAgrupaciones: [
+            { title: 'Nombre', value: 'nombre_agr' },
+            { title: 'Descripción', value: 'descripcion' },
+            { title: 'Fecha de creación', value: 'fecha_creacion' },
+            { title: 'Estado', value: 'estado' },
+        ],
+
+        // nombre grupos usuario
+        grupos: [],
 
         // PDF
         contenidoPDF: [],
         datos: [],
-        tab: 'Actividades',
+
     }),
     setup() {
         const router = useRouter();
@@ -267,6 +272,125 @@ export default {
 
             return null;
         },
+
+        // USUARIOS
+
+        async substringUsuarioBDD() {
+            // llama a la ruta /correoSubString/:correo
+            const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+                body: JSON.stringify({
+                    correo: this.valorTextBoxUsuario,
+                }),
+            });
+
+            if (response.ok) {
+                this.usuariosBuscados = [];
+                this.usuariosBuscados = await response.json();
+            } else {
+                console.error('No se encontraron usuarios:', response.status);
+            }
+        },
+
+        async generarInformeUsuario(rut) {
+
+            // primer recorrido: busca las agrupaciones a las que pertenece el usuario, genero el pdf con las agrupaciones a las que entro el usuario
+            // segundo recorrido: busca las actividades en las que participo el usuario, si hay actividades, las añade al pdf, si no hay actividades entonces se imprime el pdf con las agrupaciones
+
+            // se obtienen las agrupaciones del usuario
+            const responseAgrupaciones = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+            });
+            if (responseAgrupaciones.ok) {
+                const agrupaciones = await responseAgrupaciones.json();
+
+                // busca las actividades en las que participo el usuario
+                const responseActividades = await fetch(`${global.BACKEND_URL}/actividadesparticipante/${rut}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                });
+                if (responseActividades.ok) {
+                    const actividades = await responseActividades.json();
+
+                    // se genera un pdf con una tabla en donde se muestra el nombre de las agrupaciones y la fecha de integracion y el rol interno
+                    const doc = new jsPDF();
+                    doc.text('Informe de pertenencia de agrupaciones del usuario', 10, 10);
+                    const rowsPerPage = 20; // Limite de filas por página
+                    let currentPage = 1;
+
+                    for (let i = 0; i < agrupaciones.length; i += rowsPerPage) {
+                        if (i > 0) {
+                            doc.addPage();
+                            currentPage++;
+                        }
+
+                        agrupaciones.forEach(item => {
+                            const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
+                            item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
+                        });
+
+                        const rows = agrupaciones.slice(i, i + rowsPerPage).map(item => [item.id_agr, item.fecha_integracion, item.rol_agr]);
+
+                        // formatea las fechas
+                        rows.forEach(agrupacion => {
+                            agrupacion[1] = new Date(agrupacion[1]).toLocaleDateString();
+                        });
+
+                        doc.autoTable({
+                            head: [['Nombre de la agrupación', 'Fecha de integracion a la agrupación', 'Rol interno']],
+                            body: rows,
+                            columnStyles: {
+                                1: { cellWidth: 40, halign: 'right' }, // fecha
+                                2: { cellWidth: 25 }, // rol
+                            },
+                            startY: 30,
+                        });
+                    }
+
+                    if (actividades.length > 0) {
+                        doc.addPage();
+                        const fechaActual = new Date().toLocaleDateString();
+                        doc.text(`Informe de actividades del usuario - ${fechaActual}`, 10, 10);
+                        const activityRows = actividades.map(item => [item.nom_act, item.fecha_creacion, item.descripcion]);
+
+                        // formatea las fechas
+                        activityRows.forEach(item => {
+                            item[1] = new Date(item[1]).toLocaleDateString();
+                        });
+
+                        doc.autoTable({
+                            head: [['Nombre de la actividad', 'Fecha de realización', 'Descripción']],
+                            body: activityRows,
+                            columnStyles: {
+                                0: { cellWidth: 60 }, // nombre act
+                                1: { cellWidth: 40, halign: 'right' }, // fecha
+                            },
+                            startY: 30,
+                        });
+                    }
+
+                    // Guardar el PDF
+                    doc.save('Informe_Usuario.pdf');
+
+                }
+
+            } else {
+                this.$root.showSnackBar('error', 'El usuario no pertenece a ninguna agrupación:', responseAgrupaciones.status);
+            }
+        },
+
+        // ACTIVIDADES
 
         async obtenerGrupos() {
             try {
@@ -393,7 +517,40 @@ export default {
             }
         },
 
-        // funcion para generar un pdf con los datos de contenidoPDF
+        async generarTabla() {
+
+            // verifica si el token del usuario que apreta el boton de generar tabla es valido
+
+            this.actividades = [];
+
+            if (this.rol === "Admin") {
+                await this.obtenerActividadesGrupo();
+            } else {
+                await this.obtenerActividadesGrupo();
+                await this.validarParticipacion();
+            }
+            this.contenidoPDF = this.actividades.flat();
+
+            // si dentro del array el atributo "Aprobado" es false lo cambia por "Rechazado"
+            this.contenidoPDF.forEach(item => {
+                if (item.tipo === false) {
+                    item.tipo = "Privada";
+                } else {
+                    item.tipo = "Publica";
+                }
+            });
+
+            // cambia el formato de la fecha
+            this.contenidoPDF.forEach(item => {
+                item.fecha_creacion = new Date(item.fecha_creacion).toLocaleDateString();
+            });
+
+            // si la response es success: false elimina el item del array
+            this.contenidoPDF = this.contenidoPDF.filter(item => item.success !== false);
+
+            return this.contenidoPDF;
+        },
+
         async generarPDFAct() {
             // Crea un nuevo documento PDF
             const doc = new jsPDF();
@@ -454,45 +611,12 @@ export default {
             }
         },
 
-        async generarTabla() {
-
-            // verifica si el token del usuario que apreta el boton de generar tabla es valido
-
-            this.actividades = [];
-
-            if (this.rol === "Admin") {
-                await this.obtenerActividadesGrupo();
-            } else {
-                await this.obtenerActividadesGrupo();
-                await this.validarParticipacion();
-            }
-            this.contenidoPDF = this.actividades.flat();
-
-            // si dentro del array el atributo "Aprobado" es false lo cambia por "Rechazado"
-            this.contenidoPDF.forEach(item => {
-                if (item.tipo === false) {
-                    item.tipo = "Privada";
-                } else {
-                    item.tipo = "Publica";
-                }
-            });
-
-            // cambia el formato de la fecha
-            this.contenidoPDF.forEach(item => {
-                item.fecha_creacion = new Date(item.fecha_creacion).toLocaleDateString();
-            });
-
-            // si la response es success: false elimina el item del array
-            this.contenidoPDF = this.contenidoPDF.filter(item => item.success !== false);
-
-            return this.contenidoPDF;
-        },
-
+        // AGRUPACIONES
         async generarInformeAgrupaciones(rut) {
 
             console.log("rol: ", this.rol)
             if (this.rol === "Admin") {
-                
+
                 const AgrupacionesUsuario = this.gruposConID;
 
                 // cambia los id_agr por el nombre_agr
@@ -541,7 +665,7 @@ export default {
                 }
                 doc.save('Informe_Agrupaciones_ConectaUBB.pdf');
             } else {
-                
+
                 // se obtienen las agrupaciones a las que pertenece el usuario
                 const response = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
                     method: 'GET',
@@ -582,7 +706,7 @@ export default {
                             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                         },
                     });
-                    
+
                     if (responseUsuario.ok) {
                         const usuario = await responseUsuario.json();
 
@@ -635,31 +759,6 @@ export default {
                 } else {
                     console.error('No se encontraron agrupaciones:', response.status);
                 }
-            }
-        },
-
-        async cambiarGrupo() {
-
-        },
-
-        async obteneralgo() {
-            // llama a la ruta /correoSubString/:correo
-            const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-                },
-                body: JSON.stringify({
-                    correo: this.valorTextBoxUsuario,
-                }),
-            });
-
-            if (response.ok) {
-                this.usuariosBuscados = [];
-                this.usuariosBuscados = await response.json();
-            } else {
-                console.error('No se encontraron usuarios:', response.status);
             }
         },
 

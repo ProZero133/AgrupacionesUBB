@@ -1825,8 +1825,12 @@ export default {
         });
         const data = await response.json();
         if (data.success) {
+          this.dialogBordes = false;
+          this.dialogFondo = false;
           this.$root.showSnackBar('success', data.message, 'Operación exitosa');
         } else {
+          this.dialogBordes = false;
+          this.dialogFondo = false;
           this.$root.showSnackBar('error', data.message, 'Operación fallida');
         }
       } catch (error) {

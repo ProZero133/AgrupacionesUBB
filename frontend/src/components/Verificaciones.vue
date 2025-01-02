@@ -357,7 +357,6 @@ export default {
     async RechazarActividad(id_act) {
       this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
       const creadorActData = await this.CreadorActividad(id_act);
-      console.log("Creador actividad: ", creadorActData);
       try {
         const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${creadorActData[0].id_act}/${creadorActData[0].rut}`, {
           method: 'DELETE',

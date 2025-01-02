@@ -187,7 +187,6 @@ export default {
         UsuariosRegistrados: [],
         SubstringCorreo: [],
         usuariosBuscados: [],
-        nombreAgrupacion: [],
 
         // datos de la tabla de usuarios
         headersBuscadorUsuario: [
@@ -323,70 +322,97 @@ export default {
                 if (responseActividades.ok) {
                     const actividades = await responseActividades.json();
 
-                    // se genera un pdf con una tabla en donde se muestra el nombre de las agrupaciones y la fecha de integracion y el rol interno
-                    const doc = new jsPDF();
-                    doc.text('Informe de pertenencia de agrupaciones del usuario', 10, 10);
-                    const rowsPerPage = 20; // Limite de filas por página
-                    let currentPage = 1;
-
-                    for (let i = 0; i < agrupaciones.length; i += rowsPerPage) {
-                        if (i > 0) {
-                            doc.addPage();
-                            currentPage++;
-                        }
-
-                        agrupaciones.forEach(item => {
-                            const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
-                            item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                        });
-
-                        const rows = agrupaciones.slice(i, i + rowsPerPage).map(item => [item.id_agr, item.fecha_integracion, item.rol_agr]);
-
-                        // formatea las fechas
-                        rows.forEach(agrupacion => {
-                            agrupacion[1] = new Date(agrupacion[1]).toLocaleDateString();
-                        });
-
-                        doc.autoTable({
-                            head: [['Nombre de la agrupación', 'Fecha de integracion a la agrupación', 'Rol interno']],
-                            body: rows,
-                            columnStyles: {
-                                1: { cellWidth: 40, halign: 'right' }, // fecha
-                                2: { cellWidth: 25 }, // rol
-                            },
-                            startY: 30,
-                        });
+                    if (!Array.isArray(actividades)) {
+                        console.error('La respuesta de actividades no es un arreglo:', actividades);
+                        this.$root.showSnackBar('error', 'Error al obtener las actividades del usuario');
+                        return;
                     }
 
+                    // formatea la fecha
+                    agrupaciones.forEach(item => {
+                        item.fecha_integracion = new Date(item.fecha_integracion).toLocaleDateString();
+                    });
+
+                    // cambia los id_agr por el nombre_agr
+                    agrupaciones.forEach(item => {
+                        const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
+                        item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
+                    });
+
+                    // valida las actividades por id_agr
+                    actividades.forEach(item => {
+                        const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
+                        item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
+                    });
+
+                    const doc = new jsPDF();
+
+                    // Título del informe
+                    doc.text('Informe de Usuario', 10, 10);
+
+                    // Tabla de agrupaciones
+                    doc.autoTable({
+                        head: [['Nombre de la Agrupación', 'Fecha de Integración']],
+                        body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
+                        startY: 20,
+                    });
+
+                    // Tabla de actividades por agrupación
                     if (actividades.length > 0) {
                         doc.addPage();
-                        const fechaActual = new Date().toLocaleDateString();
-                        doc.text(`Informe de actividades del usuario - ${fechaActual}`, 10, 10);
-                        const activityRows = actividades.map(item => [item.nom_act, item.fecha_creacion, item.descripcion]);
 
-                        // formatea las fechas
-                        activityRows.forEach(item => {
-                            item[1] = new Date(item[1]).toLocaleDateString();
-                        });
+                        const actividadesPorAgrupacion = actividades.reduce((acc, actividad) => {
+                            if (!acc[actividad.id_agr]) {
+                                acc[actividad.id_agr] = [];
+                            }
+                            acc[actividad.id_agr].push(actividad);
+                            return acc;
+                        }, {});
 
-                        doc.autoTable({
-                            head: [['Nombre de la actividad', 'Fecha de realización', 'Descripción']],
-                            body: activityRows,
-                            columnStyles: {
-                                0: { cellWidth: 60 }, // nombre act
-                                1: { cellWidth: 40, halign: 'right' }, // fecha
-                            },
-                            startY: 30,
+                        Object.keys(actividadesPorAgrupacion).forEach((id_agr, index) => {
+                            if (index > 0) {
+                                doc.addPage();
+                            }
+                            const actividades = actividadesPorAgrupacion[id_agr];
+
+                            // busca el nombre de la agrupacion
+                            const nombreAgrupacion = agrupaciones.find(agrupacion => agrupacion.id_agr === id_agr)?.nombre_agr || 'Sin Nombre';
+
+                            doc.text(`Actividades del usuario en ${nombreAgrupacion}`, 10, 20);
+                            doc.autoTable({
+                                head: [['Nombre Actividad', 'Fecha', 'Descripción']],
+                                body: actividades.map(act => [act.nom_act, new Date(act.fecha_creacion).toLocaleDateString(), act.descripcion]),
+                                columnStyles: {
+                                    0: { cellWidth: 50 }, // nombre act
+                                    1: { cellWidth: 30 }, // fecha
+                                },
+                                startY: 30,
+                            });
                         });
                     }
 
                     // Guardar el PDF
                     doc.save('Informe_Usuario.pdf');
+                } else {
+                    const doc = new jsPDF();
 
+                    // Título del informe
+                    doc.text('Informe de Usuario', 10, 10);
+
+                    // Tabla de agrupaciones
+                    doc.autoTable({
+                        head: [['Nombre de la Agrupación', 'Fecha de Integración']],
+                        body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
+                        startY: 20,
+                    });
+
+                    // Guardar el PDF
+                    doc.save('Informe_Usuario.pdf');
+
+                    this.$root.showSnackBar('error', 'Este usuario no ha participado en ninguna actividad');
                 }
-
             } else {
-                this.$root.showSnackBar('error', 'El usuario no pertenece a ninguna agrupación:', responseAgrupaciones.status);
+                this.$root.showSnackBar('error', 'Este usuario no pertenece a ninguna agrupación');
             }
         },
 
@@ -613,8 +639,6 @@ export default {
 
         // AGRUPACIONES
         async generarInformeAgrupaciones(rut) {
-
-            console.log("rol: ", this.rol)
             if (this.rol === "Admin") {
 
                 const AgrupacionesUsuario = this.gruposConID;

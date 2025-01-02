@@ -48,6 +48,17 @@ async function createAgrupacion(agrupacion) {
     if (lider.rows.length === 0) {
       throw new Error('Error al insertar el lider');
     }
+
+    
+      const BordeDescripcion = '20px';
+      const FondoDescripcion = '#FFFFFF';
+      const SombraDescripcion = '0|6|12|rgba(0, 0, 0, 0.2)'
+      const BordeActividades = '20px';
+      const FondoActividades = '#FFFFFF';
+      const SombraActividades = '0|6|12|rgba(0, 0, 0, 0.2)'
+    
+
+    const apariencia = await pool.query('INSERT INTO "Apariencia" (id_agr, bordedescripcion, fondodescripcion, sombradescripcion, bordeactividad, fondoactividad, sombraactividad) VALUES ($1, $2,$3,$4,$5,$6,$7) RETURNING *', [newAgrupacion.rows[0].id_agr, BordeDescripcion, FondoDescripcion, SombraDescripcion, BordeActividades, FondoActividades, SombraActividades]);
     // Retorna la nueva agrupacion insertada
     return newAgrupacion.rows[0];
   } catch (error) {
@@ -311,6 +322,8 @@ async function softDeleteAgrupacion(id_agr) {
   try {
     // Establece la visibilidad de la agrupación en falso
     const agrupacion = await pool.query('UPDATE "Agrupacion" SET visible = $1 WHERE id_agr = $2 RETURNING *', [false, id_agr]);
+    // Establece la visibilidad de las actividades en falso
+    const actividades = await pool.query('UPDATE "Actividad" SET visible = $1 WHERE id_agr = $2 RETURNING *', [false, id_agr]);
     return agrupacion.rows[0];
   } catch (error) {
     console.log('Error al eliminar la agrupación:', error);
@@ -472,7 +485,7 @@ async function getPublicacionCorreos(id_agr, id_pub) {
 async function redeemCodigo(rut, id_agr) {
   try {
     const fecha_ingreso = new Date();
-    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [rut, id_agr,fecha_ingreso, 'Miembro']);
+    const response = await pool.query('INSERT INTO "Pertenece" (rut, id_agr, fecha_integracion, rol_agr) VALUES ($1, $2, $3, $4) RETURNING *', [rut, id_agr, fecha_ingreso, 'Miembro']);
     if (response.rows.length === 0) {
       return [];
     }
@@ -512,6 +525,49 @@ async function deleteTagAgrupacion(id_agr, id_tag) {
   }
 }
 
+async function getAparienciaAgrupacion(id_agr) {
+  try {
+    // Obtiene la apariencia de la agrupación con el id especificado
+    const apariencia = await pool.query('SELECT * FROM "Apariencia" WHERE id_agr = $1', [id_agr]);
+    return apariencia.rows[0];
+  } catch (error) {
+    console.log('Error al obtener la apariencia de la agrupación:', error);
+  }
+}
+
+async function updateAparienciaAgrupacion(id_agr, apariencia) {
+  try {
+    const {
+      BordeDescripcion,
+      FondoDescripcion,
+      SombraDescripcion,
+      BordeActividades,
+      FondoActividades,
+      SombraActividades,
+    } = apariencia;
+
+    const sombraDescripcion = SombraDescripcion.join('|');
+    const sombraActividades = SombraActividades.join('|');
+    const response = await pool.query(
+      `UPDATE "Apariencia" SET "bordedescripcion" = $1, "fondodescripcion" = $2, "sombradescripcion" = $3, "bordeactividad" = $4, "fondoactividad" = $5, "sombraactividad" = $6 
+       WHERE "id_agr" = $7 
+       RETURNING *`,
+      [
+        BordeDescripcion,
+        FondoDescripcion,
+        sombraDescripcion,
+        BordeActividades,
+        FondoActividades,
+        sombraActividades,
+        id_agr,
+      ]
+    );
+    return response.rows[0];
+  } catch (error) {
+    console.log('Error al actualizar la apariencia de la agrupación:', error);
+  }
+}
+
 module.exports = {
   getAgrupaciones,
   getAgrupacionById,
@@ -542,5 +598,7 @@ module.exports = {
   redeemCodigo,
   getAgrupacionesNoInscritas,
   getTagsAgrupacion,
-  deleteTagAgrupacion
+  deleteTagAgrupacion,
+  getAparienciaAgrupacion,
+  updateAparienciaAgrupacion,
 };

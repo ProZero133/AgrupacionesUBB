@@ -5,7 +5,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
-    deleteTagAgrupacion, updateAgrupacion, getPertenece } = require("../services/agrupacion.service.js");
+    deleteTagAgrupacion, updateAgrupacion, getPertenece, getAparienciaAgrupacion, updateAparienciaAgrupacion } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -261,6 +261,7 @@ async function eliminarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const decoded = await req.jwtVerify();
+        const rol = decoded.rol;
         const rut = decoded.rut;
         const user = await getUsuarioByRut(rut);
         if (user.length === 0) {
@@ -268,7 +269,7 @@ async function eliminarAgrupacion(req, res) {
         }
         const usuarioEsLider = await getLider(id_agr);
         const lider = usuarioEsLider;
-        if (lider.rut !== rut) {
+        if (lider.rut !== rut && rol !== 'Admin') {
             return res.code(401).send('No tienes permisos para eliminar la agrupación');
         }
         const result = await validateEliminarGrupo(id_agr);
@@ -533,7 +534,7 @@ async function invitarUsuario(req, res) {
             return res.code(404).send({ success: false, message: 'Usuario no encontrado' });
         }
         if (usuarioPLataforma[0].rol === 'Admin') {
-            return res.code(401).send({success: false, message: 'No puedes invitar a un administrador'});
+            return res.code(401).send({ success: false, message: 'No puedes invitar a un administrador' });
         }
         const rut = usuarioPLataforma[0].rut;
 
@@ -657,6 +658,36 @@ async function eliminarTagAgrupacion(req, res) {
     }
 }
 
+async function obtenerAparienciaAgrupacion(req, res) {
+    try {
+        const { id_agr } = req.params;
+        const apariencia = await getAparienciaAgrupacion(id_agr);
+        if (apariencia) {
+            return res.status(200).send({ success: true, data: apariencia });
+        } else {
+            return res.status(404).send({ success: false, message: 'Apariencia no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error al obtener la apariencia de la agrupación:', error);
+        res.code(500).send('Error al obtener la apariencia de la agrupación');
+    }
+}
+async function actualizarAparienciaAgrupacion(req, res) {
+    try {
+        const { id_agr } = req.params;
+        const apariencia = req.body;
+        const updatedApariencia = await updateAparienciaAgrupacion(id_agr, apariencia);
+        if (updatedApariencia) {
+            return res.status(200).send({ success: true, data: updatedApariencia });
+        } else {
+            return res.status(404).send({ success: false, message: 'Apariencia no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error al actualizar la apariencia de la agrupación:', error);
+        return res.status(500).send({ success: false, message: 'Error al actualizar la apariencia de la agrupación' });
+    }
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -686,4 +717,6 @@ module.exports = {
     obtenerLiderArray,
     obtenerAgrupacionesPertenece,
     invitarUsuario,
+    obtenerAparienciaAgrupacion,
+    actualizarAparienciaAgrupacion
 };

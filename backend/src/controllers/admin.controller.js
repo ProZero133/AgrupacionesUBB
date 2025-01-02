@@ -20,7 +20,7 @@ async function correoSubString(request, reply) {
     let resultUsuarios = [];
     for (let i = 0; i < usuariosPlataforma.length; i++) {
         for (let j = 0; j < resultadoSubString.length; j++) {
-
+            
             if (usuariosPlataforma[i].rut === resultadoSubString[j].rut.toString()) {
                 resultUsuarios.push(resultadoSubString[j]);
             }

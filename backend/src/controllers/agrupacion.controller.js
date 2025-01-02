@@ -636,9 +636,13 @@ async function VerGruposNoInscritos(req, res) {
 async function ObtenerTagsAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.code(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }
         const tags = await getTagsAgrupacion(id_agr);
-        if (tags.length === 0) {
-            return 0;
+        if (!tags) {
+            return [];
         }
 
         for (const tag of tags) {
@@ -658,23 +662,29 @@ async function eliminarTagAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const id_tag = req.params.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const lider = await getLiderArray(id_agr);
+        if (lider[0].rut !== rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para eliminar el tag' });
+        }
 
         const agrupacion = await getAgrupacionById(id_agr);
         if (!agrupacion) {
-            return res.code(404).send('Agrupación no encontrada');
+            return res.code(404).send({ success: false, message: 'Agrupación no encontrada' });
         }
 
         const tag = await obtenerTagPorId(id_tag);
         if (tag.rows.length === 0) {
-            return res.code(404).send('Tag no encontrado');
+            return res.code(404).send({ success: false, message: 'Tag no encontrado' });
         }
 
         const result = await deleteTagAgrupacion(id_agr, id_tag);
         if (!result) {
-            return res.code(500).send('Error al eliminar el tag');
+            return res.code(500).send({ success: false, message: 'Error al eliminar el tag' });
         }
 
-        res.code(200).send('Tag eliminado');
+        res.code(200).send({ success: true, message: 'Tag eliminado' });
     } catch (error) {
         console.error('Error al eliminar el tag:', error);
         res.code(500).send('Error al eliminar el tag');

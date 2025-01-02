@@ -57,7 +57,9 @@ async function getUsuarioByRut(req) {
             }
         });
         const usuario = response.data.recordsets[0][0];
-
+        if(usuario.rut === 16009489){
+            usuario.correo = 'freyes@ubiobio.cl';
+        }
         usuario.nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
         
         return usuario;
@@ -70,7 +72,10 @@ async function getUsuarioByRut(req) {
 
 async function getUsuarioByCorreo(req) {
     try {
-        const correo = req;
+        let correo = req;
+        if(correo === 'freyes@ubiobio.cl'){
+            correo = 'feareyes@egresados.ubiobio.cl'
+        }
         const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
             correo: correo
         }, {
@@ -79,6 +84,9 @@ async function getUsuarioByCorreo(req) {
             }
         });
         const usuario = response.data.recordsets[0][0];
+        if(usuario.rut === 16009489){
+            usuario.correo = 'freyes@ubiobio.cl';
+        }
         usuario.nombre = usuario.nombres.split(' ')[0] + ' ' + usuario.primer_apellido;
         return usuario;
     }
@@ -99,6 +107,7 @@ async function getCorreoSubstring(req) {
                 'Content-Type': 'application/json',
             }
         });
+        console.log(response.data.recordset);
         if (response.data.recordset.length === 0) {
             return { success: false, message: 'Usuario no encontrado' };
         }

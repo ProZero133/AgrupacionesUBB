@@ -684,6 +684,10 @@ async function eliminarTagAgrupacion(req, res) {
 async function obtenerAparienciaAgrupacion(req, res) {
     try {
         const { id_agr } = req.params;
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }
         const apariencia = await getAparienciaAgrupacion(id_agr);
         if (apariencia) {
             return res.status(200).send({ success: true, data: apariencia });
@@ -699,6 +703,20 @@ async function actualizarAparienciaAgrupacion(req, res) {
     try {
         const { id_agr } = req.params;
         const apariencia = req.body;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const rol = decoded.rol;
+        const lider = await getLiderArray(id_agr);
+        if (lider[0].rut !== rut) {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar la apariencia de la agrupación' });
+        }
+        if (rol !== 'Estudiante') {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar la apariencia de la agrupación' });
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }    
         const updatedApariencia = await updateAparienciaAgrupacion(id_agr, apariencia);
         if (updatedApariencia) {
             return res.status(200).send({ success: true, data: updatedApariencia });

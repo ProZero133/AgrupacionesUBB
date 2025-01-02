@@ -46,6 +46,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/agrupacionesPertenece/:rut',{ preHandler: [isUserOrAdmin] }, obtenerAgrupacionesPertenece);
   fastify.post('/invitarUsuario', { preHandler: [isUserOrAdmin] },invitarUsuario);
   fastify.get('/apariencia/:id_agr', { preHandler: [isUserOrAdmin] },obtenerAparienciaAgrupacion);
-  fastify.put('/apariencia/:id_agr', { preHandler: [isUserOrAdmin] },actualizarAparienciaAgrupacion);
+  fastify.put('/apariencia/:id_agr', { preHandler: [isUser] },actualizarAparienciaAgrupacion);
   done();
 };

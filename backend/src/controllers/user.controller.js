@@ -145,21 +145,11 @@ async function obtenerUsuarioServidor(req, res) {
       return res.send({ success: false, message: 'No se encontró el usuario' });
     }
     return result;
-
   }
   catch(error){
     console.error('Error al obtener el usuario:', error);
     res.code(500).send('Error al obtener el usuario');
   }
-}
-
-function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
 }
 
 async function EliminarPreferenciaUsuario(req, res){

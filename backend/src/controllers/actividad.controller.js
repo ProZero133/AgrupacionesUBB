@@ -393,12 +393,15 @@ async function AceptacionActividad(req, res) {
         const id_act = req.params.id_act;
         // Programa la actividad
         const actividad = await setAprobacionActividad(id_act);
+        if (actividad) {
+            return res.code(200).send({ success: true, message: 'Actividad aprobada', data: actividad });
+        }
         // Retorna la actividad programada
-        res.code(200).send(actividad);
+        res.code(500).send({success: false, message: 'Error al aprobar la actividad'});
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al programar la actividad:', error);
-        res.code(500).send('Error al programar la actividad');
+        res.code(500).send({error: 'Error al aprobar la actividad'});
     }
 }
 

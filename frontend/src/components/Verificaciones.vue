@@ -101,6 +101,7 @@
 
 
 <script>
+
 export default {
   name: 'CrearAgrupacion',
   data() {
@@ -205,17 +206,17 @@ export default {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
           this.MiembrosdeAgr = filtrada;
-            this.AgrupacionesPendientesObtenidas = this.AgrupacionesPendientesObtenidas.map((item) => {
+          this.AgrupacionesPendientesObtenidas = this.AgrupacionesPendientesObtenidas.map((item) => {
             if (item.id_agr === id_agr) {
               item.integrantes = filtrada.length;
               const lider = filtrada.find((usuario) => usuario.rol_agr === 'Lider');
               if (lider) {
-              item.nombre = lider.user_nombre;
-              item.correo = lider.correo;
+                item.nombre = lider.user_nombre;
+                item.correo = lider.correo;
               }
             }
             return item;
-            });
+          });
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -235,15 +236,15 @@ export default {
         });
 
         if (response.ok) {
-          this.showSnackbar('Agrupación aceptada con éxito', 'Se le notificará al lider por correo.');
+          this.$root.showSnackBar('success', response.message, 'Se le notificará al lider por correo.');
           this.ObtenerAgrupacionesPendientes();
         } else {
-          console.error('Error en la respuesta:', response.status);
-          this.showSnackbar('Error al aceptar la agrupación', 'error');
+          console.error('Error en la respuesta:', response.message);
+          this.$root.showSnackBar('error', 'error');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
-        this.showSnackbar('Error al aceptar la agrupación', 'error');
+        this.$root.showSnackBar('error', response.message);
       }
     },
 
@@ -261,16 +262,16 @@ export default {
         });
 
         if (response.ok) {
-          this.showSnackbar('Agrupación rechazada con éxito', 'Se le notificará al lider por correo.');
+          this.$root.showSnackBar('success', 'Agrupación rechazada con éxito', 'Se le notificará al lider por correo.');
           this.ObtenerAgrupacionesPendientes();
           this.rechazarDialog = false; // Cerrar el diálogo después de rechazar
         } else {
           console.error('Error en la respuesta:', response.status);
-          this.showSnackbar('Error al rechazar la agrupación', 'error');
+          this.$root.showSnackBar('error', 'error');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
-        this.showSnackbar('Error al rechazar la agrupación', 'error');
+        this.$root.showSnackBar('error', 'error');
       }
     },
 
@@ -338,22 +339,25 @@ export default {
           }),
         });
 
-        if (response.ok) {
-          this.showSnackbar('Actividad aceptada con éxito', 'Se le notificará al lider por correo.');
+        const data = await response.json();
+
+        if (data.success) {
+          this.$root.showSnackBar('success', data.message, 'Se le notificará al lider por correo.');
           this.ObtenerActividadesPendientes();
         } else {
           console.error('Error en la respuesta:', response.status);
-          this.showSnackbar('Error al aceptar la actividad', 'error');
+          this.$root.showSnackBar('error', data.message);
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
-        this.showSnackbar('Error al aceptar la actividad', 'error');
+        this.$root.showSnackBar('error');
       }
     },
 
     async RechazarActividad(id_act) {
       this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
       const creadorActData = await this.CreadorActividad(id_act);
+      console.log("Creador actividad: ", creadorActData);
       try {
         const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${creadorActData[0].id_act}/${creadorActData[0].rut}`, {
           method: 'DELETE',
@@ -366,24 +370,17 @@ export default {
         });
 
         if (response.ok) {
-          this.showSnackbar('Actividad rechazada con éxito', 'Se le notificará al lider por correo.');
+          this.$root.showSnackBar('success', data.message, 'Se le notificará al lider por correo.');
           this.ObtenerActividadesPendientes();
         } else {
           console.error('Error en la respuesta:', response.status);
-          this.showSnackbar('Error al rechazar la actividad', 'error');
+          this.$root.showSnackBar('error', data.message);
         }
 
       } catch (error) {
         console.error('Error al hacer fetch:', error);
-        this.showSnackbar('Error al rechazar la actividad', 'error');
+        this.$root.showSnackBar('error', 'Error al rechazar la actividad');
       }
-    },
-
-
-    showSnackbar(message, color) {
-      this.snackbarText = message;
-      this.snackbarColor = color;
-      this.snackbar = true;
     },
 
     formatDate(dateString) {

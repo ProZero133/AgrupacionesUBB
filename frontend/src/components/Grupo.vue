@@ -54,8 +54,7 @@
           <!-- tab miembros -->
           <v-tab-item value="miembros" v-if="tab === 'miembros'">
 
-            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['user_nombre']"
-              :sort-desc="[false]">
+            <v-data-table :headers="headersMiembros" :items="MiembrosdeAgr" :sort-by="['rol_agr']">
               <template v-slot:item.action="{ item }">
 
                 <div class="d-flex justify-end">
@@ -65,7 +64,7 @@
                   <v-dialog width="auto" scrollable>
                     <template v-slot:activator="{ props: activatorProps }">
                       <v-btn color="brown" prepend-icon="mdi-pencil" variant="outlined" v-bind="activatorProps"
-                        @click="ObtenerRolUsr(item.user_rut)"></v-btn>
+                        @click="ObtenerRolUsr(item.rut)"></v-btn>
                     </template>
 
                     <template v-slot:default="{ isActive }">
@@ -672,13 +671,13 @@ export default {
 
     headersMiembros: [
       { title: 'Nombre', value: 'user_nombre', sortable: true },
-      { title: 'Rut', value: 'rut', sortable: true },
+      { title: 'Fecha de Integracion', value: 'fecha_integracion', sortable: true },
+      { title: 'Rol', value: 'rol_agr', sortable: true },
       { value: 'action', sortable: false },
     ],
 
     headersSolicitudes: [
-      { title: 'Nombre', value: 'nombres', sortable: true },
-      { title: 'Rut', value: 'rut', sortable: true },
+      { title: 'Correo', value: 'correo', sortable: true },
       { value: 'action', sortable: false },
     ],
 
@@ -707,11 +706,11 @@ export default {
     ],
 
     modItems: [
-      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1, disabled: false },
       { title: 'Editar Grupo', path: 'dialogeditar', tier: 0, disabled: false },
+      { title: 'Ver Miembros', path: 'dialogmiembros', tier: 1, disabled: false },
+      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1, disabled: false },
       { title: 'Solicitar Acreditación', path: 'dialogsolicitar', tier: 0, disabled: false },
       { title: 'Eliminar Agrupación', path: 'dialogeliminar', tier: 1, disabled: false },
-      { title: 'Invitar Usuarios', path: 'dialoginvitar', tier: 1, disabled: false },
     ],
 
     aparienciaItems: [
@@ -838,6 +837,9 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const filtrada = data.filter((item) => item.rol_agr !== 'Pendiente');
+          filtrada.forEach((item) => {
+            item.fecha_integracion = new Date(item.fecha_integracion).toLocaleDateString();
+          });
           this.MiembrosdeAgr = filtrada;
 
 
@@ -925,6 +927,11 @@ export default {
         if (response.ok) {
           const datosLiderAgrupacion = await response.json();
 
+          if (datosLiderAgrupacion.length === 0) {
+            this.lider = true;
+            return datosLiderAgrupacion;
+          }
+
           if (datosLiderAgrupacion[0].rut === rutLider) {
             this.lider = true;
           } else {
@@ -959,7 +966,6 @@ export default {
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
@@ -967,7 +973,6 @@ export default {
         if (response.ok) {
           const datosUsuarioSeleccionado = await response.json();
           this.selectedRole = datosUsuarioSeleccionado.rol_agr;
-
           return datosUsuarioSeleccionado;
 
         } else {
@@ -981,15 +986,29 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-        // Si el rol_agr es 'Lider', debe cambiar el rol del usuario actual a 'Miembro'
         const datosLiderAgrupacion = await this.ObtenerLider();
         const datosUsuarioSeleccionado = await this.ObtenerRolUsr(rut);
 
         if (rol_agr === 'Lider') {
-
           if (datosLiderAgrupacion.rut != datosUsuarioSeleccionado.rut) {
-            const cambiarLider = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${datosLiderAgrupacion[0].rut}`;
-            const responseNuevoLider = await fetch(cambiarLider, {
+            const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+              },
+              body: JSON.stringify({
+                rol_agr
+              }),
+            });
+            if (response.ok) {
+              this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
+            } else {
+              this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
+            }
+
+            const responseNuevoLider = await fetch(`${global.BACKEND_URL}/administracionderoles/${this.groupId}/${datosLiderAgrupacion[0].rut}`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
@@ -999,23 +1018,6 @@ export default {
                 rol_agr: "Miembro"
               }),
             });
-          }
-          const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
-          const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-            },
-            body: JSON.stringify({
-              rol_agr
-            }),
-          });
-          if (response.ok) {
-            this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
-          } else {
-            console.error('Error en la respuesta:', response.status);
-            this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
           }
         }
 
@@ -1040,14 +1042,16 @@ export default {
             this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
           } else {
             console.error('Error en la respuesta:', response.status);
-            this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
+            this.$root.showSnackBar('error', 'Operación fallida', 'Una agrupacion no puede quedar sin lider');
           }
         }
 
+        this.ObtenerUsuariosDeAgrupacion();
 
-        this.dialogmiembros = false;
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      } finally {
+        this.dialogeditar = false;
       }
     },
 
@@ -1333,9 +1337,10 @@ export default {
               },
             });
             const dataUsuarioServidor = await respuestaUsuarioServidor.json();
-            solicitudes.push(dataUsuarioServidor[0]);
+            solicitudes.push(dataUsuarioServidor);
           }
-          this.solicitudes = solicitudes;
+          // unifica los nombres con el primer y segundo apellido
+          this.solicitudes = solicitudes[0];
 
         } else {
           this.solicitudes = [];

@@ -193,6 +193,7 @@ export default {
         // nombre y id grupos usuario
         gruposConID: [],
         resultadoGrupos: [],
+        cambioIDGrupo: [],
 
         // headers de la tabla de actividades
         headersInformeAct: [
@@ -353,7 +354,7 @@ export default {
                             this.actividades = this.actividades.concat(data);
 
                         } else {
-                            console.error('No se encontraron actividades: ', response.status);
+                            this.$root.showSnackBar('error', 'Esta agrupacion no cuenta con actividades');
                         }
                     }
                 }
@@ -446,7 +447,6 @@ export default {
                 const pageCount = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     doc.setPage(i);
-                    doc.text('Yo, [Nombre del estudiante o docente], certifico mi participación en la actividad descrita en el presente documento. Por su parte, el Encargado de Agrupaciones Estudiantiles, mediante su firma, avala la veracidad de mi participación y confirma que dicha actividad se encuentra dentro del marco de las funciones y objetivos de la agrupación estudiantil a la que pertenezco.', 10, 220, { maxWidth: 180, align: 'justify' });
                     doc.text('________________________________', 10, 270);
                     doc.text('Firma del estudiante', 25, 280);
                 }
@@ -490,8 +490,9 @@ export default {
 
         async generarInformeAgrupaciones(rut) {
 
+            console.log("rol: ", this.rol)
             if (this.rol === "Admin") {
-
+                
                 const AgrupacionesUsuario = this.gruposConID;
 
                 // cambia los id_agr por el nombre_agr
@@ -540,6 +541,7 @@ export default {
                 }
                 doc.save('Informe_Agrupaciones_ConectaUBB.pdf');
             } else {
+                
                 // se obtienen las agrupaciones a las que pertenece el usuario
                 const response = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
                     method: 'GET',
@@ -548,13 +550,14 @@ export default {
                         'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                     },
                 });
+                const data = await response.json();
+
                 if (response.ok) {
                     // se obtienen las agrupaciones a las que pertenece el usuario
-                    const AgrupacionesPertenece = await response.json();
                     const AgrupacionesUsuario = this.gruposConID;
 
                     // selecciona las agrupaciones con fecha_integracion valida distinta de NULL
-                    const Agrupaciones = AgrupacionesPertenece.filter(item => item.fecha_integracion !== null);
+                    const Agrupaciones = data.filter(item => item.fecha_integracion !== null);
 
                     // formatea la fecha
                     Agrupaciones.forEach(item => {
@@ -562,7 +565,7 @@ export default {
                     });
 
                     // cambia los id_agr por el nombre_agr
-                    cambioIDGrupo = Agrupaciones.forEach(item => {
+                    this.cambioIDGrupo = Agrupaciones.forEach(item => {
                         const grupo = AgrupacionesUsuario.find(grupo => grupo.id_agr === item.id_agr);
                         item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
                     });
@@ -579,10 +582,12 @@ export default {
                             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
                         },
                     });
-
+                    
                     if (responseUsuario.ok) {
                         const usuario = await responseUsuario.json();
-                        const datosUsuario = usuario[0].nombre;
+
+
+                        const datosUsuario = usuario.nombres + ' ' + usuario.primer_apellido + ' ' + usuario.segundo_apellido;
 
                         doc.text(`Informe de pertenencia de agrupaciones del usuario`, 10, 10);
                         const fechaActual = new Date().toLocaleDateString();

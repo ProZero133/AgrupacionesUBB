@@ -247,9 +247,6 @@ async function obtenerLiderArray(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const lider = await getLiderArray(id_agr);
-        if (lider.length === 0) {
-            return res.code(404).send('No se encontró el líder');
-        }
         res.code(200).send(lider);
     } catch (error) {
         console.error('Error al obtener el líder:', error);
@@ -309,6 +306,7 @@ async function obtenerAgrupacionesPertenece(req, res) {
             return res.code(404).send('Usuario no encontrado');
         }
         const pertenencia = await getPertenece(rut);
+        console.log(pertenencia);
         if (pertenencia.length === 0) {
             return res.code(404).send('No se encontraron agrupaciones');
         }
@@ -339,6 +337,14 @@ async function CambiarRoldeUsuario(req, res) {
         const rut = req.params.rut;
         const rol = req.body.rol_agr;
 
+        // si el array de los lideres es igual a 1, no se puede cambiar el rol
+        if (rol === 'Miembro oficial' || rol === 'Miembro') {
+            const lideres = await getLiderArray(id_agr);
+            if (lideres.length === 1) {
+                return res.code(400).send('No se puede cambiar el rol del último líder');
+            }
+        }
+
         const usuario = await getUsuarioByRut(rut);
         if (usuario.length === 0) {
             return res.code(404).send('Usuario no encontrado');
@@ -350,7 +356,6 @@ async function CambiarRoldeUsuario(req, res) {
         }
 
         const result = await updateRolUsuario(rut, id_agr, rol);
-
         if (!result) {
             return res.code(500).send('Error al cambiar el rol del usuario');
         }
@@ -373,9 +378,27 @@ async function abandonarAgrupacion(req, res) {
         if (user.length === 0) {
             return res.code(404).send('Usuario no encontrado');
         }
+
         const agrupacion = await getAgrupacionById(id_agr);
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
+        }
+
+        const lider = await getLiderArray(id_agr);
+        if (lider[0].rut === rut) {
+            // obtiene los miembros de la agrupacion y cambia el rol a lider al miembro mas antiguo de la agrupacion
+            const miembros = await getUsuariosdeAgrupacion(id_agr);
+            console.log("MIEMBROS DE LA AGRUPACION \n", miembros);
+            // busca por cada uno el usuario que tenga rol de miembro oficial o miembro y el primer usuario que encuentre que cumpla con esos roles le cambia el rol a lider de la agrupacion
+            for (let i = 0; i < miembros.length; i++) {
+                const rol = await getRolUsuario(miembros[i].rut, id_agr);
+                if (rol.rol_agr === 'Miembro oficial' || rol.rol_agr === 'Miembro') {
+                    const result = await updateRolUsuario(miembros[i].rut, id_agr, 'Lider');
+                    if (!result) {
+                        return res.code(500).send('Error al abandonar la agrupación');
+                    }
+                }
+            }
         }
 
         const result = await deleteUsuarioAgrupacion(rut, id_agr);

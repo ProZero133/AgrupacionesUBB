@@ -306,7 +306,6 @@ async function obtenerAgrupacionesPertenece(req, res) {
             return res.code(404).send('Usuario no encontrado');
         }
         const pertenencia = await getPertenece(rut);
-        console.log(pertenencia);
         if (pertenencia.length === 0) {
             return res.code(404).send('No se encontraron agrupaciones');
         }
@@ -388,7 +387,6 @@ async function abandonarAgrupacion(req, res) {
         if (lider[0].rut === rut) {
             // obtiene los miembros de la agrupacion y cambia el rol a lider al miembro mas antiguo de la agrupacion
             const miembros = await getUsuariosdeAgrupacion(id_agr);
-            console.log("MIEMBROS DE LA AGRUPACION \n", miembros);
             // busca por cada uno el usuario que tenga rol de miembro oficial o miembro y el primer usuario que encuentre que cumpla con esos roles le cambia el rol a lider de la agrupacion
             for (let i = 0; i < miembros.length; i++) {
                 const rol = await getRolUsuario(miembros[i].rut, id_agr);

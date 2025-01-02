@@ -1,5 +1,7 @@
 <template>
+  <v-container></v-container>
   <v-img :src="LogoPagina" max-height="150" class="mt-2"></v-img>
+  <v-divider></v-divider>
   <v-toolbar color="#014898">
     <template v-slot:extension>
       <v-tabs v-model="tab" grow>

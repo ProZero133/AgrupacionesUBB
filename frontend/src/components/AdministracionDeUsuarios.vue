@@ -1,10 +1,9 @@
 <template>
     <v-container>
         <v-card class="mb-4">
-            <v-card-title>
+            <v-card-title class="text-wrap">
                 <h1>Administración de Usuarios</h1>
-                <h4>Listado de usuarios registrados como</h4>
-                <h4>administradores de la plataforma</h4>
+                <h4>Listado de usuarios registrados como administradores de la plataforma</h4>
             </v-card-title>
             <v-card-text>
                 <v-row>
@@ -12,13 +11,8 @@
                         <v-card class="mb-4">
                             <v-card-title>
                                 <v-row align="center" justify="space-between" class="w-100">
-                                    <v-col cols="auto">
+                                    <v-col cols="auto" class="text-wrap">
                                         {{ admin.nombres }} {{ admin.primer_apellido }} {{ admin.segundo_apellido }}
-                                    </v-col>
-                                    <v-col cols="auto">
-                                        <v-btn icon @click="openDialog(admin)">
-                                            <v-icon color="red">mdi-delete</v-icon>
-                                        </v-btn>
                                     </v-col>
                                 </v-row>
                             </v-card-title>
@@ -27,6 +21,13 @@
                                 <p><strong>Correo:</strong> {{ admin.correo }}</p>
                                 <p><strong>Rol en el establecimiento:</strong> {{ admin.rol }}</p>
                             </v-card-text>
+                            <v-col cols="auto">
+                                <v-row justify="end" style="margin: 0%;">
+                                    <v-btn icon @click="openDialog(admin)">
+                                        <v-icon color="red">mdi-delete</v-icon>
+                                    </v-btn>
+                                </v-row>
+                            </v-col>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -75,8 +76,10 @@
                 <v-card-title class="headline">Confirmar registro</v-card-title>
                 <v-card-text>
                     <p>¿Está seguro de registrar a este usuario como un administrador?</p>
-                    <v-text-field v-model="AdminPasword" label="Ingrese su contraseña" type="password" required></v-text-field>
-                    <v-text-field v-model="newAdminPassword" label="Ingrese la contraseña para el nuevo administrador" type="password" required></v-text-field>
+                    <v-text-field v-model="AdminPasword" label="Ingrese su contraseña" type="password"
+                        required></v-text-field>
+                    <v-text-field v-model="newAdminPassword" label="Ingrese la contraseña para el nuevo administrador"
+                        type="password" required></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -87,50 +90,50 @@
         </v-dialog>
     </v-container>
     <v-card class="footer-card" style="background-color: #014898;" dark>
-    <v-container>
-      <v-row justify="space-between" align="center">
-        <!-- Logo -->
-        <v-col cols="12" md="2">
-          <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
-        </v-col>
-        <v-col cols="12" md="2">
-          <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
-        </v-col>
-        <!-- Información de contacto -->
-        <v-col cols="12" md="4">
-          <div class="text-center" style="color: white;">
-            <p>Conectando agrupaciones y estudiantes de
-              la Universidad del Bío-Bío.
-            </p>
-            <p>Conecta UBB es una iniciativa estudiantil,
-              con apoyo de la Dirección de Desarrollo
-              Estudiantil.</p>
-          </div>
-        </v-col>
+        <v-container>
+            <v-row justify="space-between" align="center">
+                <!-- Logo -->
+                <v-col cols="12" md="2">
+                    <img src="@/assets/escudo-monocromatico-oscuro.png" alt="Logo" width="120" height="80" />
+                </v-col>
+                <v-col cols="12" md="2">
+                    <img src="@/assets/ConectaUBB.png" alt="Logo" width="200" height="80" />
+                </v-col>
+                <!-- Información de contacto -->
+                <v-col cols="12" md="4">
+                    <div class="text-center" style="color: white;">
+                        <p>Conectando agrupaciones y estudiantes de
+                            la Universidad del Bío-Bío.
+                        </p>
+                        <p>Conecta UBB es una iniciativa estudiantil,
+                            con apoyo de la Dirección de Desarrollo
+                            Estudiantil.</p>
+                    </div>
+                </v-col>
 
-        <!-- Redes sociales -->
-        <v-col cols="12" md="4">
-          <div class="text-center">
-            <p style="color: white;">Si tienes dudas o consultas escríbenos a
-            </p>
-            <p style="color: white;">conectaubb@gmail.com
-            </p>
-            <p style="color: white;">Conéctate con las redes sociales de la DDE
-            </p>
-            <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
-              <v-icon>mdi-facebook</v-icon>
-            </v-btn>
-            <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
-              <v-icon>mdi-twitter</v-icon>
-            </v-btn>
-            <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
-              <v-icon>mdi-instagram</v-icon>
-            </v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+                <!-- Redes sociales -->
+                <v-col cols="12" md="4">
+                    <div class="text-center">
+                        <p style="color: white;">Si tienes dudas o consultas escríbenos a
+                        </p>
+                        <p style="color: white;">conectaubb@gmail.com
+                        </p>
+                        <p style="color: white;">Conéctate con las redes sociales de la DDE
+                        </p>
+                        <v-btn icon href="https://www.facebook.com/ddeconcepcion" target="_blank">
+                            <v-icon>mdi-facebook</v-icon>
+                        </v-btn>
+                        <v-btn icon href="https://x.com/ddeubiobio" target="_blank">
+                            <v-icon>mdi-twitter</v-icon>
+                        </v-btn>
+                        <v-btn icon href="https://www.instagram.com/ddeconcepcion/?hl=es" target="_blank">
+                            <v-icon>mdi-instagram</v-icon>
+                        </v-btn>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-card>
 </template>
 <script>
 import conectaUBB from '../assets/ConectaUBBLine.png';
@@ -272,7 +275,7 @@ export default {
                     this.verAdministradores();
                     this.$root.showSnackBar('success', 'Administrador registrado', 'El usuario ha sido registrado como administrador correctamente');
                 } else {
-                    this.$root.showSnackBar('error', 'Error',data.message);
+                    this.$root.showSnackBar('error', 'Error', data.message);
                 }
             } catch (error) {
                 this.$root.showSnackBar('error', 'Error', 'No se pudo registrar al administrador');

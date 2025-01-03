@@ -107,7 +107,6 @@ async function getCorreoSubstring(req) {
                 'Content-Type': 'application/json',
             }
         });
-        console.log(response.data.recordset);
         if (response.data.recordset.length === 0) {
             return { success: false, message: 'Usuario no encontrado' };
         }

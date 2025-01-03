@@ -11,6 +11,7 @@ const {
     getActividadesByGrupoUsuario,
     getParticipantesActividad,
     getActividadesParticipante,
+    getActividadesParticipanteUsuario,
     deleteParticipanteActividad,
     setAprobacionActividad,
     deletePrograma,
@@ -370,6 +371,20 @@ async function obtenerActividadesParticipante(req, res) {
     }
 }
 
+async function obtenerActividadesParticipanteUsuario(req, res) {
+    try {
+        const { rut } = req.params;
+        const actividades = await getActividadesParticipanteUsuario(rut);
+        if (actividades.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron actividades' });
+        }
+        return res.send(actividades);
+    } catch (error) {
+        console.error('Error al obtener las actividades del usuario:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener las actividades del usuario' });
+    }
+}
+
 async function abandonarActividad(req, res) {
     try {
         // Obtiene el id de la actividad
@@ -437,5 +452,6 @@ module.exports = {
     AceptacionActividad,
     eliminarActividadPublica,
     ObtenerActividadesPublicas,
-    obtenerParticipantesActividad
+    obtenerParticipantesActividad,
+    obtenerActividadesParticipanteUsuario
 };

@@ -1,9 +1,10 @@
 "use strict";
 
 const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
-    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario} = require("../services/publicacion.service.js");
+    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario, insertTagsPublicacion} = require("../services/publicacion.service.js");
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
+const { getLiderArray } = require("../services/agrupacion.service.js");
 
 const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
@@ -305,6 +306,31 @@ async function obtenerPublicacionesPorGrupoUsuario(req, res) {
     }
 }
 
+async function ingresarTagsPublicacion(req, res) {
+    try {
+        const id_pub = req.body.id_pub;
+        const tags = req.body.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const publicacion = await getPublicacionById(id_pub);
+        if (!publicacion) {
+            return res.code(404).send({ success: false, message: 'Publicacion no encontrada' });
+        }
+        const lider = await getLiderArray(publicacion.rows[0].id_agr);
+        if (rut !== lider[0].rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ingresar tags' });
+        }
+        const result = await insertTagsPublicacion(id_pub, tags);
+        if (!result) {
+            return res.code(500).send({ success: false, message: 'Error al ingresar tags' });
+        }
+        res.code(200).send({ success: true, message: 'Tags ingresados correctamente' });
+    } catch (error) {
+        console.error('Error al ingresar tags:', error);
+        res.code(500).send('Error al ingresar tags');
+    }
+}
+
 module.exports = {
     obtenerPublicaciones,
     obtenerPublicacionesPorId,
@@ -312,5 +338,6 @@ module.exports = {
     crearPublicacion,
     actualizarPublicacion,
     eliminarPublicacion,
-    obtenerPublicacionesPorGrupoUsuario
+    obtenerPublicacionesPorGrupoUsuario,
+    ingresarTagsPublicacion
 };

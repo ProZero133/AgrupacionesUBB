@@ -12,11 +12,9 @@ const publicacion = require('../routes/publicacion.routes');
 const imagenes = require('../routes/imagenes.routes');
 const acreditaciones = require('../routes/admin.routes');
 const tag  = require('../routes/tags.routes');
-
 const fastifyCors = require('@fastify/cors');
 const secret = config.JWT_SECRET;
 const cookieSecret = config.COOKIE_SECRET;
-const url = config.URL;
 
 fastify.register(require('@fastify/jwt'), {
   secret: secret

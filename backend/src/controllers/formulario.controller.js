@@ -2,6 +2,8 @@
 
 const { getFormularios, getFormularioById, createFormulario, updateFormulario, deleteFormulario} = require("../services/formulario.service");
 const { formularioBodySchema } = require("../schema/formulario.schema.js");
+const { getPublicacionById } = require("../services/publicacion.service.js");
+const { getLiderArray } = require("../services/agrupacion.service.js");
 
 /**
  * Obtiene todas los formularios
@@ -43,6 +45,17 @@ const obtenerFormularioPorId = async (req, res) => {
 
 async function crearFormulario(req, res) {
     try {
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const { id_pub } = req.body;
+        const publicacion = await getPublicacionById(id_pub);
+        if (!publicacion) {
+            return res.code(404).send({ message: 'La publicación con el ID especificado no existe' });
+        }
+        const lider = await getLiderArray(publicacion.rows[0].id_agr);
+        if(lider[0].rut !== rut){
+            return res.code(401).send({ message: 'No tienes permiso para crear un formulario' });
+        }
         const { error, value } = formularioBodySchema.validate(req.body);
         if (error) {
         console.error('Error al validar el formulario:', error);

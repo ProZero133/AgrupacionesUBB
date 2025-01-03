@@ -45,9 +45,9 @@
                 </v-card-title>
                 <v-data-table :headers="headersAgrupacionesUsuario" :items="AgrupacionesPertenenciaUsuario"
                     :sort-desc="[false]" class="elevation-13" style="margin: 3%;">
-                    <template v-slot:item.action="{ item }">
-                        <div class="d-flex justify-end">
-
+                    <template v-slot:item.nombre_agr="{ item }">
+                        <div style="width: 100%;">
+                            {{ item.nombre_agr }}
                         </div>
                     </template>
                 </v-data-table>
@@ -240,6 +240,7 @@ export default {
         UsuariosRegistrados: [],
         SubstringCorreo: [],
         usuariosBuscados: [],
+        nombresAgrupaciones: [],
         dialogUsuario: false,
 
         // datos de la tabla de usuarios
@@ -253,7 +254,7 @@ export default {
         ],
 
         headersAgrupacionesUsuario: [
-            { title: 'Nombre de la agrupación', value: 'id_agr' },
+            { title: 'Nombre de la agrupación', value: 'nombre_agr' },
             { title: 'Fecha de integración', value: 'fecha_integracion' },
             { title: 'Rol interno', value: 'rol_agr' },
         ],
@@ -344,7 +345,7 @@ export default {
         // USUARIOS
 
         async substringUsuarioBDD() {
-            // llama a la ruta /correoSubString/:correo
+            // llama a la api
             const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
                 method: 'POST',
                 headers: {
@@ -381,12 +382,10 @@ export default {
                     item.fecha_integracion = new Date(item.fecha_integracion).toLocaleDateString();
                 });
 
-                // cambia los id_agr por el nombre_agr
+                // añade un campo al array con el nombre de la agrupacion
                 this.AgrupacionesPertenenciaUsuario.forEach(item => {
-                    const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
-                    item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
+                    item.nombre_agr = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr).nombre_agr;
                 });
-
 
                 // busca las actividades en las que participo el usuario
                 const responseActividades = await fetch(`${global.BACKEND_URL}/actividadesparticipante/${rut}`, {
@@ -415,74 +414,71 @@ export default {
         async descargarInformeUsuario() {
             const agrupaciones = this.AgrupacionesPertenenciaUsuario;
             const actividades = this.ActividadesParticipaUsuario;
-
-            // valida las actividades por id_agr
-            actividades.forEach(item => {
-                const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
-                item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-            });
+            const fechaActual = new Date().toLocaleDateString();
 
             const doc = new jsPDF();
 
-            // Título del informe
-            doc.text('Informe de Usuario', 10, 10);
+            doc.setFontSize(14);
+            doc.text('INFORME DE PERTENENCIA DE AGRUPACIONES', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+            doc.setFontSize(11);
+            doc.text(`${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+            doc.text(`${fechaActual}`, doc.internal.pageSize.getWidth() / 2, 35, { align: 'center' });
 
             // Tabla de agrupaciones
             doc.autoTable({
-                head: [['Nombre de la Agrupación', 'Fecha de Integración']],
-                body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
-                startY: 20,
+                head: [['Nombre de la Agrupación', 'Fecha de Integración', 'Rol Interno']],
+                body: agrupaciones.map(item => [item.nombre_agr, item.fecha_integracion, item.rol_agr]),
+                startY: 40,
             });
 
             // Tabla de actividades por agrupación
             if (actividades.length > 0) {
-                doc.addPage();
+                const agrupacionesMap = new Map();
 
-                const actividadesPorAgrupacion = actividades.reduce((acc, actividad) => {
-                    if (!acc[actividad.id_agr]) {
-                        acc[actividad.id_agr] = [];
+                actividades.forEach(act => {
+                    if (!agrupacionesMap.has(act.id_agr)) {
+                        agrupacionesMap.set(act.id_agr, []);
                     }
-                    acc[actividad.id_agr].push(actividad);
-                    return acc;
-                }, {});
+                    agrupacionesMap.get(act.id_agr).push(act);
+                });
 
-                Object.keys(actividadesPorAgrupacion).forEach((id_agr, index) => {
-                    if (index > 0) {
-                        doc.addPage();
-                    }
-                    const actividades = actividadesPorAgrupacion[id_agr];
+                agrupacionesMap.forEach((acts, id_agr) => {
+                    doc.addPage();
 
-                    // busca el nombre de la agrupacion
-                    const nombreAgrupacion = agrupaciones.find(agrupacion => agrupacion.id_agr === id_agr)?.nombre_agr || 'Sin Nombre';
-
-                    doc.text(`Actividades del usuario en ${nombreAgrupacion}`, 10, 20);
+                    doc.setFontSize(14);
+                    const nombreAgrupacion = this.gruposConID.find(grupo => grupo.id_agr === id_agr).nombre_agr;
+                    doc.text('INFORME DE ACTIVIDADES', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                    doc.text(`"${nombreAgrupacion}"`, doc.internal.pageSize.getWidth() / 2, 28, { maxWidth: 180, align: 'center', fontStyle: 'bold' });
                     doc.autoTable({
                         head: [['Nombre Actividad', 'Fecha', 'Descripción']],
-                        body: actividades.map(act => [act.nom_act, new Date(act.fecha_creacion).toLocaleDateString(), act.descripcion]),
+                        body: acts.map(act => [act.nom_act, new Date(act.fecha_creacion).toLocaleDateString(), act.descripcion]),
                         columnStyles: {
                             0: { cellWidth: 50 }, // nombre act
                             1: { cellWidth: 30 }, // fecha
                         },
-                        startY: 30,
+                        startY: 40,
                     });
                 });
+
                 // Guardar el PDF
-                doc.save('Informe_Usuario.pdf');
+                const nombreUsuario = `${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`;
+                doc.save(`Informe_Agrupaciones_Actividades_${nombreUsuario}.pdf`);
             } else {
                 const doc = new jsPDF();
 
                 // Título del informe
-                doc.text('Informe de Usuario', 10, 10);
+                doc.text(`Nombre del Usuario: ${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`, 10, 20);
 
                 // Tabla de agrupaciones
                 doc.autoTable({
-                    head: [['Nombre de la Agrupación', 'Fecha de Integración']],
-                    body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
-                    startY: 20,
+                    head: [['Nombre de la Agrupación', 'Fecha de Integración', 'Rol Interno']],
+                    body: agrupaciones.map(item => [item.nombre_agr, item.fecha_integracion, item.rol_agr]),
+                    startY: 40,
                 });
 
                 // Guardar el PDF
-                doc.save('Informe_Usuario.pdf');
+                const nombreUsuario = `${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`;
+                doc.save(`Informe_Agrupaciones_${nombreUsuario}.pdf`);
 
                 this.$root.showSnackBar('error', 'Este usuario no ha participado en ninguna actividad');
             }
@@ -491,7 +487,6 @@ export default {
 
         abrirDialogUsuario(usuario) {
             this.selectedUsuario = usuario;
-            console.log(this.selectedUsuario);
             this.generarInformeUsuario(usuario.rut);
             this.dialogUsuario = true;
         },
@@ -535,11 +530,13 @@ export default {
 
                     if (response.ok) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
-                        // mapear los grupos con su id y nombre_agrcomo descargar un array a pdfc
+
+                        // mapear los grupos con su id y nombre_agr
                         this.gruposConID = data.map(grupo => ({
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
+
 
                     } else {
                         console.error('No se encontraron agrupupaciones:', response.status);
@@ -891,7 +888,4 @@ export default {
     flex-grow: 1;
     min-width: 0;
 }
-
-
-
 </style>

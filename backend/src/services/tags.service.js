@@ -41,30 +41,9 @@ async function createTag(tagData) {
     }
 }
 
-async function updateTag(id, tagData) {
-    try {
-        const [rowsUpdated, [updatedTag]] = await Tag.update({
-            nombre_tag: tagData.nombre_tag,
-            rut: tagData.rut
-        }, {
-            where : { id: id },
-            returning: true
-        });
-
-        // Retorna la etiqueta actualizada
-        return updatedTag;
-    }catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al actualizar el tag:', error);
-        throw error;
-    }
-}
-
 async function deleteTag(id) {
     try {
-        const rowsDeleted = await Tag.destroy({
-            where: { id: id }
-        });
+        const rowsDeleted = await pool.query('DELETE FROM "Tags" WHERE id_tag = $1', [id]);
         return rowsDeleted;
     } catch (error) {
         console.error('Error al eliminar el tag:', error);
@@ -92,7 +71,6 @@ module.exports = {
     getTags,
     getTagById,
     createTag,
-    updateTag,
     deleteTag,
     getTagByNombre
 };

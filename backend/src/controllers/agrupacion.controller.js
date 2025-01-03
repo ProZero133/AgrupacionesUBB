@@ -219,7 +219,7 @@ async function ObtenerUsuariosdeAgrupacion(req, res) {
         const usuarios = await getUsuariosdeAgrupacion(id);
 
         if (usuarios.length === 0) {
-            return res.code(404).send('No se encontraron usuarios');
+            return 0;
         }
 
         res.code(200).send(usuarios);

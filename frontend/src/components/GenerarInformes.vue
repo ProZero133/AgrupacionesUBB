@@ -297,9 +297,6 @@ export default {
 
         async generarInformeUsuario(rut) {
 
-            // primer recorrido: busca las agrupaciones a las que pertenece el usuario, genero el pdf con las agrupaciones a las que entro el usuario
-            // segundo recorrido: busca las actividades en las que participo el usuario, si hay actividades, las añade al pdf, si no hay actividades entonces se imprime el pdf con las agrupaciones
-
             // se obtienen las agrupaciones del usuario
             const responseAgrupaciones = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
                 method: 'GET',

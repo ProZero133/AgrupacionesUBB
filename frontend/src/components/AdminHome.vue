@@ -7,6 +7,7 @@
       <v-tabs v-model="tab" grow>
         <v-tab prepend-icon="mdi-account-group" value="agrupaciones">Agrupaciones</v-tab>
         <v-tab prepend-icon="mdi-account-multiple" value="usuariosSistema">Usuarios</v-tab>
+        <v-tab prepend-icon="mdi-tag" value="tags">Tags</v-tab>
       </v-tabs>
     </template>
   </v-toolbar>
@@ -28,7 +29,8 @@
 
         <v-col cols="12" md="6" lg="3" v-for="(item, index) in filteredItemsAgrupaciones" :key="index">
           <v-card class="gruposCard" max-width="400" @click="AbrirDialogAgrupacion(item.idAgrupacion)">
-            <v-sheet :color="item.visible === false ? 'grey' : (item.verificado === 'Verificado' ? 'green' : '#014898')"
+            <v-sheet
+              :color="item.visible === false ? '#E41B1A' : (item.verificado === 'Verificado' ? 'green' : '#FFCC33')"
               height="8"></v-sheet>
             <v-img class="align-end text-white" height="200" :src="item.img" cover
               :style="{ filter: item.visible === false ? 'grayscale(100%)' : 'none' }"
@@ -86,6 +88,36 @@
     </v-container>
   </v-tab-item>
 
+  <!-- Tab de Tags -->
+  <v-tab-item value="tags" v-if="tab === 'tags'">
+    <!-- Columna de búsqueda y resultados -->
+    <v-card>
+      <v-row class="justify-center">
+        <v-col cols="12" md="6">
+          <!-- Barra de búsqueda -->
+          <v-card class="search-container pa-3 mb-3">
+            <v-card-title class="pa-0">Tags dentro de la plataforma</v-card-title>
+            <v-text-field v-model="searchQueryTags" @input="TagsPlataforma(searchQueryTags)" label="Buscar..." single-line
+              hide-details></v-text-field>
+          </v-card>
+
+          <v-card class="selected-items-container pa-3 mb-3">
+            <v-card-title class="pa-0">Tags encontrados</v-card-title>
+            <v-card-text class="pa-0">
+                <v-chip-group>
+                <v-chip v-for="item in searchResults" :key="item.id" @click="AbrirDeleteTagDialog(item)" class="result-item"
+                  color="primary" text-color="white" outlined>
+                  {{ item.nombre_tag }}
+                </v-chip>
+                </v-chip-group>
+            </v-card-text>
+          </v-card>
+          <v-btn color="primary" class="mt-2" @click="ConfirmarSeleccion">Confirmar Selección</v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-tab-item>
+
   <!-- Dialogo para mostrar los detalles de la agrupación -->
   <v-dialog v-model="dialogAgrupacion" class="dialogAgrupacion">
     <v-card>
@@ -118,12 +150,12 @@
       </v-card-subtitle>
 
       <v-divider></v-divider>
-      
+
       <v-card-text>
         <v-list v-if="gruposUsuario.length">
           <v-list-item v-for="(grupo, index) in gruposUsuario" :key="index" @click="ir_a_agrupacion(grupo.id_agr)">
             <v-list-item-content>
-              
+
               <v-list-item-title>{{ grupo.nombre_agr }}</v-list-item-title>
               <v-list-item-subtitle>{{ grupo.verificado }}</v-list-item-subtitle>
               <v-divider></v-divider>
@@ -141,6 +173,22 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- Dialogo para eliminar tags -->
+  <v-dialog v-model="dialogEliminarTag" max-width="500">
+    <v-card>
+      <v-card-title>Eliminar Tag</v-card-title>
+      <v-card-text>
+        ¿Estás seguro de que deseas eliminar el tag?
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="red" text @click="eliminarTag(selectedItems[0].id_tag)">Eliminar</v-btn>
+        <v-btn color="blue" text @click="dialogEliminarTag = false">Cancelar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Footer -->
   <v-card class="footer-card" style="background-color: #014898;" dark>
     <v-container>
       <v-row justify="space-between" align="center">
@@ -203,8 +251,10 @@ export default {
       rut: '',
       dialogUsuario: false, // Controla el diálogo para usuarios
       dialogAgrupacion: false, // Controla el diálogo para agrupaciones
+      dialogEliminarTag: false, // Controla el diálogo para eliminar tags
       gruposUsuario: [], // Almacena los grupos del usuario seleccionado
       selectedAgrupacion: {}, // Almacena los detalles de la agrupación seleccionada
+
 
       usuariosBuscados: [],
       valorTextBoxUsuario: '',
@@ -216,6 +266,13 @@ export default {
         { title: 'Rol', value: 'rol' },
         { value: 'action', align: 'center' },
       ],
+
+      // tags
+      searchQueryTags: '',
+      searchResults: [],
+      selectedItems: [],
+      dialogTag: false,
+
     };
   },
   computed: {
@@ -365,7 +422,7 @@ export default {
             agrupacion.integrantes = data.length;
 
           } else {
-            console.error('Error en la respuesta:', response.status);
+            return 0;
           }
         }
       } catch (error) {
@@ -467,13 +524,64 @@ export default {
         console.error('No se encontraron usuarios:', response.status);
       }
     },
+
+    // TAGS
+    async TagsPlataforma() {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/tags`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.searchResults = data; 
+      } catch (error) {
+        console.error('Error al buscar:', error);
+        this.searchResults = [];
+      }
+    },
+
+    selectItem(item) {
+      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
+      this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
+
+    AbrirDeleteTagDialog(item) {
+      this.selectedItems = [item];
+      this.dialogEliminarTag = true;
+    },
+
+    async eliminarTag(tag) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/eliminarTag/${tag}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (response.ok) {
+          this.TagsPlataforma();
+          this.dialogEliminarTag = false;
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
   },
 
   mounted() {
     this.fetchItems();
     this.BuscarUsuarios();
+    this.TagsPlataforma();
     this.rut = this.getRut();
     this.rol = this.getRol();
+    
   },
 };
 </script>

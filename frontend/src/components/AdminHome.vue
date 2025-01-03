@@ -95,24 +95,27 @@
       <v-row class="justify-center">
         <v-col cols="12" md="6">
           <!-- Barra de búsqueda -->
-          <v-card class="search-container pa-3 mb-3">
-            <v-card-title class="pa-0">Tags dentro de la plataforma</v-card-title>
-            <v-text-field v-model="searchQueryTags" @input="TagsPlataforma(searchQueryTags)" label="Buscar..." single-line
+          <v-card class="search-container pa-3 mb-3 elevation-5">
+            <v-card-title class="text-center pa-0">Tags dentro de la plataforma</v-card-title>
+            <v-text-field v-model="searchQueryTags" @input="buscarTag" label="Buscar..." single-line
               hide-details></v-text-field>
           </v-card>
 
-          <v-card class="selected-items-container pa-3 mb-3">
-            <v-card-title class="pa-0">Tags encontrados</v-card-title>
-            <v-card-text class="pa-0">
-                <v-chip-group>
-                <v-chip v-for="item in searchResults" :key="item.id" @click="AbrirDeleteTagDialog(item)" class="result-item"
-                  color="primary" text-color="white" outlined>
-                  {{ item.nombre_tag }}
-                </v-chip>
+          <v-card class="selected-items-container pa-3 mb-3 elevation-5">
+            <v-card-title class="text-center" style="font-size: 1.25rem;">
+              Si desea eliminar alguno de los tags, haga click en el tag que desea eliminar.
+            </v-card-title>
+            <v-col>
+              <v-card-text class="pa-0">
+                <v-chip-group column>
+                  <v-chip v-for="item in filteredTags" :key="item.id" @click="AbrirDeleteTagDialog(item)"
+                    class="elevation-3" color="primary" text-color="white" outlined >
+                    {{ item.nombre_tag }}
+                  </v-chip>
                 </v-chip-group>
-            </v-card-text>
+              </v-card-text>
+            </v-col>
           </v-card>
-          <v-btn color="primary" class="mt-2" @click="ConfirmarSeleccion">Confirmar Selección</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -177,13 +180,16 @@
   <!-- Dialogo para eliminar tags -->
   <v-dialog v-model="dialogEliminarTag" max-width="500">
     <v-card>
-      <v-card-title>Eliminar Tag</v-card-title>
-      <v-card-text>
+      <v-card-title class="text-center">Eliminar Tag</v-card-title>
+      <v-card-text class="text-center">
         ¿Estás seguro de que deseas eliminar el tag?
       </v-card-text>
-      <v-card-actions>
-        <v-btn color="red" text @click="eliminarTag(selectedItems[0].id_tag)">Eliminar</v-btn>
+
+      <v-card-title class="text-center">" {{ selectedItems[0].nombre_tag }} "</v-card-title>
+
+      <v-card-actions class="justify-center">
         <v-btn color="blue" text @click="dialogEliminarTag = false">Cancelar</v-btn>
+        <v-btn color="red" text @click="eliminarTag(selectedItems[0].id_tag)">Eliminar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -269,8 +275,11 @@ export default {
 
       // tags
       searchQueryTags: '',
+      searchTagsItems: '',
       searchResults: [],
       selectedItems: [],
+      tags: [],
+      filteredTags: [],
       dialogTag: false,
 
     };
@@ -535,18 +544,20 @@ export default {
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
-        if (!response.ok) throw new Error('Error en la respuesta de la red');
-        const data = await response.json();
-        this.searchResults = data; 
+        if (response.ok) {
+          this.tags = await response.json();
+          this.filteredTags = this.tags; // Inicialmente, mostrar todos los tags
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
       } catch (error) {
-        console.error('Error al buscar:', error);
-        this.searchResults = [];
+        console.error('Error al hacer fetch:', error);
       }
     },
 
-    selectItem(item) {
-      this.selectedItems.push(item); // Añade el item a la lista de seleccionados
-      this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    buscarTag() {
+      const query = this.searchQueryTags.toLowerCase();
+      this.filteredTags = this.tags.filter(tag => tag.nombre_tag.toLowerCase().includes(query));
     },
 
     AbrirDeleteTagDialog(item) {
@@ -566,6 +577,7 @@ export default {
         if (response.ok) {
           this.TagsPlataforma();
           this.dialogEliminarTag = false;
+          this.$root.showSnackBar('success', 'Tag eliminado correctamente');
         } else {
           console.error('Error en la respuesta:', response.status);
         }
@@ -575,13 +587,15 @@ export default {
     },
   },
 
+
+
   mounted() {
     this.fetchItems();
     this.BuscarUsuarios();
     this.TagsPlataforma();
     this.rut = this.getRut();
     this.rol = this.getRol();
-    
+
   },
 };
 </script>

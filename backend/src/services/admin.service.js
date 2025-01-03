@@ -61,7 +61,6 @@ async function registrarAdministrador(rut, constrasena) {
             return { success: false, message: 'No se pudo registrar al administrador' };
         }
 
-
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;
@@ -71,12 +70,7 @@ async function registrarAdministrador(rut, constrasena) {
 async function eliminarTagActividad(id) {
     try {
         const resAct = await pool.query('DELETE FROM "Actividad_tags" WHERE id_tag = $1;', [id]);
-
-        if (resAct.rowCount > 0) {
-            return { success: true, message: 'Tag eliminado correctamente' };
-        } else {
-            return { success: false, message: 'No existe un tag para eliminar' };
-        }
+        return 0;
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;
@@ -86,12 +80,7 @@ async function eliminarTagActividad(id) {
 async function eliminarTagAgrupacion(id) {
     try {
         const resAgr = await pool.query('DELETE FROM "Agrupacion_tags" WHERE id_tag = $1;', [id]);
-
-        if (resAgr.rowCount > 0) {
-            return { success: true, message: 'Tag eliminado correctamente' };
-        } else {
-            return { success: false, message: 'No existe un tag para eliminar' };
-        }
+        return 0;
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;
@@ -101,12 +90,7 @@ async function eliminarTagAgrupacion(id) {
 async function eliminarTagPublicacion(id) {
     try {
         const resPub = await pool.query('DELETE FROM "Publicacion_tags" WHERE id_tag = $1;', [id]);
-        
-        if (resPub.rowCount > 0) {
-            return { success: true, message: 'Tag eliminado correctamente' };
-        } else {
-            return { success: false, message: 'No existe un tag para eliminar' };
-        }
+        return 0;
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;
@@ -114,15 +98,10 @@ async function eliminarTagPublicacion(id) {
 }
 
 async function eliminarTagUsuario(id) {
-    console.log("id_tag Usuario: ", id);
     try {
         const resUsr = await pool.query('DELETE FROM "Usuario_tags" WHERE id_tag = $1;', [id]);
+        return 0;
 
-        if (resUsr.rowCount > 0) {
-            return { success: true, message: 'Tag eliminado correctamente' };
-        } else {
-            return { success: false, message: 'No existe un tag para eliminar' };
-        }
     } catch (error) {
         console.error('Error en la consulta:', error);
         return error;

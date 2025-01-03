@@ -209,6 +209,66 @@ async function notifySolicitudAcritacion(mailDetails) {
 
 }
 
+async function notifyAprobarActPublica(mailDetails) {
+    let templatePath;
+    let sujeto;
+    let replacements;
+
+    templatePath = path.join(__dirname, '../mails/aprobarActPublica.html');
+    replacements = {
+        agrupacion: mailDetails.nombre_agr,
+        actividad: mailDetails.nombre_act,
+    };
+    sujeto = 'Solicitud Actividad Publica';
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaUBB@gmail.com>',
+        to:  mailDetails.lider_correo,
+        subject: sujeto,
+        html: htmlBody
+    };
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.correo}`, info: info });
+    }
+    catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
+    }
+}
+
+async function notifyRechazarActPublica(mailDetails) {
+    let templatePath;
+    let sujeto;
+    let replacements;
+
+    templatePath = path.join(__dirname, '../mails/rechazarActPublica.html');
+    replacements = {
+        agrupacion: mailDetails.agrupacion,
+        actividad: mailDetails.actividad,
+    };
+    sujeto = 'Solicitud Actividad Publica';
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaUBB@gmail.com>',
+        to: mailDetails.correo,
+        subject: sujeto,
+        html: htmlBody
+    };
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.correo}`, info: info });
+    }
+    catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
+    }
+}
+
 async function createNotificacion(rut, titulo, descripcion) {
     const query = 'INSERT INTO "Notificacion" (rut, titulo, descripcion) VALUES ($1, $2, $3) RETURNING *';
     const values = [rut, titulo, descripcion];
@@ -263,6 +323,7 @@ async function deleteNotificacion(id_noti) {
 }
 
 
+
 module.exports = {
     notifyPublicacion,
     inviteUsuario,
@@ -271,5 +332,7 @@ module.exports = {
     createNotificacion,
     getNotificacionesUsuario,
     deleteNotificacionesUsuario,
-    notifySolicitudAcritacion
+    notifySolicitudAcritacion,
+    notifyAprobarActPublica,
+    notifyRechazarActPublica,
 };

@@ -22,8 +22,10 @@ const {
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
-const { getUsuarioByRut, obtenerUsuarioPlataforma } = require('../services/user.service.js');
+const { obtenerUsuarioPlataforma } = require('../services/user.service.js');
 const {obtenerTagPorId} = require('../controllers/tags.controller.js');
+const { notifyAprobarActPublica, notifyRechazarActPublica } = require("../services/mail.service.js");
+const { validarUsuarioRut } = require("../services/auth.service.js");
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -411,6 +413,21 @@ async function AceptacionActividad(req, res) {
         const id_act = req.params.id_act;
         // Programa la actividad
         const actividad = await setAprobacionActividad(id_act);
+
+        const datosActividad = await getActividadById(id_act);
+        const datosAgrupacion = await getAgrupacionById(datosActividad.rows[0].id_agr);
+        const lider = await getLiderArray(datosActividad.rows[0].id_agr);
+        const liderCompleto = await validarUsuarioRut(lider[0].rut);
+        const liderCorreo = liderCompleto.usuario.correo;
+
+        const mailDetails = {
+            lider_correo: liderCorreo,
+            nombre_agr: datosAgrupacion.nombre_agr,
+            nombre_act: datosActividad.rows[0].nom_act,
+        };
+
+        await notifyAprobarActPublica(mailDetails);
+
         if (actividad) {
             return res.code(200).send({ success: true, message: 'Actividad aprobada', data: actividad });
         }

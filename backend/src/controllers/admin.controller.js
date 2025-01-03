@@ -1,5 +1,6 @@
 const { obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
 const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario } = require('../services/admin.service');
+
 const bcrypt = require('bcrypt');
 async function ObtenerUsuarios(request, reply) {
     const resultUsuarios = await obtenerUsuariosPlataforma();

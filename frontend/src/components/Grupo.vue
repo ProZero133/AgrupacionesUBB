@@ -381,7 +381,7 @@
             <v-col cols="6">
               <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="5">
               <v-btn v-if="this.rol != 'Admin'" :disabled="elemento.participantes >= elemento.cupos"
                 :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text
                 @click="ParticiparActividad(elemento.id)">Participar</v-btn>
@@ -427,10 +427,12 @@
               </v-col>
               <v-card-text class="TagsGrupo">
                 <v-chip-group>
-                  <v-chip v-for="tag in elemento.tags" :key="tag.id_tag" class="res-tags" color="primary"
-                    text-color="white" outlined>
-                    {{ tag.nombre_tag }}
-                  </v-chip>
+                  <div class="tags-container">
+                    <v-chip v-for="tag in elemento.tags" :key="tag.id_tag" class="res-tags" color="primary"
+                      text-color="white" outlined>
+                      {{ tag.nombre_tag }}
+                    </v-chip>
+                  </div>
                 </v-chip-group>
               </v-card-text>
             </v-row>

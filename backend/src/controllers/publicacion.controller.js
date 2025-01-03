@@ -1,11 +1,12 @@
 "use strict";
 
-const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
-    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario, insertTagsPublicacion} = require("../services/publicacion.service.js");
+const { getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
+    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario, insertTagsPublicacion,
+    getTagsPublicacion } = require("../services/publicacion.service.js");
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
 const { getLiderArray } = require("../services/agrupacion.service.js");
-
+const {obtenerTagPorId} = require('../controllers/tags.controller.js');
 const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
 /**
@@ -48,7 +49,7 @@ async function obtenerPublicacionesPorId(req, res) {
         } else {
             id = req.params.id;
         }
-       
+
 
         // Obtiene la publicacion por su id
         const pub = await getPublicacionById(id);
@@ -63,7 +64,7 @@ async function obtenerPublicacionesPorId(req, res) {
         }
 
         try {
-        const post = await getPostById(publicacion.id_pub);
+            const post = await getPostById(publicacion.id_pub);
             if (post) {
                 publicacion.descripcion = post.cuerpo;
                 publicacion.tipoPub = 'post';
@@ -101,7 +102,7 @@ async function obtenerPublicacionesPorId(req, res) {
         } else {
             return publicacion;
         }
-        
+
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la publicacion:', error);
@@ -331,6 +332,26 @@ async function ingresarTagsPublicacion(req, res) {
     }
 }
 
+async function obtenerTagsPublicacion(req, res) {
+    try {
+        const id_pub = req.params.id_pub;
+        const tags = await getTagsPublicacion(id_pub);
+        if (!tags) {
+            return res.send({ success: false, message: 'No se encontraron tags' });
+        }
+        let TagsConNombre = [];
+        for (let i = 0; i < tags.length; i++) {
+            //TagsConNombre.push(await obtenerTagPorId(tags[i].id_tag).rows);
+            const tagResult = await obtenerTagPorId(tags[i].id_tag);
+            TagsConNombre.push(tagResult.rows[0]);
+        }
+        return res.send({ success: true, TagsConNombre });
+    } catch (error) {
+        console.error('Error al obtener los tags de la publicacion:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener los tags de la publicacion' });
+    }
+}
+
 module.exports = {
     obtenerPublicaciones,
     obtenerPublicacionesPorId,
@@ -339,5 +360,6 @@ module.exports = {
     actualizarPublicacion,
     eliminarPublicacion,
     obtenerPublicacionesPorGrupoUsuario,
-    ingresarTagsPublicacion
+    ingresarTagsPublicacion,
+    obtenerTagsPublicacion
 };

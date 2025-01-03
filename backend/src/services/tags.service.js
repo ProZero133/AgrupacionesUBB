@@ -16,7 +16,6 @@ async function getTagById(id) {
     try {
         // Obtiene la etiqueta con el id especificado de la base de datos
         const tag = await pool.query('SELECT * FROM "Tags" WHERE id_tag = $1', [id]);
-
         // Retorna la etiqueta
         return tag;
     } catch (error) {

@@ -412,6 +412,17 @@ async function insertTagsActividad(id_act, tags) {
     }
   }
 
+async function getTagsActividad(id_act) {
+    try {
+        const tags = await pool.query('SELECT * FROM "Actividad_tags" WHERE id_act = $1', [id_act]);
+        if (tags.rows.length === 0) {
+            return [];
+        }
+        return tags.rows;
+    } catch (error) {
+        console.log('Error al obtener los tags de la actividad:', error);
+    }
+}
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -436,6 +447,7 @@ module.exports = {
     getActividadesPublicas,
     softDeleteActividad,
     getActividadesParticipanteUsuario,
-    insertTagsActividad
+    insertTagsActividad,
+    getTagsActividad,
 
 };

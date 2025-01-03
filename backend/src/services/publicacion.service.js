@@ -119,7 +119,17 @@ async function insertTagsPublicacion(id_pub, tags) {
       console.log('Error al ingresar los tags:', error);
     }
   }
-
+  async function getTagsPublicacion(id_pub) {
+    try {
+        const tags = await pool.query('SELECT * FROM "Publicacion_tags" WHERE id_pub = $1', [id_pub]);
+        if (tags.rows.length === 0) {
+            return [];
+        }
+        return tags.rows;
+    } catch (error) {
+        console.log('Error al obtener los tags de la publicacion:', error);
+    }
+}
 module.exports = {
     getPublicacion,
     getPublicacionById,
@@ -128,5 +138,6 @@ module.exports = {
     updatePublicacion,
     deletePublicacion,
     getPublicacionesByGrupoUsuario,
-    insertTagsPublicacion
+    insertTagsPublicacion,
+    getTagsPublicacion
 };

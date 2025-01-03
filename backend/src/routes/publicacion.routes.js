@@ -1,7 +1,7 @@
 const fastify = require('../config/configFastify.js');
 
 const { obtenerPublicaciones, obtenerPublicacionesPorId, crearPublicacion, actualizarPublicacion,
-   eliminarPublicacion, obtenerPublicacionesPorGrupo,ingresarTagsPublicacion } = require('../controllers/publicacion.controller.js');
+   eliminarPublicacion, obtenerPublicacionesPorGrupo,ingresarTagsPublicacion,obtenerTagsPublicacion } = require('../controllers/publicacion.controller.js');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 module.exports = function(fastify, options, done) {
     fastify.decorate("authenticate", async (request, reply) => {
@@ -22,5 +22,6 @@ module.exports = function(fastify, options, done) {
     fastify.post('/publicaciones', { preHandler: [isUser] },crearPublicacion);
     fastify.delete('/publicaciones/:id', { preHandler: [isUser] },eliminarPublicacion);
     fastify.post('/ingresartagspublicacion', { preHandler: [isUser] },ingresarTagsPublicacion);
+    fastify.get('/obtenerTagsPublicacion/:id_pub', { preHandler: [isUserOrAdmin] },obtenerTagsPublicacion);
     done();
 }

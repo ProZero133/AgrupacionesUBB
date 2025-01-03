@@ -47,10 +47,7 @@ const MAIL_PASS = process.env.MAIL_PASS;
 /** Secreto para las cookies */
 const COOKIE_SECRET = process.env.COOKIE_SECRET;
 
-/** URL direccion local + puerto SSH (http://xxx.xxx.xxx:xxxx)*/
-const URL= process.env.BASE_URL;
-
 /** URL de la API de ConectaUBB (http://xxx.xxx.xxx:xxxx/ConectaUBB/api)*/
 const API_ConectaUBB = process.env.API_URL;
 
-module.exports = { PORT, FastifyPort, FastifyHost, HOST, DB_URL, JWT_SECRET, MAIL_USER, MAIL_PASS, COOKIE_SECRET, URL, API_ConectaUBB, USER, PASSWORD, PortPg, DATABASE };
+module.exports = { PORT, FastifyPort, FastifyHost, HOST, DB_URL, JWT_SECRET, MAIL_USER, MAIL_PASS, COOKIE_SECRET, API_ConectaUBB, USER, PASSWORD, PortPg, DATABASE };

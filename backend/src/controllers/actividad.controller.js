@@ -16,11 +16,14 @@ const {
     setAprobacionActividad,
     deletePrograma,
     deleteActividadPublica,
-    getActividadesPublicas
+    getActividadesPublicas,
+    insertTagsActividad,
+    getTagsActividad
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
 const { getUsuarioByRut, obtenerUsuarioPlataforma } = require('../services/user.service.js');
+const {obtenerTagPorId} = require('../controllers/tags.controller.js');
 
 async function ObtenerActividades(req, res) {
     const respuesta = await getActividades();
@@ -433,7 +436,49 @@ async function ObtenerActividadesPublicas(req, res) {
     }
 }
 
+async function ingresarTagsActividad(req, res) {
+    try {
+        const id_act = req.body.id_act;
+        const tags = req.body.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const actividad = await getActividadById(id_act);
+        if (!actividad) {
+            return res.code(404).send({ success: false, message: 'No se encontró la actividad' });
+        }
+        const lider = await getLiderArray(actividad.rows[0].id_agr);
+        if (rut !== lider[0].rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ingresar tags' });
+        }
+        const result = await insertTagsActividad(id_act, tags);
+        if (!result) {
+            return res.code(500).send({ success: false, message: 'Error al ingresar tags' });
+        }
+        res.code(200).send({ success: true, message: 'Tags ingresados correctamente' });
+    } catch (error) {
+        console.error('Error al ingresar tags:', error);
+        res.code(500).send('Error al ingresar tags');
+    }
+}
 
+async function obtenerTagsActividad(req, res) {
+    try {
+        const id_act = req.params.id_act;
+        const tags = await getTagsActividad(id_act);
+        if (!tags) {
+            return res.send({ success: false, message: 'No se encontraron tags' });
+        }
+        let TagsConNombre = [];
+        for (let i = 0; i < tags.length; i++) {
+            const tagResult = await obtenerTagPorId(tags[i].id_tag);
+            TagsConNombre.push(tagResult.rows[0]);
+        }
+        return res.send({ success: true, TagsConNombre });
+    } catch (error) {
+        console.error('Error al obtener los tags de la actividad:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener los tags de la actividad' });
+    }
+}
 module.exports = {
     ObtenerActividades,
     ObtenerActividadyAgrupacion,
@@ -453,5 +498,7 @@ module.exports = {
     eliminarActividadPublica,
     ObtenerActividadesPublicas,
     obtenerParticipantesActividad,
-    obtenerActividadesParticipanteUsuario
+    obtenerActividadesParticipanteUsuario,
+    ingresarTagsActividad,
+    obtenerTagsActividad
 };

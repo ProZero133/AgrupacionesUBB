@@ -37,6 +37,34 @@
             </v-col>
           </v-col>
 
+          <v-col cols="12">
+            <v-card class="search-container">
+              <v-card-title>Añadir Tags a la Actividad</v-card-title>
+              <v-text-field v-model="searchQuery" @input="fetchSearchResults(searchQuery)" append-icon="mdi-magnify"
+                label="Buscar..." single-line hide-details>
+              </v-text-field>
+              <v-card-text>
+                <!-- Aquí se mostrarán los resultados de la búsqueda -->
+                <v-chip-group>
+                  <v-chip class="results-container" v-for="item in searchResults" :key="item.id"
+                    @click="selectItem(item)">
+                    {{ item.nombre_tag }}
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+            <v-card class="selected-items-container">
+              <v-card-title>Tags seleccionados</v-card-title>
+              <v-card-text class="selected-item" v-for="item in tags" :key="item.id">
+                <v-chip-group>
+                  <v-chip class="selected-item" v-for="item in tags" :key="item.id" @click="eliminarTag(item)">
+                    {{ item.nombre_tag }}
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
           <v-col cols="12" md="12">
             <v-col cols="12" class="bottomElement">
               <v-switch v-model="tipo" :disabled="verificado !== 'Verificado'" inset color="green">
@@ -162,6 +190,9 @@ export default {
     date: null,
     rut: '',
     rol: '',
+    searchQuery: '',
+    searchResults: [],
+    tags: [],
   }),
   methods: {
     getRut() {
@@ -325,6 +356,7 @@ export default {
 
             this.$router.push(`/api/grupo/${this.groupId}`);
             this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');
+            this.tags.forEach(tag => this.RegistrarTag(tag.id_tag, id_act));
           } else {
             console.error('Error en la respuesta:', response.status);
           }
@@ -334,6 +366,55 @@ export default {
         }
       }
     },
+    async fetchSearchResults(searchValue) {
+      // Convertir searchValue a cadena explícitamente
+      const stringValue = searchValue.trim();
+      if (stringValue === '') {
+        this.searchResults = [];
+        return;
+      }
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/buscarTags/${stringValue}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (!response.ok) throw new Error('Error en la respuesta de la red');
+        const data = await response.json();
+        this.searchResults = data; // Asegúrate de que esto coincida con el formato de tu respuesta
+      } catch (error) {
+        console.error('Error al buscar:', error);
+        this.searchResults = [];
+      }
+    },
+    selectItem(item) {
+      this.tags.push(item); // Añade el item a la lista de seleccionados
+      this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
+    },
+    async eliminarTag(item) {
+      this.tags = this.tags.filter(tag => tag.id !== item.id);
+    },
+    async RegistrarTag(id_tag, id_act) {
+            try {
+                const response = await fetch(`${global.BACKEND_URL}/ingresartagsactividad`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                    },
+                    body: JSON.stringify({ id_tag: id_tag, id_act: id_act }),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                } else {
+                    console.error('Error en la respuesta:', response);
+                }
+            } catch (error) {
+                console.error('Error al hacer fetch:', error);
+            }
+        },
   },
   mounted() {
     this.rut = this.getRut();

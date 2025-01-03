@@ -77,6 +77,10 @@ async function updatePublicacion(id, publicacionData) {
 
 async function deletePublicacion(id) {
     try {
+        // Eliminar tags de la publicacion en tabla Publicacion_tags
+        const urlTags = 'DELETE FROM "Publicacion_tags" WHERE id_pub = $1 RETURNING *';
+        const id_pub = [id];
+        const resultadoTags = await pool.query(urlTags, id_pub);
         // Construye la consulta SQL para eliminar la publicacion
         const consulta = 'DELETE FROM "Publicacion" WHERE id_pub = $1 RETURNING *';
         const valor = [id];
@@ -104,6 +108,28 @@ async function getPublicacionesByGrupoUsuario(rut) {
     }
 }
 
+async function insertTagsPublicacion(id_pub, tags) {
+    try {
+      const response = await pool.query('INSERT INTO "Publicacion_tags" (id_pub, id_tag) VALUES ($1, $2) RETURNING *', [id_pub, tags]);
+        if (!response) {
+          return 'Error al ingresar los tags';
+        }
+      return 'Tags ingresados correctamente';
+    } catch (error) {
+      console.log('Error al ingresar los tags:', error);
+    }
+  }
+  async function getTagsPublicacion(id_pub) {
+    try {
+        const tags = await pool.query('SELECT * FROM "Publicacion_tags" WHERE id_pub = $1', [id_pub]);
+        if (tags.rows.length === 0) {
+            return [];
+        }
+        return tags.rows;
+    } catch (error) {
+        console.log('Error al obtener los tags de la publicacion:', error);
+    }
+}
 module.exports = {
     getPublicacion,
     getPublicacionById,
@@ -111,5 +137,7 @@ module.exports = {
     createPublicacion,
     updatePublicacion,
     deletePublicacion,
-    getPublicacionesByGrupoUsuario
+    getPublicacionesByGrupoUsuario,
+    insertTagsPublicacion,
+    getTagsPublicacion
 };

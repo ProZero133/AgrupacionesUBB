@@ -381,7 +381,7 @@
             <v-col cols="6">
               <v-btn color="green darken-1" text @click="dialogPub = false">Cerrar</v-btn>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="5">
               <v-btn v-if="this.rol != 'Admin'" :disabled="elemento.participantes >= elemento.cupos"
                 :color="elemento.participantes >= elemento.cupos ? 'red' : 'green'" text
                 @click="ParticiparActividad(elemento.id)">Participar</v-btn>
@@ -409,7 +409,7 @@
     <v-row align="start" no-gutters class="mt-6">
       <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
         <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)" :style="{
-          borderRadius: `${BordeActividades}px`,
+          borderRadius: '40px',
           backgroundColor: FondoActividades,
           boxShadow: `${SombraActividadesX}px ${SombraActividadesY}px ${SombraActividadesBlur}px ${SombraActividadesColor}`,
         }">
@@ -425,6 +425,16 @@
               <v-col cols="7">
                 <p>{{ elemento.descripcion }}</p>
               </v-col>
+              <v-card-text class="TagsGrupo">
+                <v-chip-group>
+                  <div class="tags-container">
+                    <v-chip v-for="tag in elemento.tags" :key="tag.id_tag" class="res-tags" color="primary"
+                      text-color="white" outlined>
+                      {{ tag.nombre_tag }}
+                    </v-chip>
+                  </div>
+                </v-chip-group>
+              </v-card-text>
             </v-row>
             <v-col v-if="elemento.hipervinculo" cols="12">
               <v-btn class="text-link" :href="elemento.hipervinculo ? elemento.hipervinculo : 'https://www.google.com'"
@@ -1221,7 +1231,8 @@ export default {
             // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
             // Los campos de actividad se pasarán de la siguiente manera a elementos:
             // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-            let elementosAct = this.actividades.map((elemento) => {
+            let elementosAct = await Promise.all(this.actividades.map(async (elemento) => {
+              const tags = await this.VerTagsActividad(elemento.id_act);
               return {
                 id: elemento.id_act,
                 nombre: elemento.nom_act,
@@ -1231,10 +1242,10 @@ export default {
                 id_agr: elemento.id_agr,
                 tipo_elemento: 'actividad',
                 fecha_creacion: elemento.fecha_creacion,
-                cupos: elemento.cupos
+                cupos: elemento.cupos,
+                tags: tags ? tags.TagsConNombre : [], // Asigna los tags si existen
               };
-            });
-
+            }));
             this.anadirAElementos(elementosAct);
           }
 
@@ -1285,7 +1296,8 @@ export default {
               }
             }
 
-            const nuevosElementos = this.publicaciones.map(publicacion => {
+            const nuevosElementos = await Promise.all(this.publicaciones.map(async (publicacion) => {
+              const tags = await this.VerTagsPublicacion(publicacion.id_pub);
               const elemento = {
                 id: publicacion.id_pub,
                 nombre: publicacion.encabezado,
@@ -1294,6 +1306,7 @@ export default {
                 id_agr: publicacion.id_agr,
                 tipo_elemento: publicacion.tipoPub,
                 fecha_creacion: publicacion.fecha_publicacion,
+                tags: tags ? tags.TagsConNombre : [], // Asigna los tags si existen
               };
 
               if (publicacion.tipoPub === 'formulario') {
@@ -1301,7 +1314,7 @@ export default {
               }
 
               return elemento;
-            });
+            }));
 
             this.anadirAElementos(nuevosElementos);
           }
@@ -1849,7 +1862,6 @@ export default {
       if (data.success) {
         this.BordeDescripcion = data.data.bordedescripcion;
         this.FondoDescripcion = data.data.fondodescripcion;
-        console.log(data)
         this.facebook = data.data.enlace_fb;
         this.instagram = data.data.enlace_ig;
         this.twitter = data.data.enlace_tw;
@@ -1887,8 +1899,8 @@ export default {
       }
     },
 
-    async guardarRedesSociales(){
-      try{
+    async guardarRedesSociales() {
+      try {
         const response = await fetch(`${global.BACKEND_URL}/redesSociales/${this.groupId}`, {
           method: 'PUT',
           headers: {
@@ -1909,10 +1921,50 @@ export default {
           this.dialogRedesSociales = false;
           this.$root.showSnackBar('error', data.message, 'Operación fallida');
         }
-    } catch (error) {
-      console.error('Error al hacer fetch:', error);
-    }
-  },
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async VerTagsActividad(id_act) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsActividad/${id_act}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          return data;
+        } else {
+          console.error('No se encontraron Tags para la actividad', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+    async VerTagsPublicacion(id_pub) {
+      try {
+        // Realiza una solicitud fetch a tu backend Fastify
+        const response = await fetch(`${global.BACKEND_URL}/obtenerTagsPublicacion/${id_pub}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          return data;
+        } else {
+          console.error('No se encontraron Tags para la publicacion', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
   },
   mounted() {
     this.rut = this.getRut();

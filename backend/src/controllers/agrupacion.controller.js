@@ -475,6 +475,12 @@ async function ingresarTagsAgrupacion(req, res) {
     try {
         const id_agr = req.body.id_agr;
         const tags = req.body.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const rolEnAgrupacion = await getRolUsuario(rut, id_agr);
+        if (rolEnAgrupacion.rol_agr !== 'Lider') {
+            return res.code(401).send('No tienes permisos para ingresar tags');
+        }
         const agrupacion = await getAgrupacionById(id_agr);
         if (!agrupacion) {
             return res.code(404).send('Agrupación no encontrada');

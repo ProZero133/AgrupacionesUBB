@@ -1,10 +1,12 @@
 "use strict";
 
-const {getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
-    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario} = require("../services/publicacion.service.js");
+const { getPublicacion, getPublicacionById, createPublicacion, updatePublicacion,
+    deletePublicacion, getPublicacionesByAgrupacion, getPublicacionesByGrupoUsuario, insertTagsPublicacion,
+    getTagsPublicacion } = require("../services/publicacion.service.js");
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
-
+const { getLiderArray } = require("../services/agrupacion.service.js");
+const {obtenerTagPorId} = require('../controllers/tags.controller.js');
 const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
 /**
@@ -47,7 +49,7 @@ async function obtenerPublicacionesPorId(req, res) {
         } else {
             id = req.params.id;
         }
-       
+
 
         // Obtiene la publicacion por su id
         const pub = await getPublicacionById(id);
@@ -62,7 +64,7 @@ async function obtenerPublicacionesPorId(req, res) {
         }
 
         try {
-        const post = await getPostById(publicacion.id_pub);
+            const post = await getPostById(publicacion.id_pub);
             if (post) {
                 publicacion.descripcion = post.cuerpo;
                 publicacion.tipoPub = 'post';
@@ -100,7 +102,7 @@ async function obtenerPublicacionesPorId(req, res) {
         } else {
             return publicacion;
         }
-        
+
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la publicacion:', error);
@@ -305,6 +307,51 @@ async function obtenerPublicacionesPorGrupoUsuario(req, res) {
     }
 }
 
+async function ingresarTagsPublicacion(req, res) {
+    try {
+        const id_pub = req.body.id_pub;
+        const tags = req.body.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const publicacion = await getPublicacionById(id_pub);
+        if (!publicacion) {
+            return res.code(404).send({ success: false, message: 'Publicacion no encontrada' });
+        }
+        const lider = await getLiderArray(publicacion.rows[0].id_agr);
+        if (rut !== lider[0].rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ingresar tags' });
+        }
+        const result = await insertTagsPublicacion(id_pub, tags);
+        if (!result) {
+            return res.code(500).send({ success: false, message: 'Error al ingresar tags' });
+        }
+        res.code(200).send({ success: true, message: 'Tags ingresados correctamente' });
+    } catch (error) {
+        console.error('Error al ingresar tags:', error);
+        res.code(500).send('Error al ingresar tags');
+    }
+}
+
+async function obtenerTagsPublicacion(req, res) {
+    try {
+        const id_pub = req.params.id_pub;
+        const tags = await getTagsPublicacion(id_pub);
+        if (!tags) {
+            return res.send({ success: false, message: 'No se encontraron tags' });
+        }
+        let TagsConNombre = [];
+        for (let i = 0; i < tags.length; i++) {
+            //TagsConNombre.push(await obtenerTagPorId(tags[i].id_tag).rows);
+            const tagResult = await obtenerTagPorId(tags[i].id_tag);
+            TagsConNombre.push(tagResult.rows[0]);
+        }
+        return res.send({ success: true, TagsConNombre });
+    } catch (error) {
+        console.error('Error al obtener los tags de la publicacion:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener los tags de la publicacion' });
+    }
+}
+
 module.exports = {
     obtenerPublicaciones,
     obtenerPublicacionesPorId,
@@ -312,5 +359,7 @@ module.exports = {
     crearPublicacion,
     actualizarPublicacion,
     eliminarPublicacion,
-    obtenerPublicacionesPorGrupoUsuario
+    obtenerPublicacionesPorGrupoUsuario,
+    ingresarTagsPublicacion,
+    obtenerTagsPublicacion
 };

@@ -83,6 +83,8 @@ async function updateFormulario(id, formularioData) {
 
 async function deleteFormulario(id) {
     try {
+        const urlTags = 'DELETE FROM "Publicacion_tags" WHERE id_pub = $1';
+        const resultadoTags = await pool.query(urlTags, [id]);
         // Crea la consulta SQL para eliminar el formulario
         const sql = 'DELETE FROM "Formulario" WHERE id_pub = $1';
         await pool.query(sql, [id]);

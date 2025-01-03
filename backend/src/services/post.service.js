@@ -55,6 +55,8 @@ async function createPost(postData) {
 
 async function deletePost(id) {
     try {
+        const urlTags = 'DELETE FROM "Publicacion_tags" WHERE id_pub = $1';
+        const resultadoTags = await pool.query(urlTags, [id]);
         // Arma la consulta SQL para eliminar un post
         const query = 'DELETE FROM "Post" WHERE id_pub = $1';
         // Elimina el post con el id especificado de la base de datos

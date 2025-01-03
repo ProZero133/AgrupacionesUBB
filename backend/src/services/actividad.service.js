@@ -400,6 +400,29 @@ async function getActividadesPublicas() {
     }
 }
 
+async function insertTagsActividad(id_act, tags) {
+    try {
+      const response = await pool.query('INSERT INTO "Actividad_tags" (id_act, id_tag) VALUES ($1, $2) RETURNING *', [id_act, tags]);
+        if (!response) {
+          return 'Error al ingresar los tags';
+        }
+      return 'Tags ingresados correctamente';
+    } catch (error) {
+      console.log('Error al ingresar los tags:', error);
+    }
+  }
+
+async function getTagsActividad(id_act) {
+    try {
+        const tags = await pool.query('SELECT * FROM "Actividad_tags" WHERE id_act = $1', [id_act]);
+        if (tags.rows.length === 0) {
+            return [];
+        }
+        return tags.rows;
+    } catch (error) {
+        console.log('Error al obtener los tags de la actividad:', error);
+    }
+}
 // Exporta las funciones auxiliares de la actividad
 module.exports = {
     getActividades,
@@ -423,6 +446,8 @@ module.exports = {
     deletePrograma,
     getActividadesPublicas,
     softDeleteActividad,
-    getActividadesParticipanteUsuario
+    getActividadesParticipanteUsuario,
+    insertTagsActividad,
+    getTagsActividad,
 
 };

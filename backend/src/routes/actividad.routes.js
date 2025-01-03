@@ -17,8 +17,11 @@ const {
   abandonarActividad,
   eliminarActividadPublica,
   ObtenerActividadesPublicas,
-  obtenerParticipantesActividad
+  obtenerParticipantesActividad,
+  ingresarTagsActividad,
+  obtenerTagsActividad
 } = require('../controllers/actividad.controller.js');
+const { obtenerTags } = require('../controllers/tags.controller.js');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
 module.exports = function (fastify, options, done) {
@@ -52,5 +55,7 @@ module.exports = function (fastify, options, done) {
   fastify.post('/abandonaractividad/:id_act/:rut', { preHandler: [isUser] },abandonarActividad);
   fastify.get('/actividadesPublicas', { preHandler: [isUserOrAdmin] },ObtenerActividadesPublicas);
   fastify.get('/obtenerParticipantes/:id_act', { preHandler: [isUserOrAdmin] },obtenerParticipantesActividad);
+  fastify.post('/ingresartagsactividad', { preHandler: [isUser] },ingresarTagsActividad);
+  fastify.get('/obtenerTagsActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerTagsActividad);
   done();
 };

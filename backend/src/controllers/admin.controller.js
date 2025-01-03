@@ -1,5 +1,5 @@
-const { obtenerUsuariosPlataforma,obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
-const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador } = require('../services/admin.service');
+const { obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
+const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario } = require('../services/admin.service');
 const bcrypt = require('bcrypt');
 async function ObtenerUsuarios(request, reply) {
     const resultUsuarios = await obtenerUsuariosPlataforma();
@@ -20,7 +20,7 @@ async function correoSubString(request, reply) {
     let resultUsuarios = [];
     for (let i = 0; i < usuariosPlataforma.length; i++) {
         for (let j = 0; j < resultadoSubString.length; j++) {
-            
+
             if (usuariosPlataforma[i].rut === resultadoSubString[j].rut.toString()) {
                 resultUsuarios.push(resultadoSubString[j]);
             }
@@ -80,55 +80,72 @@ async function borrarAdministrador(request, reply) {
     }
     const resultAdmin = await obtenerAdministradorPorRut(rutActual);
     const contrasenaValida = await bcrypt.compare(password, resultAdmin.contrasena);
-        if (!contrasenaValida) {
-            reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
-            return;
-        }
+    if (!contrasenaValida) {
+        reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
+        return;
+    }
     const result = await eliminarAdministrador(rut);
     return reply.send(result);
 }
 
 async function crearAdministrador(request, reply) {
     try {
-    const decoded = await request.jwtVerify();
-    const rol = decoded.rol;
-    const rutActual = decoded.rut;
-    const contrasena = request.body.contrasena;
-    const contrasenaConfirmacion = request.body.contrasenaAdmin;
-    const resultAdmin = await obtenerAdministradorPorRut(rutActual);
-    const contrasenaValida = await bcrypt.compare(contrasenaConfirmacion, resultAdmin.contrasena);
+        const decoded = await request.jwtVerify();
+        const rol = decoded.rol;
+        const rutActual = decoded.rut;
+        const contrasena = request.body.contrasena;
+        const contrasenaConfirmacion = request.body.contrasenaAdmin;
+        const resultAdmin = await obtenerAdministradorPorRut(rutActual);
+        const contrasenaValida = await bcrypt.compare(contrasenaConfirmacion, resultAdmin.contrasena);
         if (!contrasenaValida) {
             reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
             return;
         }
-    if (!contrasena) {
-        reply.code(400).send({ success: false, message: 'La contraseña es requerida' });
-        return;
+        if (!contrasena) {
+            reply.code(400).send({ success: false, message: 'La contraseña es requerida' });
+            return;
+        }
+        if (rol !== 'Admin') {
+            reply.code(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
+        const rut = request.params.rut;
+        const usuario = await obtenerUsuarioPlataforma(rut);
+        if (usuario.length === 0) {
+            reply.code(404).send({ success: false, message: 'Usuario no encontrado' });
+            return;
+        }
+        if (usuario[0].rol === 'Admin') {
+            reply.code(400).send({ success: false, message: 'El usuario ya es administrador' });
+            return;
+        }
+        const contrasenaEncriptada = await bcrypt.hash(contrasena, 15);
+        const result = await registrarAdministrador(rut, contrasenaEncriptada);
+        return reply.send(result);
     }
-    if (rol !== 'Admin') {
-        reply.code(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
-        return;
+    catch (error) {
+        console.error('Error al crear administrador: ', error);
+        reply.code(500).send('Error al crear administrador');
     }
-    const rut  = request.params.rut;
-    const usuario = await obtenerUsuarioPlataforma(rut);
-    if(usuario.length === 0){
-        reply.code(404).send({ success: false, message: 'Usuario no encontrado' });
-        return;
-    }
-    if(usuario[0].rol === 'Admin'){
-        reply.code(400).send({ success: false, message: 'El usuario ya es administrador' });
-        return;
-    }
-    const contrasenaEncriptada = await bcrypt.hash(contrasena, 15);
-    const result = await registrarAdministrador(rut, contrasenaEncriptada);
-    return reply.send(result);
 }
-catch (error) {
-    console.error('Error al crear administrador: ', error);
-    reply.code(500).send('Error al crear administrador');
-}
+
+async function EliminarTag(request, reply) {
+    try {
+        frontFormateado = parseInt(request.params.id, 10);
+
+        const resAct = await eliminarTagActividad(frontFormateado);
+        const resAgr = await eliminarTagAgrupacion(frontFormateado);
+        const resPub =  await eliminarTagPublicacion(frontFormateado);
+        const resUsr = await eliminarTagUsuario(frontFormateado);
+
+        const result = await eliminarTag(frontFormateado);
+        return reply.send(result);
+    } catch (error) {
+        console.error('Error al eliminar tag:', error);
+        reply.code(500).send('Error al eliminar tag');
+    }
 }
 
 
 
-module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador };
+module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador, EliminarTag };

@@ -54,7 +54,7 @@ async function registrarAdministrador(rut, constrasena) {
         //Consultar si el usuario ya existe en la plataforma
         const result = await pool.query(`UPDATE usuario SET rol = 'Admin' WHERE rut = $1;`, [rut]);
         const resultAdmin = await pool.query(`INSERT INTO administrador (rut, contrasena) VALUES ($1, $2);`, [rut, constrasena]);
-    
+
         if (result.rowCount === 1 && resultAdmin.rowCount === 1) {
             return { success: true, message: 'Administrador registrado exitosamente' };
         } else {
@@ -68,11 +68,91 @@ async function registrarAdministrador(rut, constrasena) {
     }
 }
 
+async function eliminarTagActividad(id) {
+    try {
+        const resAct = await pool.query('DELETE FROM "Actividad_tags" WHERE id_tag = $1;', [id]);
+
+        if (resAct.rowCount > 0) {
+            return { success: true, message: 'Tag eliminado correctamente' };
+        } else {
+            return { success: false, message: 'No existe un tag para eliminar' };
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function eliminarTagAgrupacion(id) {
+    try {
+        const resAgr = await pool.query('DELETE FROM "Agrupacion_tags" WHERE id_tag = $1;', [id]);
+
+        if (resAgr.rowCount > 0) {
+            return { success: true, message: 'Tag eliminado correctamente' };
+        } else {
+            return { success: false, message: 'No existe un tag para eliminar' };
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function eliminarTagPublicacion(id) {
+    try {
+        const resPub = await pool.query('DELETE FROM "Publicacion_tags" WHERE id_tag = $1;', [id]);
+        
+        if (resPub.rowCount > 0) {
+            return { success: true, message: 'Tag eliminado correctamente' };
+        } else {
+            return { success: false, message: 'No existe un tag para eliminar' };
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function eliminarTagUsuario(id) {
+    console.log("id_tag Usuario: ", id);
+    try {
+        const resUsr = await pool.query('DELETE FROM "Usuario_tags" WHERE id_tag = $1;', [id]);
+
+        if (resUsr.rowCount > 0) {
+            return { success: true, message: 'Tag eliminado correctamente' };
+        } else {
+            return { success: false, message: 'No existe un tag para eliminar' };
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+async function eliminarTag(id) {
+    try {
+        const resTag = await pool.query('DELETE FROM "Tags" WHERE id_tag = $1;', [id]);
+
+        if (resTag.rowCount > 0) {
+            return { success: true, message: 'Tag eliminado correctamente' };
+        } else {
+            return { success: false, message: 'No existe un tag para eliminar' };
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
 
 module.exports = {
     obtenerAdministradoresPlataforma,
     eliminarAdministrador,
     registrarAdministrador,
-    obtenerAdministradorPorRut
-
+    obtenerAdministradorPorRut,
+    eliminarTagActividad,
+    eliminarTagAgrupacion,
+    eliminarTagPublicacion,
+    eliminarTagUsuario,
+    eliminarTag,
 };

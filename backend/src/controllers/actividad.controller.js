@@ -18,7 +18,8 @@ const {
     deleteActividadPublica,
     getActividadesPublicas,
     insertTagsActividad,
-    getTagsActividad
+    getTagsActividad,
+    getFechasActividades
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
@@ -298,6 +299,10 @@ async function participarActividad(req, res) {
         if(actividad.rows[0].tipo === true && actividad.rows[0].aprobado === false){
             return res.code(401).send({ success: false, message: 'La actividad no ha sido aprobada' });
         }
+        const fecha = await getFechasActividades(id_act);
+        if(!fecha.rows[0]){
+            return res.code(401).send({ success: false, message: 'La actividad no tiene fecha programada' });
+        }
         // Obtener participantes de la actividad
         const participantes = await ParticipantesActividad(id_act);
         const cuposRestantes = actividad.rows[0].cupos - participantes.length;
@@ -479,6 +484,21 @@ async function obtenerTagsActividad(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener los tags de la actividad' });
     }
 }
+
+async function obtenerProgramacionActividad(req, res) {
+    try {
+        const id_act = req.params.id_act;
+        const response = await getFechasActividades(id_act);
+        const fecha = response.rows;
+        if (!fecha) {
+            return res.code(404).send({ success: false, message: 'No se encontraron fechas' });
+        }
+        return res.code(200).send({ success: true, fecha });
+    } catch (error) {
+        console.error('Error al obtener las fechas de la actividad:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener las fechas de la actividad' });
+    }
+}
 module.exports = {
     ObtenerActividades,
     ObtenerActividadyAgrupacion,
@@ -500,5 +520,6 @@ module.exports = {
     obtenerParticipantesActividad,
     obtenerActividadesParticipanteUsuario,
     ingresarTagsActividad,
-    obtenerTagsActividad
+    obtenerTagsActividad,
+    obtenerProgramacionActividad
 };

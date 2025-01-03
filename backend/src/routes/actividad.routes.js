@@ -19,7 +19,8 @@ const {
   ObtenerActividadesPublicas,
   obtenerParticipantesActividad,
   ingresarTagsActividad,
-  obtenerTagsActividad
+  obtenerTagsActividad,
+  obtenerProgramacionActividad
 } = require('../controllers/actividad.controller.js');
 const { obtenerTags } = require('../controllers/tags.controller.js');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
@@ -57,5 +58,6 @@ module.exports = function (fastify, options, done) {
   fastify.get('/obtenerParticipantes/:id_act', { preHandler: [isUserOrAdmin] },obtenerParticipantesActividad);
   fastify.post('/ingresartagsactividad', { preHandler: [isUser] },ingresarTagsActividad);
   fastify.get('/obtenerTagsActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerTagsActividad);
+  fastify.get('/obtenerProgramacionActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerProgramacionActividad);
   done();
 };

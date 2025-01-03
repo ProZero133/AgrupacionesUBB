@@ -1,5 +1,4 @@
 const { pool } = require('../db.js');
-const { getActividadesByAgrupacion, getFechasActividades, getParticipantesActividad } = require('../services/actividad.service.js');
 const { getUsuarioByRut } = require('../services/user.service.js');
 const { obtenerAdministradoresPlataforma } = require('../services/admin.service.js');
 const { notifySolicitudAcritacion } = require('../services/mail.service.js');

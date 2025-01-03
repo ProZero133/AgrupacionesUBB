@@ -112,10 +112,10 @@ async function getActividadesByAgrupacion(id_agr) {
     }
 }
 
-async function getFechasActividades(id_agr) {
+async function getFechasActividades(id_act) {
     try {
-        const fechasActividades = await pool.query('SELECT fecha_actividad FROM "Programa" WHERE id_agr = $1', [id_agr]);
-        return fechasActividades.rows;
+        const fechasActividades = await pool.query('SELECT * FROM "Programa" WHERE id_act = $1', [id_act]);
+        return fechasActividades;
     }
     catch (error) {
         console.log('Error al obtener las fechas de las actividades:', error);

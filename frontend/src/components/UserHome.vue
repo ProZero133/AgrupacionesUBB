@@ -24,7 +24,11 @@
             <v-card rounded="xl" elevation="12" class="card-actividades" v-on:click="seleccionar(elemento.id)">
               <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
               <v-card-subtitle class="publicadoen">Publicado en {{ grupoOrigenActividad(elemento.id_agr) }} {{
-                formatearFecha(elemento.fecha_creacion) }}</v-card-subtitle>
+                formatearFecha(elemento.fecha_creacion) }}<br>
+                <template v-if="elemento.tipo_elemento === 'Actividad'">
+                  Programada para {{ formatearFecha(elemento.fecha_programada) }}
+                </template>
+              </v-card-subtitle>
               <v-card-text>
 
                 <v-row>
@@ -543,7 +547,8 @@ export default {
           // Ahora, por cada elemento en actividades, se crea un nuevo objeto con los campos que se necesitan en elementos.
           // Los campos de actividad se pasarán de la siguiente manera a elementos:
           // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
-          const elementitos = this.actividades.map((elemento) => {
+          const elementitos = await Promise.all(this.actividades.map(async (elemento) => {
+            const programacion = await this.programacionActividad(elemento.id_act);
             return {
               id: elemento.id_act,
               nombre: elemento.nom_act,
@@ -553,9 +558,10 @@ export default {
               id_agr: elemento.id_agr,
               tipo_elemento: 'Actividad',
               fecha_creacion: elemento.fecha_creacion,
-              cupos: elemento.cupos
+              cupos: elemento.cupos,
+              fecha_programada: programacion ? programacion : null,
             };
-          });
+          }));
           this.anadirAElementos(elementitos);
         }
 
@@ -822,6 +828,21 @@ export default {
     cancelHold() {
       clearInterval(this.pressTimer);
       this.progress = 0;
+    },
+    async programacionActividad(id_act) {
+      const response = await fetch(`${global.BACKEND_URL}/obtenerProgramacionActividad/${id_act}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        return data.fecha[0].fecha_actividad;
+      } else {
+        console.error('No se encontraron programaciones para la actividad', response.status);
+      }
     },
   },
   mounted() {

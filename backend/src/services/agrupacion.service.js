@@ -568,6 +568,26 @@ async function updateAparienciaAgrupacion(id_agr, apariencia) {
   }
 }
 
+async function updateRedesSociales(id_gr, req) {
+  try {
+      const facebook = req.fb;
+      const instagram = req.ig;
+      const twitter = req.tw;
+      const id_agr = id_gr;
+      // Actualiza las redes sociales de la agrupación en la base de datos
+      const response = await pool.query(
+          `UPDATE "Apariencia" SET enlace_fb = $1, enlace_ig = $2, enlace_tw = $3 WHERE id_agr = $4 RETURNING *`,
+          [facebook, instagram, twitter, id_agr]
+      );
+      if (!response) {
+          return [];
+      }
+      return response.rows[0];
+  } catch (error) {
+      console.error('Error al programar la actividad:', error);
+  }
+}
+
 module.exports = {
   getAgrupaciones,
   getAgrupacionById,
@@ -601,4 +621,5 @@ module.exports = {
   deleteTagAgrupacion,
   getAparienciaAgrupacion,
   updateAparienciaAgrupacion,
+  updateRedesSociales,
 };

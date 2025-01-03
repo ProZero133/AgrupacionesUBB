@@ -5,7 +5,8 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     getUsuariosdeAgrupacion, deleteUsuarioAgrupacion, getAgrupacionesDeUsuario,
     rejectSolicitud, createSolicitarAcreditacion, insertTagsAgrupacion,
     getAgrupacionesPorNombre, getPublicacionCorreos, redeemCodigo, getAgrupacionesNoInscritas, getTagsAgrupacion,
-    deleteTagAgrupacion, updateAgrupacion, getPertenece, getAparienciaAgrupacion, updateAparienciaAgrupacion } = require("../services/agrupacion.service.js");
+    deleteTagAgrupacion, updateAgrupacion, getPertenece, getAparienciaAgrupacion, updateAparienciaAgrupacion,
+    updateRedesSociales } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
@@ -737,6 +738,40 @@ async function actualizarAparienciaAgrupacion(req, res) {
     }
 }
 
+async function actualizarRedesSociales(req, res) {
+    try {
+        const { id_agr } = req.params;
+        const redes = req.body;
+        if (!redes) {
+            return res.status(400).send({ success: false, message: 'Falta información' });
+        }
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const rol = decoded.rol;
+        const lider = await getLiderArray(id_agr);
+        if (lider[0].rut !== rut) {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar las redes sociales de la agrupación' });
+        }
+        if (rol !== 'Estudiante') {
+            return res.status(401).send({ success: false, message: 'No tienes permisos para editar las redes sociales de la agrupación' });
+        }
+        const agrupacion = await getAgrupacionById(id_agr);
+        if (!agrupacion) {
+            return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
+        }
+        const updatedRedes = await updateRedesSociales(id_agr,redes);
+        if (updatedRedes) {
+            return res.status(200).send({ success: true, message:'Redes sociales actualizadas', data: updatedRedes });
+        } else {
+            return res.status(404).send({ success: false, message: 'Redes sociales no encontradas' });
+        }
+    } catch (error) {
+        console.error('Error al actualizar las redes sociales de la agrupación:', error);
+        return res.status(500).send({ success: false, message: 'Error al actualizar las redes sociales de la agrupación' });
+    }
+
+}
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -767,5 +802,6 @@ module.exports = {
     obtenerAgrupacionesPertenece,
     invitarUsuario,
     obtenerAparienciaAgrupacion,
-    actualizarAparienciaAgrupacion
+    actualizarAparienciaAgrupacion,
+    actualizarRedesSociales
 };

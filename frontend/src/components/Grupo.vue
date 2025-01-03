@@ -1849,6 +1849,10 @@ export default {
       if (data.success) {
         this.BordeDescripcion = data.data.bordedescripcion;
         this.FondoDescripcion = data.data.fondodescripcion;
+        console.log(data)
+        this.facebook = data.data.enlace_fb;
+        this.instagram = data.data.enlace_ig;
+        this.twitter = data.data.enlace_tw;
         if (data.data.sombradescripcion) {
           const [SombraDescripcionX, SombraDescripcionY, SombraDescripcionBlur, SombraDescripcionColor] = data.data.sombradescripcion.split('|');
           this.SombraDescripcionX = parseFloat(SombraDescripcionX);
@@ -1883,6 +1887,32 @@ export default {
       }
     },
 
+    async guardarRedesSociales(){
+      try{
+        const response = await fetch(`${global.BACKEND_URL}/redesSociales/${this.groupId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            fb: this.facebook,
+            ig: this.instagram,
+            tw: this.twitter,
+          }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          this.dialogRedesSociales = false;
+          this.$root.showSnackBar('success', data.message, 'Operación exitosa');
+        } else {
+          this.dialogRedesSociales = false;
+          this.$root.showSnackBar('error', data.message, 'Operación fallida');
+        }
+    } catch (error) {
+      console.error('Error al hacer fetch:', error);
+    }
+  },
   },
   mounted() {
     this.rut = this.getRut();

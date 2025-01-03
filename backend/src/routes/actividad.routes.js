@@ -13,6 +13,7 @@ const {
   programarActividad,
   participarActividad,
   obtenerActividadesParticipante,
+  obtenerActividadesParticipanteUsuario,
   abandonarActividad,
   eliminarActividadPublica,
   ObtenerActividadesPublicas,
@@ -47,6 +48,7 @@ module.exports = function (fastify, options, done) {
   fastify.get('/obtenerCreador/:id_act', { preHandler: [isUserOrAdmin] },ObtenerCreadorActividad);
   fastify.delete('/rechazarActividad/:id_act', { preHandler: [isAdmin] },rechazarActividad);
   fastify.get('/actividadesparticipante/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipante);
+  fastify.get('/actividadesparticipanteUsuario/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipanteUsuario);
   fastify.post('/abandonaractividad/:id_act/:rut', { preHandler: [isUser] },abandonarActividad);
   fastify.get('/actividadesPublicas', { preHandler: [isUserOrAdmin] },ObtenerActividadesPublicas);
   fastify.get('/obtenerParticipantes/:id_act', { preHandler: [isUserOrAdmin] },obtenerParticipantesActividad);

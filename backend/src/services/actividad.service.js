@@ -268,18 +268,9 @@ async function getActividadesByGrupoUsuario(rut) {
         // Obtiene todas las actividades del grupo del usuario donde la columna "tipo" es igual a False
         const actividades = await pool.query(`
             SELECT * FROM "Actividad" 
-            WHERE tipo = false AND id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1)
-        `, [rut]);
-        // Elimina las actividades que tengan visible en false
-
-        for (let i = 0; i < actividades.rows.length; i++) {
-            if (actividades.rows[i].visible === false) {
-                actividades.rows.splice(i, 1);
-                i--;
-            }
-        }
-
-
+            WHERE tipo = false AND visible = true 
+            AND id_agr IN (SELECT id_agr FROM "Pertenece" WHERE rut = $1
+            AND id_agr IN (SELECT id_agr FROM "Agrupacion" WHERE visible = true))`, [rut]);
         if (actividades.rows.length === 0) {
             return [];
         }
@@ -321,6 +312,42 @@ async function getActividadesParticipante(rut) {
 
         // Filtra las actividades que aún no han ocurrido
         const actividadesFuturas = actividades.rows.filter(actividad => id_actsFuturas.includes(actividad.id_act));
+
+        // Retorna las actividades futuras
+        return actividadesFuturas;
+    } catch (error) {
+        console.log('Error al obtener las actividades de un participante:', error);
+    }
+}
+
+async function getActividadesParticipanteUsuario(rut) {
+    try {
+        // Obtiene todas las actividades del participante
+        const actividades = await pool.query(`
+            SELECT * FROM "Actividad" 
+            WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1 AND visible = true)
+        `, [rut]);
+
+        if (actividades.rows.length === 0) {
+            return [];
+        }
+        //  Obtiene las agrupaciones asociadas a cada actividad del participante
+        const agrupaciones = await pool.query(`
+            SELECT * FROM "Agrupacion" WHERE id_agr IN (SELECT id_agr FROM "Actividad" WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1))
+        `, [rut]);
+        const actividadesFiltradas = actividades.rows.filter(actividad => {
+            const agrupacion = agrupaciones.rows.find(agr => agr.id_agr === actividad.id_agr);
+            return agrupacion && agrupacion.visible !== false;
+        });
+
+        // Obtiene los id_act de las actividades que aún no han ocurrido
+        const programas = await pool.query(`
+            SELECT id_act FROM "Programa" WHERE fecha_actividad > now()
+        `);
+
+        const id_actsFuturas = programas.rows.map(row => row.id_act);
+        // Filtra las actividades que aún no han ocurrido
+        const actividadesFuturas = actividadesFiltradas.filter(actividad => id_actsFuturas.includes(actividad.id_act));
 
         // Retorna las actividades futuras
         return actividadesFuturas;
@@ -395,6 +422,7 @@ module.exports = {
     setAprobacionActividad,
     deletePrograma,
     getActividadesPublicas,
-    softDeleteActividad
+    softDeleteActividad,
+    getActividadesParticipanteUsuario
 
 };

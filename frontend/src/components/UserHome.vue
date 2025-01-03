@@ -722,7 +722,7 @@ export default {
     async VerActividadesParticipando(rut) {
       try {
         // Realiza un fetch a la ruta actividadesparticipante
-        const response = await fetch(`${global.BACKEND_URL}/actividadesparticipante/${rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/actividadesparticipanteUsuario/${rut}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

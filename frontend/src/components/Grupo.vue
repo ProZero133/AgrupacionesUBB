@@ -1849,7 +1849,6 @@ export default {
       if (data.success) {
         this.BordeDescripcion = data.data.bordedescripcion;
         this.FondoDescripcion = data.data.fondodescripcion;
-        console.log(data)
         this.facebook = data.data.enlace_fb;
         this.instagram = data.data.enlace_ig;
         this.twitter = data.data.enlace_tw;

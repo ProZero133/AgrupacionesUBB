@@ -16,7 +16,8 @@ const {
     setAprobacionActividad,
     deletePrograma,
     deleteActividadPublica,
-    getActividadesPublicas
+    getActividadesPublicas,
+    insertTagsActividad
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
@@ -433,6 +434,31 @@ async function ObtenerActividadesPublicas(req, res) {
     }
 }
 
+async function ingresarTagsActividad(req, res) {
+    try {
+        const id_act = req.body.id_act;
+        const tags = req.body.id_tag;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const actividad = await getActividadById(id_act);
+        if (!actividad) {
+            return res.code(404).send({ success: false, message: 'No se encontró la actividad' });
+        }
+        const lider = await getLiderArray(actividad.rows[0].id_agr);
+        if (rut !== lider[0].rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ingresar tags' });
+        }
+        const result = await insertTagsActividad(id_act, tags);
+        if (!result) {
+            return res.code(500).send({ success: false, message: 'Error al ingresar tags' });
+        }
+        res.code(200).send({ success: true, message: 'Tags ingresados correctamente' });
+    } catch (error) {
+        console.error('Error al ingresar tags:', error);
+        res.code(500).send('Error al ingresar tags');
+    }
+}
+
 
 module.exports = {
     ObtenerActividades,
@@ -453,5 +479,6 @@ module.exports = {
     eliminarActividadPublica,
     ObtenerActividadesPublicas,
     obtenerParticipantesActividad,
-    obtenerActividadesParticipanteUsuario
+    obtenerActividadesParticipanteUsuario,
+    ingresarTagsActividad
 };

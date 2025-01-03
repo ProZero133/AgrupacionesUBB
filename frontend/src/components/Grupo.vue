@@ -415,7 +415,10 @@
         }">
           <v-card-title>{{ elemento.tipo_elemento }}: {{ elemento.nombre }}</v-card-title>
           <v-card-subtitle class="publicadoen">
-            Publicado {{ formatearFecha(elemento.fecha_creacion) }}
+            Publicado {{ formatearFecha(elemento.fecha_creacion) }}<br>
+            <template v-if="elemento.tipo_elemento === 'actividad'">
+              Programada para {{ formatearFecha(elemento.fecha_programada) }}
+            </template>
           </v-card-subtitle>
           <v-card-text>
             <v-row>
@@ -725,7 +728,7 @@ export default {
 
     aparienciaItems: [
       { title: 'Cambiar Fondo', roles: ['Lider'], path: 'dialogFondo' },
-      { title: 'Cambiar Bordes actividades', roles: ['Lider'], path: 'dialogBordes' },
+      { title: 'Cambiar Fondo actividades', roles: ['Lider'], path: 'dialogBordes' },
       { title: 'Asignar Redes sociales', roles: ['Lider'], path: 'dialogRedesSociales' },
     ],
 
@@ -1233,6 +1236,8 @@ export default {
             // id_act -> id. nom_act -> nombre. descripcion -> descripcion. tipo -> tipo. imagen -> imagen. id_agr -> id_agr.
             let elementosAct = await Promise.all(this.actividades.map(async (elemento) => {
               const tags = await this.VerTagsActividad(elemento.id_act);
+              const programacion = await this.programacionActividad(elemento.id_act);
+             
               return {
                 id: elemento.id_act,
                 nombre: elemento.nom_act,
@@ -1243,7 +1248,8 @@ export default {
                 tipo_elemento: 'actividad',
                 fecha_creacion: elemento.fecha_creacion,
                 cupos: elemento.cupos,
-                tags: tags ? tags.TagsConNombre : [], // Asigna los tags si existen
+                tags: tags ? tags.TagsConNombre : [],
+                fecha_programada: programacion ? programacion : null,
               };
             }));
             this.anadirAElementos(elementosAct);
@@ -1963,6 +1969,21 @@ export default {
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
+      }
+    },
+    async programacionActividad(id_act) {
+      const response = await fetch(`${global.BACKEND_URL}/obtenerProgramacionActividad/${id_act}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        return data.fecha[0].fecha_actividad;
+      } else {
+        console.error('No se encontraron programaciones para la actividad', response.status);
       }
     },
   },

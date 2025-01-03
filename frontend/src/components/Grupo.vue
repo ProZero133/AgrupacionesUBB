@@ -409,7 +409,7 @@
     <v-row align="start" no-gutters class="mt-6">
       <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
         <v-card class="card-actividades" v-on:click="seleccionar(elemento.id)" :style="{
-          borderRadius: `${BordeActividades}px`,
+          borderRadius: '40px',
           backgroundColor: FondoActividades,
           boxShadow: `${SombraActividadesX}px ${SombraActividadesY}px ${SombraActividadesBlur}px ${SombraActividadesColor}`,
         }">

@@ -577,6 +577,7 @@ export default {
         if (response.ok) {
           this.TagsPlataforma();
           this.dialogEliminarTag = false;
+          this.$root.showSnackBar('success', 'Tag eliminado correctamente');
         } else {
           console.error('Error en la respuesta:', response.status);
         }

@@ -307,6 +307,11 @@
             @touchstart="startHold" @touchend="cancelHold" @touchcancel="cancelHold" :style="progressStyle"
             depressed>Aceptar</v-btn>
         </v-card-actions>
+        <v-card-text>
+          <p style="font-size: 0.8em; color: rgba(0, 0, 0, 0.6);">
+            Por favor, mantén pulsado el botón de "Aceptar" para confirmar.
+          </p>
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -324,8 +329,15 @@
           <v-btn color="primary" text @click="dialogabandonar = false">Cancelar</v-btn>
           <v-btn width="250px" color="primary" text @mousedown="startHoldAbandonar" @mouseup="cancelHold"
             @mouseleave="cancelHold" @touchstart="startHoldAbandonar" @touchend="cancelHold" @touchcancel="cancelHold"
-            :style="progressStyle" depressed>Aceptar</v-btn>
+            :style="progressStyle" depressed>
+            Aceptar
+          </v-btn>
         </v-card-actions>
+        <v-card-text>
+          <p style="font-size: 0.8em; color: rgba(0, 0, 0, 0.6);">
+            Por favor, mantén pulsado el botón de "Aceptar" para confirmar.
+          </p>
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -1237,7 +1249,6 @@ export default {
             let elementosAct = await Promise.all(this.actividades.map(async (elemento) => {
               const tags = await this.VerTagsActividad(elemento.id_act);
               const programacion = await this.programacionActividad(elemento.id_act);
-             
               return {
                 id: elemento.id_act,
                 nombre: elemento.nom_act,
@@ -1980,7 +1991,7 @@ export default {
         },
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.fecha.length > 0) {
         return data.fecha[0].fecha_actividad;
       } else {
         console.error('No se encontraron programaciones para la actividad', response.status);

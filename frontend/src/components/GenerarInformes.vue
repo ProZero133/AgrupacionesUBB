@@ -26,12 +26,65 @@
                         <v-chip color="primary" dark>{{ item.correo }}</v-chip>
                     </template>
                     <template v-slot:item.action="{ item }">
-                        <v-btn color="#014898" @click="generarInformeUsuario(item.rut)">generar informe</v-btn>
+                        <v-btn color="#014898" @click="abrirDialogUsuario(item)">Ver detalles</v-btn>
                     </template>
                 </v-data-table>
             </v-row>
         </v-container>
     </v-tab-item>
+
+    <v-dialog v-if="dialogUsuario == true" v-model="dialogUsuario" max-width="800px">
+        <v-card>
+            <v-row>
+                <v-card-title>
+                    {{ selectedUsuario.nombres }} {{ selectedUsuario.primer_apellido }}
+                    {{ selectedUsuario.segundo_apellido }}
+                </v-card-title>
+                <v-card-title>
+                    Agrupaciones a las que pertenece el usuario
+                </v-card-title>
+                <v-data-table :headers="headersAgrupacionesUsuario" :items="AgrupacionesPertenenciaUsuario"
+                    :sort-desc="[false]" class="elevation-13" style="margin: 3%;">
+                    <template v-slot:item.nombre_agr="{ item }">
+                        <div style="width: 100%;">
+                            {{ item.nombre_agr }}
+                        </div>
+                    </template>
+                </v-data-table>
+
+                <v-divider></v-divider>
+                <v-spacer style="height: 20px;"></v-spacer>
+
+                <v-card-title>
+                    Actividades en las que participo el usuario seleccionado
+                </v-card-title>
+                <v-data-table :headers="headersActividadesUsuario" :items="ActividadesParticipaUsuario"
+                    :sort-desc="[false]" class="elevation-13" style="margin: 3%;">
+                    <template v-slot:item.nom_act="{ item }">
+                        <div style="width: 100%;">
+                            {{ item.nom_act }}
+                        </div>
+                    </template>
+                    <template v-slot:item.fecha_creacion="{ item }">
+                        <div style="width: 100%;">
+                            {{ item.fecha_creacion }}
+                        </div>
+                    </template>
+                    <template v-slot:item.descripcion="{ item }">
+                        <div style="width: 400px;">
+                            {{ item.descripcion }}
+                        </div>
+                    </template>
+
+                </v-data-table>
+                <v-row class="d-flex justify-end" style="margin: 3%;">
+                    <v-btn elevation="24" icon="mdi-download" color="#014898"
+                        @click="descargarInformeUsuario()"></v-btn>
+                </v-row>
+            </v-row>
+        </v-card>
+    </v-dialog>
+
     <!------------------------------------------------------------>
 
 
@@ -187,6 +240,8 @@ export default {
         UsuariosRegistrados: [],
         SubstringCorreo: [],
         usuariosBuscados: [],
+        nombresAgrupaciones: [],
+        dialogUsuario: false,
 
         // datos de la tabla de usuarios
         headersBuscadorUsuario: [
@@ -197,6 +252,21 @@ export default {
             { title: 'Rol', value: 'rol' },
             { value: 'action', align: 'center' },
         ],
+
+        headersAgrupacionesUsuario: [
+            { title: 'Nombre de la agrupación', value: 'nombre_agr' },
+            { title: 'Fecha de integración', value: 'fecha_integracion' },
+            { title: 'Rol interno', value: 'rol_agr' },
+        ],
+
+        headersActividadesUsuario: [
+            { title: 'Nombre de la actividad', value: 'nom_act', width: '50%' },
+            { title: 'Fecha de creación', value: 'fecha_creacion' },
+            { title: 'Descripción', value: 'descripcion' },
+        ],
+
+        AgrupacionesPertenenciaUsuario: [],
+        ActividadesParticipaUsuario: [],
 
         // variables tab Actividades
         // nombre grupos usuario seleccionados
@@ -275,7 +345,7 @@ export default {
         // USUARIOS
 
         async substringUsuarioBDD() {
-            // llama a la ruta /correoSubString/:correo
+            // llama a la api
             const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
                 method: 'POST',
                 headers: {
@@ -296,7 +366,6 @@ export default {
         },
 
         async generarInformeUsuario(rut) {
-
             // se obtienen las agrupaciones del usuario
             const responseAgrupaciones = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
                 method: 'GET',
@@ -306,7 +375,17 @@ export default {
                 },
             });
             if (responseAgrupaciones.ok) {
-                const agrupaciones = await responseAgrupaciones.json();
+                this.AgrupacionesPertenenciaUsuario = await responseAgrupaciones.json();
+
+                // formatea la fecha
+                this.AgrupacionesPertenenciaUsuario.forEach(item => {
+                    item.fecha_integracion = new Date(item.fecha_integracion).toLocaleDateString();
+                });
+
+                // añade un campo al array con el nombre de la agrupacion
+                this.AgrupacionesPertenenciaUsuario.forEach(item => {
+                    item.nombre_agr = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr).nombre_agr;
+                });
 
                 // busca las actividades en las que participo el usuario
                 const responseActividades = await fetch(`${global.BACKEND_URL}/actividadesparticipante/${rut}`, {
@@ -317,100 +396,99 @@ export default {
                     },
                 });
                 if (responseActividades.ok) {
-                    const actividades = await responseActividades.json();
-
-                    if (!Array.isArray(actividades)) {
-                        console.error('La respuesta de actividades no es un arreglo:', actividades);
-                        this.$root.showSnackBar('error', 'Error al obtener las actividades del usuario');
-                        return;
-                    }
+                    this.ActividadesParticipaUsuario = await responseActividades.json();
 
                     // formatea la fecha
-                    agrupaciones.forEach(item => {
-                        item.fecha_integracion = new Date(item.fecha_integracion).toLocaleDateString();
+                    this.ActividadesParticipaUsuario.forEach(item => {
+                        item.fecha_creacion = new Date(item.fecha_creacion).toLocaleDateString();
                     });
 
-                    // cambia los id_agr por el nombre_agr
-                    agrupaciones.forEach(item => {
-                        const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
-                        item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    });
-
-                    // valida las actividades por id_agr
-                    actividades.forEach(item => {
-                        const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
-                        item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    });
-
-                    const doc = new jsPDF();
-
-                    // Título del informe
-                    doc.text('Informe de Usuario', 10, 10);
-
-                    // Tabla de agrupaciones
-                    doc.autoTable({
-                        head: [['Nombre de la Agrupación', 'Fecha de Integración']],
-                        body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
-                        startY: 20,
-                    });
-
-                    // Tabla de actividades por agrupación
-                    if (actividades.length > 0) {
-                        doc.addPage();
-
-                        const actividadesPorAgrupacion = actividades.reduce((acc, actividad) => {
-                            if (!acc[actividad.id_agr]) {
-                                acc[actividad.id_agr] = [];
-                            }
-                            acc[actividad.id_agr].push(actividad);
-                            return acc;
-                        }, {});
-
-                        Object.keys(actividadesPorAgrupacion).forEach((id_agr, index) => {
-                            if (index > 0) {
-                                doc.addPage();
-                            }
-                            const actividades = actividadesPorAgrupacion[id_agr];
-
-                            // busca el nombre de la agrupacion
-                            const nombreAgrupacion = agrupaciones.find(agrupacion => agrupacion.id_agr === id_agr)?.nombre_agr || 'Sin Nombre';
-
-                            doc.text(`Actividades del usuario en ${nombreAgrupacion}`, 10, 20);
-                            doc.autoTable({
-                                head: [['Nombre Actividad', 'Fecha', 'Descripción']],
-                                body: actividades.map(act => [act.nom_act, new Date(act.fecha_creacion).toLocaleDateString(), act.descripcion]),
-                                columnStyles: {
-                                    0: { cellWidth: 50 }, // nombre act
-                                    1: { cellWidth: 30 }, // fecha
-                                },
-                                startY: 30,
-                            });
-                        });
-                    }
-
-                    // Guardar el PDF
-                    doc.save('Informe_Usuario.pdf');
                 } else {
-                    const doc = new jsPDF();
-
-                    // Título del informe
-                    doc.text('Informe de Usuario', 10, 10);
-
-                    // Tabla de agrupaciones
-                    doc.autoTable({
-                        head: [['Nombre de la Agrupación', 'Fecha de Integración']],
-                        body: agrupaciones.map(item => [item.id_agr, item.fecha_integracion]),
-                        startY: 20,
-                    });
-
-                    // Guardar el PDF
-                    doc.save('Informe_Usuario.pdf');
-
-                    this.$root.showSnackBar('error', 'Este usuario no ha participado en ninguna actividad');
+                    console.error('No se encontraron actividades:', responseActividades.status);
                 }
             } else {
                 this.$root.showSnackBar('error', 'Este usuario no pertenece a ninguna agrupación');
             }
+        },
+
+        async descargarInformeUsuario() {
+            const agrupaciones = this.AgrupacionesPertenenciaUsuario;
+            const actividades = this.ActividadesParticipaUsuario;
+            const fechaActual = new Date().toLocaleDateString();
+
+            const doc = new jsPDF();
+
+            doc.setFontSize(14);
+            doc.text('INFORME DE PERTENENCIA DE AGRUPACIONES', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+            doc.setFontSize(11);
+            doc.text(`${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+            doc.text(`${fechaActual}`, doc.internal.pageSize.getWidth() / 2, 35, { align: 'center' });
+
+            // Tabla de agrupaciones
+            doc.autoTable({
+                head: [['Nombre de la Agrupación', 'Fecha de Integración', 'Rol Interno']],
+                body: agrupaciones.map(item => [item.nombre_agr, item.fecha_integracion, item.rol_agr]),
+                startY: 40,
+            });
+
+            // Tabla de actividades por agrupación
+            if (actividades.length > 0) {
+                const agrupacionesMap = new Map();
+
+                actividades.forEach(act => {
+                    if (!agrupacionesMap.has(act.id_agr)) {
+                        agrupacionesMap.set(act.id_agr, []);
+                    }
+                    agrupacionesMap.get(act.id_agr).push(act);
+                });
+
+                agrupacionesMap.forEach((acts, id_agr) => {
+                    doc.addPage();
+
+                    doc.setFontSize(14);
+                    const nombreAgrupacion = this.gruposConID.find(grupo => grupo.id_agr === id_agr).nombre_agr;
+                    doc.text('INFORME DE ACTIVIDADES', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                    doc.text(`"${nombreAgrupacion}"`, doc.internal.pageSize.getWidth() / 2, 28, { maxWidth: 180, align: 'center', fontStyle: 'bold' });
+                    doc.autoTable({
+                        head: [['Nombre Actividad', 'Fecha', 'Descripción']],
+                        body: acts.map(act => [act.nom_act, new Date(act.fecha_creacion).toLocaleDateString(), act.descripcion]),
+                        columnStyles: {
+                            0: { cellWidth: 50 }, // nombre act
+                            1: { cellWidth: 30 }, // fecha
+                        },
+                        startY: 40,
+                    });
+                });
+
+                // Guardar el PDF
+                const nombreUsuario = `${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`;
+                doc.save(`Informe_Agrupaciones_Actividades_${nombreUsuario}.pdf`);
+            } else {
+                const doc = new jsPDF();
+
+                // Título del informe
+                doc.text(`Nombre del Usuario: ${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`, 10, 20);
+
+                // Tabla de agrupaciones
+                doc.autoTable({
+                    head: [['Nombre de la Agrupación', 'Fecha de Integración', 'Rol Interno']],
+                    body: agrupaciones.map(item => [item.nombre_agr, item.fecha_integracion, item.rol_agr]),
+                    startY: 40,
+                });
+
+                // Guardar el PDF
+                const nombreUsuario = `${this.selectedUsuario.nombres} ${this.selectedUsuario.primer_apellido} ${this.selectedUsuario.segundo_apellido}`;
+                doc.save(`Informe_Agrupaciones_${nombreUsuario}.pdf`);
+
+                this.$root.showSnackBar('error', 'Este usuario no ha participado en ninguna actividad');
+            }
+        },
+
+
+        abrirDialogUsuario(usuario) {
+            this.selectedUsuario = usuario;
+            this.generarInformeUsuario(usuario.rut);
+            this.dialogUsuario = true;
         },
 
         // ACTIVIDADES
@@ -452,11 +530,13 @@ export default {
 
                     if (response.ok) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
-                        // mapear los grupos con su id y nombre_agrcomo descargar un array a pdfc
+
+                        // mapear los grupos con su id y nombre_agr
                         this.gruposConID = data.map(grupo => ({
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
+
 
                     } else {
                         console.error('No se encontraron agrupupaciones:', response.status);

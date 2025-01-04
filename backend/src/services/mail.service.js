@@ -256,7 +256,7 @@ async function notifyRechazarActPublica(mailDetails) {
 
     const mailOptions = {
         from: '"ConectaUBB" <conectaUBB@gmail.com>',
-        to: "nicolas.madrid2001@alumnos.ubiobio.cl", //mailDetails.correo,
+        to: mailDetails.correo,
         subject: sujeto,
         html: htmlBody
     };
@@ -289,7 +289,7 @@ async function reportarAgrupacionCorreo(mailDetails) {
 
     const mailOptions = {
         from: '"ConectaUBB" <conectaubb@gmail.com>',
-        to: 'nicolas.madrid2001@alumnos.ubiobio.cl',
+        to: mailDetails.correo,
         subject: sujeto,
         html: htmlBody
     };

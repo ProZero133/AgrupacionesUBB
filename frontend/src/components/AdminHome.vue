@@ -137,7 +137,11 @@
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="orange" text @click="abrirDialogMotivoSancion()">Sancionar</v-btn>
+
+        <v-btn v-if="selectedAgrupacion.visible" color="orange" text
+          @click="abrirDialogMotivoSancion()">Sancionar</v-btn>
+        <v-btn v-else color="orange" text @click="abrirDialogVisibilisar()">Cambiar visibilidad</v-btn>
+
         <v-btn color="blue" text @click="ir_a_agrupacion(selectedAgrupacion.idAgrupacion)">Ir a Agrupacion</v-btn>
         <v-btn color="red" text @click="dialogAgrupacion = false">Cerrar</v-btn>
       </v-card-actions>
@@ -147,12 +151,15 @@
   <v-dialog v-model="dialogMotivoSancion" class="dialogAgrupacion">
     <v-card v-if="selectedAgrupacion.verificado === 'Verificado'">
       <v-alert type="warning" class="mb-4">
-        Sancionar esta agrupación le cambiara el estado de acreditacion a <strong>No verificado</strong>, por lo que esta ya no podra realizar actividades publicas.
+        Sancionar esta agrupación le cambiara el estado de acreditacion a <strong>No verificado</strong>, por lo que
+        esta
+        ya no podra realizar actividades publicas.
       </v-alert>
     </v-card>
     <v-card v-if="selectedAgrupacion.verificado === 'Noverificado'">
       <v-alert type="warning" class="mb-4">
-        Sancionar esta agrupación le cambiara la visibilidad a <strong>INVISIBLE</strong>, por lo que solo los administradores podran ver esta agrupaci.
+        Sancionar esta agrupación le cambiara la visibilidad a <strong>INVISIBLE</strong>, por lo que solo los
+        administradores podran ver esta agrupaci.
       </v-alert>
     </v-card>
     <v-card>
@@ -163,6 +170,25 @@
       <v-card-actions class="justify-end">
         <v-btn color="blue" text @click="dialogMotivoSancion = false">Cancelar</v-btn>
         <v-btn color="red" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Sancionar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="dialogVisibilisar" class="dialogAgrupacion">
+    <v-card>
+      <v-alert type="warning" class="mb-4">
+        Cambiar la visibilidad de esta agrupación le cambiara la visibilidad a <strong>VISIBLE</strong>, por lo que
+        todos
+        los usuarios de la plataforma podrán ver la agrupación.
+      </v-alert>
+    </v-card>
+    <v-card>
+      <v-card-text>
+        <v-text-field v-model="contraseñaAdmin" label="Ingrese la contraseña del administrador" type="password" required></v-text-field>
+      </v-card-text>
+      <v-card-actions class="justify-center">
+        <v-btn color="blue" text @click="dialogVisibilisar = false">Cancelar</v-btn>
+        <v-btn color="red" text @click="CambiarVisibilidadAgrupacion(selectedAgrupacion.idAgrupacion)">Cambiar Visibilidad</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -279,10 +305,12 @@ export default {
       rol: '',
       rut: '',
       motivoSancion: '',
+      contraseñaAdmin: '',
       dialogUsuario: false,
       dialogAgrupacion: false,
       dialogMotivoSancion: false,
       dialogEliminarTag: false,
+      dialogVisibilisar: false,
       gruposUsuario: [],
       selectedAgrupacion: {},
 
@@ -571,6 +599,10 @@ export default {
       this.dialogMotivoSancion = true;
     },
 
+    abrirDialogVisibilisar() {
+      this.dialogVisibilisar = true;
+    },
+
     async SancionarAgrupacion(id_agr) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/sancionarAgrupacion/${id_agr}`, {
@@ -590,6 +622,32 @@ export default {
           this.motivoSancion = '';
         } else {
           console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
+    async CambiarVisibilidadAgrupacion(id_agr) {
+      if (this.contraseñaAdmin === '') {
+        this.$root.showSnackBar('error', 'Ingrese la contraseña del administrador');
+        return;
+      }
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/restablecerVisibilidad/${id_agr}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({ contraseñaAdmin: this.contraseñaAdmin}),
+        });
+        if (response.ok) {
+          this.$root.showSnackBar('success', 'Visibilidad de la agrupación cambiada correctamente');
+          this.fetchItems();
+          this.dialogVisibilisar = false;
+        } else {
+          this.$root.showSnackBar('error', 'Contraseña incorrecta');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);

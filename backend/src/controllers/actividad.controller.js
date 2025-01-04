@@ -19,7 +19,9 @@ const {
     getActividadesPublicas,
     insertTagsActividad,
     getTagsActividad,
-    getFechasActividades
+    getFechasActividades,
+    getActividadesSinProgramacion,
+    updateCuposActividad
 } = require('../services/actividad.service');
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
@@ -134,26 +136,34 @@ async function crearActividad(req, reply) {
 
 
 
-async function updateActividad(req, res) {
+async function actualizarCuposActividad(req, res) {
     try {
         // Obtiene el id de la actividad
-        const id = req.params.id;
-
-        // Valida el cuerpo de la solicitud
-        const { error, value } = actividadBodySchema.validate(req.body);
-
-        if (error) {
-            // Si hay un error, retorna un error de validación
-            res.status(400).send(error.message);
-            return;
+        const id_act = req.params.id_act;
+        const cupos = req.body.cupos;
+        const decoded = await req.jwtVerify();
+        const rut = decoded.rut;
+        const actividad = await getActividadById(id_act);
+        if (actividad.length === 0) {
+            return res.send({ success: false, message: 'No se encontro la actividad' });
         }
+        const programacion = await getFechasActividades(id_act);
+        const fecha = programacion.rows;
+    
+        if (fecha.length > 0) {
+            return res.code(401).send({ success: false, message: 'La actividad ya tiene una fecha programada' });
+        }
+        const lider = await getLider(actividad.rows[0].id_agr);
+        if (rut !== lider.rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para modificar los cupos' });
+        }
+        const act = await updateCuposActividad(id_act, cupos);
+        if (act) {
+            return res.code(200).send({ success: true, message: 'Cupos actualizados', data: act });
+        }
+        return res.code(500).send({ success: false, message: 'Error al actualizar los cupos' });
 
-        // Actualiza la actividad
-        const actividad = await actividadService.updateActividad(id, value);
-        // UPDATE ACTIVIDAD SOLAMENTE CAMBIARA LA TABLA PROGRAMA YA Q SOLO CAMBIARA LA FECHA DE LA ACTIVIDAD
 
-        // Retorna la actividad actualizada
-        res.status(200).json(actividad);
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la actividad:', error);
@@ -284,6 +294,12 @@ async function programarActividad(req, res) {
         }
         if (rutActual !== rut && rol !== 'Miembro oficial') {
             return res.code(401).send({ success: false, message: 'No tienes permisos para programar la actividad' });
+        }
+        const programacion = await getFechasActividades(id_act);
+        
+        const data = programacion.rows;
+        if (data) {
+            return res.send({ success: false, message: 'La actividad ya tiene una fecha programada' });
         }
         const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         await setParticipanteActividad(id_act, rut);
@@ -527,12 +543,26 @@ async function obtenerProgramacionActividad(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener las fechas de la actividad' });
     }
 }
+
+async function ObtenerActividadesPorAgrupacionSinProgramar(req, res) {
+    try {
+        const actividades = await getActividadesSinProgramacion(req.params.id_agr);
+        const actividadesNoProgramadas = actividades.rows;
+        if (actividades.length === 0) {
+            return res.send({ success: false, message: 'No se encontraron actividades sin programar' });
+        }
+        return res.code(200).send({ success: true, actividadesNoProgramadas });
+    } catch (error) {
+        console.error('Error al obtener las actividades de la agrupacion:', error);
+        return res.status(500).send({ success: false, message: 'Error al obtener las actividades de la agrupacion' });
+    }
+}
 module.exports = {
     ObtenerActividades,
     ObtenerActividadyAgrupacion,
     ObtenerActividadPorID,
     crearActividad,
-    updateActividad,
+    actualizarCuposActividad,
     ObtenerCreadorActividad,
     eliminarActividad,
     rechazarActividad,
@@ -549,5 +579,6 @@ module.exports = {
     obtenerActividadesParticipanteUsuario,
     ingresarTagsActividad,
     obtenerTagsActividad,
-    obtenerProgramacionActividad
+    obtenerProgramacionActividad,
+    ObtenerActividadesPorAgrupacionSinProgramar
 };

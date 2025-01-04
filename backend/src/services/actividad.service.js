@@ -187,22 +187,13 @@ async function createActividad(actividadData) {
     }
 }
 
-async function updateActividad(id, actividadData) {
+async function updateCuposActividad(id_act, cupos) {
     try {
-        // Actualiza la actividad con el id especificado en la base de datos
-        const [rowsUpdated, [updatedActividad]] = await Actividad.update({
-            nom_act: actividadData.nom_act,
-            descripcion: actividadData.descripcion,
-            imagen: actividadData.imagen,
-            tipo: actividadData.tipo,
-            id_agr: actividadData.id_agr
-        }, {
-            where: { id: id },
-            returning: true
-        });
-
+        // Actualiza los cupos de la actividad
+        const response = await pool.query('UPDATE "Actividad" SET cupos = $1 WHERE id_act = $2 RETURNING *', [cupos, id_act]);
         // Retorna la actividad actualizada
-        return updatedActividad;
+        return response.rows[0];
+        
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al actualizar la actividad:', error);
@@ -423,13 +414,24 @@ async function getTagsActividad(id_act) {
         console.log('Error al obtener los tags de la actividad:', error);
     }
 }
-// Exporta las funciones auxiliares de la actividad
+
+async function getActividadesSinProgramacion(id_agr) {
+    try {
+        // Obtiene todas las actividades de una agrupacion que no tienen programacion
+        const actividades = await pool.query('SELECT id_act, nom_act, fecha_creacion FROM "Actividad" WHERE id_agr = $1 AND id_act NOT IN (SELECT id_act FROM "Programa")', [id_agr]);
+        return actividades;
+    } catch (error) {
+        console.log('Error al obtener las actividades sin programación:', error);
+    }
+}
+
+
 module.exports = {
     getActividades,
     getActividadById,
     getActyAgr,
     createActividad,
-    updateActividad,
+    updateCuposActividad,
     deleteActividad,
     deleteActividadPublica,
     getActividadesByAgrupacion,
@@ -449,5 +451,6 @@ module.exports = {
     getActividadesParticipanteUsuario,
     insertTagsActividad,
     getTagsActividad,
+    getActividadesSinProgramacion,
 
 };

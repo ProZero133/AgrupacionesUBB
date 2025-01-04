@@ -1,8 +1,10 @@
 const { obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
-const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario, downgradearAgrupacion } = require('../services/admin.service');
-const { getAgrupacionById } = require('../services/agrupacion.service');
-
+const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario, downgradearAgrupacion, restablecerVisibilidadAgrupacion } = require('../services/admin.service');
+const { getAgrupacionById, getLiderArray } = require('../services/agrupacion.service');
+const { notificarDowngrade } = require('../services/mail.service');
+const { validarUsuarioRut } = require("../services/auth.service.js");
 const bcrypt = require('bcrypt');
+
 async function ObtenerUsuarios(request, reply) {
     const resultUsuarios = await obtenerUsuariosPlataforma();
     if (resultUsuarios.length === 0) {
@@ -137,7 +139,7 @@ async function EliminarTag(request, reply) {
 
         const resAct = await eliminarTagActividad(frontFormateado);
         const resAgr = await eliminarTagAgrupacion(frontFormateado);
-        const resPub =  await eliminarTagPublicacion(frontFormateado);
+        const resPub = await eliminarTagPublicacion(frontFormateado);
         const resUsr = await eliminarTagUsuario(frontFormateado);
 
         const result = await eliminarTag(frontFormateado);
@@ -149,9 +151,64 @@ async function EliminarTag(request, reply) {
 }
 
 async function SancionarAgrupacion(request, reply) {
-    try{
+    try {
         const id_agr = request.params.id_agr;
+        const motivo = request.body.motivo;
+        const agrupacion = await getAgrupacionById(id_agr);
+        const Lider = await getLiderArray(id_agr);
+        const LiderAPI = await validarUsuarioRut(Lider[0].rut);
         const result = await downgradearAgrupacion(id_agr);
+
+
+        const decoded = await request.jwtVerify();
+        const rol = decoded.rol;
+        const rutActual = decoded.rut;
+
+        if (rol !== 'Admin') {
+            reply.code(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
+
+        const password = request.body.contraseñaAdmin;
+
+        if (!password) {
+            reply.code(400).send({ success: false, message: 'La contraseña es requerida' });
+            return;
+        }
+        if (!rutActual) {
+            reply.code(400).send({ success: false, message: 'El rut es requerido' });
+            return;
+        }
+        const admin = await obtenerAdministradoresPlataforma();
+        let esAdmin = false;
+        // Verificar si el rut se encuentra en la lista de administradores
+        for (let i = 0; i < admin.length; i++) {
+            if (admin[i].rut === rutActual) {
+                esAdmin = true;
+                break;
+            }
+        }
+        if (!esAdmin) {
+            reply.code(404).send({ success: false, message: 'El usuario no es administrador' });
+            return;
+        }
+        const resultAdmin = await obtenerAdministradorPorRut(rutActual);
+        const contrasenaValida = await bcrypt.compare(password, resultAdmin.contrasena);
+        if (!contrasenaValida) {
+            reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
+            return;
+        }
+
+        const mailDetails = {
+            rut: LiderAPI.usuario.rut,
+            nombre: LiderAPI.usuario.nombre,
+            correo: LiderAPI.usuario.correo,
+            nombre_agr: agrupacion.nombre_agr,
+            motivo: motivo,
+        };
+
+        await notificarDowngrade(mailDetails);
+
         return reply.send(result);
     } catch (error) {
         console.error('Error al sancionar agrupación:', error);
@@ -159,4 +216,54 @@ async function SancionarAgrupacion(request, reply) {
     }
 }
 
-module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador, EliminarTag, SancionarAgrupacion };
+async function cambiarVisibilidad(request, reply) {
+    try {
+        const id_agr = request.params.id_agr;
+        const decoded = await request.jwtVerify();
+        const rol = decoded.rol;
+        const rutActual = decoded.rut;
+
+        if (rol !== 'Admin') {
+            reply.code(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
+
+        const password = request.body.contraseñaAdmin;
+
+        if (!password) {
+            reply.code(400).send({ success: false, message: 'La contraseña es requerida' });
+            return;
+        }
+        if (!rutActual) {
+            reply.code(400).send({ success: false, message: 'El rut es requerido' });
+            return;
+        }
+        const admin = await obtenerAdministradoresPlataforma();
+        let esAdmin = false;
+        // Verificar si el rut se encuentra en la lista de administradores
+        for (let i = 0; i < admin.length; i++) {
+            if (admin[i].rut === rutActual) {
+                esAdmin = true;
+                break;
+            }
+        }
+        if (!esAdmin) {
+            reply.code(404).send({ success: false, message: 'El usuario no es administrador' });
+            return;
+        }
+        const resultAdmin = await obtenerAdministradorPorRut(rutActual);
+        const contrasenaValida = await bcrypt.compare(password, resultAdmin.contrasena);
+        if (!contrasenaValida) {
+            reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
+            return;
+        }
+
+        const result = await restablecerVisibilidadAgrupacion(id_agr);
+        return reply.send(result);
+    } catch (error) {
+        console.error('Error al cambiar visibilidad:', error);
+        reply.code(500).send('Error al cambiar visibilidad');
+    }
+}
+
+module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador, EliminarTag, SancionarAgrupacion, cambiarVisibilidad };

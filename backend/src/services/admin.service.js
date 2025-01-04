@@ -141,6 +141,18 @@ async function downgradearAgrupacion(id) {
     }
 }
 
+async function restablecerVisibilidadAgrupacion(id) {
+    try{
+        await pool.query('UPDATE "Agrupacion" SET "visible" = true WHERE id_agr = $1;', [id]);
+        return { success: true, message: 'Agrupación sancionada correctamente' };
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
+
+
 module.exports = {
     obtenerAdministradoresPlataforma,
     eliminarAdministrador,
@@ -152,4 +164,5 @@ module.exports = {
     eliminarTagUsuario,
     eliminarTag,
     downgradearAgrupacion,
+    restablecerVisibilidadAgrupacion,
 };

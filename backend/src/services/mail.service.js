@@ -302,6 +302,38 @@ async function reportarAgrupacionCorreo(mailDetails) {
     }   
 }
 
+async function notificarDowngrade(mailDetails) {
+    let templatePath;
+    let sujeto;
+    let replacements;
+
+    templatePath = path.join(__dirname, '../mails/mailNotificarSancion.html');
+    replacements = {
+        rut: mailDetails.rut,
+        nombre: mailDetails.nombre,
+        correo: mailDetails.lider_correo,
+        nombre_agr: mailDetails.nombre_agr,
+        motivo: mailDetails.motivo,
+    };
+    sujeto = 'Sanción de agrupación ' + mailDetails.nombre_agr;
+
+    const htmlBody = loadHtmlTemplate(templatePath, replacements);
+    const results = [];
+
+    const mailOptions = {
+        from: '"ConectaUBB" <conectaubb@gmail.com>',
+        to: mailDetails.correo,
+        subject: sujeto,
+        html: htmlBody
+    };
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        results.push({ success: true, message: `Correo enviado a ${mailDetails.correo}`, info: info });
+    }
+    catch (error) {
+        results.push({ success: false, message: `Error al enviar correo a ${mailDetails.correo}`, error: error });
+    }
+}
 
 async function createNotificacion(rut, titulo, descripcion) {
     const query = 'INSERT INTO "Notificacion" (rut, titulo, descripcion) VALUES ($1, $2, $3) RETURNING *';
@@ -370,4 +402,5 @@ module.exports = {
     notifyAprobarActPublica,
     notifyRechazarActPublica,
     reportarAgrupacionCorreo,
+    notificarDowngrade,
 };

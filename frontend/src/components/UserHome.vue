@@ -514,6 +514,8 @@ export default {
         });
         const dataPublicas = await actividadesPublicas.json();
 
+        console.log(dataPublicas);
+
         if (response.ok && actividadesPublicas.ok && dataPublicas.success) {
           dataPublicas.forEach((actiPublica) => {
             const index = data.actividades.findIndex((acti) => acti.id_act === actiPublica.id_act);

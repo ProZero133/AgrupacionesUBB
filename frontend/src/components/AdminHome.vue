@@ -169,7 +169,7 @@
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn color="blue" text @click="dialogMotivoSancion = false">Cancelar</v-btn>
-        <v-btn color="red" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Sancionar</v-btn>
+        <v-btn color="red" text @click="dialogContraseñaAdmin = true">Sancionar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -184,11 +184,32 @@
     </v-card>
     <v-card>
       <v-card-text>
-        <v-text-field v-model="contraseñaAdmin" label="Ingrese la contraseña del administrador" type="password" required></v-text-field>
+        <v-text-field v-model="contraseñaAdmin" label="Ingrese la contraseña del administrador" type="password"
+          required></v-text-field>
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn color="blue" text @click="dialogVisibilisar = false">Cancelar</v-btn>
-        <v-btn color="red" text @click="CambiarVisibilidadAgrupacion(selectedAgrupacion.idAgrupacion)">Cambiar Visibilidad</v-btn>
+        <v-btn color="red" text @click="CambiarVisibilidadAgrupacion(selectedAgrupacion.idAgrupacion)">Cambiar
+          Visibilidad</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="dialogContraseñaAdmin" class="dialogAgrupacion">
+    <v-card>
+      <v-alert type="warning" class="mb-4">
+        Ingrese su contraseña de administrador para sancionar esta agrupación.
+      </v-alert>
+    </v-card>
+    <v-card>
+      <v-card-text>
+        <v-text-field v-model="contraseñaAdmin" label="Ingrese la contraseña del administrador" type="password"
+          required></v-text-field>
+      </v-card-text>
+      <v-card-actions class="justify-center">
+        <v-btn color="blue" text @click="dialogContraseñaAdmin = false">Cancelar</v-btn>
+        <v-btn color="red" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Cambiar
+          Visibilidad</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -311,6 +332,7 @@ export default {
       dialogMotivoSancion: false,
       dialogEliminarTag: false,
       dialogVisibilisar: false,
+      dialogContraseñaAdmin: false,
       gruposUsuario: [],
       selectedAgrupacion: {},
 
@@ -613,6 +635,7 @@ export default {
           },
           body: JSON.stringify({
             motivo: this.motivoSancion,
+            contraseñaAdmin: this.contraseñaAdmin,
           }),
         });
         if (response.ok) {
@@ -621,7 +644,7 @@ export default {
           this.dialogMotivoSancion = false;
           this.motivoSancion = '';
         } else {
-          console.error('Error en la respuesta:', response.status);
+          this.$root.showSnackBar('error', 'Contraseña incorrecta');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -640,12 +663,14 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
-          body: JSON.stringify({ contraseñaAdmin: this.contraseñaAdmin}),
+          body: JSON.stringify({ contraseñaAdmin: this.contraseñaAdmin }),
         });
         if (response.ok) {
           this.$root.showSnackBar('success', 'Visibilidad de la agrupación cambiada correctamente');
           this.fetchItems();
           this.dialogVisibilisar = false;
+          this.contraseñaAdmin = '';
+          this.dialogContraseñaAdmin = false;
         } else {
           this.$root.showSnackBar('error', 'Contraseña incorrecta');
         }

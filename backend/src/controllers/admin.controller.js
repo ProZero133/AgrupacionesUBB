@@ -159,6 +159,46 @@ async function SancionarAgrupacion(request, reply) {
         const LiderAPI = await validarUsuarioRut(Lider[0].rut);
         const result = await downgradearAgrupacion(id_agr);
 
+
+        const decoded = await request.jwtVerify();
+        const rol = decoded.rol;
+        const rutActual = decoded.rut;
+
+        if (rol !== 'Admin') {
+            reply.code(403).send({ success: false, message: 'Acceso denegado: rol no autorizado' });
+            return;
+        }
+
+        const password = request.body.contraseñaAdmin;
+
+        if (!password) {
+            reply.code(400).send({ success: false, message: 'La contraseña es requerida' });
+            return;
+        }
+        if (!rutActual) {
+            reply.code(400).send({ success: false, message: 'El rut es requerido' });
+            return;
+        }
+        const admin = await obtenerAdministradoresPlataforma();
+        let esAdmin = false;
+        // Verificar si el rut se encuentra en la lista de administradores
+        for (let i = 0; i < admin.length; i++) {
+            if (admin[i].rut === rutActual) {
+                esAdmin = true;
+                break;
+            }
+        }
+        if (!esAdmin) {
+            reply.code(404).send({ success: false, message: 'El usuario no es administrador' });
+            return;
+        }
+        const resultAdmin = await obtenerAdministradorPorRut(rutActual);
+        const contrasenaValida = await bcrypt.compare(password, resultAdmin.contrasena);
+        if (!contrasenaValida) {
+            reply.code(401).send({ success: false, message: 'Contraseña incorrecta' });
+            return;
+        }
+
         const mailDetails = {
             rut: LiderAPI.usuario.rut,
             nombre: LiderAPI.usuario.nombre,

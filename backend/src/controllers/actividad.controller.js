@@ -75,6 +75,7 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener actividades' });
     }
 }
+
 async function obtenerTimestamp() {
     const ahora = new Date();
     const opcionesFecha = { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -102,18 +103,17 @@ async function crearActividad(req, reply) {
         const lider = await getLiderArray(body.id_agr);
         const rol = await getRolUsuario(rut, body.id_agr).rol_agr;
         const agrupacion = await getAgrupacionById(body.id_agr);
-        if (agrupacion.length === 0) {
-            return reply.send({ success: false, message: 'No se encontro la agrupacion' });
+        if (!agrupacion) {
+            return reply.code(404).send({ success: false, message: 'No se encontro la agrupacion' });
         }
         if (agrupacion.verificado !== 'Verificado' && body.tipo === true) {
-            return reply.send({ success: false, message: 'La agrupacion no esta acreditada' });
+            return reply.code(403).send({ success: false, message: 'La agrupacion no esta acreditada' });
         }
         if (rut !== lider[0].rut && rol !== 'Miembro oficial') {
-            return reply.send({ success: false, message: 'No tienes permisos para crear actividades' });
+            return reply.code(403).send({ success: false, message: 'No tienes permisos para crear actividades' });
         }
-
         if (rol === 'Miembro oficial' && body.tipo === false) {
-            return reply.send({ success: false, message: 'No tienes permisos para crear actividades publicas' });
+            return reply.code(403).send({ success: false, message: 'No tienes permisos para crear actividades publicas' });
         }
 
         if (error) {

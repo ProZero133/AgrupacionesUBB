@@ -16,7 +16,6 @@
   <v-tab-item value="agrupaciones" v-if="tab === 'agrupaciones'">
     <v-container>
       <v-row>
-
         <!-- BARRA DE BUSQUEDA, searchQueryAgrupaciones es la lista en al que se filtran los datos en tiempo real. -->
         <v-container class="Busqueda">
           <v-toolbar dense floating class="search-bar">
@@ -146,6 +145,16 @@
   </v-dialog>
 
   <v-dialog v-model="dialogMotivoSancion" class="dialogAgrupacion">
+    <v-card v-if="selectedAgrupacion.verificado === 'Verificado'">
+      <v-alert type="warning" class="mb-4">
+        Sancionar esta agrupación le cambiara el estado de acreditacion a <strong>No verificado</strong>, por lo que esta ya no podra realizar actividades publicas.
+      </v-alert>
+    </v-card>
+    <v-card v-if="selectedAgrupacion.verificado === 'Noverificado'">
+      <v-alert type="warning" class="mb-4">
+        Sancionar esta agrupación le cambiara la visibilidad a <strong>INVISIBLE</strong>, por lo que solo los administradores podran ver esta agrupaci.
+      </v-alert>
+    </v-card>
     <v-card>
       <v-card-title class="headline">Motivo de Sanción</v-card-title>
       <v-card-text>
@@ -269,12 +278,12 @@ export default {
       searchQueryUsuarios: '',
       rol: '',
       rut: '',
-      motivoSancion: '', 
-      dialogUsuario: false, 
-      dialogAgrupacion: false, 
-      dialogMotivoSancion: false, 
+      motivoSancion: '',
+      dialogUsuario: false,
+      dialogAgrupacion: false,
+      dialogMotivoSancion: false,
       dialogEliminarTag: false,
-      gruposUsuario: [], 
+      gruposUsuario: [],
       selectedAgrupacion: {},
 
 
@@ -386,6 +395,12 @@ export default {
         // Para cada grupo, obtener VerTagsGrupo
         if (response.ok) {
           const data = await response.json();
+
+          // ordena las agrupaciones por orden "Verificado" y "No verificado"
+          data.sort((a, b) => (a.verificado > b.verificado) ? -1 : 1);
+
+          // ordena las agrupaciones por orden "Visible" e "Invisible"
+          data.sort((a, b) => (a.visible > b.visible) ? -1 : 1);
 
           this.itemsAgr = await Promise.all(data.map(async item => {
             const tags = await this.VerTagsGrupo(item.id_agr);
@@ -664,5 +679,9 @@ export default {
   max-height: 360px;
   margin: 1%;
   box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dialogAgrupacion {
+  max-width: 700px;
 }
 </style>

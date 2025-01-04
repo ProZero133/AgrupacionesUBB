@@ -298,8 +298,8 @@ async function programarActividad(req, res) {
         const programacion = await getFechasActividades(id_act);
         
         const data = programacion.rows;
-        if (data) {
-            return res.send({ success: false, message: 'La actividad ya tiene una fecha programada' });
+        if (data.length > 0) {
+            return res.code(401).send({ success: false, message: 'La actividad ya tiene una fecha programada' });
         }
         const actividad = await setProgramacionActividad(id_agr, id_act, fecha_actividad);
         await setParticipanteActividad(id_act, rut);

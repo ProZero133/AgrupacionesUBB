@@ -52,7 +52,7 @@ async function crearAgrupacion(req, res) {
         const rut = decoded.rut;
         const rol = decoded.rol;
         if (rut !== req.body.rut) {
-            return res.code(401).send('Rut no pertece al usuario');
+            return res.code(401).send('Rut no pertenece al usuario');
         }
         if (rol !== 'Estudiante') {
             return res.code(401).send('No tienes permisos para crear una agrupacion')
@@ -84,12 +84,12 @@ async function editarAgrupacion(req, res) {
         const lider = await getLiderArray(id_agr);
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
+        const agrupacionactual = await getAgrupacionById(id_agr);
+        if (!agrupacionactual) {
+            return res.code(404).send('Agrupación no encontrada');
+        }
         if (lider[0].rut !== rut) {
             return res.code(401).send('No tienes permisos para editar la agrupacion')
-        }
-        const agrupacionactual = await getAgrupacionById(id_agr);
-        if (agrupacionactual.length === 0) {
-            return res.code(404).send('Agrupación no encontrada');
         }
         const agrupa = agrupacionactual
         const imagen = agrupa.imagen;
@@ -207,6 +207,10 @@ async function aceptarSolicitud(req, res) {
         if (!result) {
             return res.code(500).send('Error al aceptar la solicitud');
         }
+        if (result === 'El usuario ya es miembro de la agrupación') {
+            return res.code(400).send({ success: false, message: 'El usuario ya es miembro de la agrupación' });
+        }
+        res.code(200).send({ success: true, message: 'Solicitud aceptada' });
     }
     catch (error) {
         console.error('Error al aceptar la solicitud:', error);
@@ -274,7 +278,7 @@ async function eliminarAgrupacion(req, res) {
         if (!result) {
             return res.code(500).send('Error al eliminar la agrupación');
         }
-        res.code(200).send('Agrupación eliminada');
+        res.code(200).send({ success: true, message: 'Agrupación eliminada', data: result });
     } catch (error) {
         console.error('Error al eliminar la agrupación:', error);
         res.code(500).send('Error al eliminar la agrupación');

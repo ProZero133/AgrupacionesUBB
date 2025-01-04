@@ -1,5 +1,6 @@
 const { pool } = require('../db.js');
 const { getUsuarioByRut } = require('../services/user.service.js');
+const {getFechasActividades} = require('../services/actividad.service.js');
 const { obtenerAdministradoresPlataforma } = require('../services/admin.service.js');
 const { notifySolicitudAcritacion } = require('../services/mail.service.js');
 const axios = require('axios');
@@ -351,12 +352,23 @@ async function getLiderArray(id_agr) {
 
 async function validateEliminarGrupo(id_agr) {
   try {
-
+    const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
+    let fechas = [];
+    for (let i = 0; i < actividades.rows.length; i++) {
+      const fecha = await getFechasActividades(actividades.rows[i].id_act);
+      fechas.push(fecha);
+    }
+    const fechaActual = new Date();
+    for (let i = 0; i < fechas.length; i++) {
+      if (fechas[i].fecha_actividad < fechaActual) {
+        return 'No se puede eliminar la agrupación, hay actividades pasadas';
+      }
+    }
     const agrupacion = await softDeleteAgrupacion(id_agr);
     if (agrupacion.length === 0) {
       return 'Error al eliminar la agrupación';
     }
-    return 'Agrupacion eliminada';
+    return { message: 'Agrupación eliminada correctamente', agrupacion: agrupacion };
   }
   catch (error) {
     console.log('Error al obtener las actividades:', error);

@@ -6,7 +6,7 @@ const {
   ObtenerActividadPorID,
   ObtenerActividades,
   crearActividad,
-  updateActividad,
+  actualizarCuposActividad,
   ObtenerCreadorActividad,
   eliminarActividad,
   rechazarActividad,
@@ -20,7 +20,8 @@ const {
   obtenerParticipantesActividad,
   ingresarTagsActividad,
   obtenerTagsActividad,
-  obtenerProgramacionActividad
+  obtenerProgramacionActividad,
+  ObtenerActividadesPorAgrupacionSinProgramar
 } = require('../controllers/actividad.controller.js');
 const { obtenerTags } = require('../controllers/tags.controller.js');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
@@ -46,7 +47,7 @@ module.exports = function (fastify, options, done) {
   fastify.post('/programar/:id_act/:id_agr', { preHandler: [isUser] },programarActividad);
   fastify.post('/participar/:id_act', { preHandler: [isUser] },participarActividad);
   fastify.post('/actividades',{ preHandler: [isUser] }, crearActividad);
-  fastify.put('/actividades/:id', { preHandler: [isUser] },updateActividad);
+  fastify.put('/actividades/:id_act', { preHandler: [isUser] },actualizarCuposActividad);
   fastify.delete('/actividades/:id_act', { preHandler: [isUserOrAdmin] },eliminarActividad);
   fastify.delete('/borrarActividades/:id_act/:rut', { preHandler: [isAdmin] },eliminarActividadPublica);
   fastify.get('/obtenerCreador/:id_act', { preHandler: [isUserOrAdmin] },ObtenerCreadorActividad);
@@ -59,5 +60,6 @@ module.exports = function (fastify, options, done) {
   fastify.post('/ingresartagsactividad', { preHandler: [isUser] },ingresarTagsActividad);
   fastify.get('/obtenerTagsActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerTagsActividad);
   fastify.get('/obtenerProgramacionActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerProgramacionActividad);
+  fastify.get('/actividadesPorProgramar/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerActividadesPorAgrupacionSinProgramar);
   done();
 };

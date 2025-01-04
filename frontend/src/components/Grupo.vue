@@ -483,6 +483,10 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
 
+          <v-list-item v-if="programarItem" v-on:click="this.dialogPendiente = true">
+            <v-list-item-title>Actividades sin programar</v-list-item-title>
+          </v-list-item>
+
           <v-list-item v-if="abandonarItem" v-on:click="this.dialogabandonar = true">
             <v-list-item-title>Abandonar agrupación</v-list-item-title>
           </v-list-item>
@@ -582,6 +586,50 @@
     </v-container>
   </v-card>
 
+
+<v-dialog v-model="dialogPendiente" max-width="500">
+  <v-card>
+    <v-card-title>
+      <span class="headline">Actividades pendientes de programar</span>
+    </v-card-title>
+    <v-card-text>
+      <v-data-table :headers="headersPendientes" :items="actividadePorProgramar" :sort-by="['fecha_creacion']">
+        <template v-slot:item.action="{ item }">
+          <v-btn color="green darken-1" text @click="programarActividad(item.id_act)">Programar</v-btn>
+        </template>
+      </v-data-table>
+    </v-card-text>
+  </v-card>
+</v-dialog>
+
+
+  <v-dialog v-model="dialogProgramar" max-width="500px">
+    <v-card>
+      <v-card-title>
+        <span class="headline">Detalles de la Actividad</span>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="dialogForm">
+          <v-col>
+            <v-text-field v-model="date" label="Fecha para la actividad" type="datetime-local" required :min="hoy"
+              :rules="dateRules" :error-messages="dateErrors"></v-text-field>
+          </v-col>
+          <v-col>
+            <v-text-field class="Cupos" v-model="cupos" label="Cupos para la actividad" type="number" min="1" required
+              :rules="cuposRules"></v-text-field>
+          </v-col>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="dialog = false">Cancelar</v-btn>
+        <v-btn color="blue darken-1" text
+          @click="AgendarActividad(cupos, date)">Aceptar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+
   <!-- Dialogo para personalizar la descripción -->
   <v-dialog v-model="dialogFondo" max-width="500px">
     <v-card>
@@ -641,6 +689,7 @@ export default {
     dialogRedesSociales: false,
     dialogFondo: false,
     dialogBordes: false,
+    cupos: 1,
     facebook: '',
     instagram: '',
     twitter: '',
@@ -684,9 +733,13 @@ export default {
     preferenciasActuales: [],
     searchResults: [],
     selectedItems: [],
+    actividadePorProgramar: [],
+    actividadSeleccionadaProgramar: null,
     snackbar: false,
     snackbarMessage: '',
     snackbarColor: '',
+    dialogProgramar: false,
+    dialogPendiente: false,
     snackbarTimeout: 3000,
     rut: '',
     rol: '',
@@ -703,6 +756,11 @@ export default {
 
     headersSolicitudes: [
       { title: 'Correo', value: 'correo', sortable: true },
+      { value: 'action', sortable: false },
+    ],
+    headersPendientes: [
+      { title: 'Nombre', value: 'nom_act', sortable: true },
+      { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true },
       { value: 'action', sortable: false },
     ],
 
@@ -744,13 +802,23 @@ export default {
       { title: 'Asignar Redes sociales', roles: ['Lider'], path: 'dialogRedesSociales' },
     ],
 
+    dateRules: [
+      value => {
+        if (value) return true
+        return 'La fecha es requerida.'
+      },
+      value => {
+        const inputDate = new Date(value);
+        const today = new Date();
+        if (inputDate >= today) return true
+        return `La fecha no puede ser antes que la actual.`
+      },
+    ],
+    date: null,
+    hoy: new Date().toISOString().slice(0, 16),
+    cuposRules: [v => !!v || 'Cupos requeridos'],
     rolesPermitidosEliminar: ['Lider', 'Administrador'],
 
-    // Lista de elementos
-    // Los que son actividades, tienen los siguientes campos:
-    // id_act, nom_act, descripcion, tipo, imagen, id_agr, tipo_elemento
-    // Si son publicaciones, pueden tener, además, los siguientes:
-    // hipervinculo, opciones (arreglo de strings)
     actividades: [],
     publicaciones: [],
     elementos: [],
@@ -1997,6 +2065,72 @@ export default {
         console.error('No se encontraron programaciones para la actividad', response.status);
       }
     },
+    async actividadesSinProgramar() {
+      const response = await fetch(`${global.BACKEND_URL}/actividadesPorProgramar/${this.groupId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        this.actividadePorProgramar = data.actividadesNoProgramadas;
+        // formatea la fecha para cada actividad
+        this.actividadePorProgramar.forEach((actividad) => {
+          actividad.fecha_creacion = this.formatearFecha(actividad.fecha_creacion);
+        });
+      } else {
+        this.actividadePorProgramar = [];
+      }
+    },
+    async programarActividad(id_act) {
+      this.actividadSeleccionadaProgramar = id_act;
+      this.dialogPendientes = false;
+      this.dialogProgramar = true;
+    },
+
+    async AgendarActividad(cupos, fecha){
+      try{
+      const response = await fetch(`${global.BACKEND_URL}/programar/${this.actividadSeleccionadaProgramar}/${this.groupId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+    body: JSON.stringify({
+      fecha_actividad: fecha,
+    }),
+    });
+    if(response.status === 500){
+      this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
+      this.dialogProgramar = false;
+    }
+    const data = await response.json();
+    if (response.ok) {
+      const respuesta = await fetch(`${global.BACKEND_URL}/actividades/${this.actividadSeleccionadaProgramar}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+        },
+        body: JSON.stringify({
+          cupos: cupos,
+        }),
+      });
+
+      this.$root.showSnackBar('success', 'Actividad programada correctamente', 'Operación exitosa');
+      this.dialogProgramar = false;
+      this.dialogPendientes = false;
+      this.actividadesSinProgramar();
+    } else {
+      this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
+      console.error('Error en la respuesta:', response.status);
+    }
+  } catch (error) {
+    console.error('Error al hacer fetch:', error);
+  }
+},
   },
   mounted() {
     this.rut = this.getRut();
@@ -2010,6 +2144,7 @@ export default {
     this.obtenerTagsGrupo();
     this.puedeEliminarElemento();
     this.fetchCustomization();
+    this.actividadesSinProgramar();
   },
   computed: {
     progressStyle() {
@@ -2021,6 +2156,9 @@ export default {
       return this.itemsSegunRol.filter(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title !== 'Abandonar Agrupación');
     },
     abandonarItem() {
+      return this.itemsSegunRol.find(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title === 'Abandonar Agrupación');
+    },
+    programarItem() {
       return this.itemsSegunRol.find(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title === 'Abandonar Agrupación');
     },
   },

@@ -1,5 +1,6 @@
 const { obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
-const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario } = require('../services/admin.service');
+const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario, downgradearAgrupacion } = require('../services/admin.service');
+const { getAgrupacionById } = require('../services/agrupacion.service');
 
 const bcrypt = require('bcrypt');
 async function ObtenerUsuarios(request, reply) {
@@ -147,6 +148,15 @@ async function EliminarTag(request, reply) {
     }
 }
 
+async function SancionarAgrupacion(request, reply) {
+    try{
+        const id_agr = request.params.id_agr;
+        const result = await downgradearAgrupacion(id_agr);
+        return reply.send(result);
+    } catch (error) {
+        console.error('Error al sancionar agrupación:', error);
+        reply.code(500).send('Error al sancionar agrupación');
+    }
+}
 
-
-module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador, EliminarTag };
+module.exports = { ObtenerUsuarios, correoSubString, Administradores, borrarAdministrador, crearAdministrador, EliminarTag, SancionarAgrupacion };

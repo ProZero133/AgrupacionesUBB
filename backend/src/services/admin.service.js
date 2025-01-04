@@ -123,6 +123,23 @@ async function eliminarTag(id) {
     }
 }
 
+async function downgradearAgrupacion(id) {
+    try {
+        const agrupacion = await pool.query('SELECT * FROM "Agrupacion" WHERE id_agr = $1;', [id]);
+        const datosAgrupacion = agrupacion.rows[0];
+
+        if (datosAgrupacion.verificado === 'Verificado') {
+            await pool.query('UPDATE "Agrupacion" SET "verificado" = $1 WHERE id_agr = $2;', ['Noverificado', id]);
+        }
+        if (datosAgrupacion.verificado === 'Noverificado') {
+            await pool.query('UPDATE "Agrupacion" SET "visible" = false WHERE id_agr = $1;', [id]);
+        }
+        return { success: true, message: 'Agrupación sancionada correctamente' };
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        return error;
+    }
+}
 
 module.exports = {
     obtenerAdministradoresPlataforma,
@@ -134,4 +151,5 @@ module.exports = {
     eliminarTagPublicacion,
     eliminarTagUsuario,
     eliminarTag,
+    downgradearAgrupacion,
 };

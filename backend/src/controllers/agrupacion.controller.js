@@ -10,7 +10,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
-const { notifyPublicacion, integrateUsuario, inviteUsuario } = require("../services/mail.service.js");
+const { notifyPublicacion, integrateUsuario, inviteUsuario, reportarAgrupacionCorreo } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
 const { validarUsuario } = require('../services/auth.service.js');
 const crypto = require('crypto')
@@ -778,6 +778,34 @@ async function actualizarRedesSociales(req, res) {
 
 }
 
+async function reportarAgrupacion(req, res) {
+    try {
+        const id_agr = req.params.id_agr;
+        const rut = req.params.rut;
+        const motivo = req.body.motivo;
+
+        const agrupacion = await getAgrupacionById(id_agr);
+        const usuario = await getUsuarioByRut(rut);
+
+        const mailDetails = {
+            rut: usuario.rut,
+            nombre: usuario.nombre,
+            lider_correo: usuario.correo,
+            nombre_agr: agrupacion.nombre_agr,
+            motivo: motivo
+        };
+
+        await reportarAgrupacionCorreo(mailDetails);
+
+
+    } catch (error) {
+        console.error('Error al reportar la agrupación:', error);
+        return { success: false, message: 'Error al reportar la agrupación' };
+    }
+}
+
+
+
 module.exports = {
     VerGrupos,
     ObtenerAgrupacionesPorID,
@@ -809,5 +837,6 @@ module.exports = {
     invitarUsuario,
     obtenerAparienciaAgrupacion,
     actualizarAparienciaAgrupacion,
-    actualizarRedesSociales
+    actualizarRedesSociales,
+    reportarAgrupacion,
 };

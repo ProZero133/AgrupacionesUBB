@@ -4,7 +4,7 @@ const { ObtenerUsuariosdeAgrupacion, ObtenerRolUsuario, CambiarRoldeUsuario } = 
 const { AceptacionActividad } = require('../controllers/actividad.controller');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 const { obtenerUsuariosPlataforma } = require('../services/user.service.js');
-const { borrarAdministrador, crearAdministrador, EliminarTag } = require('../controllers/admin.controller.js');
+const { borrarAdministrador, crearAdministrador, EliminarTag, SancionarAgrupacion } = require('../controllers/admin.controller.js');
 
 module.exports = function(fastify, options, done) {
   fastify.decorate("authenticate", async (request, reply) => {
@@ -34,6 +34,7 @@ module.exports = function(fastify, options, done) {
   fastify.delete('/eliminaradministrador', { preHandler: [isAdmin] }, borrarAdministrador);
   fastify.post('/nuevoAdministrador/:rut', { preHandler: [isAdmin] }, crearAdministrador);
   fastify.delete('/eliminarTag/:id', { preHandler: [isAdmin] }, EliminarTag);
+  fastify.post('/sancionarAgrupacion/:id_agr', { preHandler: [isAdmin] }, SancionarAgrupacion);
   done();
 
 };

@@ -3,7 +3,7 @@ const { ObtenerActividadesPorAgrupacion, ObtenerActividades,
   ObtenerActividadesPorGrupoUsuario, } = require('../controllers/actividad.controller');
 const { obtenerUsuarioPorRut, ObtenerTagsSimilares, ObtenerPreferenciasUsuario, ActualizarPreferenciasUsuario, 
   ObtenerTag, obtenerUsuarioServidor, obtenerUsuarioPorCorreo, EliminarPreferenciaUsuario } = require('../controllers/user.controller');
-const { obtenerAgrupacionesDeUsuario } = require('../controllers/agrupacion.controller');
+const { obtenerAgrupacionesDeUsuario, reportarAgrupacion } = require('../controllers/agrupacion.controller');
 const { obtenerPublicacionesPorGrupoUsuario } = require('../controllers/publicacion.controller');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 module.exports = function(fastify, options, done) {
@@ -31,5 +31,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/obtenerTagPorId/:id', { preHandler: [isUserOrAdmin] },ObtenerTag);
   fastify.get('/obtenerGruposUsuario/:rut', { preHandler: [isUserOrAdmin] },obtenerAgrupacionesDeUsuario);
   fastify.delete('/eliminarPreferencia/:rut/:id', { preHandler: [isUser] },EliminarPreferenciaUsuario);
+  fastify.post('/reportarAgrupacion/:id_agr/:rut', { preHandler: [isUser] }, reportarAgrupacion);
   done();
 };

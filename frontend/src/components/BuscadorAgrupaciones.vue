@@ -29,7 +29,14 @@
           <v-card class="gruposCard" max-width="400">
             <v-img class="align-end text-white" height="200" :src="item.img" cover
               gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
-              <v-card-title>{{ item.title }}</v-card-title>
+
+              <v-card-title>
+                {{ item.title }}
+              </v-card-title>
+              <v-btn icon size="x" @click="abrirDialogReportar(item.idAgrupacion)"
+                style="position: absolute; top: 0; right: 0;">
+                <v-icon size="x-large" color="red">mdi-alert-octagon</v-icon>
+              </v-btn>
             </v-img>
 
             <v-card-text class="text-justify">
@@ -68,6 +75,31 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="primary" text @click="ingresarPorCodigo">Entrar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialogReportar" max-width="500px" min-width="400px">
+        <v-card>
+            <v-card-title class="acred ml-3" style="text-align: center;">
+            Agrupacion: " {{ selectedAgrupacion.title }} "
+          </v-card-title>
+
+            <v-alert type="warning" class="mb-4 d-flex justify-center" style="text-align: justify;">
+              Estas a punto de reportar a una agrupacion. Este correo se le enviará a los administradores de la plataforma.
+                Por motivos de <strong>moderación</strong>, se enviara su nombre junto al motivo del reporte hacia los administradores.
+            </v-alert>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field v-model="motivo" label="Motivo de su reporte..." required></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red" text @click="reportarAgrupacion(this.selectedAgrupacion.idAgrupacion)">Reportar</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -136,6 +168,8 @@ export default {
       rol: '',
       rut: '',
       dialogIngresar: false, // Diálogo para ingresar a una agrupación
+      dialogReportar: false, // Diálogo para reportar una agrupación
+      motivo: '', // Motivo del reporte
       selectedAgrupacion: {}, // Almacena los detalles de la agrupación seleccionada
     };
   },
@@ -347,7 +381,7 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
-    
+
     async obtenerPreferencias() {
       try {
         const response = await fetch(`${global.BACKEND_URL}/obtenerPreferencias/${this.rut}`, {
@@ -383,6 +417,37 @@ export default {
       }
     },
 
+    async abrirDialogReportar(idAgrupacion) {
+      this.selectedAgrupacion = this.itemsAgr.find(item => item.idAgrupacion === idAgrupacion);
+      console.log(this.selectedAgrupacion);
+      this.dialogReportar = true;
+    },
+
+    async reportarAgrupacion(idAgrupacion) {
+
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/reportarAgrupacion/${idAgrupacion}/${this.rut}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            motivo: this.motivo,
+          }),
+        });
+
+        if (response.ok) {
+          this.$root.showSnackBar('success', 'Agrupación reportada correctamente!', 'Se le notificara al administrador.');
+          this.dialogReportar = false;
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
   },
   async fetchSearchResults(searchValue) {
     // Convertir searchValue a cadena explícitamente
@@ -406,6 +471,8 @@ export default {
       console.error('Error al buscar:', error);
       this.searchResults = [];
     }
+
+
   },
   mounted() {
 
@@ -429,8 +496,10 @@ export default {
 }
 
 .gruposCard {
-  min-height: 360px;
-  max-height: 360px;
+  min-height: 400px;
+  max-height: 400px;
+  min-width: 300px;
+  max-width: 300px;
   margin: 1%;
   box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.2);
 }

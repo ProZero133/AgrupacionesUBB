@@ -9,6 +9,9 @@
       backgroundColor: FondoDescripcion,
       boxShadow: `${SombraDescripcionX}px ${SombraDescripcionY}px ${SombraDescripcionBlur}px ${SombraDescripcionColor}`,
     }">
+      <v-btn icon size="x" @click="abrirDialogReportar()" style="position: absolute; top: 0; right: 0;">
+        <v-icon size="x-large" color="red">mdi-alert-octagon</v-icon>
+      </v-btn>
       <h1 class="texto">{{ datosGrupo.nombre_agr }}</h1>
       <p class="text-left">{{ datosGrupo.descripcion }}</p>
       <div class="social-icons">
@@ -417,6 +420,33 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="dialogReportar" max-width="500px" min-width="400px">
+      <v-card>
+        <v-card-title class="acred ml-3" style="text-align: center;">
+          Agrupacion: " {{ datosGrupo.nombre_agr }} "
+        </v-card-title>
+
+        <v-alert type="warning" class="mb-4 d-flex justify-center" style="text-align: justify;">
+          Estas a punto de reportar a una agrupacion. Este correo se le enviará a los administradores de la plataforma.
+          Por motivos de <strong>moderación</strong>, se enviara su nombre junto al motivo del reporte hacia los
+          administradores.
+        </v-alert>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field v-model="motivo" label="Motivo de su reporte..." required></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red" text @click="reportarAgrupacion(groupId)">Reportar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
     <!-- ACTIVIDADES Y PUBLICACIONES -->
     <v-row align="start" no-gutters class="mt-6">
       <v-col v-for="elemento in elementos" :key="elemento.id" class="mb-15" border="0px" cols="12" md="6">
@@ -536,6 +566,7 @@
       </v-menu>
     </div>
   </VLayoutItem>
+
   <v-card class="footer-card" style="background-color: #014898;" dark>
     <v-container>
       <v-row justify="space-between" align="center">
@@ -666,6 +697,7 @@ export default {
     dialoginvitar: false,
     dialogabandonar: false,
     dialogPub: false,
+    dialogReportar: false,
     permisoEliminar: false,
 
     pressTimer: null,
@@ -1008,6 +1040,34 @@ export default {
       }
     },
 
+    async abrirDialogReportar() {
+      this.dialogReportar = true;
+    },
+
+    async reportarAgrupacion(idAgrupacion) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/reportarAgrupacion/${idAgrupacion}/${this.rut}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            motivo: this.motivo,
+          }),
+        });
+
+        if (response.ok) {
+          this.dialogReportar = false;
+          this.$root.showSnackBar('success', 'Agrupación reportada correctamente!', 'Se le notificara al administrador.');
+
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {

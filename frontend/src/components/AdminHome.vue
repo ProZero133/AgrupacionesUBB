@@ -131,13 +131,14 @@
           gradient="to bottom, rgba(255,255,255,.0), rgba(255,255,255,.0), rgba(52,62,72,.9)">
         </v-img>
         <v-divider></v-divider>
-        <p><br><strong>Tipo de Acreditación:</strong> {{ selectedAgrupacion.visible === false ? 'invisible' :
+        <p><br><strong>Estado de la Agrupación:</strong> {{ selectedAgrupacion.visible === false ? 'invisible' :
           selectedAgrupacion.verificado }}</p>
         <p><strong>Cantidad de Integrantes:</strong> {{ selectedAgrupacion.integrantes || 0 }}</p>
         <p><strong>Descripción:</strong></p>
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
       </v-card-text>
       <v-card-actions class="justify-end">
+        <v-btn color="orange" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Sancionar</v-btn>
         <v-btn color="blue" text @click="ir_a_agrupacion(selectedAgrupacion.idAgrupacion)">Ir a Agrupacion</v-btn>
         <v-btn color="red" text @click="dialogAgrupacion = false">Cerrar</v-btn>
       </v-card-actions>
@@ -533,6 +534,28 @@ export default {
         console.error('No se encontraron usuarios:', response.status);
       }
     },
+
+    // SANCIONES
+
+    async SancionarAgrupacion(id_agr){
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/sancionarAgrupacion/${id_agr}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+        });
+        if (response.ok) {
+          this.$root.showSnackBar('success', 'Agrupación sancionada correctamente');
+          this.fetchItems();
+        } else {
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
+
 
     // TAGS
     async TagsPlataforma() {

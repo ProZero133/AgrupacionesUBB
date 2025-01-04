@@ -78,7 +78,7 @@
             {{ formatDate(item.fecha_creacion) }}
           </template>
           <template v-slot:item.fecha_actividad="{ item }">
-            {{ formatDate(item.fecha_actividad) }}
+            {{ item.fecha_actividad ? formatDate(item.fecha_actividad) : 'Pendiente' }}
           </template>
           <template v-slot:item.action="{ item }">
             <div class="d-flex justify-end">
@@ -129,6 +129,7 @@ export default {
         { title: 'Nombre de Agrupacion', value: 'nombre_agr', sortable: true },
         { title: 'Nombre de Actividad', value: 'nom_act', sortable: true },
         { title: 'Fecha de Creación', value: 'fecha_creacion', sortable: true },
+        { title: 'Fecha de Actividad', value: 'fecha_actividad', sortable: true },
         { title: 'Cupos Totales', value: 'cupos', sortable: true },
         { value: 'action', sortable: false },
       ]

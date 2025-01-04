@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <body>
+    <div
+      style='background-color:#F5F5F5;color:#262626;font-family:"Helvetica Neue", "Arial Nova", "Nimbus Sans", Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0.15008px;line-height:1.5;margin:0;padding:32px 0;min-height:100%;width:100%'
+    >
+      <table
+        align="center"
+        width="100%"
+        style="margin:0 auto;max-width:600px;background-color:#FFFFFF"
+        role="presentation"
+        cellspacing="0"
+        cellpadding="0"
+        border="0"
+      >
+        <tbody>
+          <tr style="width:100%">
+            <td>
+              <h2
+                style="font-weight:bold;text-align:center;margin:0;font-size:24px;padding:16px 24px 16px 24px"
+              >
+                Saludos, {{nombre}}
+              </h2>
+              <div style="font-weight:normal;padding:16px 24px 16px 24px">
+                Lamentamos informarle que por motivos de moderacion su agrupacion:
+              </div>
+              <div style="font-weight:normal;padding:16px 24px 16px 24px;text-align:center">
+                {{nombre_agr}}
+              </div>
+              <div style="font-weight:normal;padding:16px 24px 16px 24px">
+                Ha sido sancionada por los siguientes motivos:
+              </div>
+              <div style="font-weight:normal;padding:16px 24px 16px 24px">
+                {{motivo}}
+              </div>
+              <div style="font-weight:normal;padding:16px 24px 16px 24px">
+                Para mas informacion puede dirigirse a la Direccion de Desarrollo Estudiantil.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

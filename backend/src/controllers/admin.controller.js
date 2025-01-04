@@ -1,6 +1,8 @@
 const { obtenerUsuariosPlataforma, obtenerUsuarioPlataforma, getCorreoSubstring, getUsuarioByRut } = require('../services/user.service');
 const { obtenerAdministradoresPlataforma, obtenerAdministradorPorRut, registrarAdministrador, eliminarAdministrador, eliminarTag, eliminarTagActividad, eliminarTagAgrupacion, eliminarTagPublicacion, eliminarTagUsuario, downgradearAgrupacion } = require('../services/admin.service');
-const { getAgrupacionById } = require('../services/agrupacion.service');
+const { getAgrupacionById, getLiderArray } = require('../services/agrupacion.service');
+const { notificarDowngrade } = require('../services/mail.service');
+const { validarUsuarioRut } = require("../services/auth.service.js");
 
 const bcrypt = require('bcrypt');
 async function ObtenerUsuarios(request, reply) {
@@ -151,7 +153,22 @@ async function EliminarTag(request, reply) {
 async function SancionarAgrupacion(request, reply) {
     try{
         const id_agr = request.params.id_agr;
+        const motivo = request.body.motivo;
+        const agrupacion = await getAgrupacionById(id_agr);
+        const Lider = await getLiderArray(id_agr);        
+        const LiderAPI = await validarUsuarioRut(Lider[0].rut);
         const result = await downgradearAgrupacion(id_agr);
+        
+        const mailDetails = {
+            rut: LiderAPI.usuario.rut,
+            nombre: LiderAPI.usuario.nombre,
+            correo: LiderAPI.usuario.correo,
+            nombre_agr: agrupacion.nombre_agr,
+            motivo: motivo,
+        };
+
+        await notificarDowngrade(mailDetails);
+        
         return reply.send(result);
     } catch (error) {
         console.error('Error al sancionar agrupación:', error);

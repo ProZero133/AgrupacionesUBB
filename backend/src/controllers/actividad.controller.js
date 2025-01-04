@@ -24,7 +24,7 @@ const {
 const { actividadBodySchema } = require('../schema/actividad.schema.js');
 const { getLider, getLiderArray, getRolUsuario, getAgrupacionById, getUsuariosdeAgrupacion } = require('../services/agrupacion.service.js');
 const { obtenerUsuarioPlataforma } = require('../services/user.service.js');
-const {obtenerTagPorId} = require('../controllers/tags.controller.js');
+const { obtenerTagPorId } = require('../controllers/tags.controller.js');
 const { notifyAprobarActPublica, notifyRechazarActPublica } = require("../services/mail.service.js");
 const { validarUsuarioRut } = require("../services/auth.service.js");
 
@@ -100,17 +100,17 @@ async function crearActividad(req, reply) {
         const lider = await getLiderArray(body.id_agr);
         const rol = await getRolUsuario(rut, body.id_agr).rol_agr;
         const agrupacion = await getAgrupacionById(body.id_agr);
-        if(agrupacion.length === 0){
+        if (agrupacion.length === 0) {
             return reply.send({ success: false, message: 'No se encontro la agrupacion' });
         }
-        if(agrupacion.verificado !== 'Verificado' && body.tipo === true){
+        if (agrupacion.verificado !== 'Verificado' && body.tipo === true) {
             return reply.send({ success: false, message: 'La agrupacion no esta acreditada' });
         }
         if (rut !== lider[0].rut && rol !== 'Miembro oficial') {
             return reply.send({ success: false, message: 'No tienes permisos para crear actividades' });
         }
 
-        if(rol === 'Miembro oficial' && body.tipo === false){
+        if (rol === 'Miembro oficial' && body.tipo === false) {
             return reply.send({ success: false, message: 'No tienes permisos para crear actividades publicas' });
         }
 
@@ -164,7 +164,8 @@ async function updateActividad(req, res) {
 async function ObtenerCreadorActividad(req, res) {
     try {
         const id_act = req.params.id_act;
-        const creador = await getParticipantesActividad(id_act);
+        const actividad = await getActividadById(id_act);
+        const creador = await getLider(actividad.rows[0].id_agr);
 
         if (creador.length === 0) {
             return res.send({ success: false, message: 'No se encontro el creador de la actividad' });
@@ -189,7 +190,7 @@ async function eliminarActividad(req, res) {
         if (actividad.length === 0) {
             return res.send({ success: false, message: 'No se encontro la actividad' });
         }
-        
+
         const lider = await getLider(actividad.rows[0].id_agr);
         const rol_usuario = await obtenerUsuarioPlataforma(rut);
         if (rut !== lider.rut && rol_usuario[0].rol !== 'Admin') {
@@ -213,23 +214,33 @@ async function eliminarActividadPublica(req, res) {
         const id_act = req.params.id_act;
         const rut = req.params.rut;
         const decoded = req.jwtVerify();
-        const adminRut = decoded.rut;
-        const administrador = await obtenerUsuarioPlataforma(adminRut);
-        if (administrador[0].rol !== 'Admin') {
-            return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
-        }
-        const actividad = await getActividadById(id_act);
+        const adminRol = decoded.rol;
+        const datosActividad = await getActividadById(id_act);
+        const datosAgrupacion = await getAgrupacionById(datosActividad.rows[0].id_agr);
 
-        if (actividad.length === 0) {
-            return res.send({ success: false, message: 'No se encontro la actividad' });
+        const lider = await getLiderArray(datosActividad.rows[0].id_agr);
+        const liderCompleto = await validarUsuarioRut(lider[0].rut);
+        const liderCorreo = liderCompleto.usuario.correo;
+
+        if (adminRol !== 'Admin') {
+            res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
 
-        // Elimina participa
+        // Elimina participa        
         await deleteParticipanteActividad(id_act, rut);
         // Elimina programa
         await deletePrograma(id_act);
         // Elimina la actividad
         await deleteActividadPublica(id_act);
+
+        // Notifica al lider 
+        const mailDetails = {
+            lider_correo: liderCorreo,
+            nombre_agr: datosAgrupacion.nombre_agr,
+            nombre_act: datosActividad.rows[0].nom_act,
+        };
+
+        await notifyRechazarActPublica(mailDetails);
 
         // Retorna un mensaje de éxito
         res.status(200).send('Actividad eliminada');
@@ -298,11 +309,11 @@ async function participarActividad(req, res) {
         if (miembro === 'Pendiente' && actividad.rows[0].tipo === false) {
             return res.code(401).send({ success: false, message: 'No puedes participar en esta actividad' });
         }
-        if(actividad.rows[0].tipo === true && actividad.rows[0].aprobado === false){
+        if (actividad.rows[0].tipo === true && actividad.rows[0].aprobado === false) {
             return res.code(401).send({ success: false, message: 'La actividad no ha sido aprobada' });
         }
         const fecha = await getFechasActividades(id_act);
-        if(!fecha.rows[0]){
+        if (!fecha.rows[0]) {
             return res.code(401).send({ success: false, message: 'La actividad no tiene fecha programada' });
         }
         // Obtener participantes de la actividad
@@ -437,11 +448,11 @@ async function AceptacionActividad(req, res) {
             return res.code(200).send({ success: true, message: 'Actividad aprobada', data: actividad });
         }
         // Retorna la actividad programada
-        res.code(500).send({success: false, message: 'Error al aprobar la actividad'});
+        res.code(500).send({ success: false, message: 'Error al aprobar la actividad' });
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al programar la actividad:', error);
-        res.code(500).send({error: 'Error al aprobar la actividad'});
+        res.code(500).send({ error: 'Error al aprobar la actividad' });
     }
 }
 

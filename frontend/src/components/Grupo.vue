@@ -1980,7 +1980,7 @@ export default {
         },
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.fecha.length > 0) {
         return data.fecha[0].fecha_actividad;
       } else {
         console.error('No se encontraron programaciones para la actividad', response.status);

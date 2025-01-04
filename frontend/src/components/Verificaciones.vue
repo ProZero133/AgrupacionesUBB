@@ -356,8 +356,9 @@ export default {
     async RechazarActividad(id_act) {
       this.ActividadesPendientesObtenidas.find(actividad => actividad.id_act === id_act);
       const creadorActData = await this.CreadorActividad(id_act);
+
       try {
-        const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${creadorActData[0].id_act}/${creadorActData[0].rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${id_act}/${creadorActData.rut}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -368,11 +369,11 @@ export default {
         });
 
         if (response.ok) {
-          this.$root.showSnackBar('success', data.message, 'Se le notificará al lider por correo.');
+          this.$root.showSnackBar('success', response.message, 'Se le notificará al lider por correo.');
           this.ObtenerActividadesPendientes();
         } else {
           console.error('Error en la respuesta:', response.status);
-          this.$root.showSnackBar('error', data.message);
+          this.$root.showSnackBar('error', response.message);
         }
 
       } catch (error) {

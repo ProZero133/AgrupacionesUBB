@@ -246,8 +246,8 @@ async function notifyRechazarActPublica(mailDetails) {
 
     templatePath = path.join(__dirname, '../mails/rechazarActPublica.html');
     replacements = {
-        agrupacion: mailDetails.agrupacion,
-        actividad: mailDetails.actividad,
+        agrupacion: mailDetails.nombre_agr,
+        actividad: mailDetails.nombre_act,
     };
     sujeto = 'Solicitud Actividad Publica';
 
@@ -256,7 +256,7 @@ async function notifyRechazarActPublica(mailDetails) {
 
     const mailOptions = {
         from: '"ConectaUBB" <conectaUBB@gmail.com>',
-        to: mailDetails.correo,
+        to: "nicolas.madrid2001@alumnos.ubiobio.cl", //mailDetails.correo,
         subject: sujeto,
         html: htmlBody
     };

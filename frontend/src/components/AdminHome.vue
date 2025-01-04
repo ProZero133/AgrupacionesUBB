@@ -109,7 +109,7 @@
               <v-card-text class="pa-0">
                 <v-chip-group column>
                   <v-chip v-for="item in filteredTags" :key="item.id" @click="AbrirDeleteTagDialog(item)"
-                    class="elevation-3" color="primary" text-color="white" outlined >
+                    class="elevation-3" color="primary" text-color="white" outlined>
                     {{ item.nombre_tag }}
                   </v-chip>
                 </v-chip-group>
@@ -138,9 +138,22 @@
         <p class="text-justify">{{ selectedAgrupacion.descripcion }}</p>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="orange" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Sancionar</v-btn>
+        <v-btn color="orange" text @click="abrirDialogMotivoSancion()">Sancionar</v-btn>
         <v-btn color="blue" text @click="ir_a_agrupacion(selectedAgrupacion.idAgrupacion)">Ir a Agrupacion</v-btn>
         <v-btn color="red" text @click="dialogAgrupacion = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="dialogMotivoSancion" class="dialogAgrupacion">
+    <v-card>
+      <v-card-title class="headline">Motivo de Sanción</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="motivoSancion" label="Ingrese el motivo de la sanción" required></v-text-field>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn color="blue" text @click="dialogMotivoSancion = false">Cancelar</v-btn>
+        <v-btn color="red" text @click="SancionarAgrupacion(selectedAgrupacion.idAgrupacion)">Sancionar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -256,11 +269,13 @@ export default {
       searchQueryUsuarios: '',
       rol: '',
       rut: '',
-      dialogUsuario: false, // Controla el diálogo para usuarios
-      dialogAgrupacion: false, // Controla el diálogo para agrupaciones
-      dialogEliminarTag: false, // Controla el diálogo para eliminar tags
-      gruposUsuario: [], // Almacena los grupos del usuario seleccionado
-      selectedAgrupacion: {}, // Almacena los detalles de la agrupación seleccionada
+      motivoSancion: '', 
+      dialogUsuario: false, 
+      dialogAgrupacion: false, 
+      dialogMotivoSancion: false, 
+      dialogEliminarTag: false,
+      gruposUsuario: [], 
+      selectedAgrupacion: {},
 
 
       usuariosBuscados: [],
@@ -537,17 +552,27 @@ export default {
 
     // SANCIONES
 
-    async SancionarAgrupacion(id_agr){
+    abrirDialogMotivoSancion() {
+      this.dialogMotivoSancion = true;
+    },
+
+    async SancionarAgrupacion(id_agr) {
       try {
         const response = await fetch(`${global.BACKEND_URL}/sancionarAgrupacion/${id_agr}`, {
           method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
+          body: JSON.stringify({
+            motivo: this.motivoSancion,
+          }),
         });
         if (response.ok) {
-          this.$root.showSnackBar('success', 'Agrupación sancionada correctamente');
+          this.$root.showSnackBar('success', 'Agrupación sancionada correctamente, se enviara un correo con el motivo de la sanción');
           this.fetchItems();
+          this.dialogMotivoSancion = false;
+          this.motivoSancion = '';
         } else {
           console.error('Error en la respuesta:', response.status);
         }

@@ -35,7 +35,7 @@ async function EmailLogin(request, reply) {
   // Llamar a la base de datos para verificar si el usuario existe
   const result = await validarUsuario(email);
   const usuario = result;
-  if (result.success) {
+  if (result.success !=false) {
     const payload = {
       rol: result.usuario.rol,
       rut: result.usuario.rut,
@@ -51,7 +51,7 @@ async function EmailLogin(request, reply) {
     //Envia el mismo codigo al frontend
     reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
   } else {
-    reply.send({ success: false, message: result.message });
+    reply.code(401).send({ success: false, message: result.message });
   }
 }
 
@@ -78,7 +78,7 @@ async function RutLogin(request, reply) {
     //Envia el mismo codigo al frontend
     reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
   } else {
-    reply.send({ success: false, message: result.message });
+    reply.code(401).send({ success: false, message: result.message });
   }
 }
 

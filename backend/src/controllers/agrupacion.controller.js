@@ -8,6 +8,8 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     deleteTagAgrupacion, updateAgrupacion, getPertenece, getAparienciaAgrupacion, updateAparienciaAgrupacion,
     updateRedesSociales } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
+const { aparienciaSchema } = require("../schema/apariencia.schema.js");
+const {redesSchema} = require("../schema/redes.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario, inviteUsuario, reportarAgrupacionCorreo } = require("../services/mail.service.js");
@@ -800,6 +802,10 @@ async function actualizarAparienciaAgrupacion(req, res) {
     try {
         const { id_agr } = req.params;
         const apariencia = req.body;
+        const { error } = aparienciaSchema.validate(apariencia);
+        if (error) {
+            return res.status(400).send({ success: false, message: 'Datos de apariencia inválidos', details: error.details });
+        }
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
         const rol = decoded.rol;
@@ -830,8 +836,9 @@ async function actualizarRedesSociales(req, res) {
     try {
         const { id_agr } = req.params;
         const redes = req.body;
-        if (!redes) {
-            return res.status(400).send({ success: false, message: 'Falta información' });
+        const { error } = redesSchema.validate(redes);
+        if (error) {
+            return res.status(400).send({ success: false, message: 'Datos de redes sociales inválidos', details: error.details });
         }
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;

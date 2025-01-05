@@ -364,8 +364,6 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
-          body: JSON.stringify({
-          }),
         });
 
         if (response.ok) {

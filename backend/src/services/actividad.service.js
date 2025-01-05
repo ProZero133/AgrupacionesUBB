@@ -19,6 +19,7 @@ async function getActyAgr() {
         const actividades = await pool.query('SELECT * FROM "Actividad"');
         const programa = await pool.query('SELECT * FROM "Programa"');
         const agrupaciones = await pool.query('SELECT * FROM "Agrupacion"');
+
         // une las tablas
         const actyAgr = actividades.rows.map(act => {
             const agr = agrupaciones.rows.find(agr => agr.id_agr === act.id_agr);
@@ -75,7 +76,7 @@ async function getActividadById(id) {
     try {
         // Obtiene la actividad con el id especificado de la base de datos
         const actividad = await pool.query('SELECT * FROM "Actividad" WHERE id_act = $1', [id]);
-
+        
         // Retorna la actividad
         return actividad;
     } catch (error) {

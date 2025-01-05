@@ -293,7 +293,6 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.ActividadesPendientesObtenidas = data.filter(item => item.tipo === true && item.aprobado === false);
-
         } else {
           console.error('Error en la respuesta:', response.status);
         }

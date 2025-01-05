@@ -29,7 +29,7 @@ module.exports = function(fastify, options, done) {
   fastify.put('/administracionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },CambiarRoldeUsuario); // Cambia el rol de un usuario en una agrupacion
   fastify.put('/aceptacionAct/:id_act', { preHandler: [isAdmin] },AceptacionActividad);
   fastify.get('/usuariosPlataforma', { preHandler: [isAdmin] }, obtenerUsuariosPlataforma);
-  fastify.post('/correoSubString/:correo', { preHandler: [isAdmin] }, correoSubString);
+  fastify.post('/correoSubString', { preHandler: [isAdmin] }, correoSubString);
   fastify.get('/administradores', { preHandler: [isAdmin] }, Administradores);
   fastify.delete('/eliminaradministrador', { preHandler: [isAdmin] }, borrarAdministrador);
   fastify.post('/nuevoAdministrador/:rut', { preHandler: [isAdmin] }, crearAdministrador);

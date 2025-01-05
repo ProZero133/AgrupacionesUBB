@@ -94,7 +94,7 @@
         <v-container class="containerActividades" grid-list-xs>
             <v-card class="ContenedorSelector" elevation="15">
                 <v-card-title class="ContenedorTitulo">
-                    <h1 class="Titulo" style="margin: 2%;">Agrupaciones usuario </h1>
+                    <h1 class="Titulo" style="margin: 2%;">Informe de Agrupaciones </h1>
                     <v-card-text>
                         <v-row>
                             <v-col cols="12">
@@ -119,7 +119,7 @@
         <v-container class="containerHistorialActividades" grid-list-xs>
             <v-card class="ContenedorInforme" elevation="24">
                 <v-card-title class="ContenedorGrafico">
-                    <h1 class="d-flex justify-start" style="margin: 2%;">Informe de participacion en actividades</h1>
+                    <h2 class="d-flex justify-start" style="margin: 2%;">Informe de participacion en actividades</h2>
 
                     <v-btn v-if="selectedGrupo" @click="menu = !menu" color="primary" text>
                         {{ selectedGrupo.nombre_agr }}
@@ -158,7 +158,6 @@
     <!-------------------- TAB AGRUPACIONES ---------------------->
     <v-tab-item value="Agrupaciones" v-if="tab === 'Agrupaciones'">
         <v-container class="containerActividades" grid-list-xs>
-
             <v-card class="ContenedorSelector" elevation="15">
                 <v-card-title class="ContenedorTitulo">
                     <h1 class="Titulo" style="margin: 2%;">Generar informe de agrupaciones</h1>
@@ -346,7 +345,7 @@ export default {
 
         async substringUsuarioBDD() {
             // llama a la api
-            const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+            const response = await fetch(`${global.BACKEND_URL}/correoSubString`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -513,6 +512,7 @@ export default {
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
+                        console.log(this.grupos);
 
                     } else {
                         console.error('No se encontraron agrupupaciones:', response.status);

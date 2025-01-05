@@ -595,8 +595,8 @@ export default {
     },
 
     async obteneralgo() {
-      // llama a la ruta /correoSubString/:correo
-      const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+      // llama a la ruta /correoSubString
+      const response = await fetch(`${global.BACKEND_URL}/correoSubString`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

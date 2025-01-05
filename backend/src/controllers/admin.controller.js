@@ -16,7 +16,7 @@ async function ObtenerUsuarios(request, reply) {
 }
 
 async function correoSubString(request, reply) {
-    const { correo } = request.params;
+    const correo = request.body.correo;
     const usuariosPlataforma = await obtenerUsuariosPlataforma();
     const resultadoSubString = await getCorreoSubstring(correo);
 
@@ -30,7 +30,7 @@ async function correoSubString(request, reply) {
             }
         }
     }
-    return reply.send(resultUsuarios);
+    return reply.code(200).send(resultUsuarios);
 }
 
 async function Administradores(request, reply) {

@@ -233,7 +233,7 @@ export default {
             }
         },
         async obteneralgo() {
-            const response = await fetch(`${global.BACKEND_URL}/correoSubString/${this.valorTextBoxUsuario}`, {
+            const response = await fetch(`${global.BACKEND_URL}/correoSubString`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

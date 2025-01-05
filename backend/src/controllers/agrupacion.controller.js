@@ -799,6 +799,7 @@ async function actualizarAparienciaAgrupacion(req, res) {
     try {
         const { id_agr } = req.params;
         const apariencia = req.body;
+        console.log(apariencia);
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
         const rol = decoded.rol;

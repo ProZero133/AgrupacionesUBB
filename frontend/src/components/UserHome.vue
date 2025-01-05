@@ -414,6 +414,34 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.grupos = data;
+          // Itera sobre cada grupo para obtener su lider con la ruta /obtenerLider/{id_agr}
+          for (const grupo of this.grupos) {
+            try {
+              const response = await fetch(`${global.BACKEND_URL}/obtenerLider/${grupo.id_agr}`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                },
+              });
+              if (response.ok) {
+                const data = await response.json();
+                const lider = await fetch(`${global.BACKEND_URL}/usuarioPorRut/${data.rut}`, {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                  },
+                });
+                const dataLider = await lider.json();
+                grupo.rut = dataLider.nombre;
+              } else {
+                console.error('Error en la respuesta:', response.status);
+              }
+            } catch (error) {
+              console.error('Error al hacer fetch:', error);
+            }
+          }
 
           // Itera sobre cada grupo para obtener su imagen
           for (const grupo of this.grupos) {

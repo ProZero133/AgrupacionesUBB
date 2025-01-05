@@ -545,7 +545,7 @@ export default {
                     });
                     const data = await response.json();
                     this.gruposConID = data;
-                    
+
                     if (response.ok) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
 
@@ -769,8 +769,6 @@ export default {
 
         // AGRUPACIONES
         async generarInformeAgrupaciones(rut) {
-            console.log('generarInformeAgrupaciones', rut);
-
             if (this.rol === "Admin") {
                 const AgrupacionesPlataforma = this.gruposConID;
 
@@ -846,15 +844,11 @@ export default {
                 const data = await response.json();
 
                 if (response.ok) {
-                    console.log('AgrupacionesUsuario', this.gruposConID);
-
                     // se obtienen las agrupaciones a las que pertenece el usuario
                     const AgrupacionesUsuario = this.gruposConID;
-                    console.log('AgrupacionesUsuario', AgrupacionesUsuario);
 
                     // selecciona las agrupaciones con fecha_integracion valida distinta de NULL
                     const Agrupaciones = data.filter(item => item.fecha_integracion !== null);
-                    console.log('Agrupaciones', Agrupaciones);
 
                     // formatea la fecha
                     Agrupaciones.forEach(item => {
@@ -864,7 +858,6 @@ export default {
                     // cambia los id_agr por el nombre_agr
                     for (let i = 0; i < Agrupaciones.length; i++) {
                         const grupo = AgrupacionesUsuario.find(grupo => grupo.id_agr === Agrupaciones[i].id_agr);
-                        console.log('grupo', grupo);
                         if (grupo) {
                             Agrupaciones[i].id_agr = grupo.nombre_agr;
                         }

@@ -94,7 +94,7 @@
         <v-container class="containerActividades" grid-list-xs>
             <v-card class="ContenedorSelector" elevation="15">
                 <v-card-title class="ContenedorTitulo">
-                    <h1 class="Titulo" style="margin: 2%;">Informe de Agrupaciones </h1>
+                    <h1 class="Titulo" style="margin: 2%;">Informe de Actividades </h1>
                     <v-card-text>
 
                         <v-text-field v-model="AgrupacionBuscada" label="Ingrese el nombre de una agrupación"
@@ -730,7 +730,7 @@ export default {
                     }));
 
                     // Genera la página
-                    doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11);
+                    doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, overflow: 'linebreak' });
 
                     // Divide las actividades en páginas de 15 actividades cada una
                     for (let i = 0; i < columnas.length; i += 15) {
@@ -747,6 +747,7 @@ export default {
                                 2: { cellWidth: 25 }, // fecha
                             },
                             styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
+                            startY: 40,
                         });
                     }
                 });

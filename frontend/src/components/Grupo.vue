@@ -1016,7 +1016,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.rol_agr === 'Miembro' || data.rol_agr === 'Miembro Oficial' || data.rol_agr === 'Lider') {
+          if (data.rol_agr === 'Miembro' || data.rol_agr === 'Miembro oficial' || data.rol_agr === 'Lider') {
             this.rolA = true;
             this.rolEnAgrupacion = data.rol_agr;
           } else {
@@ -1344,7 +1344,7 @@ export default {
                 fecha_creacion: elemento.fecha_creacion,
                 cupos: elemento.cupos,
                 tags: tags ? tags.TagsConNombre : [],
-                fecha_programada: programacion ? programacion : null,
+                fecha_programada: programacion ? programacion : 'Pendiente',
               };
             }));
             this.anadirAElementos(elementosAct);
@@ -1755,6 +1755,9 @@ export default {
       this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
     },
     formatearFecha(fecha) {
+      if(fecha === 'Pendiente') {
+        return 'Fecha pendiente';
+      }
       const date = new Date(fecha);
       const now = new Date();
 

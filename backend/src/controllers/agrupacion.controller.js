@@ -17,6 +17,7 @@ const crypto = require('crypto')
 const ALGORITHM = 'aes-256-cbc';
 const SECRET_KEY = Buffer.from('aluecr2etfsyg2345578h01234g67890', 'utf-8');
 const IV = Buffer.alloc(16, 0);
+
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
     if (agrupaciones.length === 0) {

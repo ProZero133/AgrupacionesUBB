@@ -96,17 +96,27 @@
                 <v-card-title class="ContenedorTitulo">
                     <h1 class="Titulo" style="margin: 2%;">Informe de Agrupaciones </h1>
                     <v-card-text>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-select chips multiple v-model="selectedGrupos" :items="grupos" item-text="nombre_agr"
-                                    elevation="24" item-value="id_agr" label="Seleccione un grupo" required
-                                    :search-input.sync="search"></v-select>
-                            </v-col>
-                        </v-row>
+
+                        <v-text-field v-model="AgrupacionBuscada" label="Ingrese el nombre de una agrupación"
+                            prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
+
+                        <v-data-table :headers="headersAgrupacionesSeleccionadas" :items="gruposConID"
+                            class="elevation-5" :items-per-page="5" :search="AgrupacionBuscada">
+                            <template v-slot:item.nombre_agr="{ item }">
+                                <div
+                                    style="max-width: 300px; white-space: wrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ item.nombre_agr }}
+                                </div>
+                            </template>
+                            <template v-slot:item.check="{ item }">
+                                <v-checkbox v-model="item.success" @change="añadirAgrupacion(item)"></v-checkbox>
+                            </template>
+                        </v-data-table>
+
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-end">
                                 <v-btn elevation="24" icon="mdi-table-refresh" color="#014898" :disabled="isGenerating"
-                                    @click="generarTabla()"></v-btn>
+                                    style="margin: 2%;" @click="generarTabla()"></v-btn>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -274,6 +284,13 @@ export default {
         actividades: [],
         publicaciones: [],
         formularios: [],
+        AgrupacionBuscada: '',
+
+        // headers de la tabla de agrupaciones
+        headersAgrupacionesSeleccionadas: [
+            { title: 'Nombre de la agrupación', value: 'nombre_agr', sortable: true },
+            { title: 'Seleccionar', value: 'check' },
+        ],
 
         // headers de la tabla de actividades
         headersInformeAct: [
@@ -375,6 +392,7 @@ export default {
             });
             if (responseAgrupaciones.ok) {
                 this.AgrupacionesPertenenciaUsuario = await responseAgrupaciones.json();
+                const GruposID = this.gruposConID;
 
                 // formatea la fecha
                 this.AgrupacionesPertenenciaUsuario.forEach(item => {
@@ -383,7 +401,7 @@ export default {
 
                 // añade un campo al array con el nombre de la agrupacion
                 this.AgrupacionesPertenenciaUsuario.forEach(item => {
-                    item.nombre_agr = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr).nombre_agr;
+                    item.nombre_agr = GruposID.find(grupo => grupo.id_agr === item.id_agr).nombre_agr;
                 });
 
                 // busca las actividades en las que participo el usuario
@@ -483,7 +501,6 @@ export default {
             }
         },
 
-
         abrirDialogUsuario(usuario) {
             this.selectedUsuario = usuario;
             this.generarInformeUsuario(usuario.rut);
@@ -494,7 +511,7 @@ export default {
 
         async obtenerGrupos() {
             try {
-
+                const DatosGrupo = this.gruposConID;
                 if (this.rol === "Admin") {
                     const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
                         method: 'GET',
@@ -505,14 +522,14 @@ export default {
                     });
 
                     const data = await response.json();
+                    this.gruposConID = data;
 
                     if (response.ok) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
-                        this.gruposConID = data.map(grupo => ({
+                        DatosGrupo = data.map((grupo, index) => ({
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
-                        console.log(this.grupos);
 
                     } else {
                         console.error('No se encontraron agrupupaciones:', response.status);
@@ -527,12 +544,13 @@ export default {
                         },
                     });
                     const data = await response.json();
-
+                    this.gruposConID = data;
+                    
                     if (response.ok) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
 
                         // mapear los grupos con su id y nombre_agr
-                        this.gruposConID = data.map(grupo => ({
+                        DatosGrupo = data.map(grupo => ({
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
@@ -549,10 +567,24 @@ export default {
             }
         },
 
+
+        añadirAgrupacion(item) {
+            if (item.success) {
+                this.selectedGrupos.push(item);
+            } else {
+                const index = this.selectedGrupos.indexOf(item);
+                if (index > -1) {
+                    this.selectedGrupos.splice(index, 1);
+                }
+            }
+            return this.selectedGrupos;
+        },
+
         async obtenerActividadesGrupo() {
             try {
-                //Para cada id_agr de gruposConID donde el nombre_agr de gruposConID este en selectedGrupos, obtener las actividades 
-                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.includes(grupo.nombre_agr));
+                //recorre this.gruposConID y si el id_agr de gruposConID esta en selectedGrupos, añade el valor completo a resultadoGrupos
+                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.some(selectedGrupo => selectedGrupo.id_agr === grupo.id_agr));
+
                 //Obtiene las actividades de los grupos seleccionados si se selecciono la opcion de actividades
                 if (this.Actividades.includes('Actividades')) {
 
@@ -622,10 +654,15 @@ export default {
 
         async generarTabla() {
 
-            // verifica si el token del usuario que apreta el boton de generar tabla es valido
+            // verifica si el array de agrupaciones esta vacio
+            if (this.selectedGrupos.length === 0) {
+                this.$root.showSnackBar('error', 'Seleccione al menos una agrupación para generar el informe');
+                return;
+            }
 
             this.actividades = [];
 
+            // verifica si el token del usuario que apreta el boton de generar tabla es valido
             if (this.rol === "Admin") {
                 await this.obtenerActividadesGrupo();
             } else {
@@ -651,7 +688,12 @@ export default {
             // si la response es success: false elimina el item del array
             this.contenidoPDF = this.contenidoPDF.filter(item => item.success !== false);
 
-            return this.contenidoPDF;
+            if (this.contenidoPDF.length === 0) {
+                this.$root.showSnackBar('error', 'Esta agrupación no cuenta con actividades');
+            } else {
+                this.$root.showSnackBar('success', 'Informe generado correctamente');
+                return this.contenidoPDF;
+            }
         },
 
         async generarPDFAct() {
@@ -687,28 +729,39 @@ export default {
                         'Descripción': item.descripcion,
                     }));
 
-
-
                     // Genera la página
                     doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11);
-                    doc.autoTable({
-                        head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
-                        body: columnas.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
-                        columnStyles: {
-                            0: { cellWidth: 40 }, // nombre act
-                            1: { cellWidth: 20 }, // tipo
-                            2: { cellWidth: 25 }, // fecha
-                        },
-                        styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
-                    });
+
+                    // Divide las actividades en páginas de 15 actividades cada una
+                    for (let i = 0; i < columnas.length; i += 15) {
+                        if (i > 0) {
+                            doc.addPage();
+                        }
+                        const pageContent = columnas.slice(i, i + 15);
+                        doc.autoTable({
+                            head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
+                            body: pageContent.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
+                            columnStyles: {
+                                0: { cellWidth: 40 }, // nombre act
+                                1: { cellWidth: 20 }, // tipo
+                                2: { cellWidth: 25 }, // fecha
+                            },
+                            styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
+                        });
+                    }
                 });
 
                 doc.setFontSize(10);
                 const pageCount = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     doc.setPage(i);
-                    doc.text('________________________________', 10, 270);
-                    doc.text('Firma del estudiante', 25, 280);
+                    doc.setFontSize(12);
+                    doc.text('______________________________', 10, 270);
+                    doc.text('Firma del estudiante o docente', 15, 280);
+
+                    doc.text('______________________________', 125, 270);
+                    doc.text('Firma de Direccion de Desarrollo', 130, 280);
+                    doc.text('Estudiantil', 150, 285);
                 }
                 doc.save('Informe_Actividades_ConectaUBB.pdf');
             }
@@ -716,14 +769,29 @@ export default {
 
         // AGRUPACIONES
         async generarInformeAgrupaciones(rut) {
+            console.log('generarInformeAgrupaciones', rut);
+
             if (this.rol === "Admin") {
+                const AgrupacionesPlataforma = this.gruposConID;
 
-                const AgrupacionesUsuario = this.gruposConID;
-
-                // cambia los id_agr por el nombre_agr
-                AgrupacionesUsuario.forEach(item => {
-                    item.id_agr = item.nombre_agr;
+                AgrupacionesPlataforma.sort((a, b) => {
+                    if (a.verificado === b.verificado) {
+                        return 0;
+                    }
+                    return a.verificado === 'Verificado' ? -1 : 1;
                 });
+
+                // formatea la verificacion
+                for (let i = 0; i < AgrupacionesPlataforma.length; i++) {
+                    if (AgrupacionesPlataforma[i].verificado === "Noverificado") {
+                        AgrupacionesPlataforma[i].verificado = "No verificado";
+                    } else {
+                        AgrupacionesPlataforma[i].verificado = "Verificado";
+                    }
+                    AgrupacionesPlataforma[i].fecha_creacion = new Date(AgrupacionesPlataforma[i].fecha_creacion).toLocaleDateString();
+                    AgrupacionesPlataforma[i].id_agr = AgrupacionesPlataforma[i].nombre_agr;
+                }
+                
 
                 // se genera el informe de agrupaciones
                 const doc = new jsPDF();
@@ -732,17 +800,17 @@ export default {
                 const fechaActual = new Date().toLocaleDateString();
                 doc.text(`Informe de pertenencia de agrupaciones del usuario ${fechaActual}`, 10, 10);
 
-                const rowsPerPage = 20; // Limite de filas por página
+                const maxFilasPagina = 20; // Limite de filas por página
                 let currentPage = 1;
 
-                for (let i = 0; i < AgrupacionesUsuario.length; i += rowsPerPage) {
+                for (let i = 0; i < AgrupacionesPlataforma.length; i += maxFilasPagina) {
                     if (i > 0) {
                         doc.addPage();
                         currentPage++;
                     }
-                    const rows = AgrupacionesUsuario.slice(i, i + rowsPerPage).map(item => [item.id_agr, item.fecha_integracion, item.rol_agr]);
+                    const rows = AgrupacionesPlataforma.slice(i, i + maxFilasPagina).map(item => [item.id_agr, item.fecha_creacion, item.verificado]);
                     doc.autoTable({
-                        head: [['Nombre de la agrupación', 'Fecha de integracion a la agrupación', 'Rol interno']],
+                        head: [['Nombre de la agrupación', 'Fecha de creación a la agrupación', 'Tipo Acreditación']],
                         body: rows,
                         columnStyles: {
                             1: { cellWidth: 80 }, // fecha
@@ -765,8 +833,8 @@ export default {
 
                 }
                 doc.save('Informe_Agrupaciones_ConectaUBB.pdf');
-            } else {
 
+            } else {
                 // se obtienen las agrupaciones a las que pertenece el usuario
                 const response = await fetch(`${global.BACKEND_URL}/agrupacionesPertenece/${rut}`, {
                     method: 'GET',
@@ -778,11 +846,15 @@ export default {
                 const data = await response.json();
 
                 if (response.ok) {
+                    console.log('AgrupacionesUsuario', this.gruposConID);
+
                     // se obtienen las agrupaciones a las que pertenece el usuario
                     const AgrupacionesUsuario = this.gruposConID;
+                    console.log('AgrupacionesUsuario', AgrupacionesUsuario);
 
                     // selecciona las agrupaciones con fecha_integracion valida distinta de NULL
                     const Agrupaciones = data.filter(item => item.fecha_integracion !== null);
+                    console.log('Agrupaciones', Agrupaciones);
 
                     // formatea la fecha
                     Agrupaciones.forEach(item => {
@@ -790,11 +862,13 @@ export default {
                     });
 
                     // cambia los id_agr por el nombre_agr
-                    this.cambioIDGrupo = Agrupaciones.forEach(item => {
-                        const grupo = AgrupacionesUsuario.find(grupo => grupo.id_agr === item.id_agr);
-                        item.id_agr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
-                    });
-
+                    for (let i = 0; i < Agrupaciones.length; i++) {
+                        const grupo = AgrupacionesUsuario.find(grupo => grupo.id_agr === Agrupaciones[i].id_agr);
+                        console.log('grupo', grupo);
+                        if (grupo) {
+                            Agrupaciones[i].id_agr = grupo.nombre_agr;
+                        }
+                    }
 
                     // se genera el informe de agrupaciones
                     const doc = new jsPDF();

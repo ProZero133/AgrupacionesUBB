@@ -496,7 +496,7 @@ export default {
     async VerActividades() {
       try {
         // Realiza una solicitud fetch a tu backend Fastify
-        const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut.trim()}`, {
+        const response = await fetch(`${global.BACKEND_URL}/VerActividadesGruposUsuario/${this.rut}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -525,8 +525,8 @@ export default {
         }
 
         // Añadir las actividades publicas a las actividades en data.actividades
-
         this.actividades = data;
+        
         if (data.succes !== false) {
           for (const actis of this.actividades) {
             try {

@@ -1,6 +1,6 @@
 const { ObtenerUsuarios, correoSubString, Administradores} = require('../controllers/admin.controller');
 const { ObtenerAcreditaciones, AceptacionAcreditaciondeGrupo, RechazoAcreditaciondeGrupo } = require('../controllers/AcreditacionGrupo.controller');
-const { ObtenerUsuariosdeAgrupacion, ObtenerRolUsuario, CambiarRoldeUsuario } = require('../controllers/agrupacion.controller');
+const { ObtenerUsuariosdeAgrupacion, ObtenerRolUsuario } = require('../controllers/agrupacion.controller');
 const { AceptacionActividad } = require('../controllers/actividad.controller');
 const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 const { obtenerUsuariosPlataforma } = require('../services/user.service.js');
@@ -26,7 +26,6 @@ module.exports = function(fastify, options, done) {
   fastify.put('/rechazoAcr/:id_agr', { preHandler: [isAdmin] },RechazoAcreditaciondeGrupo);
   fastify.get('/obtenerUsuariosAgrupacion/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerUsuariosdeAgrupacion); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
   fastify.get('/obtencionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },ObtenerRolUsuario); // Devuelve los usuarios que pertenecen a una agrupacion en especifico
-  fastify.put('/administracionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },CambiarRoldeUsuario); // Cambia el rol de un usuario en una agrupacion
   fastify.put('/aceptacionAct/:id_act', { preHandler: [isAdmin] },AceptacionActividad);
   fastify.get('/usuariosPlataforma', { preHandler: [isAdmin] }, obtenerUsuariosPlataforma);
   fastify.post('/correoSubString/:correo', { preHandler: [isAdmin] }, correoSubString);

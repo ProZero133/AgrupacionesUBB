@@ -1139,11 +1139,6 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-        const datosLiderAgrupacion = await this.ObtenerLider();
-        const datosUsuarioSeleccionado = await this.ObtenerRolUsr(rut);
-
-        if (rol_agr === 'Lider') {
-          if (datosLiderAgrupacion.rut != datosUsuarioSeleccionado.rut) {
             const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
             const response = await fetch(url, {
               method: 'PUT',
@@ -1160,44 +1155,6 @@ export default {
             } else {
               this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
             }
-
-            const responseNuevoLider = await fetch(`${global.BACKEND_URL}/administracionderoles/${this.groupId}/${datosLiderAgrupacion[0].rut}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-              },
-              body: JSON.stringify({
-                rol_agr: "Miembro"
-              }),
-            });
-          }
-        }
-
-        if (rol_agr === 'Miembro Oficial' || rol_agr === 'Miembro') {
-          if (datosLiderAgrupacion.length != 1) {
-            console.error('Una agrupacion no puede quedar sin Lider');
-            this.$root.showSnackBar('error', 'Una agrupacion no puede quedar sin Lider', 'Operación fallida');
-            return;
-          }
-          const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
-          const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-            },
-            body: JSON.stringify({
-              rol_agr
-            }),
-          });
-          if (response.ok) {
-            this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
-          } else {
-            console.error('Error en la respuesta:', response.status);
-            this.$root.showSnackBar('error', 'Operación fallida', 'Una agrupacion no puede quedar sin lider');
-          }
-        }
 
         this.ObtenerUsuariosDeAgrupacion();
 
@@ -1222,10 +1179,9 @@ export default {
         this.ObtenerUsuariosDeAgrupacion();
         if (response.ok) {
           this.$root.showSnackBar('success', 'Usuario eliminado correctamente', 'Operación exitosa');
-          this.$router.push('/api/home');
         } else {
+          this.$root.showSnackBar('error', 'Error al eliminar el usuario', 'Operación fallida');
           console.error('Error en la respuesta:', response.status);
-          this.$router.push('/api/home');
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);

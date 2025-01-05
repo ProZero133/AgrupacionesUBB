@@ -5,7 +5,7 @@ const { VerGrupos, ObtenerAgrupacionesPorID, crearAgrupacion, editarAgrupacion,
   eliminarAgrupacion, abandonarAgrupacion, rechazarSolicitud, solicitarAcreditacion, ingresarTagsAgrupacion,
   obtenerLider, ObtenerRolUsuario, VerGruposPorNombre, notificarMiembrosPublicacion, ingresarPorCodigo, VerGruposNoInscritos, ObtenerTagsAgrupacion, obtenerLiderArray,
   eliminarTagAgrupacion,obtenerAgrupacionesPertenece, invitarUsuario, obtenerAparienciaAgrupacion, actualizarAparienciaAgrupacion,
-  actualizarRedesSociales } = require('../controllers/agrupacion.controller.js');
+  actualizarRedesSociales, CambiarRoldeUsuario } = require('../controllers/agrupacion.controller.js');
   const { isUser, isAdmin, isUserOrAdmin } = require('../middlewares/auth.middleware.js');
 
 module.exports = function(fastify, options, done) {
@@ -49,5 +49,6 @@ module.exports = function(fastify, options, done) {
   fastify.get('/apariencia/:id_agr', { preHandler: [isUserOrAdmin] },obtenerAparienciaAgrupacion);
   fastify.put('/apariencia/:id_agr', { preHandler: [isUser] },actualizarAparienciaAgrupacion);
   fastify.put('/redesSociales/:id_agr', { preHandler: [isUser] },actualizarRedesSociales);
+  fastify.put('/administracionderoles/:id_agr/:rut', { preHandler: [isUserOrAdmin] },CambiarRoldeUsuario);
   done();
 };

@@ -144,19 +144,19 @@ async function unirseAgrupacion(req, res) {
         const Lider = await getLiderArray(id_agr);
         const LiderCompleto = await getUsuarioByRut(Lider[0].rut);
         if (Lider.length === 0) {
-            return res.code(404).send('Agrupación no encontrada');
+            return res.code(404).send({ success: false, message: 'Lider no encontrado' });
         }
 
         //buscar la agrupacion en la bdd
         const agrupacionDatos = await getAgrupacionById(id_agr);
         if (agrupacionDatos.length === 0) {
-            return res.code(404).send('Agrupación no encontrada');
+            return res.code(404).send({ success: false, message: 'Agrupación no encontrada' });
         }
 
         // crea el correo
         const result = await createSolicitud(rut, id_agr);
         if (!result) {
-            return res.code(500).send('Error al enviar solicitud');
+            return res.code(500).send({ success: false, message: 'Error al enviar solicitud' });
         }
 
         const mailDetails = {
@@ -341,12 +341,18 @@ async function CambiarRoldeUsuario(req, res) {
         const rut = req.params.rut;
         const rol = req.body.rol_agr;
 
-        // si el array de los lideres es igual a 1, no se puede cambiar el rol
-        if (rol === 'Miembro oficial' || rol === 'Miembro') {
-            const lideres = await getLiderArray(id_agr);
-            if (lideres.length === 1) {
-                return res.code(400).send('No se puede cambiar el rol del último líder');
-            }
+        const decoded = await req.jwtVerify();
+        const rutActual = decoded.rut;
+        const rolActual = decoded.rol;
+        const lider = await getLiderArray(id_agr);
+        const rutLider = lider[0].rut;
+
+        if (rol !== 'Miembro oficial' && rol !== 'Miembro' && rol !== 'Lider') {
+            return res.code(400).send({ success: false, message: 'Rol no válido' });
+        }
+
+        if (rolActual !== 'Admin' && rutActual !== rutLider) {
+            return res.code(401).send('No tienes permisos para cambiar el rol del usuario');
         }
 
         const usuario = await getUsuarioByRut(rut);
@@ -358,12 +364,59 @@ async function CambiarRoldeUsuario(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
+        const miembros = await getUsuariosdeAgrupacion(id_agr);
+
+        if (miembros.length === 1) {
+            return res.code(400).send({ success: false, message: 'No se puede cambiar el rol del último usuario de la agrupación' });
+        }
+        let existe = false;
+        for (let i = 0; i < miembros.length; i++) {
+            if (miembros[i].rut === rut) {
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            return res.code(400).send({ success: false, message: 'El usuario no pertenece a la agrupación' });
+        }
+
+        if (rut === rutLider && rol !== 'Lider') {
+            let CandidatoALider = 0;
+            let fechaIntegracion = new Date();
+            for (let i = 0; i < miembros.length; i++) {
+                const rolMiembro = await getRolUsuario(miembros[i].rut, id_agr);
+                if (rolMiembro.rol_agr === 'Miembro oficial' || rolMiembro.rol_agr === 'Miembro') {
+                    if (rolMiembro.fecha_integracion < fechaIntegracion) {
+                        CandidatoALider = rolMiembro.rut;
+                        fechaIntegracion = rolMiembro.fecha_integracion;
+                        continue;
+                    }
+
+                }
+            }
+            const result = await updateRolUsuario(CandidatoALider, id_agr, 'Lider');
+            if (!result) {
+                return res.code(500).send({ success: false, message: 'Error al cambiar el rol del nuevo lider' });
+            }
+            const response = await updateRolUsuario(rut, id_agr, rol);
+            if (!response) {
+                return res.code(500).send('Error al cambiar el rol del usuario');
+            }
+            return res.code(200).send({ success: true, message: 'Rol cambiado para el usuario actual y nuevo lider' });
+        }
+
+        if(rut !== rutLider && rol === 'Lider'){
+            const response = await updateRolUsuario(rutLider, id_agr, 'Miembro oficial');
+            if (!response) {
+                return res.code(500).send('Error al cambiar el rol del antiguo lider');
+            }
+        }
 
         const result = await updateRolUsuario(rut, id_agr, rol);
         if (!result) {
             return res.code(500).send('Error al cambiar el rol del usuario');
         }
-        res.code(200).send('Rol cambiado');
+        res.code(200).send({ success: true, message: 'Rol cambiado para el usuario' });
     } catch (error) {
         console.error('Error al cambiar el rol del usuario:', error);
         res.code(500).send('Error al cambiar el rol del usuario');
@@ -377,7 +430,8 @@ async function abandonarAgrupacion(req, res) {
     try {
         const id_agr = req.params.id_agr;
         const rut = req.params.rut;
-
+        const decoded = await req.jwtVerify();
+        const rutActual = decoded.rut;
         const user = await getUsuarioByRut(rut);
         if (user.length === 0) {
             return res.code(404).send('Usuario no encontrado');
@@ -387,20 +441,41 @@ async function abandonarAgrupacion(req, res) {
         if (agrupacion.length === 0) {
             return res.code(404).send('Agrupación no encontrada');
         }
+        const miembros = await getUsuariosdeAgrupacion(id_agr);
+        let existe = false;
+        for (let i = 0; i < miembros.length; i++) {
+            if (miembros[i].rut === rut) {
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            return res.code(400).send({ success: false, message: 'El usuario no pertenece a la agrupación' });
+        }
 
         const lider = await getLiderArray(id_agr);
-        if (lider[0].rut === rut) {
-            // obtiene los miembros de la agrupacion y cambia el rol a lider al miembro mas antiguo de la agrupacion
-            const miembros = await getUsuariosdeAgrupacion(id_agr);
-            // busca por cada uno el usuario que tenga rol de miembro oficial o miembro y el primer usuario que encuentre que cumpla con esos roles le cambia el rol a lider de la agrupacion
+        const rutLider = lider[0].rut;
+        const rol = await getRolUsuario(rut, id_agr);
+        if (rol.rol_agr !== 'Lider' && rutActual !== rut) {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para eliminar miembros' });
+        }
+        if (rut === rutLider) {
+            let CandidatoALider = 0;
+            let fechaIntegracion = new Date();
             for (let i = 0; i < miembros.length; i++) {
-                const rol = await getRolUsuario(miembros[i].rut, id_agr);
-                if (rol.rol_agr === 'Miembro oficial' || rol.rol_agr === 'Miembro') {
-                    const result = await updateRolUsuario(miembros[i].rut, id_agr, 'Lider');
-                    if (!result) {
-                        return res.code(500).send('Error al abandonar la agrupación');
+                const rolMiembro = await getRolUsuario(miembros[i].rut, id_agr);
+                if (rolMiembro.rol_agr === 'Miembro oficial' || rolMiembro.rol_agr === 'Miembro') {
+                    if (rolMiembro.fecha_integracion < fechaIntegracion) {
+                        CandidatoALider = rolMiembro.rut;
+                        fechaIntegracion = rolMiembro.fecha_integracion;
+                        continue;
                     }
+
                 }
+            }
+            const result = await updateRolUsuario(CandidatoALider, id_agr, 'Lider');
+            if (!result) {
+                return res.code(500).send({ success: false, message: 'Error al cambiar el rol del nuevo lider' });
             }
         }
 
@@ -408,8 +483,10 @@ async function abandonarAgrupacion(req, res) {
         if (!result) {
             return res.code(500).send('Error al abandonar la agrupación');
         }
-
-        res.code(200).send('Agrupación abandonada');
+        if (result === 'Agrupacion eliminada por falta de miembros') {
+            return res.code(200).send({ success: true, message: 'Agrupación eliminada por falta de miembros' });
+        }
+        res.code(200).send({ success: true, message: 'Usuario eliminado de la agrupación' });
     } catch (error) {
         console.error('Error al abandonar la agrupación:', error);
         res.code(500).send('Error al abandonar la agrupación');
@@ -583,7 +660,7 @@ async function invitarUsuario(req, res) {
         if (!invitar) {
             return res.code(500).send({ success: false, message: 'Error al invitar al usuario' });
         }
-        return res.code(200).send({ succes: true, message: 'Invitación enviada' });
+        return res.code(200).send({ succes: true, message: 'Invitación enviada', data: encrypted });
     } catch (error) {
         console.error('Error al ingresar el código:', error);
         res.code(500).send('Error al ingresar el código');
@@ -735,7 +812,7 @@ async function actualizarAparienciaAgrupacion(req, res) {
         const agrupacion = await getAgrupacionById(id_agr);
         if (!agrupacion) {
             return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
-        }    
+        }
         const updatedApariencia = await updateAparienciaAgrupacion(id_agr, apariencia);
         if (updatedApariencia) {
             return res.status(200).send({ success: true, data: updatedApariencia });
@@ -769,9 +846,9 @@ async function actualizarRedesSociales(req, res) {
         if (!agrupacion) {
             return res.status(404).send({ success: false, message: 'Agrupación no encontrada' });
         }
-        const updatedRedes = await updateRedesSociales(id_agr,redes);
+        const updatedRedes = await updateRedesSociales(id_agr, redes);
         if (updatedRedes) {
-            return res.status(200).send({ success: true, message:'Redes sociales actualizadas', data: updatedRedes });
+            return res.status(200).send({ success: true, message: 'Redes sociales actualizadas', data: updatedRedes });
         } else {
             return res.status(404).send({ success: false, message: 'Redes sociales no encontradas' });
         }

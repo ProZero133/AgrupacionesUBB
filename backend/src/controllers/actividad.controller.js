@@ -207,9 +207,14 @@ async function eliminarActividad(req, res) {
             return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
         // Elimina la actividad
-        await deleteActividad(id_act);
-        // Retorna un mensaje de éxito
-        res.status(200).send('Actividad eliminada');
+        const validarEliminacion=await deleteActividad(id_act);
+        if(validarEliminacion === 'Actividad eliminada'){
+            return res.code(200).send({ success: true, message: 'Actividad eliminada' });
+        }
+        if(validarEliminacion === 'Actividad eliminada para los usuarios'){
+            return res.code(200).send({ success: true, message: 'Actividad eliminada para los usuarios' });
+        }
+        return res.code(500).send({ success: false, message: 'Error al eliminar la actividad' });
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al eliminar la actividad:', error);

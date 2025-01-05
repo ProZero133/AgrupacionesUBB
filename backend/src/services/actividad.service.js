@@ -215,12 +215,19 @@ async function deleteActividad(id) {
         }
         const cantidadParticipantes = await getParticipantesActividad(id);
         if (cantidadParticipantes.length > 1) {
-            await softDeleteActividad(id);
+            const softDelete=await softDeleteActividad(id);
+            if(softDelete==='Actividad eliminada'){
+                return 'Actividad eliminada para los usuarios';
+            }
+
         }
         else {
             const del = await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id]);
             const delProg = await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id]);
             const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+            if (response.rowCount !== 0) {
+                return 'Actividad eliminada';
+            }
         }
 
     } catch (error) {

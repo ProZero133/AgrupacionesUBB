@@ -312,7 +312,7 @@ async function deleteAgrupacion(id_agr) {
     await pool.query('DELETE FROM "Agrupacion_tags" WHERE id_agr = $1', [id_agr]);
     // Finalmente, elimina la agrupación
     const agrupacion = await pool.query('DELETE FROM "Agrupacion" WHERE id_agr = $1 RETURNING *', [id_agr]);
-    return agrupacion.rows[0];
+    return { message: 'Agrupación eliminada correctamente', agrupacion: agrupacion.rows[0] };
   } catch (error) {
     console.log('Error al eliminar la agrupación:', error);
   }
@@ -353,22 +353,21 @@ async function getLiderArray(id_agr) {
 async function validateEliminarGrupo(id_agr) {
   try {
     const actividades = await pool.query('SELECT * FROM "Actividad" WHERE id_agr = $1', [id_agr]);
-    let fechas = [];
     for (let i = 0; i < actividades.rows.length; i++) {
       const fecha = await getFechasActividades(actividades.rows[i].id_act);
-      fechas.push(fecha);
-    }
-    const fechaActual = new Date();
-    for (let i = 0; i < fechas.length; i++) {
-      if (fechas[i].fecha_actividad < fechaActual) {
-        return 'No se puede eliminar la agrupación, hay actividades pasadas';
+      const fechaActual = new Date();
+      const participantes = await pool.query('SELECT * FROM "Participa" WHERE id_act = $1', [actividades.rows[i].id_act]);
+      if (fecha.fecha_actividad < fechaActual || participantes.rows.length > 1) {
+        const response = await softDeleteAgrupacion(id_agr);
+        return { message: 'Agrupación eliminada para los usuarios', agrupacion: response };
       }
     }
-    const agrupacion = await softDeleteAgrupacion(id_agr);
-    if (agrupacion.length === 0) {
-      return 'Error al eliminar la agrupación';
+   
+    const borrarAgrupacion = await deleteAgrupacion(id_agr);
+    if (borrarAgrupacion) {
+      return { message: 'Agrupación eliminada correctamente', agrupacion: borrarAgrupacion };
     }
-    return { message: 'Agrupación eliminada correctamente', agrupacion: agrupacion };
+    return { message: 'No se pudo eliminar la agrupación' };
   }
   catch (error) {
     console.log('Error al obtener las actividades:', error);

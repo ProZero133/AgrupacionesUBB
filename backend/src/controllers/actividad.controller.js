@@ -227,7 +227,6 @@ async function eliminarActividadPublica(req, res) {
     try {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
-        const rut = req.params.rut;
         const decoded = await req.jwtVerify();
         const adminRol = decoded.rol;
         const datosActividad = await getActividadById(id_act);
@@ -247,7 +246,7 @@ async function eliminarActividadPublica(req, res) {
         }
         // Notifica al lider 
         const mailDetails = {
-            lider_correo: liderCorreo,
+            correo: liderCorreo,
             nombre_agr: datosAgrupacion.nombre_agr,
             nombre_act: datosActividad.rows[0].nom_act,
         };

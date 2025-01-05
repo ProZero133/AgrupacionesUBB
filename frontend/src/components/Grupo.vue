@@ -508,6 +508,10 @@
         </template>
         <v-list class="tultipCrear">
 
+          <v-list-item v-if="rolEnAgrupacion === 'Miembro oficial'" v-on:click="this.dialoginvitar = true">
+            <v-list-item-title>Invitar Usuarios</v-list-item-title>
+          </v-list-item>
+
           <v-list-item v-for="(item, index) in itemsFiltroRol" :key="index"
             v-on:click="this.$router.push(item.path + `${groupId}`)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>

@@ -448,9 +448,9 @@ async function AceptacionActividad(req, res) {
     try {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
+
         // Programa la actividad
         const actividad = await setAprobacionActividad(id_act);
-
         const datosActividad = await getActividadById(id_act);
         const datosAgrupacion = await getAgrupacionById(datosActividad.rows[0].id_agr);
         const lider = await getLiderArray(datosActividad.rows[0].id_agr);

@@ -75,7 +75,6 @@ export default {
         }
         data = await response.json();
 
-        console.log(data);
         if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;

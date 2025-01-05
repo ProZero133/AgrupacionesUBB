@@ -49,7 +49,7 @@ module.exports = function (fastify, options, done) {
   fastify.post('/actividades',{ preHandler: [isUser] }, crearActividad);
   fastify.put('/actividades/:id_act', { preHandler: [isUser] },actualizarCuposActividad);
   fastify.delete('/actividades/:id_act', { preHandler: [isUserOrAdmin] },eliminarActividad);
-  fastify.delete('/borrarActividades/:id_act/:rut', { preHandler: [isAdmin] },eliminarActividadPublica);
+  fastify.delete('/borrarActividades/:id_act', { preHandler: [isAdmin] },eliminarActividadPublica);
   fastify.get('/obtenerCreador/:id_act', { preHandler: [isUserOrAdmin] },ObtenerCreadorActividad);
   fastify.delete('/rechazarActividad/:id_act', { preHandler: [isAdmin] },rechazarActividad);
   fastify.get('/actividadesparticipante/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipante);

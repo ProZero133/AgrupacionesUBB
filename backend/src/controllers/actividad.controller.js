@@ -228,7 +228,7 @@ async function eliminarActividadPublica(req, res) {
         // Obtiene el id de la actividad
         const id_act = req.params.id_act;
         const rut = req.params.rut;
-        const decoded = req.jwtVerify();
+        const decoded = await req.jwtVerify();
         const adminRol = decoded.rol;
         const datosActividad = await getActividadById(id_act);
         const datosAgrupacion = await getAgrupacionById(datosActividad.rows[0].id_agr);
@@ -236,18 +236,15 @@ async function eliminarActividadPublica(req, res) {
         const lider = await getLiderArray(datosActividad.rows[0].id_agr);
         const liderCompleto = await validarUsuarioRut(lider[0].rut);
         const liderCorreo = liderCompleto.usuario.correo;
-
         if (adminRol !== 'Admin') {
             res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
 
-        // Elimina participa        
-        await deleteParticipanteActividad(id_act, rut);
-        // Elimina programa
-        await deletePrograma(id_act);
-        // Elimina la actividad
-        await deleteActividadPublica(id_act);
-
+        
+        const respuesta=await deleteActividadPublica(id_act);
+        if(respuesta!=='Actividad eliminada'){
+            return res.code(500).send({ success: false, message: 'Error al eliminar la actividad' });
+        }
         // Notifica al lider 
         const mailDetails = {
             lider_correo: liderCorreo,

@@ -252,8 +252,16 @@ async function softDeleteActividad(id) {
 
 async function deleteActividadPublica(id) {
     try {
+        // Eliminar participantes
+        const del = await pool.query('DELETE FROM "Participa" WHERE id_act = $1', [id]);
+        // Eliminar programa
+        const delProg = await pool.query('DELETE FROM "Programa" WHERE id_act = $1', [id]);
         // Elimina la actividad con el id especificado de la base de datos
         const response = await pool.query('DELETE FROM "Actividad" WHERE id_act = $1', [id]);
+        if (response.rowCount !== 0) {
+            return 'Actividad eliminada';
+        }
+        return 'No pudo eliminar la actividad';
 
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir

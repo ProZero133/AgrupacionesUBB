@@ -358,7 +358,7 @@ export default {
       const creadorActData = await this.CreadorActividad(id_act);
 
       try {
-        const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${id_act}/${creadorActData.rut}`, {
+        const response = await fetch(`${global.BACKEND_URL}/borrarActividades/${id_act}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

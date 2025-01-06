@@ -372,7 +372,7 @@ export default {
         });
 
         if (response.ok) {
-          this.$root.showSnackBar('ok', 'Solicitud enviada correctamente!', 'Se le notificara al Lider sobre tu solicitud.');
+          this.$root.showSnackBar('success', 'Solicitud enviada correctamente!', 'Se le notificara al Lider sobre tu solicitud.');
           const data = await response.json();
         } else {
           console.error('Error en la respuesta:', response.status);

@@ -187,7 +187,7 @@
         </v-card-text>
         <v-card-text>
           <p style="font-size: 0.8em; color: rgba(0, 0, 0, 0.6);">
-            Por favor, mantén pulsado el botón de "Aceptar" para confirmar.
+            Por favor, mantén pulsado el botón de "Abandonar actividad" para confirmar.
           </p>
         </v-card-text>
         <v-card-actions>

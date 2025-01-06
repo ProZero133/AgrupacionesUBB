@@ -78,7 +78,7 @@
                         <v-card-text class="px-4" style="min-width: 300px; max-width: 300px">
                           <v-radio-group v-model="selectedRole" column>
                             <v-radio label="Líder" value="Lider"></v-radio>
-                            <v-radio label="Miembro Oficial" value="Miembro Oficial"></v-radio>
+                            <v-radio label="Miembro Oficial" value="Miembro oficial"></v-radio>
                             <v-radio label="Miembro" value="Miembro"></v-radio>
                           </v-radio-group>
                         </v-card-text>
@@ -517,7 +517,7 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
 
-          <v-list-item v-if="programarItem" v-on:click="this.dialogPendiente = true">
+          <v-list-item v-if="OficalOLider" v-on:click="this.dialogPendiente = true">
             <v-list-item-title>Actividades sin programar</v-list-item-title>
           </v-list-item>
 
@@ -741,6 +741,7 @@ export default {
     SombraActividadesColor: 'rgba(0, 0, 0, 0.2)',
     lider: false,
     adminOlider: false,
+    OficalOLider: false,
     rolEnAgrupacion: '',
     dialogmiembros: false,
     dialogeditar: false,
@@ -817,6 +818,7 @@ export default {
       { title: 'Crear Publicación', path: '/api/crear_publicacion/' },
       { title: 'Abandonar Agrupación', path: '/api/abandonaragrupacion/' },
     ],
+
     itemsSegunRol: [
       { title: 'Crear Actividad', path: '/api/crear_actividad/', roles: ['Lider', 'Miembro oficial'] },
       { title: 'Crear Publicación', path: '/api/crear_publicacion/', roles: ['Lider'] },
@@ -1075,6 +1077,16 @@ export default {
       }
     },
 
+    async esOficialOLider() {
+      this.rut = this.getRut();
+      await this.ObtenerLider();
+      if (this.lider === true || this.rolEnAgrupacion === 'Miembro oficial') {
+        return this.OficalOLider = true;
+      } else {
+        return this.OficalOLider = false;
+      }
+    },
+
     async esAdminOLider() {
       this.rol = this.getRol();
       this.rut = this.getRut();
@@ -1142,7 +1154,6 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-        console.log(rut, rol_agr);
         const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
         const response = await fetch(url, {
           method: 'PUT',
@@ -1154,9 +1165,12 @@ export default {
             rol_agr
           }),
         });
+        const data = await response.json();
         if (response.ok) {
+          this.dialogmiembros = false;
           this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
         } else {
+          this.dialogmiembros = false;
           this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
         }
 
@@ -2161,6 +2175,7 @@ export default {
     this.lider = this.ObtenerLider();
     this.rol = this.getRol();
     this.adminOlider = this.esAdminOLider();
+    this.OficalOLider = this.esOficialOLider();
     this.VerGrupos();
     this.VerActividades();
     this.ObtenerUsuariosDeAgrupacion();
@@ -2179,9 +2194,6 @@ export default {
       return this.itemsSegunRol.filter(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title !== 'Abandonar Agrupación');
     },
     abandonarItem() {
-      return this.itemsSegunRol.find(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title === 'Abandonar Agrupación');
-    },
-    programarItem() {
       return this.itemsSegunRol.find(itemsSegunRol => itemsSegunRol.roles.includes(this.rolEnAgrupacion) && itemsSegunRol.title === 'Abandonar Agrupación');
     },
   },

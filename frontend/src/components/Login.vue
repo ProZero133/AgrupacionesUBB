@@ -74,7 +74,6 @@ export default {
           });
         }
         data = await response.json();
-
         if (response.ok && data.success) {
           this.userData = data.result.usuario;
           this.serverCode = data.codigo;

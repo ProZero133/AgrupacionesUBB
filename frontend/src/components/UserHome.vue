@@ -381,6 +381,7 @@ export default {
     grupoOrigenActividad(id_agr) {
       // Find the grupo that matches the id_agr
       const grupo = this.grupos.find(grupo => grupo.id_agr === id_agr);
+    
       // Return the grupo description if found, else return a default string
       return grupo ? grupo.nombre_agr : 'Grupo';
     },
@@ -414,6 +415,11 @@ export default {
           // Convierte la respuesta en formato JSON
           const data = await response.json();
           this.grupos = data;
+
+          for (const grupo of this.grupos) {
+            grupo.fecha_creacion = new Date(grupo.fecha_creacion).toLocaleDateString();
+          }
+
           // Itera sobre cada grupo para obtener su lider con la ruta /obtenerLider/{id_agr}
           for (const grupo of this.grupos) {
             try {

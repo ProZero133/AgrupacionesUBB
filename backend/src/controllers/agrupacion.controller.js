@@ -26,7 +26,7 @@ async function VerGrupos(request, reply) {
         return reply.code(404).send({ success: false, message: 'No se encontraron agrupaciones' });
     }
     else {
-        return reply.send(agrupaciones);
+        return reply.code(200).send({ success: true, message: 'Se encontraron agrupaciones', data: agrupaciones });
     }
 }
 

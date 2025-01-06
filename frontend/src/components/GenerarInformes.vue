@@ -251,6 +251,7 @@ export default {
         usuariosBuscados: [],
         nombresAgrupaciones: [],
         selectedUsuario: [],
+        DatosGrupo: [],
         dialogUsuario: false,
 
         // datos de la tabla de usuarios
@@ -502,9 +503,9 @@ export default {
             }
         },
 
-        abrirDialogUsuario(usuario) {
+        async abrirDialogUsuario(usuario) {
             this.selectedUsuario = usuario;
-            this.generarInformeUsuario(usuario.rut);
+            await this.generarInformeUsuario(usuario.rut);
             this.dialogUsuario = true;
         },
 
@@ -512,7 +513,7 @@ export default {
 
         async obtenerGrupos() {
             try {
-                const DatosGrupo = this.gruposConID;
+                let DatosGrupo = this.gruposConID;
                 if (this.rol === "Admin") {
                     const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
                         method: 'GET',
@@ -522,10 +523,10 @@ export default {
                         },
                     });
 
-                    const data = await response.json();
+                    const datos = await response.json();
+                    const data = datos.data;
                     this.gruposConID = data;
-
-                    if (data.success === true) {
+                    if (datos.success === true) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
                         DatosGrupo = data.map((grupo, index) => ({
                             id_agr: grupo.id_agr,
@@ -534,7 +535,7 @@ export default {
 
                     } else {
                         this.gruposConID = [];
-                        console.error('No se encontraron agrupupaciones:', response.status);
+                        console.error('No se encontraron agrupaciones:', response.status);
                     }
 
                 } else {

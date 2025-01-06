@@ -419,7 +419,6 @@ export default {
 
     async abrirDialogReportar(idAgrupacion) {
       this.selectedAgrupacion = this.itemsAgr.find(item => item.idAgrupacion === idAgrupacion);
-      console.log(this.selectedAgrupacion);
       this.dialogReportar = true;
     },
 

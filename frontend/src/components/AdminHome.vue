@@ -587,6 +587,7 @@ export default {
         }
         this.dialogUsuario = true;
       } catch (error) {
+        this.$root.showSnackBar('error', 'El usuario no pertenece a ninguna agrupación');
         console.error('Error al hacer fetch:', error);
       }
     },

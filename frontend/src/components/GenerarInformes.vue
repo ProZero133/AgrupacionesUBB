@@ -108,11 +108,20 @@
                                     {{ item.nombre_agr }}
                                 </div>
                             </template>
+                            <template v-slot:item.verificado="{ item }">
+                                <v-chip
+                                    :color="item.visible === false ? 'red' : (item.verificado === 'Noverificado' ? 'orange' : 'green')"
+                                    dark>
+                                    {{ item.visible === false ? 'Invisible' : (item.verificado === 'Noverificado' ? 'No verificado' : item.verificado) }}
+                                </v-chip>
+                            </template>
                             <template v-slot:item.check="{ item }">
                                 <v-checkbox v-model="item.success" @change="añadirAgrupacion(item)"></v-checkbox>
                             </template>
                         </v-data-table>
-
+                        <v-alert v-if="this.rol === 'Estudiante'" type="warning" style="font-size: 19px; margin: 2%; white-space: normal; text-align: justify;">
+                            Estos informes solo contienen las agrupaciones en las que participas. Si deseas recibir un informe completo de tus agrupaciones puede acercarce a Direccion de Desarrollo Estudiantil para solicitarlas
+                        </v-alert>
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-end">
                                 <v-btn elevation="24" icon="mdi-table-refresh" color="#014898" :disabled="isGenerating"
@@ -176,7 +185,8 @@
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-center">
                                 <v-btn elevation="24" class="form-submit" type="submit" color="#014898"
-                                    :disabled="isGenerating" @click="generarInformeAgrupaciones(this.rut)">Generar Informe</v-btn>
+                                    :disabled="isGenerating" @click="generarInformeAgrupaciones(this.rut)">Generar
+                                    Informe</v-btn>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -290,7 +300,9 @@ export default {
 
         // headers de la tabla de agrupaciones
         headersAgrupacionesSeleccionadas: [
+            { title: 'id', value: 'id_agr' },
             { title: 'Nombre de la agrupación', value: 'nombre_agr', sortable: true },
+            { title: 'Estado en la plataforma', value: 'verificado', sortable: true },
             { title: 'Seleccionar', value: 'check' },
         ],
 
@@ -358,6 +370,63 @@ export default {
             }
 
             return null;
+        },
+
+        async obtenerGrupos() {
+            try {
+                let DatosGrupo = this.gruposConID;
+                if (this.rol === "Admin") {
+                    const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                        },
+                    });
+
+                    const datos = await response.json();
+                    const data = datos.data;
+
+                    this.gruposConID = data;
+                    if (datos.success === true) {
+                        this.grupos = data.map(grupo => grupo.nombre_agr);
+                        DatosGrupo = data.map((grupo, index) => ({
+                            id_agr: grupo.id_agr,
+                            nombre_agr: grupo.nombre_agr,
+                        }));
+
+                    } else {
+                        this.gruposConID = [];
+                        console.error('No se encontraron agrupaciones:', response.status);
+                    }
+
+                } else {
+                    const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${this.rut}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+                        },
+                    });
+                    const data = await response.json();
+                    this.gruposConID = data;
+
+                    if (response.ok) {
+                        this.grupos = data.map(grupo => grupo.nombre_agr);
+
+                        // mapear los grupos con su id y nombre_agr
+                        DatosGrupo = data.map(grupo => ({
+                            id_agr: grupo.id_agr,
+                            nombre_agr: grupo.nombre_agr,
+                        }));
+                    } else {
+                        console.error('No se encontraron agrupupaciones:', response.status);
+                    }
+                }
+            } catch (error) {
+                this.$root.showSnackBar('error', 'No se encontraron agrupaciones');
+                console.error('Error al hacer fetch:', error);
+            }
         },
 
         // USUARIOS
@@ -510,67 +579,6 @@ export default {
         },
 
         // ACTIVIDADES
-
-        async obtenerGrupos() {
-            try {
-                let DatosGrupo = this.gruposConID;
-                if (this.rol === "Admin") {
-                    const response = await fetch(`${global.BACKEND_URL}/agrupaciones`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-                        },
-                    });
-
-                    const datos = await response.json();
-                    const data = datos.data;
-                    
-                    this.gruposConID = data;
-                    if (datos.success === true) {
-                        this.grupos = data.map(grupo => grupo.nombre_agr);
-                        DatosGrupo = data.map((grupo, index) => ({
-                            id_agr: grupo.id_agr,
-                            nombre_agr: grupo.nombre_agr,
-                        }));
-
-                    } else {
-                        this.gruposConID = [];
-                        console.error('No se encontraron agrupaciones:', response.status);
-                    }
-
-                } else {
-                    const response = await fetch(`${global.BACKEND_URL}/obtenerGruposUsuario/${this.rut}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-                        },
-                    });
-                    const data = await response.json();
-                    this.gruposConID = data;
-
-                    if (response.ok) {
-                        this.grupos = data.map(grupo => grupo.nombre_agr);
-
-                        // mapear los grupos con su id y nombre_agr
-                        DatosGrupo = data.map(grupo => ({
-                            id_agr: grupo.id_agr,
-                            nombre_agr: grupo.nombre_agr,
-                        }));
-
-                    } else {
-                        console.error('No se encontraron agrupupaciones:', response.status);
-                    }
-                }
-
-
-            } catch (error) {
-                console.error('Error al hacer fetch:', error);
-            }
-        },
-
-
         añadirAgrupacion(item) {
             if (item.success) {
                 this.selectedGrupos.push(item);
@@ -639,6 +647,7 @@ export default {
                         },
                     });
                     const data = await response.json();
+                    console.log(data);
 
                     if (response.ok) {
 
@@ -668,17 +677,25 @@ export default {
             // verifica si el token del usuario que apreta el boton de generar tabla es valido
             if (this.rol === "Admin") {
                 await this.obtenerActividadesGrupo();
-            } else {
-                await this.obtenerActividadesGrupo();
-                await this.validarParticipacion();
+            }
+            if (this.rol === "Estudiante") {
+                if (this.selectedGrupos.length > 0) {
+                    await this.obtenerActividadesGrupo();
+                    await this.validarParticipacion();
+                } else {
+                    await this.validarParticipacion();
+                }
             }
             this.contenidoPDF = this.actividades.flat();
 
-            // si dentro del array el atributo "Aprobado" es false lo cambia por "Rechazado"
+            console.log(this.contenidoPDF);
+
+            // si dentro del array el atributo "Aprobado" es false se cambia por "Rechazado"
             this.contenidoPDF.forEach(item => {
                 if (item.tipo === false) {
                     item.tipo = "Privada";
-                } else {
+                }
+                if (item.tipo === true) {
                     item.tipo = "Publica";
                 }
             });
@@ -726,7 +743,7 @@ export default {
                     const contenido = contenidoPorAgrupacion[nombreAgr];
                     const columnas = contenido.map(item => ({
                         'Nombre Actividad': item.nom_act,
-                        'Visibilidad': item.tipo ? 'Privada' : 'Publica',
+                        'Visibilidad': item.tipo,
                         'Fecha': item.fecha_creacion,
                         'Descripción': item.descripcion,
                     }));
@@ -786,13 +803,20 @@ export default {
                 for (let i = 0; i < AgrupacionesPlataforma.length; i++) {
                     if (AgrupacionesPlataforma[i].verificado === "Noverificado") {
                         AgrupacionesPlataforma[i].verificado = "No verificado";
-                    } else {
+                    }
+
+                    if (AgrupacionesPlataforma[i].verificado === "Verificado") {
                         AgrupacionesPlataforma[i].verificado = "Verificado";
                     }
+
+                    if (AgrupacionesPlataforma[i].visible === "false") {
+                        AgrupacionesPlataforma[i].verificado = "No verificado";
+                    }
+
                     AgrupacionesPlataforma[i].fecha_creacion = new Date(AgrupacionesPlataforma[i].fecha_creacion).toLocaleDateString();
                     AgrupacionesPlataforma[i].id_agr = AgrupacionesPlataforma[i].nombre_agr;
                 }
-                
+
 
                 // se genera el informe de agrupaciones
                 const doc = new jsPDF();
@@ -958,5 +982,4 @@ export default {
     flex-grow: 1;
     min-width: 0;
 }
-
 </style>

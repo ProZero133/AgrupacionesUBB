@@ -340,8 +340,15 @@ async function getActividadesParticipanteUsuario(rut) {
         }
         //  Obtiene las agrupaciones asociadas a cada actividad del participante
         const agrupaciones = await pool.query(`
-            SELECT * FROM "Agrupacion" WHERE id_agr IN (SELECT id_agr FROM "Actividad" WHERE id_act IN (SELECT id_act FROM "Participa" WHERE rut = $1))
-        `, [rut]);
+            SELECT * FROM "Agrupacion" 
+            WHERE id_agr IN (
+                SELECT id_agr 
+                FROM "Actividad" 
+                WHERE id_act IN (
+                    SELECT id_act 
+                    FROM "Participa" 
+                    WHERE rut = $1)) AND visible = true`, [rut]);
+
         const actividadesFiltradas = actividades.rows.filter(actividad => {
             const agrupacion = agrupaciones.rows.find(agr => agr.id_agr === actividad.id_agr);
             return agrupacion && agrupacion.visible !== false;

@@ -154,12 +154,12 @@ export default {
             valorTextBoxUsuario: '',
             usuariosBuscados: [],
             headersBuscadorUsuario: [
-                { text: 'Nombres', value: 'nombres' },
-                { text: 'Primer Apellido', value: 'primer_apellido' },
-                { text: 'Segundo Apellido', value: 'segundo_apellido' },
-                { text: 'Correo', value: 'correo' },
-                { text: 'Rol', value: 'rol' },
-                { text: 'Acciones', value: 'action', sortable: false },
+                { title: 'Nombres', value: 'nombres' },
+                { title: 'Primer Apellido', value: 'primer_apellido' },
+                { title: 'Segundo Apellido', value: 'segundo_apellido' },
+                { title: 'Correo Institucional', value: 'correo' },
+                { title: 'Rol', value: 'rol' },
+                { title: 'Acciones', value: 'action', sortable: false },
             ],
         };
     },

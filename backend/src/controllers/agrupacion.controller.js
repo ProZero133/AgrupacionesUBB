@@ -23,7 +23,7 @@ const IV = Buffer.alloc(16, 0);
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
     if (agrupaciones.length === 0) {
-        return reply.send({ success: false, message: 'No se encontraron agrupaciones' });
+        return reply.code(404).send({ success: false, message: 'No se encontraron agrupaciones' });
     }
     else {
         return reply.send(agrupaciones);

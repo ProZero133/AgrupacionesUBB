@@ -170,13 +170,13 @@
         <v-container class="containerActividades" grid-list-xs>
             <v-card class="ContenedorSelector" elevation="15">
                 <v-card-title class="ContenedorTitulo">
-                    <h1 class="Titulo" style="margin: 2%;">Generar informe de agrupaciones</h1>
+                    <h1 class="Titulo" style="margin: 2%; text-align: center;">Generar informe de agrupaciones</h1>
+                    <v-divider></v-divider>
                     <v-card-text>
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-center">
                                 <v-btn elevation="24" class="form-submit" type="submit" color="#014898"
-                                    :disabled="isGenerating" @click="generarInformeAgrupaciones(this.rut)">Generar
-                                    Informe</v-btn>
+                                    :disabled="isGenerating" @click="generarInformeAgrupaciones(this.rut)">Generar Informe</v-btn>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -250,6 +250,7 @@ export default {
         SubstringCorreo: [],
         usuariosBuscados: [],
         nombresAgrupaciones: [],
+        selectedUsuario: [],
         dialogUsuario: false,
 
         // datos de la tabla de usuarios
@@ -524,7 +525,7 @@ export default {
                     const data = await response.json();
                     this.gruposConID = data;
 
-                    if (response.ok) {
+                    if (data.success === true) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);
                         DatosGrupo = data.map((grupo, index) => ({
                             id_agr: grupo.id_agr,
@@ -532,6 +533,7 @@ export default {
                         }));
 
                     } else {
+                        this.gruposConID = [];
                         console.error('No se encontraron agrupupaciones:', response.status);
                     }
 
@@ -554,7 +556,6 @@ export default {
                             id_agr: grupo.id_agr,
                             nombre_agr: grupo.nombre_agr,
                         }));
-
 
                     } else {
                         console.error('No se encontraron agrupupaciones:', response.status);
@@ -700,7 +701,6 @@ export default {
             // Crea un nuevo documento PDF
             const doc = new jsPDF();
 
-            // Asegúrate de que this.contenidoPDF sea un array
             if (Array.isArray(this.contenidoPDF)) {
                 // Filtra los elementos que no son actividades válidas
                 const contenidoValido = this.contenidoPDF.filter(item => item.success !== false);
@@ -797,7 +797,7 @@ export default {
 
 
                 const fechaActual = new Date().toLocaleDateString();
-                doc.text(`Informe de pertenencia de agrupaciones del usuario ${fechaActual}`, 10, 10);
+                doc.text(`Informe de agrupaciones estudiantiles - ${fechaActual}`, 10, 10);
 
                 const maxFilasPagina = 20; // Limite de filas por página
                 let currentPage = 1;
@@ -882,7 +882,7 @@ export default {
 
                         const datosUsuario = usuario.nombres + ' ' + usuario.primer_apellido + ' ' + usuario.segundo_apellido;
 
-                        doc.text(`Informe de pertenencia de agrupaciones del usuario`, 10, 10);
+                        doc.text(`Informe de pertenencia de agrupaciones`, 10, 10);
                         const fechaActual = new Date().toLocaleDateString();
                         doc.text(`${datosUsuario} - ${fechaActual}`, 10, 20);
 
@@ -956,4 +956,5 @@ export default {
     flex-grow: 1;
     min-width: 0;
 }
+
 </style>

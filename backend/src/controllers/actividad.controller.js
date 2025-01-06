@@ -66,9 +66,9 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
     try {
         const respuesta = await getActividadesByAgrupacion(req.params.id);
         if (respuesta.length === 0) {
-            return res.send({ success: false, message: 'No se encontraron actividades en la' + req.params.id });
+            return res.code(404).send({ success: false, message: 'No se encontraron actividades en la agrupacion ' + req.params.id });
         } else {
-            return res.send(respuesta);
+            return res.code(200).send(respuesta);
         }
     } catch (error) {
         console.error("Error al obtener actividades: ", error);
@@ -236,7 +236,7 @@ async function eliminarActividadPublica(req, res) {
         const liderCompleto = await validarUsuarioRut(lider[0].rut);
         const liderCorreo = liderCompleto.usuario.correo;
         if (adminRol !== 'Admin') {
-            res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
+            res.code(403).send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
 
         
@@ -254,11 +254,9 @@ async function eliminarActividadPublica(req, res) {
         await notifyRechazarActPublica(mailDetails);
 
         // Retorna un mensaje de éxito
-        res.status(200).send('Actividad eliminada');
+        res.status(200).send({success: true, message:'Actividad eliminada'});
     } catch (error) {
-        // Maneja cualquier error que pueda ocurrir
-        console.error('Error al eliminar la actividad:', error);
-        res.status(500).send('Error al eliminar la actividad');
+        res.status(500).send({success: false, message:'Error al eliminar la actividad'});
     }
 }
 
@@ -362,9 +360,9 @@ async function ObtenerActividadesPorGrupoUsuario(req, res) {
         const { rut } = req.params;
         const actividades = await getActividadesByGrupoUsuario(rut);
         if (actividades.length === 0) {
-            return res.send({ success: false, message: 'No se encontraron actividades' });
+            return res.code(400).send({ success: false, message: 'No se encontraron actividades' });
         }
-        return res.send(actividades);
+        return res.code(200).send(actividades);
     } catch (error) {
         console.error('Error al obtener las actividades de los grupos del usuario:', error);
         return res.status(500).send({ success: false, message: 'Error al obtener las actividades de los grupos del usuario' });
@@ -395,14 +393,20 @@ async function obtenerParticipantesActividad(req, res) {
         return res.status(500).send({ success: false, message: 'Error al obtener los participantes de la actividad' });
     }
 }
+
 async function obtenerActividadesParticipante(req, res) {
     try {
         const { rut } = req.params;
+        const decoded = await req.jwtVerify();
+        if (rut !== decoded.rut && decoded.rol !== 'Admin') {
+            return res.code(401).send({ success: false, message: 'No tienes permisos para ver las actividades de otro usuario' });
+        }
+
         const actividades = await getActividadesParticipante(rut);
         if (actividades.length === 0) {
             return res.send({ success: false, message: 'No se encontraron actividades' });
         }
-        return res.send(actividades);
+        return res.code(200).send(actividades);
     } catch (error) {
         console.error('Error al obtener las actividades del usuario:', error);
         return res.status(500).send({ success: false, message: 'Error al obtener las actividades del usuario' });

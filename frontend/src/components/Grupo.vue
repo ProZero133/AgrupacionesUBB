@@ -622,20 +622,20 @@
   </v-card>
 
 
-<v-dialog v-model="dialogPendiente" max-width="500">
-  <v-card>
-    <v-card-title>
-      <span class="headline">Actividades pendientes de programar</span>
-    </v-card-title>
-    <v-card-text>
-      <v-data-table :headers="headersPendientes" :items="actividadePorProgramar" :sort-by="['fecha_creacion']">
-        <template v-slot:item.action="{ item }">
-          <v-btn color="green darken-1" text @click="programarActividad(item.id_act)">Programar</v-btn>
-        </template>
-      </v-data-table>
-    </v-card-text>
-  </v-card>
-</v-dialog>
+  <v-dialog v-model="dialogPendiente" max-width="500">
+    <v-card>
+      <v-card-title>
+        <span class="headline">Actividades pendientes de programar</span>
+      </v-card-title>
+      <v-card-text>
+        <v-data-table :headers="headersPendientes" :items="actividadePorProgramar" :sort-by="['fecha_creacion']">
+          <template v-slot:item.action="{ item }">
+            <v-btn color="green darken-1" text @click="programarActividad(item.id_act)">Programar</v-btn>
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 
 
   <v-dialog v-model="dialogProgramar" max-width="500px">
@@ -658,8 +658,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="dialog = false">Cancelar</v-btn>
-        <v-btn color="blue darken-1" text
-          @click="AgendarActividad(cupos, date)">Aceptar</v-btn>
+        <v-btn color="blue darken-1" text @click="AgendarActividad(cupos, date)">Aceptar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -1143,22 +1142,23 @@ export default {
 
     async CambiarRolAgrupacion(rut, rol_agr) {
       try {
-            const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
-            const response = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-              },
-              body: JSON.stringify({
-                rol_agr
-              }),
-            });
-            if (response.ok) {
-              this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
-            } else {
-              this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
-            }
+        console.log(rut, rol_agr);
+        const url = `${global.BACKEND_URL}/administracionderoles/${this.groupId}/${rut}`;
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            rol_agr
+          }),
+        });
+        if (response.ok) {
+          this.$root.showSnackBar('success', 'Rol actualizado correctamente', 'Operación exitosa');
+        } else {
+          this.$root.showSnackBar('error', 'Error al actualizar el rol', 'Operación fallida');
+        }
 
         this.ObtenerUsuariosDeAgrupacion();
 
@@ -1759,7 +1759,7 @@ export default {
       this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
     },
     formatearFecha(fecha) {
-      if(fecha === 'Pendiente') {
+      if (fecha === 'Pendiente') {
         return 'Fecha pendiente';
       }
       const date = new Date(fecha);
@@ -2113,47 +2113,47 @@ export default {
       this.dialogProgramar = true;
     },
 
-    async AgendarActividad(cupos, fecha){
-      try{
-      const response = await fetch(`${global.BACKEND_URL}/programar/${this.actividadSeleccionadaProgramar}/${this.groupId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-        },
-    body: JSON.stringify({
-      fecha_actividad: fecha,
-    }),
-    });
-    if(response.status === 500){
-      this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
-      this.dialogProgramar = false;
-    }
-    const data = await response.json();
-    if (response.ok) {
-      const respuesta = await fetch(`${global.BACKEND_URL}/actividades/${this.actividadSeleccionadaProgramar}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-        },
-        body: JSON.stringify({
-          cupos: cupos,
-        }),
-      });
+    async AgendarActividad(cupos, fecha) {
+      try {
+        const response = await fetch(`${global.BACKEND_URL}/programar/${this.actividadSeleccionadaProgramar}/${this.groupId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+          },
+          body: JSON.stringify({
+            fecha_actividad: fecha,
+          }),
+        });
+        if (response.status === 500) {
+          this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
+          this.dialogProgramar = false;
+        }
+        const data = await response.json();
+        if (response.ok) {
+          const respuesta = await fetch(`${global.BACKEND_URL}/actividades/${this.actividadSeleccionadaProgramar}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
+            },
+            body: JSON.stringify({
+              cupos: cupos,
+            }),
+          });
 
-      this.$root.showSnackBar('success', 'Actividad programada correctamente', 'Operación exitosa');
-      this.dialogProgramar = false;
-      this.dialogPendientes = false;
-      this.actividadesSinProgramar();
-    } else {
-      this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
-      console.error('Error en la respuesta:', response.status);
-    }
-  } catch (error) {
-    console.error('Error al hacer fetch:', error);
-  }
-},
+          this.$root.showSnackBar('success', 'Actividad programada correctamente', 'Operación exitosa');
+          this.dialogProgramar = false;
+          this.dialogPendientes = false;
+          this.actividadesSinProgramar();
+        } else {
+          this.$root.showSnackBar('error', 'Error al programar la actividad', 'Operación fallida');
+          console.error('Error en la respuesta:', response.status);
+        }
+      } catch (error) {
+        console.error('Error al hacer fetch:', error);
+      }
+    },
   },
   mounted() {
     this.rut = this.getRut();

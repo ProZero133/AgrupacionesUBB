@@ -80,7 +80,7 @@
                 </template>
               </v-switch>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="6">
               <v-btn class="form-submit" type="submit" color="#2CA2DC" :disabled=!formValid>Crear actividad</v-btn>
             </v-col>
           </v-col>
@@ -340,9 +340,13 @@ export default {
             body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
           });
           // Verifica si la respuesta es exitosa
+          const data = await response.json();
+          if(data.success === false){
+            this.$root.showSnackBar('error', data.message, 'Error de creación');
+            return;
+          }
           if (response.ok) {
             // Convierte la respuesta en formato JSON
-            const data = await response.json();
             const id_act = data.id_act;
             const fecha_actividad = this.date; // Convierte la fecha al formato YYYY-MM-DD
             const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
@@ -353,6 +357,7 @@ export default {
               },
               body: JSON.stringify({ fecha_actividad }),
             });
+            const programacion = await programarActividad.json();
 
             this.$router.push(`/api/grupo/${this.groupId}`);
             this.$root.showSnackBar('success', nom_act, 'Publicada con éxito!');

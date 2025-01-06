@@ -94,7 +94,7 @@ async function validarUsuario(email) {
       }
     }
     if (usuarioAPI.rol === 'ALUMNO') {
-      if (usuarioAPI.sit_acad === 'NO VIGENTE' && usuarioAPI.rut !==16009489) {
+      if ((usuarioAPI.sit_acad === 'NO VIGENTE' || usuarioAPI.campus === 2) && usuarioAPI.rut !==16009489) {
         return { success: false, message: 'Usuario no admitido' };
       }
       usuario.rut = usuarioAPI.rut.toString();
@@ -107,7 +107,7 @@ async function validarUsuario(email) {
       usuario.rol_u = 'Estudiante';
     } else {
       if (usuarioAPI.rol === 'FUNCIONARIO ACADEMICO' || usuarioAPI.rol === 'FUNCIONARIO ADMINISTRATIVO') {
-        if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+        if (usuarioAPI.sit_acad === 'NO VIGENTE' || usuarioAPI.campus === 2) {
           return { success: false, message: 'Usuario no admitido' };
         }
         usuario.rut = usuarioAPI.rut.toString();
@@ -170,7 +170,7 @@ async function validarUsuarioRut(rut) {
     }
 
     if (usuarioAPI.rol === 'ALUMNO') {
-      if (usuarioAPI.sit_acad === 'NO VIGENTE' && usuarioAPI.rut !==16009489) {
+      if ((usuarioAPI.sit_acad === 'NO VIGENTE' || usuarioAPI.campus === 2) && usuarioAPI.rut !==16009489) {
         return { success: false, message: 'Usuario no admitido' };
       }
       usuario.rut = usuarioAPI.rut.toString();
@@ -183,7 +183,7 @@ async function validarUsuarioRut(rut) {
       usuario.rol_u = 'Estudiante';
     } else {
       if (usuarioAPI.rol === 'FUNCIONARIO ACADEMICO' || usuarioAPI.rol === 'FUNCIONARIO ADMINISTRATIVO') {
-        if (usuarioAPI.sit_acad === 'NO VIGENTE') {
+        if (usuarioAPI.sit_acad === 'NO VIGENTE' || usuarioAPI.campus === 2) {
           return { success: false, message: 'Usuario no admitido' };
         }
         usuario.rut = usuarioAPI.rut.toString();

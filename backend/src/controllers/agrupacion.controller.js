@@ -437,12 +437,12 @@ async function abandonarAgrupacion(req, res) {
         const rutActual = decoded.rut;
         const user = await getUsuarioByRut(rut);
         if (user.length === 0) {
-            return res.code(404).send('Usuario no encontrado');
+            return res.code(404).send({ success: false, message: 'Usuario no encontrado' });
         }
 
         const agrupacion = await getAgrupacionById(id_agr);
         if (agrupacion.length === 0) {
-            return res.code(404).send('Agrupación no encontrada');
+            return res.code(404).send({ success: false, message: 'Agrupación no encontrada' });
         }
         const miembros = await getUsuariosdeAgrupacion(id_agr);
         let existe = false;
@@ -484,7 +484,7 @@ async function abandonarAgrupacion(req, res) {
 
         const result = await deleteUsuarioAgrupacion(rut, id_agr);
         if (!result) {
-            return res.code(500).send('Error al abandonar la agrupación');
+            return res.code(500).send({ success: false, message: 'Error al abandonar la agrupación' });
         }
         if (result === 'Agrupacion eliminada por falta de miembros') {
             return res.code(200).send({ success: true, message: 'Agrupación eliminada por falta de miembros' });
@@ -492,7 +492,7 @@ async function abandonarAgrupacion(req, res) {
         res.code(200).send({ success: true, message: 'Usuario eliminado de la agrupación' });
     } catch (error) {
         console.error('Error al abandonar la agrupación:', error);
-        res.code(500).send('Error al abandonar la agrupación');
+        res.code(500).send({ success: false, message: 'Error al abandonar la agrupación' });
     }
 }
 

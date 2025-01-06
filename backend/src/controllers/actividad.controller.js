@@ -101,20 +101,26 @@ async function crearActividad(req, reply) {
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
         const lider = await getLiderArray(body.id_agr);
-        const rol = await getRolUsuario(rut, body.id_agr).rol_agr;
+        const rol = await getRolUsuario(rut, body.id_agr);
+        const rolEnAgrupacion = rol.rol_agr;
         const agrupacion = await getAgrupacionById(body.id_agr);
+        const cupos = body.cupos;
         if (!agrupacion) {
             return reply.code(404).send({ success: false, message: 'No se encontro la agrupacion' });
         }
         if (agrupacion.verificado !== 'Verificado' && body.tipo === true) {
             return reply.code(403).send({ success: false, message: 'La agrupacion no esta acreditada' });
         }
-        if (rut !== lider[0].rut && rol !== 'Miembro oficial') {
+        if (rut !== lider[0].rut && rolEnAgrupacion !== 'Miembro oficial') {
             return reply.code(403).send({ success: false, message: 'No tienes permisos para crear actividades' });
         }
-        if (rol === 'Miembro oficial' && body.tipo === false) {
+        if (rolEnAgrupacion === 'Miembro oficial' && body.tipo === true) {
             return reply.code(403).send({ success: false, message: 'No tienes permisos para crear actividades publicas' });
         }
+        if (cupos > 10000) {
+            return reply.code(403).send({ success: false, message: 'El numero de cupos no puede ser mayor a 10000' });
+        }
+
 
         if (error) {
             // Si hay un error, retorna un error de validación
@@ -286,12 +292,13 @@ async function programarActividad(req, res) {
         const rutActual = decoded.rut;
         const lider = await getLider(id_agr);
         const rut = lider.rut;
-        const rol = await getRolUsuario(rutActual, id_agr).rol_agr;
+        const rol = await getRolUsuario(rutActual, id_agr);
+        const rolEnAgrupacion = rol.rol_agr;
         const act = await getActividadById(id_act);
         if (act.length === 0) {
             return res.send({ success: false, message: 'No se encontro la actividad' });
         }
-        if (rutActual !== rut && rol !== 'Miembro oficial') {
+        if (rutActual !== rut && rolEnAgrupacion !== 'Miembro oficial') {
             return res.code(401).send({ success: false, message: 'No tienes permisos para programar la actividad' });
         }
         const programacion = await getFechasActividades(id_act);

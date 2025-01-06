@@ -508,6 +508,10 @@
         </template>
         <v-list class="tultipCrear">
 
+          <v-list-item v-if="rolEnAgrupacion === 'Miembro oficial'" v-on:click="this.dialoginvitar = true">
+            <v-list-item-title>Invitar Usuarios</v-list-item-title>
+          </v-list-item>
+
           <v-list-item v-for="(item, index) in itemsFiltroRol" :key="index"
             v-on:click="this.$router.push(item.path + `${groupId}`)">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -1016,7 +1020,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.rol_agr === 'Miembro' || data.rol_agr === 'Miembro Oficial' || data.rol_agr === 'Lider') {
+          if (data.rol_agr === 'Miembro' || data.rol_agr === 'Miembro oficial' || data.rol_agr === 'Lider') {
             this.rolA = true;
             this.rolEnAgrupacion = data.rol_agr;
           } else {
@@ -1344,7 +1348,7 @@ export default {
                 fecha_creacion: elemento.fecha_creacion,
                 cupos: elemento.cupos,
                 tags: tags ? tags.TagsConNombre : [],
-                fecha_programada: programacion ? programacion : null,
+                fecha_programada: programacion ? programacion : 'Pendiente',
               };
             }));
             this.anadirAElementos(elementosAct);
@@ -1755,6 +1759,9 @@ export default {
       this.searchResults = this.searchResults.filter(i => i.id !== item.id); // Elimina el item de `searchResults`
     },
     formatearFecha(fecha) {
+      if(fecha === 'Pendiente') {
+        return 'Fecha pendiente';
+      }
       const date = new Date(fecha);
       const now = new Date();
 

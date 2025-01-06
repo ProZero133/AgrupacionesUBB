@@ -279,6 +279,9 @@ async function updateSolicitud(rut, id_agr) {
 
 async function deleteAgrupacion(id_agr) {
   try {
+
+    // Elimina la Apariencia 
+    const apariencia = await pool.query('DELETE FROM "Apariencia" WHERE id_agr = $1 RETURNING *', [id_agr]);
     // Elimina las actividades asociadas a la agrupación
     const idactByAgr = await pool.query('SELECT id_act FROM "Actividad" WHERE id_agr = $1', [id_agr]);
     const actividadesIds = idactByAgr.rows.map(row => row.id_act);

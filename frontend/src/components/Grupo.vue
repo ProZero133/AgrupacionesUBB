@@ -1278,12 +1278,11 @@ export default {
             'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
           },
         });
-
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        if (data.success === true) {
           return data.participantes.length;
         } else {
-          console.error('Error en la respuesta:', response.status);
+         return 0;
         }
       } catch (error) {
         console.error('Error al hacer fetch:', error);
@@ -2026,6 +2025,7 @@ export default {
           this.dialogRedesSociales = false;
           this.$root.showSnackBar('success', data.message, 'Operación exitosa');
         } else {
+          console.error('Error en la respuesta:', data.details);
           this.dialogRedesSociales = false;
           this.$root.showSnackBar('error', data.message, 'Operación fallida');
         }

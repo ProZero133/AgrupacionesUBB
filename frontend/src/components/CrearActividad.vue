@@ -340,15 +340,21 @@ export default {
             body: JSON.stringify({ nom_act, descripcion, imagen: this.idImagen, tipo, id_agr: this.groupId, cupos }),
           });
           // Verifica si la respuesta es exitosa
-          const data = await response.json();
-          if(data.success === false){
+          const datos = await response.json();
+          const data = datos.data;
+          if(datos.success === false){
             this.$root.showSnackBar('error', data.message, 'Error de creación');
             return;
           }
           if (response.ok) {
-            // Convierte la respuesta en formato JSON
+            this.dialog = false;
             const id_act = data.id_act;
             const fecha_actividad = this.date; // Convierte la fecha al formato YYYY-MM-DD
+            if(fecha_actividad === null){
+              this.tags.forEach(tag => this.RegistrarTag(tag.id_tag, id_act));
+              this.$root.showSnackBar('success', 'Actividad creada sin programación', 'Éxito');
+              this.$router.push(`/api/grupo/${this.groupId}`);
+            }
             const programarActividad = await fetch(`${global.BACKEND_URL}/programar/${id_act}/${this.groupId}`, {
               method: 'POST',
               headers: {

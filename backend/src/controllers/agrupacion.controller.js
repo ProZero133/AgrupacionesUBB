@@ -835,7 +835,12 @@ async function actualizarAparienciaAgrupacion(req, res) {
 async function actualizarRedesSociales(req, res) {
     try {
         const { id_agr } = req.params;
-        const redes = req.body;
+        let redes = req.body;
+        for (let key in redes) {
+            if (redes[key] === null) {
+                redes[key] = '';
+            }
+        }
         const { error } = redesSchema.validate(redes);
         if (error) {
             return res.status(400).send({ success: false, message: 'Datos de redes sociales inválidos', details: error.details });

@@ -132,7 +132,7 @@ async function crearActividad(req, reply) {
         const actividad = await createActividad(body);
 
         // Retorna la nueva actividad
-        reply.code(201).send(actividad);
+        reply.code(201).send({ success: true, message: 'Actividad creada', data: actividad });
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al insertar la actividad:', error);

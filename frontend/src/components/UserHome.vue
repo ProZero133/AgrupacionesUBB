@@ -695,7 +695,7 @@ export default {
         const data = await response.json();
         if (response.ok) {
           this.dialog = false;
-          this.$root.showSnackBar('succes', 'Te has unido a una actividad', 'Operacion exitosa');
+          this.$root.showSnackBar('success', 'Te has unido a una actividad', 'Operacion exitosa');
           this.VerActividadesParticipando(this.rut);
         } else {
           console.error(data.message);
@@ -836,7 +836,7 @@ export default {
         const data = await response.json();
         if (response.ok) {
           this.dialogActividades = false;
-          this.$root.showSnackBar('succes', 'Has abandonado una actividad', 'Operacion exitosa');
+          this.$root.showSnackBar('success', 'Has abandonado una actividad', 'Operacion exitosa');
           this.VerActividadesParticipando(this.rut);
         } else {
           console.error(data.message);

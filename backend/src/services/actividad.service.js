@@ -79,6 +79,7 @@ async function getActividadById(id) {
         
         // Retorna la actividad
         return actividad;
+        
     } catch (error) {
         // Maneja cualquier error que pueda ocurrir
         console.error('Error al obtener la actividad:', error);

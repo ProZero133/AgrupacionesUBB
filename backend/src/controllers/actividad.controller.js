@@ -122,6 +122,10 @@ async function crearActividad(req, reply) {
         }
 
 
+        if (body.imagen === undefined) {
+            body.imagen = 1;
+        }
+
         if (error) {
             // Si hay un error, retorna un error de validación
             reply.code(400).send(error.details.map(detail => detail.message));
@@ -155,7 +159,7 @@ async function actualizarCuposActividad(req, res) {
         }
         const programacion = await getFechasActividades(id_act);
         const fecha = programacion.rows;
-    
+
         if (fecha.length > 0) {
             return res.code(401).send({ success: false, message: 'La actividad ya tiene una fecha programada' });
         }
@@ -213,11 +217,11 @@ async function eliminarActividad(req, res) {
             return res.send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
         // Elimina la actividad
-        const validarEliminacion=await deleteActividad(id_act);
-        if(validarEliminacion === 'Actividad eliminada'){
+        const validarEliminacion = await deleteActividad(id_act);
+        if (validarEliminacion === 'Actividad eliminada') {
             return res.code(200).send({ success: true, message: 'Actividad eliminada' });
         }
-        if(validarEliminacion === 'Actividad eliminada para los usuarios'){
+        if (validarEliminacion === 'Actividad eliminada para los usuarios') {
             return res.code(200).send({ success: true, message: 'Actividad eliminada para los usuarios' });
         }
         return res.code(500).send({ success: false, message: 'Error al eliminar la actividad' });
@@ -245,9 +249,9 @@ async function eliminarActividadPublica(req, res) {
             res.code(403).send({ success: false, message: 'No tienes permisos para eliminar la actividad' });
         }
 
-        
-        const respuesta=await deleteActividadPublica(id_act);
-        if(respuesta!=='Actividad eliminada'){
+
+        const respuesta = await deleteActividadPublica(id_act);
+        if (respuesta !== 'Actividad eliminada') {
             return res.code(500).send({ success: false, message: 'Error al eliminar la actividad' });
         }
         // Notifica al lider 
@@ -260,9 +264,9 @@ async function eliminarActividadPublica(req, res) {
         await notifyRechazarActPublica(mailDetails);
 
         // Retorna un mensaje de éxito
-        res.status(200).send({success: true, message:'Actividad eliminada'});
+        res.status(200).send({ success: true, message: 'Actividad eliminada' });
     } catch (error) {
-        res.status(500).send({success: false, message:'Error al eliminar la actividad'});
+        res.status(500).send({ success: false, message: 'Error al eliminar la actividad' });
     }
 }
 
@@ -302,7 +306,7 @@ async function programarActividad(req, res) {
             return res.code(401).send({ success: false, message: 'No tienes permisos para programar la actividad' });
         }
         const programacion = await getFechasActividades(id_act);
-        
+
         const data = programacion.rows;
         if (data.length > 0) {
             return res.code(401).send({ success: false, message: 'La actividad ya tiene una fecha programada' });

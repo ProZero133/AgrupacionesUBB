@@ -6,7 +6,7 @@ const { getPublicacion, getPublicacionById, createPublicacion, updatePublicacion
 const { getPostById } = require("../services/post.service.js");
 const { getFormularioById } = require("../services/formulario.service");
 const { getLiderArray } = require("../services/agrupacion.service.js");
-const {obtenerTagPorId} = require('../controllers/tags.controller.js');
+const { obtenerTagPorId } = require('../controllers/tags.controller.js');
 const { publicacionBodySchema } = require("../schema/publicacion.schema.js");
 
 /**
@@ -183,7 +183,12 @@ async function crearPublicacion(req, res) {
         if (error) {
             return res.code(400).send(error.message);
         }
-
+        
+        // si no se envia una imagen se le asigna una imagen por defecto
+        if (req.body.imagen === undefined) {
+            req.body.imagen = 1;
+        }
+        
         // Crea una nueva publicacion
         const newpublicacion = await createPublicacion(value);
 

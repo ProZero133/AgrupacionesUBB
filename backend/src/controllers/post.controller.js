@@ -1,9 +1,9 @@
 "use strict";
 
-const {getPosts, getPostById, createPost, updatePost, deletePost} = require("../services/post.service");
-const {getPublicacionById} = require("../services/publicacion.service.js");
+const { getPosts, getPostById, createPost, updatePost, deletePost } = require("../services/post.service");
+const { getPublicacionById } = require("../services/publicacion.service.js");
 const { getLiderArray } = require("../services/agrupacion.service.js");
-const postBodySchema  = require("../schema/post.schema.js");
+const postBodySchema = require("../schema/post.schema.js");
 
 /**
  * Obtiene todas los posts
@@ -60,7 +60,7 @@ async function crearPost(req, res) {
         // Valida el cuerpo de la petición
         const decoded = await req.jwtVerify();
         const rut = decoded.rut;
-        const { id_pub} = req.body;
+        const { id_pub } = req.body;
         const publicacion = await getPublicacionById(id_pub);
         const lider = await getLiderArray(publicacion.rows[0].id_agr);
         if (rut !== lider[0].rut) {
@@ -74,6 +74,12 @@ async function crearPost(req, res) {
             res.code(400).send(error.details.map(detail => detail.message));
             return;
         }
+
+        // si no se envia una imagen se le asigna una imagen por defecto
+        if (req.body.imagen === undefined) {
+            req.body.imagen = 1;
+        }
+
 
         // Crea un nuevo post
         const post = await createPost(req.body);
@@ -125,7 +131,7 @@ async function eliminarPost(req, res) {
         // Elimina el post por su id
         const response = await deletePost(id);
 
-        if(response){
+        if (response) {
             res.code(204).send({ success: true, message: 'Post eliminado correctamente' });
             return;
         }

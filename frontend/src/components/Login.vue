@@ -18,7 +18,7 @@
     </v-form>
 
     <v-dialog v-model="dialog" max-width="350">
-      <v-card>
+      <v-card class="dialogCodigo">
         <v-card-title class="headline">Ingrese el código de verificación</v-card-title>
         <v-card-text>
           <v-text-field v-model="verificationCode" label="Código de verificación" required></v-text-field>
@@ -162,6 +162,9 @@ export default {
   width: 35%;
   min-width: 400px;
   max-width: 400px;
+}
+.dialogCodigo{
+  background: rgb(221, 221, 221);
 }
 
 .switch-custom {

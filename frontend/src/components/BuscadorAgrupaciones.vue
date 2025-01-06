@@ -497,8 +497,6 @@ export default {
 .gruposCard {
   min-height: 400px;
   max-height: 400px;
-  min-width: 300px;
-  max-width: 300px;
   margin: 1%;
   box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.2);
 }

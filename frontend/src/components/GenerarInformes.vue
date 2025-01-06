@@ -525,6 +525,7 @@ export default {
 
                     const datos = await response.json();
                     const data = datos.data;
+                    
                     this.gruposConID = data;
                     if (datos.success === true) {
                         this.grupos = data.map(grupo => grupo.nombre_agr);

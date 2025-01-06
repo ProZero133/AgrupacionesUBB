@@ -9,7 +9,7 @@ const { getAgrupaciones, getAgrupacionById, getRolUsuario, createAgrupacion, upd
     updateRedesSociales } = require("../services/agrupacion.service.js");
 const { agrupacionBodySchema, agrupacionId } = require("../schema/agrupacion.schema.js");
 const { aparienciaSchema } = require("../schema/apariencia.schema.js");
-const {redesSchema} = require("../schema/redes.schema.js");
+const { redesSchema } = require("../schema/redes.schema.js");
 const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = require("../services/user.service.js");
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario, inviteUsuario, reportarAgrupacionCorreo } = require("../services/mail.service.js");
@@ -19,6 +19,8 @@ const crypto = require('crypto')
 const ALGORITHM = 'aes-256-cbc';
 const SECRET_KEY = Buffer.from('aluecr2etfsyg2345578h01234g67890', 'utf-8');
 const IV = Buffer.alloc(16, 0);
+const fs = require('fs');
+const path = require('path');
 
 async function VerGrupos(request, reply) {
     const agrupaciones = await getAgrupaciones();
@@ -68,6 +70,12 @@ async function crearAgrupacion(req, res) {
         const fechaActual = new Date();
         req.body.fecha_creacion = fechaActual;
         req.body.verificado = "Noverificado";
+
+        // si no se envia una imagen se le asigna una imagen por defecto
+        if (req.body.imagen === undefined) {
+            req.body.imagen = 1;
+        }
+
         // Crea una nueva agrupacion
         const agrupacion = await createAgrupacion(req.body);
 
@@ -408,7 +416,7 @@ async function CambiarRoldeUsuario(req, res) {
             return res.code(200).send({ success: true, message: 'Rol cambiado para el usuario actual y nuevo lider' });
         }
 
-        if(rut !== rutLider && rol === 'Lider'){
+        if (rut !== rutLider && rol === 'Lider') {
             const response = await updateRolUsuario(rutLider, id_agr, 'Miembro oficial');
             if (!response) {
                 return res.code(500).send('Error al cambiar el rol del antiguo lider');

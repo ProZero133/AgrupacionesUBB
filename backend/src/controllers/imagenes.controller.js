@@ -35,6 +35,14 @@ async function crearImagen(req, res) {
             return res.code(400).send(error.message);
         }
 
+		const defaultImagePath = path.join(__dirname, '../../../frontend/src/assets/LogoPlataforma.png');
+		// si value esta vacio retorna una imagen por defecto
+		if (value === undefined) {
+			value = {
+				imagen: defaultImagePath,
+			};
+		}
+
         // Crea una nueva publicacion
         const newimagen = await createImagen(value);
 

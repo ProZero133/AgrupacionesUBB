@@ -48,7 +48,6 @@ async function createAgrupacion(agrupacion) {
     if (lider.rows.length === 0) {
       throw new Error('Error al insertar el lider');
     }
-
     
       const BordeDescripcion = '20px';
       const FondoDescripcion = '#FFFFFF';

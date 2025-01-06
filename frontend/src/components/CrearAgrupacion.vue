@@ -173,28 +173,6 @@ export default {
         async eliminarTag(item) {
             this.tags = this.tags.filter(tag => tag.id !== item.id);
         },
-        async PostearImagen() {
-            try {
-                const response = await fetch(`${global.BACKEND_URL}/imagen`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.$cookies.get('TokenAutorizacion')}`,
-                    },
-                    body: JSON.stringify({ imagen: this.urlImagen }),
-                });
-                // Verifica si la respuesta es exitosa
-                if (response.ok) {
-                    // Convierte la respuesta en formato JSON
-                    const data = await response.json();
-                    this.idImagen = data.id_imagen;
-                } else {
-                    console.error('Error en la respuesta:', response.status);
-                }
-            } catch (error) {
-                console.error('Error al hacer fetch:', error);
-            }
-        },
 
         async PostearImagen() {
             try {

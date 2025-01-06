@@ -1,19 +1,19 @@
 <template>
+  <div class="background-container">
   <v-container class="container-loginrut">
 
-    <v-switch v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
+    <v-switch style="color: white;" color="green" v-model="showLoginByRut" label="Utilizar Rut para iniciar sesion" class="switch-custom"></v-switch>
 
-    <v-img src="https://intranet.ubiobio.cl/c100c0d63e8ca449b605510299f54303/img/ubb_logo_new.png" alt="Logo"></v-img>
     <v-form v-if="showLoginByRut" class="form-loginrut" @submit.prevent="login">
-      <v-label>Iniciar sesión con RUT</v-label>
+      <v-label style="color: white;">Iniciar sesión con RUT</v-label>
       <v-text-field class="tfCredenciales" v-model="username" label="Rut sin puntos ni digito verificador"
         required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
 
     <v-form v-else class="form-logincorreo" @submit.prevent="login">
-      <v-label>Iniciar sesión con Correo institucional</v-label>
-      <v-text-field class="tfCorreo" v-model="email" label="Correo institucional" required></v-text-field>
+      <v-label style="color: white;">Iniciar sesión con Correo institucional</v-label>
+      <v-text-field  class="tfCorreo" v-model="email" label="Correo institucional" color="white" required></v-text-field>
       <v-btn @click="login" color="primary">Enviar</v-btn>
     </v-form>
 
@@ -30,6 +30,7 @@
       </v-card>
     </v-dialog>
   </v-container>
+</div>
 </template>
 
 <script>
@@ -128,8 +129,26 @@ export default {
 </script>
 
 <style scoped>
+
+.background-container {
+  background-color: #1B2E51; /* Color de fondo */
+  background-image: url('@/assets/ConectaUBBLine.png'); /* Imagen de fondo */
+  background-size: contain; /* Ajustar la imagen para cubrir todo el fondo */
+  background-position: top; /* Centrar la imagen de fondo */
+  background-repeat: no-repeat; /* No repetir la imagen de fondo */
+  height: 100vh; /* Altura completa de la ventana */
+  width: 100vw; /* Ancho completo de la ventana */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .container-loginrut {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.158);
+  background-image: url('@/assets/placeholderSinFondo.png');
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center;
   /* Fondo blanco semi-transparente */
   border: 1px solid rgba(0, 0, 0, 0.2);
   /* Borde negro semi-transparente */
@@ -177,10 +196,14 @@ export default {
 }
 
 .tfCorreo {
+  background-color: rgba(0, 0, 0, 0.384);
   min-width: 300px;
+  color: white;
 }
 
 .tfCredenciales {
+  background-color: rgba(0, 0, 0, 0.384);
   min-width: 350px;
+  color: white;
 }
 </style>

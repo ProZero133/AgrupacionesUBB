@@ -119,9 +119,18 @@
                                 <v-checkbox v-model="item.success" @change="añadirAgrupacion(item)"></v-checkbox>
                             </template>
                         </v-data-table>
-                        <v-alert v-if="this.rol === 'Estudiante'" type="warning" style="font-size: 19px; margin: 2%; white-space: normal; text-align: justify;">
-                            Estos informes solo contienen las agrupaciones en las que participas. Si deseas recibir un informe completo de tus agrupaciones puede acercarce a Direccion de Desarrollo Estudiantil para solicitarlas
+                        <v-alert v-if="this.rol === 'Estudiante'" type="warning"
+                            style="font-size: 19px; margin: 2%; white-space: normal; text-align: justify;">
+                            Estos informes solo contienen las agrupaciones en las que participas. Si deseas recibir un
+                            informe completo de tus agrupaciones puede acercarce a Direccion de Desarrollo Estudiantil
+                            para
+                            solicitarlas
                         </v-alert>
+                        <v-row>
+                            <v-col cols="12" class="d-flex justify-end">
+                                <v-btn elevation="24" color="#014898" @click="selectTodo">Seleccionar Todas</v-btn>
+                            </v-col>
+                        </v-row>
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-end">
                                 <v-btn elevation="24" icon="mdi-table-refresh" color="#014898" :disabled="isGenerating"
@@ -300,7 +309,6 @@ export default {
 
         // headers de la tabla de agrupaciones
         headersAgrupacionesSeleccionadas: [
-            { title: 'id', value: 'id_agr' },
             { title: 'Nombre de la agrupación', value: 'nombre_agr', sortable: true },
             { title: 'Estado en la plataforma', value: 'verificado', sortable: true },
             { title: 'Seleccionar', value: 'check' },
@@ -591,6 +599,10 @@ export default {
             return this.selectedGrupos;
         },
 
+        async selectTodo() {
+            this.selectedGrupos = this.gruposConID;
+        },
+
         async obtenerActividadesGrupo() {
             try {
                 //recorre this.gruposConID y si el id_agr de gruposConID esta en selectedGrupos, añade el valor completo a resultadoGrupos
@@ -751,23 +763,27 @@ export default {
                     // Genera la página
                     doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, overflow: 'linebreak' });
 
-                    // Divide las actividades en páginas de 15 actividades cada una
-                    for (let i = 0; i < columnas.length; i += 15) {
-                        if (i > 0) {
-                            doc.addPage();
+                    if (columnas.length === 0) {
+                        doc.text('Esta agrupación no tiene actividades.', 10, 30);
+                    } else {
+                        // Divide las actividades en páginas de 15 actividades cada una
+                        for (let i = 0; i < columnas.length; i += 15) {
+                            if (i > 0) {
+                                doc.addPage();
+                            }
+                            const pageContent = columnas.slice(i, i + 15);
+                            doc.autoTable({
+                                head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
+                                body: pageContent.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
+                                columnStyles: {
+                                    0: { cellWidth: 40 }, // nombre act
+                                    1: { cellWidth: 20 }, // tipo
+                                    2: { cellWidth: 25 }, // fecha
+                                },
+                                styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
+                                startY: 40,
+                            });
                         }
-                        const pageContent = columnas.slice(i, i + 15);
-                        doc.autoTable({
-                            head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
-                            body: pageContent.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
-                            columnStyles: {
-                                0: { cellWidth: 40 }, // nombre act
-                                1: { cellWidth: 20 }, // tipo
-                                2: { cellWidth: 25 }, // fecha
-                            },
-                            styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
-                            startY: 40,
-                        });
                     }
                 });
 
@@ -786,7 +802,6 @@ export default {
                 doc.save('Informe_Actividades_ConectaUBB.pdf');
             }
         },
-
         // AGRUPACIONES
         async generarInformeAgrupaciones(rut) {
             if (this.rol === "Admin") {

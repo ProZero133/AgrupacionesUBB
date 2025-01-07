@@ -751,9 +751,6 @@ export default {
                             'Descripción': item.descripcion,
                         }));
 
-                        // Genera la página
-                        doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, align: 'left' });
-
                         if (columnas.length === 0) {
                             doc.text('Esta agrupación no tiene actividades.', 10, 30);
                         } else {
@@ -762,6 +759,9 @@ export default {
                                 if (i > 0 || index > 0) {
                                     doc.addPage();
                                 }
+                                // Genera la página
+                                doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, align: 'left' });
+
                                 const pageContent = columnas.slice(i, i + 15);
                                 autoTable(doc, {
                                     head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],

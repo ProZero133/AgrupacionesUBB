@@ -304,7 +304,6 @@ export default {
 
         // headers de la tabla de agrupaciones
         headersAgrupacionesSeleccionadas: [
-            { title: 'index', value: '.id_agr', sortable: false },
             { title: 'Nombre de la agrupación', value: 'nombre_agr', sortable: true },
             { title: 'Estado de la agrupación', value: 'verificado', sortable: true },
         ],
@@ -689,9 +688,6 @@ export default {
             }
             this.contenidoPDF = this.actividades.flat();
 
-            console.log("this.contenidoPDF ", this.contenidoPDF);
-            console.log("grupos sin actividades ", this.gruposSinActividades);
-
             // si dentro del array el atributo "Aprobado" es false se cambia por "Rechazado"
             this.contenidoPDF.forEach(item => {
                 if (item.tipo === false) {
@@ -756,7 +752,7 @@ export default {
                         }));
 
                         // Genera la página
-                        doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, overflow: 'linebreak' });
+                        doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, align: 'left' });
 
                         if (columnas.length === 0) {
                             doc.text('Esta agrupación no tiene actividades.', 10, 30);
@@ -778,27 +774,27 @@ export default {
                                     styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
                                     startY: 40,
                                     pageBreak: 'auto', // Controla los saltos de página
+                                    didDrawPage: function (data) {
+                                        // Añadir pie de página
+                                        const pageSize = doc.internal.pageSize;
+                                        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                                        doc.setFontSize(10);
+                                        doc.text('______________________________', 10, pageHeight - 20);
+                                        doc.text('Firma del estudiante o docente', 15, pageHeight - 10);
+
+                                        doc.text('______________________________', 125, pageHeight - 20);
+                                        doc.text('Firma de Direccion de Desarrollo', 130, pageHeight - 10);
+                                        doc.text('Estudiantil', 150, pageHeight - 5);
+                                    }
                                 });
                             }
                         }
                     });
-
-                    doc.setFontSize(10);
-                    const pageCount = doc.internal.getNumberOfPages();
-                    for (let i = 1; i <= pageCount; i++) {
-                        doc.setPage(i);
-                        doc.setFontSize(12);
-                        doc.text('______________________________', 10, 270);
-                        doc.text('Firma del estudiante o docente', 15, 280);
-
-                        doc.text('______________________________', 125, 270);
-                        doc.text('Firma de Direccion de Desarrollo', 130, 280);
-                        doc.text('Estudiantil', 150, 285);
-                    }
                 }
 
                 // Añadir página para agrupaciones sin actividades
                 if (this.gruposSinActividades.length > 0) {
+                    doc.addPage();
                     doc.text('Las siguientes agrupaciones no cuentan con actividades realizadas', 10, 11, { maxWidth: 180, overflow: 'linebreak' });
                     const sinActividades = this.gruposSinActividades.map(grupo => [grupo.nombre_agr, new Date(grupo.fecha_creacion).toLocaleDateString()]);
                     const maxRowsPerPage = 30;
@@ -811,6 +807,18 @@ export default {
                             head: [['Nombre de la Agrupación', 'Fecha de Creación']],
                             body: rows,
                             startY: 20,
+                            didDrawPage: function (data) {
+                                // Añadir pie de página
+                                const pageSize = doc.internal.pageSize;
+                                const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                                doc.setFontSize(10);
+                                doc.text('______________________________', 10, pageHeight - 20);
+                                doc.text('Firma del estudiante o docente', 15, pageHeight - 10);
+
+                                doc.text('______________________________', 125, pageHeight - 20);
+                                doc.text('Firma de Direccion de Desarrollo', 130, pageHeight - 10);
+                                doc.text('Estudiantil', 150, pageHeight - 5);
+                            }
                         });
                     }
                 }

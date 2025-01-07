@@ -278,7 +278,7 @@ async function reportarAgrupacionCorreo(mailDetails) {
     replacements = {
         rut: mailDetails.rut,
         nombre: mailDetails.nombre,
-        correo: mailDetails.lider_correo,
+        correo: mailDetails.correo,
         nombre_agr: mailDetails.nombre_agr,
         motivo: mailDetails.motivo,
     };

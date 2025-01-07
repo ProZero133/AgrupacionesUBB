@@ -14,7 +14,8 @@ const { getUsuarioByRut, getUsuarioByCorreo, obtenerUsuarioPlataforma } = requir
 const { obtenerPublicacionesPorId } = require("../controllers/publicacion.controller.js");
 const { notifyPublicacion, integrateUsuario, inviteUsuario, reportarAgrupacionCorreo } = require("../services/mail.service.js");
 const { obtenerTagPorId } = require('../controllers/tags.controller.js');
-const { validarUsuario } = require('../services/auth.service.js');
+const { validarUsuarioRut } = require('../services/auth.service.js');
+const { obtenerAdministradoresPlataforma } = require('../services/admin.service.js');
 const crypto = require('crypto')
 const ALGORITHM = 'aes-256-cbc';
 const SECRET_KEY = Buffer.from('aluecr2etfsyg2345578h01234g67890', 'utf-8');
@@ -888,17 +889,19 @@ async function reportarAgrupacion(req, res) {
 
         const agrupacion = await getAgrupacionById(id_agr);
         const usuario = await getUsuarioByRut(rut);
+        const admin = await obtenerAdministradoresPlataforma();
 
-        const mailDetails = {
-            rut: usuario.rut,
-            nombre: usuario.nombre,
-            lider_correo: usuario.correo,
-            nombre_agr: agrupacion.nombre_agr,
-            motivo: motivo
-        };
-
-        await reportarAgrupacionCorreo(mailDetails);
-
+        for (let i = 0; i < admin.length; i++) {
+            const adminCompleto = await validarUsuarioRut(admin[i].rut);
+            const mailDetails = {
+                rut: usuario.rut,
+                nombre: usuario.nombre,
+                nombre_agr: agrupacion.nombre_agr,
+                motivo: motivo,
+                correo: adminCompleto.usuario.correo
+            };
+            await reportarAgrupacionCorreo(mailDetails);
+        }
 
     } catch (error) {
         console.error('Error al reportar la agrupación:', error);

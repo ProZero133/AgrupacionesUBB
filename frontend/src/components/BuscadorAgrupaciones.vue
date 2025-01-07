@@ -423,7 +423,6 @@ export default {
     },
 
     async reportarAgrupacion(idAgrupacion) {
-
       try {
         const response = await fetch(`${global.BACKEND_URL}/reportarAgrupacion/${idAgrupacion}/${this.rut}`, {
           method: 'POST',

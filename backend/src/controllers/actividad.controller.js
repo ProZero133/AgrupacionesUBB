@@ -66,7 +66,7 @@ async function ObtenerActividadesPorAgrupacion(req, res) {
     try {
         const respuesta = await getActividadesByAgrupacion(req.params.id);
         if (respuesta.length === 0) {
-            return res.code(404).send({ success: false, message: 'No se encontraron actividades en la agrupacion ' + req.params.id });
+            return res.code(404).send({ success: false, message: 'No se encontraron actividades en la agrupacion ' + req.params.id , data: req.params.id });
         } else {
             return res.code(200).send(respuesta);
         }

@@ -101,7 +101,8 @@
                             prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
 
                         <v-data-table :headers="headersAgrupacionesSeleccionadas" :items="gruposConID"
-                            class="elevation-5" :items-per-page="5" :search="AgrupacionBuscada">
+                            class="elevation-5" :items-per-page="5" :search="AgrupacionBuscada" show-select
+                            item-value="id_agr" v-model="selectedGrupos">
                             <template v-slot:item.nombre_agr="{ item }">
                                 <div
                                     style="max-width: 300px; white-space: wrap; overflow: hidden; text-overflow: ellipsis;">
@@ -115,10 +116,8 @@
                                     {{ item.visible === false ? 'Invisible' : (item.verificado === 'Noverificado' ? 'No verificado' : item.verificado) }}
                                 </v-chip>
                             </template>
-                            <template v-slot:item.check="{ item }">
-                                <v-checkbox v-model="item.success" @change="añadirAgrupacion(item)"></v-checkbox>
-                            </template>
                         </v-data-table>
+
                         <v-alert v-if="this.rol === 'Estudiante'" type="warning"
                             style="font-size: 19px; margin: 2%; white-space: normal; text-align: justify;">
                             Estos informes solo contienen las agrupaciones en las que participas. Si deseas recibir un
@@ -126,11 +125,6 @@
                             para
                             solicitarlas
                         </v-alert>
-                        <v-row>
-                            <v-col cols="12" class="d-flex justify-end">
-                                <v-btn elevation="24" color="#014898" @click="selectTodo">Seleccionar Todas</v-btn>
-                            </v-col>
-                        </v-row>
                         <v-row>
                             <v-col cols="12" sm="12" md="12" lg="12" class="d-flex justify-end">
                                 <v-btn elevation="24" icon="mdi-table-refresh" color="#014898" :disabled="isGenerating"
@@ -254,7 +248,7 @@
 <script>
 import { useRouter } from 'vue-router';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export default {
     name: 'GenerarInformes',
@@ -305,13 +299,14 @@ export default {
         actividades: [],
         publicaciones: [],
         formularios: [],
+        gruposSinActividades: [],
         AgrupacionBuscada: '',
 
         // headers de la tabla de agrupaciones
         headersAgrupacionesSeleccionadas: [
+            { title: 'index', value: '.id_agr', sortable: false },
             { title: 'Nombre de la agrupación', value: 'nombre_agr', sortable: true },
-            { title: 'Estado en la plataforma', value: 'verificado', sortable: true },
-            { title: 'Seleccionar', value: 'check' },
+            { title: 'Estado de la agrupación', value: 'verificado', sortable: true },
         ],
 
         // headers de la tabla de actividades
@@ -588,25 +583,19 @@ export default {
 
         // ACTIVIDADES
         añadirAgrupacion(item) {
-            if (item.success) {
+            const index = this.selectedGrupos.indexOf(item);
+            if (index === -1) {
                 this.selectedGrupos.push(item);
             } else {
-                const index = this.selectedGrupos.indexOf(item);
-                if (index > -1) {
-                    this.selectedGrupos.splice(index, 1);
-                }
+                this.selectedGrupos.splice(index, 1);
             }
             return this.selectedGrupos;
-        },
-
-        async selectTodo() {
-            this.selectedGrupos = this.gruposConID;
         },
 
         async obtenerActividadesGrupo() {
             try {
                 //recorre this.gruposConID y si el id_agr de gruposConID esta en selectedGrupos, añade el valor completo a resultadoGrupos
-                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.some(selectedGrupo => selectedGrupo.id_agr === grupo.id_agr));
+                this.resultadoGrupos = this.gruposConID.filter(grupo => this.selectedGrupos.includes(grupo.id_agr));
 
                 //Obtiene las actividades de los grupos seleccionados si se selecciono la opcion de actividades
                 if (this.Actividades.includes('Actividades')) {
@@ -634,13 +623,13 @@ export default {
                         if (response.ok) {
                             // Añade las actividades obtenidas a un arreglo
                             this.actividades = this.actividades.concat(data);
-
+                        } else if (response.status === 404) {
+                            this.gruposSinActividades.push(grupos[i]);
                         } else {
-                            this.$root.showSnackBar('error', 'Esta agrupacion no cuenta con actividades');
+                            console.error('Error al obtener actividades:', response.status);
                         }
                     }
                 }
-
             } catch (error) {
                 console.error('Error al hacer fetch:', error);
             }
@@ -659,7 +648,6 @@ export default {
                         },
                     });
                     const data = await response.json();
-                    console.log(data);
 
                     if (response.ok) {
 
@@ -677,6 +665,7 @@ export default {
         },
 
         async generarTabla() {
+            this.gruposSinActividades = [];
 
             // verifica si el array de agrupaciones esta vacio
             if (this.selectedGrupos.length === 0) {
@@ -700,7 +689,8 @@ export default {
             }
             this.contenidoPDF = this.actividades.flat();
 
-            console.log(this.contenidoPDF);
+            console.log("this.contenidoPDF ", this.contenidoPDF);
+            console.log("grupos sin actividades ", this.gruposSinActividades);
 
             // si dentro del array el atributo "Aprobado" es false se cambia por "Rechazado"
             this.contenidoPDF.forEach(item => {
@@ -709,6 +699,12 @@ export default {
                 }
                 if (item.tipo === true) {
                     item.tipo = "Publica";
+                }
+            });
+
+            this.contenidoPDF.forEach(item => {
+                if (item.success === false) {
+                    item.nombre_agr = "Esta agrupacion no posee actividades";
                 }
             });
 
@@ -740,6 +736,7 @@ export default {
                 const contenidoPorAgrupacion = contenidoValido.reduce((acc, item) => {
                     const grupo = this.gruposConID.find(grupo => grupo.id_agr === item.id_agr);
                     const nombreAgr = grupo ? grupo.nombre_agr : 'Sin Agrupación';
+
                     if (!acc[nombreAgr]) {
                         acc[nombreAgr] = [];
                     }
@@ -747,57 +744,75 @@ export default {
                     return acc;
                 }, {});
 
-                // Genera una página para cada grupo
-                Object.keys(contenidoPorAgrupacion).forEach((nombreAgr, index) => {
-                    if (index > 0) {
-                        doc.addPage();
-                    }
-                    const contenido = contenidoPorAgrupacion[nombreAgr];
-                    const columnas = contenido.map(item => ({
-                        'Nombre Actividad': item.nom_act,
-                        'Visibilidad': item.tipo,
-                        'Fecha': item.fecha_creacion,
-                        'Descripción': item.descripcion,
-                    }));
+                if (this.actividades.length > 0) {
+                    // Genera una página para cada grupo
+                    Object.keys(contenidoPorAgrupacion).forEach((nombreAgr, index) => {
+                        const contenido = contenidoPorAgrupacion[nombreAgr];
+                        const columnas = contenido.map(item => ({
+                            'Nombre Actividad': item.nom_act,
+                            'Visibilidad': item.tipo,
+                            'Fecha': item.fecha_creacion,
+                            'Descripción': item.descripcion,
+                        }));
 
-                    // Genera la página
-                    doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, overflow: 'linebreak' });
+                        // Genera la página
+                        doc.text(`Actividades de la agrupacion "${nombreAgr}"`, 10, 11, { maxWidth: 180, overflow: 'linebreak' });
 
-                    if (columnas.length === 0) {
-                        doc.text('Esta agrupación no tiene actividades.', 10, 30);
-                    } else {
-                        // Divide las actividades en páginas de 15 actividades cada una
-                        for (let i = 0; i < columnas.length; i += 15) {
-                            if (i > 0) {
-                                doc.addPage();
+                        if (columnas.length === 0) {
+                            doc.text('Esta agrupación no tiene actividades.', 10, 30);
+                        } else {
+                            // Divide las actividades en páginas de 15 actividades cada una
+                            for (let i = 0; i < columnas.length; i += 15) {
+                                if (i > 0 || index > 0) {
+                                    doc.addPage();
+                                }
+                                const pageContent = columnas.slice(i, i + 15);
+                                autoTable(doc, {
+                                    head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
+                                    body: pageContent.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
+                                    columnStyles: {
+                                        0: { cellWidth: 40 }, // nombre act
+                                        1: { cellWidth: 20 }, // tipo
+                                        2: { cellWidth: 25 }, // fecha
+                                    },
+                                    styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
+                                    startY: 40,
+                                    pageBreak: 'auto', // Controla los saltos de página
+                                });
                             }
-                            const pageContent = columnas.slice(i, i + 15);
-                            doc.autoTable({
-                                head: [['Nombre Actividad', 'Tipo', 'Fecha', 'Descripción']],
-                                body: pageContent.map(col => [col['Nombre Actividad'], col['Visibilidad'], col['Fecha'], col['Descripción']]),
-                                columnStyles: {
-                                    0: { cellWidth: 40 }, // nombre act
-                                    1: { cellWidth: 20 }, // tipo
-                                    2: { cellWidth: 25 }, // fecha
-                                },
-                                styles: { overflow: 'linebreak' }, // Ajusta el texto que se desborda
-                                startY: 40,
-                            });
                         }
+                    });
+
+                    doc.setFontSize(10);
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFontSize(12);
+                        doc.text('______________________________', 10, 270);
+                        doc.text('Firma del estudiante o docente', 15, 280);
+
+                        doc.text('______________________________', 125, 270);
+                        doc.text('Firma de Direccion de Desarrollo', 130, 280);
+                        doc.text('Estudiantil', 150, 285);
                     }
-                });
+                }
 
-                doc.setFontSize(10);
-                const pageCount = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(12);
-                    doc.text('______________________________', 10, 270);
-                    doc.text('Firma del estudiante o docente', 15, 280);
-
-                    doc.text('______________________________', 125, 270);
-                    doc.text('Firma de Direccion de Desarrollo', 130, 280);
-                    doc.text('Estudiantil', 150, 285);
+                // Añadir página para agrupaciones sin actividades
+                if (this.gruposSinActividades.length > 0) {
+                    doc.text('Las siguientes agrupaciones no cuentan con actividades realizadas', 10, 11, { maxWidth: 180, overflow: 'linebreak' });
+                    const sinActividades = this.gruposSinActividades.map(grupo => [grupo.nombre_agr, new Date(grupo.fecha_creacion).toLocaleDateString()]);
+                    const maxRowsPerPage = 30;
+                    for (let i = 0; i < sinActividades.length; i += maxRowsPerPage) {
+                        if (i > 0) {
+                            doc.addPage();
+                        }
+                        const rows = sinActividades.slice(i, i + maxRowsPerPage);
+                        autoTable(doc, {
+                            head: [['Nombre de la Agrupación', 'Fecha de Creación']],
+                            body: rows,
+                            startY: 20,
+                        });
+                    }
                 }
                 doc.save('Informe_Actividades_ConectaUBB.pdf');
             }

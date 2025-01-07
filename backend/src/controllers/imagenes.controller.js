@@ -1,5 +1,6 @@
 const { getImagenes, getImagenbyId, createImagen, deleteImagen } = require('../services/imagenes.service');
 const { imagenesBodySchema } = require('../schema/imagenes.schema.js');
+const path = require('path');
 
 async function obtenerImagenes(req, reply) {
 	try {

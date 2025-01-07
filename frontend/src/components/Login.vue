@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import bcrypt from 'bcryptjs';
 export default {
   name: 'Login',
   data() {
@@ -91,7 +92,8 @@ export default {
       }
     },
     async verifyCode() {
-      if (this.verificationCode === this.serverCode) {
+      const isMatch = await bcrypt.compare(this.verificationCode, this.serverCode);
+      if (isMatch) {
         try {
           const nombre = this.userData.nombre;
           const rut = this.userData.rut;

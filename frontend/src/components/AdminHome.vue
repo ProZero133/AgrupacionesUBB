@@ -444,7 +444,8 @@ export default {
         });
         // Para cada grupo, obtener VerTagsGrupo
         if (response.ok) {
-          const data = await response.json();
+          const datos = await response.json();
+          const data = datos.data;
 
           // ordena las agrupaciones por orden "Verificado" y "No verificado"
           data.sort((a, b) => (a.verificado > b.verificado) ? -1 : 1);
@@ -586,6 +587,7 @@ export default {
         }
         this.dialogUsuario = true;
       } catch (error) {
+        this.$root.showSnackBar('error', 'El usuario no pertenece a ninguna agrupación');
         console.error('Error al hacer fetch:', error);
       }
     },
@@ -758,8 +760,8 @@ export default {
 }
 
 .gruposCard {
-  min-height: 360px;
-  max-height: 360px;
+  min-height: 400px;
+  max-height: 400px;
   margin: 1%;
   box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.2);
 }

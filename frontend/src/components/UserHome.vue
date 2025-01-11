@@ -547,10 +547,9 @@ export default {
           },
         });
         const dataPublicas = await actividadesPublicas.json();
-
-        if (response.ok && actividadesPublicas.ok && dataPublicas.success) {
+        if (actividadesPublicas.ok && dataPublicas.length > 0) {
           dataPublicas.forEach((actiPublica) => {
-            const index = data.actividades.findIndex((acti) => acti.id_act === actiPublica.id_act);
+            const index = data.findIndex((acti) => acti.id_act === actiPublica.id_act);
             if (index !== -1) {
               data.splice(index, 1);
             }

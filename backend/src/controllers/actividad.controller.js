@@ -494,7 +494,7 @@ async function ObtenerActividadesPublicas(req, res) {
         if (actividades.length === 0) {
             return res.send({ success: false, message: 'No se encontraron actividades' });
         }
-        return res.send(actividades);
+        return res.code(200).send(actividades);
     } catch (error) {
         console.error('Error al obtener las actividades publicas:', error);
         return res.status(500).send({ success: false, message: 'Error al obtener las actividades publicas' });

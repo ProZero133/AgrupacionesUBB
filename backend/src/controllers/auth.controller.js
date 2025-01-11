@@ -1,4 +1,6 @@
 const { validarUsuario, asignarToken, validarUsuarioRut } = require('../services/auth.service');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 async function TokenAutorizacionController(request, reply) {
  const decoded = await request.jwtVerify();
  const rol = decoded.rol;
@@ -32,6 +34,7 @@ async function EmailLogin(request, reply) {
   const { email } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   // Generar un código de verificación de 6 dígitos y letras
   const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const hashedCode = await bcrypt.hash(codigo, saltRounds);
   // Llamar a la base de datos para verificar si el usuario existe
   const result = await validarUsuario(email);
   const usuario = result;
@@ -49,7 +52,7 @@ async function EmailLogin(request, reply) {
     });
     asignarToken(request.server, usuario, codigo, reply);
     //Envia el mismo codigo al frontend
-    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
+    reply.send({ success: true, message: 'Código de verificación enviado', codigo: hashedCode, result: result, token: token });
   } else {
     reply.code(401).send({ success: false, message: result.message });
   }
@@ -59,6 +62,7 @@ async function RutLogin(request, reply) {
   const { rut } = request.body; // Asume que el correo se envía en el cuerpo de la solicitud
   // Generar un código de verificación de 6 dígitos y letras
   const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const hashedCode = await bcrypt.hash(codigo, saltRounds);
   // Llamar a la base de datos para verificar si el usuario existe
   const result = await validarUsuarioRut(rut);
   const usuario = result;
@@ -76,7 +80,7 @@ async function RutLogin(request, reply) {
     });
     asignarToken(request.server, usuario, codigo, reply);
     //Envia el mismo codigo al frontend
-    reply.send({ success: true, message: 'Código de verificación enviado', codigo: codigo, result: result, token: token });
+    reply.send({ success: true, message: 'Código de verificación enviado', codigo: hashedCode, result: result, token: token });
   } else {
     reply.code(401).send({ success: false, message: result.message });
   }

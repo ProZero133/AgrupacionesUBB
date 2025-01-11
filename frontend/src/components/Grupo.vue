@@ -1446,6 +1446,7 @@ export default {
 
     async VerSolicitudes() {
       try {
+        this.solicitudes = [];
         const url = `${global.BACKEND_URL}/versolicitudes/${this.groupId}`;
         const response = await fetch(url, {
           method: 'GET',
@@ -1468,11 +1469,8 @@ export default {
               },
             });
             const dataUsuarioServidor = await respuestaUsuarioServidor.json();
-            solicitudes.push(dataUsuarioServidor);
+            this.solicitudes.push(dataUsuarioServidor[0]);
           }
-          // unifica los nombres con el primer y segundo apellido
-          this.solicitudes = solicitudes[0];
-
         } else {
           this.solicitudes = [];
         }
@@ -2168,6 +2166,8 @@ export default {
         console.error('Error al hacer fetch:', error);
       }
     },
+    
+
   },
   mounted() {
     this.rut = this.getRut();

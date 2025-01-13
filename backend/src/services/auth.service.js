@@ -56,9 +56,6 @@ transporter.verify((error) => {
 
 async function validarUsuario(email) {
   try {
-    if (email === 'freyes@ubiobio.cl'){
-      email = 'feareyes@egresados.ubiobio.cl';
-    }
     // busca el usuario en la base de datos servidor universidad
     const response = await axios.post(`${API_ConectaUBB}/usuariosCorreo`, {
       correo: email

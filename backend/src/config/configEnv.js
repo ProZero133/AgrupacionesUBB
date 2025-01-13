@@ -8,9 +8,6 @@ const envFilePath = path.resolve(__dirname, ".env");
 // Carga las variables de entorno desde el archivo .env
 require("dotenv").config({ path: envFilePath });
 
-/** Puerto del servidor */
-const PORT = process.env.PORT;
-
 /** Puerto del escucha para Fastify */
 const FastifyPort = process.env.FastifyPort;
 
@@ -50,4 +47,4 @@ const COOKIE_SECRET = process.env.COOKIE_SECRET;
 /** URL de la API de ConectaUBB (http://xxx.xxx.xxx:xxxx/ConectaUBB/api)*/
 const API_ConectaUBB = process.env.API_URL;
 
-module.exports = { PORT, FastifyPort, FastifyHost, HOST, DB_URL, JWT_SECRET, MAIL_USER, MAIL_PASS, COOKIE_SECRET, API_ConectaUBB, USER, PASSWORD, PortPg, DATABASE };
+module.exports = { FastifyPort, FastifyHost, HOST, DB_URL, JWT_SECRET, MAIL_USER, MAIL_PASS, COOKIE_SECRET, API_ConectaUBB, USER, PASSWORD, PortPg, DATABASE };

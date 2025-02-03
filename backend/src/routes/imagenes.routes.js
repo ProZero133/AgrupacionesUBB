@@ -17,6 +17,7 @@ module.exports = function (fastify, opts, done) {
       });
     fastify.get('/imagen', { preHandler: [isUserOrAdmin] },obtenerImagenes);
     fastify.get('/imagen/:id', { preHandler: [isUserOrAdmin] },obtenerImagenPorID);
+    fastify.get('/imagenFACE/:id',obtenerImagenPorID);
     fastify.post('/imagen', { preHandler: [isUser] },crearImagen);
     fastify.delete('/imagen/:id', { preHandler: [isUserOrAdmin] },eliminarImagen);
     done();

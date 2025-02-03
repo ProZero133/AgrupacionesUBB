@@ -56,10 +56,12 @@ module.exports = function (fastify, options, done) {
   fastify.get('/actividadesparticipanteUsuario/:rut', { preHandler: [isUserOrAdmin] },obtenerActividadesParticipanteUsuario);
   fastify.post('/abandonaractividad/:id_act/:rut', { preHandler: [isUser] },abandonarActividad);
   fastify.get('/actividadesPublicas', { preHandler: [isUserOrAdmin] },ObtenerActividadesPublicas);
+  fastify.get('/actividadesPublicasFACE',ObtenerActividadesPublicas);
   fastify.get('/obtenerParticipantes/:id_act', { preHandler: [isUserOrAdmin] },obtenerParticipantesActividad);
   fastify.post('/ingresartagsactividad', { preHandler: [isUser] },ingresarTagsActividad);
   fastify.get('/obtenerTagsActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerTagsActividad);
   fastify.get('/obtenerProgramacionActividad/:id_act', { preHandler: [isUserOrAdmin] },obtenerProgramacionActividad);
+  fastify.get('/obtenerProgramacionActividadFACE/:id_act',obtenerProgramacionActividad);
   fastify.get('/actividadesPorProgramar/:id_agr', { preHandler: [isUserOrAdmin] },ObtenerActividadesPorAgrupacionSinProgramar);
   done();
 };
